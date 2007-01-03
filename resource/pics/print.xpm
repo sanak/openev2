@@ -1,0 +1,30 @@
+/* XPM */
+static char *print[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        5            1",
+/* colors */
+". c #000000",
+"# c #808080",
+"a c None",
+"b c #ff0000",
+"c c #ffffff",
+/* pixels */
+"aaaaa............aaaaa",
+"aaaaa.cccccccccc.aaaaa",
+"aaaaa.c..ccccccc.aaaaa",
+"aaaaa.cccccccccc.aaaaa",
+"aaaaa.c........c.aaaaa",
+"aaaaa.cccccccccc.aaaaa",
+"aaaaa.c........c.aaaaa",
+"aaaa..cccccccccc..aaaa",
+"aaaa..............aaaa",
+"aa...#ccc#ccc#ccc...aa",
+"a.#c#c#c#c#c#c#c#c#c.a",
+"a.cbbbcccbbbbcccbbc#.a",
+"a.#c#c#c#c#c#c#c#c#c.a",
+"a.ccc#ccc#ccc#ccc#cc.a",
+"a....................a",
+"aa...aaaaaaaaaaaa...aa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

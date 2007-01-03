@@ -1,0 +1,127 @@
+
+NOTES:
+    refactor pymod into a hierarchy of packages
+    break modules (gview in particular) out into its own package
+    move gdal stuff to a gdal package
+    code descriptions at the top of the module in docstring, not copyright, not cvs logs!
+    delete all cvs logs from files
+    tests for each module
+    don't really need gvplot -- replace with pylab
+    change all _get functions to get_ functions, resolve conflicts by making descriptive
+    move gvdata subclass change_info handling to superclass
+    config mgmt stuff, makefiles, autoconf
+
+    Larger design issues (gvplot?) not included
+
+    signal_handler_block/unblock -> handler_block/unblock
+    style.font -> style.get_font() 
+    .get_window() -> .window
+    win.width, win.height -> w,h = win.get_size()
+    need to rename 'notify' in gvsignaler.Signaler, because name is already
+    taken in gtk.GObject -- presents a problem when subclassing from both
+    try, except clause shall not be used for flow control, only for truly exceptional
+        situations and must always specify exact exceptions to catch
+    *_font.width -> *_font.string_width
+    *.active -> *.get_active()
+    create_pixmap -> gtk.gdk.Pixmap
+    pguCombo -> gtk.ComboBox, gtk.ComboBoxEntry
+    gviewapp.py contains a good example for the replacement of pgucolor.ColorButton
+        with gtk.ColorButton
+    pgucolor.ColorButton now subclasses gtk.ColorButton
+    most pgu* functionality can be replaced with gtk equivalents.  This means
+        that some extension modules will also go away (e.g., gtkcolorwell.c)
+    ran pychecker to scare up more problems
+
+
+
+
+MOSTLY DONE
+-rwxr-xr-x    1 jcollins jcollins   161694 May 25 17:26 gview.py*
+-rwxr-xr-x    1 jcollins jcollins    86509 May 25 14:40 gviewapp.py*
+-rwxr-xr-x    1 jcollins jcollins    72614 May 25 09:33 gvviewwindow.py*
+-rwxr-xr-x    1 jcollins jcollins     5331 May 26 09:06 gvalg.py*
+
+TODO
+-rwxr-xr-x    1 jcollins jcollins    11161 May 23 10:37 gvlabeledit.py*
+-rwxr-xr-x    1 jcollins jcollins    28770 May 23 10:37 gvmaptools.py*
+
+PROBABLY NO ACTION
+-rwxr-xr-x    1 jcollins jcollins    52869 May 23 10:37 gvclassification.py*
+-rwxr-xr-x    1 jcollins jcollins     8058 May 25 10:14 gvogrdlg.py*
+-rwxr-xr-x    1 jcollins jcollins    11971 May 25 09:37 gvselbrowser.py*
+-rwxr-xr-x    1 jcollins jcollins     5828 May 25 09:36 gvsdsdlg.py*
+-rwxr-xr-x    1 jcollins jcollins    48235 May 25 09:17 gvrasterpropdlg.py*
+-rwxr-xr-x    1 jcollins jcollins    18808 May 24 21:33 layerdlg.py*
+-rwxr-xr-x    1 jcollins jcollins    39634 May 23 10:37 toolexample.py*
+-rwxr-xr-x    1 jcollins jcollins     9899 May 23 10:37 pgumenu.py*
+-rwxr-xr-x    1 jcollins jcollins    11718 May 23 10:37 oeattedit.py*
+-rwxr-xr-x    1 jcollins jcollins    10948 May 23 10:37 gvogrfs.py*
+-rwxr-xr-x    1 jcollins jcollins     8035 May 23 10:37 gvpquerypropdlg.py*
+-rwxr-xr-x    1 jcollins jcollins     7524 May 23 10:37 pgucolorsel.py*
+-rwxr-xr-x    1 jcollins jcollins      329 May 23 10:37 pguentry.py*
+
+DONE
+-rwxr-xr-x    1 jcollins jcollins    22666 May 23 10:37 gvvectorpropdlg.py*
+-rwxr-xr-x    1 jcollins jcollins     5219 May 23 10:37 testmain.py*
+-rwxr-xr-x    1 jcollins jcollins    15527 May 23 10:37 gvlegenddlg.py*
+-rwxr-xr-x    1 jcollins jcollins   152821 May 23 10:37 vecplot.py*
+-rwxr-xr-x    1 jcollins jcollins    20366 May 23 10:37 gvogrfsgui.py*
+-rwxr-xr-x    1 jcollins jcollins    36324 May 25 10:13 gvclassifydlg.py*
+-rwxr-xr-x    1 jcollins jcollins     3783 May 23 10:37 ibrowse.py*
+-rwxr-xr-x    1 jcollins jcollins   243536 May 23 10:37 pgugrid.py*
+-rwxr-xr-x    1 jcollins jcollins    15564 May 23 10:37 pgufont.py*
+-rwxr-xr-x    1 jcollins jcollins    39470 May 25 10:16 pgushapesgrid.py*
+-rwxr-xr-x    1 jcollins jcollins   102936 May 26 08:59 pyshell.py*
+-rwxr-xr-x    1 jcollins jcollins     1446 May 25 13:53 gtkmissing.py*
+-rwxr-xr-x    1 jcollins jcollins    25263 May 25 10:12 filedlg.py*
+-rwxr-xr-x    1 jcollins jcollins    41065 May 25 09:19 gvutils.py*
+-rwxr-xr-x    1 jcollins jcollins    15221 May 25 10:20 pgucolor.py*
+-rwxr-xr-x    1 jcollins jcollins    11475 May 25 10:17 pgutextarea.py*
+-rwxr-xr-x    1 jcollins jcollins     3585 May 23 10:37 pgutogglebutton.py*
+
+NO ACTION
+-rwxr-xr-x    1 jcollins jcollins     4503 May 23 10:37 gdal2xyz.py*
+-rwxr-xr-x    1 jcollins jcollins     3344 May 23 10:37 gdalchksum.py*
+-rwxr-xr-x    1 jcollins jcollins     4286 May 23 10:37 gdalconst.py*
+-rwxr-xr-x    1 jcollins jcollins     3391 May 23 10:37 gdalimport.py*
+-rwxr-xr-x    1 jcollins jcollins    14937 May 23 10:37 gdal_merge.py*
+-rwxr-xr-x    1 jcollins jcollins    10666 May 23 10:37 gdalnumeric.py*
+-rwxr-xr-x    1 jcollins jcollins    36674 May 23 10:37 gdal.py*
+-rwxr-xr-x    1 jcollins jcollins    49836 May 23 10:37 vrtutils.py*
+-rwxr-xr-x    1 jcollins jcollins     2386 May 23 10:37 esri2wkt.py*
+-rwxr-xr-x    1 jcollins jcollins     5011 May 23 10:37 gvconst2.py*
+-rwxr-xr-x    1 jcollins jcollins     8804 May 23 10:37 gvconst.py*
+-rwxr-xr-x    1 jcollins jcollins     5656 May 23 10:37 gvhtml.py*
+-rwxr-xr-x    1 jcollins jcollins     2496 May 24 06:36 gvobject.py*
+-rwxr-xr-x    1 jcollins jcollins    29742 May 23 10:37 gvcommand.py*
+-rwxr-xr-x    1 jcollins jcollins    48025 May 23 10:37 gvcorecmds.py*
+-rwxr-xr-x    1 jcollins jcollins     2985 May 23 10:37 blah.py*
+-rwxr-xr-x    1 jcollins jcollins     7927 May 23 10:37 epsg_tr.py*
+-rwxr-xr-x    1 jcollins jcollins     4454 May 23 10:37 gcps2vec.py*
+-rwxr-xr-x    1 jcollins jcollins     2784 May 23 10:37 gcps2wld.py*
+-rwxr-xr-x    1 jcollins jcollins     2571 May 23 10:37 gvbitlayerlut.py*
+-rwxr-xr-x    1 jcollins jcollins     5496 May 23 10:37 rgb2pct.py*
+-rwxr-xr-x    1 jcollins jcollins     6439 May 23 10:37 nls.py*
+-rwxr-xr-x    1 jcollins jcollins    41904 May 23 10:37 ogr.py*
+-rwxr-xr-x    1 jcollins jcollins     6010 May 23 10:37 gvshell.py*
+-rwxr-xr-x    1 jcollins jcollins    25429 May 23 10:37 gvplot.py*
+-rwxr-xr-x    1 jcollins jcollins    25153 May 23 10:37 osr.py*
+-rwxr-xr-x    1 jcollins jcollins     2030 May 23 10:37 petetest.py*
+-rwxr-xr-x    1 jcollins jcollins     5432 May 23 10:37 pathutils.py*
+-rwxr-xr-x    1 jcollins jcollins     4709 May 23 10:37 gvsignaler.py*
+-rwxr-xr-x    1 jcollins jcollins     5071 May 23 10:37 openev.py*
+-rwxr-xr-x    1 jcollins jcollins     5622 May 23 10:37 pct2rgb.py*
+-rwxr-xr-x    1 jcollins jcollins     4376 May 23 10:37 pgucolourswatch.py*
+-rwxr-xr-x    1 jcollins jcollins     7148 May 23 10:37 pgufilesel.py*
+-rwxr-xr-x    1 jcollins jcollins     3510 May 23 10:37 pguprogress.py*
+-rwxr-xr-x    1 jcollins jcollins    16749 May 25 08:52 gvprint.py*
+
+NO LONGER NEEDED
+-rwxr-xr-x    1 jcollins jcollins     7800 May 23 10:37 pgucombo.py*
+-rwxr-xr-x    1 jcollins jcollins    26439 May 23 10:37 generate.py*
+-rwxr-xr-x    1 jcollins jcollins     3958 May 23 10:37 scmexpr.py*
+-rwxr-xr-x    1 jcollins jcollins     1987 May 23 10:37 pgu.py*
+-rwxr-xr-x    1 jcollins jcollins      179 May 23 10:37 mkgv.py*
+
+
+

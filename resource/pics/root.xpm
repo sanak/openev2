@@ -1,0 +1,31 @@
+/* XPM */
+static char *linear[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        4            1",
+/* colors */
+". c #000000",
+"# c #808080",
+"a c None",
+"b c #ffffff",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaa.................aa",
+"aaa.###############.aa",
+"aaa.aaaaaaaaa.##aa#.aa",
+"aaa.aaaaaaa.##aaaa#.aa",
+"aaa.aaaaaa.#aaaaaa#.aa",
+"aaa.aaaaa.#aaaaaaa#.aa",
+"aaa.aaaa.#aaaaaaaa#.aa",
+"aaa.aaaa.#aaaaaaaa#.aa",
+"aaa.aaa.#aaaaaaaaa#.aa",
+"aaa.aaa.#aaaaaaaaa#.aa",
+"aaa.aaa.#aaaaaaaaa#.aa",
+"aaa.aa.#aaaaaaaaaa#.aa",
+"aaa.aa.#aaaaaaaaaa#.aa",
+"aaa.aa.#aaaaaaaaaa#.aa",
+"aaa.aa.#aaaaaaaaaa#.aa",
+"aaa.................aa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};
+
+

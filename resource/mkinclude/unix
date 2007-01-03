@@ -1,0 +1,27 @@
+###############################################################################
+#                                                                             #
+# Generic platform type definitions                                           #
+#                                                                             #
+###############################################################################
+
+#
+# Shared object library type.  (e.g. so, dll)
+# Should be lower case.  When used in nested variable names,
+# an upper case replacement (USHAREDTYPE) will be used instead.
+#
+
+  SHAREDTYPE = so
+
+#
+# Define unix shared object library prefix of 'lib'.  This
+# is overridden when creating a python module to PYMOD_PREFIX, which
+# defaults to '_'.
+#
+
+  SLIBPREFIX = lib
+
+#
+# Define path separator character for unix
+#
+
+ CLASSPATH_SEP =:

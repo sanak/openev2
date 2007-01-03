@@ -1,0 +1,52 @@
+The Porting Effort
+
+In porting the code, we let errors and warnings of compiles and runs (test codes,
+main openev, etc.) guide us.  When problems were found, changes were formulated
+and applied to all problematic files.  While we eliminated all of the errors
+that our testing touched, many warnings still remain.  Most of these are GTK
+deprecation warnings.  We tested the code as fully as possible, but we expect
+that some portions of code have not been covered at all.  We also expect minor
+bugs to be flushed out for some months to come.
+
+In testing, we have not pushed the system very hard.  It could use some testing
+on large images, 3D stuff, opening and closing of view areas, etc.  It is by
+no means bullet proof, but it works reasonably well.
+
+Before releasing to the public
+    - Check for unnecessary debug print statements
+    - Remove unnecessary files and other test scaffolding
+    - Update copyright section in each file if necessary
+    - Create a README and CHANGELOG file
+    - Create an openev-devel mailing list for development related traffic;
+      the openev list should contain only usage related traffic
+    - Establish coding stylistic conventions
+        - Python style guide is a good place to start
+        - Make it consistent with our internal development standards
+        - Jeff C. has already started such a document
+    - Clean up build / installation procedures for multiple platforms,
+      autoconf?
+    - Web site changes, marketing blurbs, explanation of why switching
+      to the gtk2 version is beneficial
+    - Detail how we plan on addressing issues mentioned on the list,
+      including large vectors, will we use new 2d graphics capabilities,
+      can we improve menus and tools using gtk Actions and UIManager, etc.
+    - Update documentation / tutorials
+
+Things yet to be done to clean up the source.  Let's get the community to
+help.
+
+    - Replace or upgrade pgu*.py with gtk equivalents (pgucolor.ColorButton
+        has already been ported)
+    - Rename pygtk names using the fully qualified gtk namespace 
+        (import gtk, not from gtk import ...)
+        This is important, since the Gtk prefix has been dropped from all names
+        in PyGtk-2.x.
+    - Old fonts -> Pango fonts
+    - Use the warnings as a guide to potential future problems, esp. DeprecationWarnings
+    - Reorganize openev/pymod into a tree of packages
+    - gview.py and other modules are too big; break out into a seperate package
+    - Factor out unnecessary modules -- it looks like there might be some gdal
+      modules that are already available in the gdal distribution
+    - Verify with pychecker and code coverage tools
+    - Finish porting tools -- need to find replacements for GtkExtra
+

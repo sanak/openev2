@@ -1,0 +1,140 @@
+<GViewAppMenu>
+ <Menu>
+  <entry>
+    <path>'File/Import'</path>
+    <callback>self.file_import_cb</callback>
+  </entry>
+  <entry>
+    <path>'File/Open'</path>
+    <accelerator>control+O</accelerator>
+    <callback>self.file_open_cb</callback>
+  </entry>
+  <entry>
+    <path>'File/Open 3D'</path>
+    <callback>self.open_3D_request</callback>
+  </entry>
+  <entry>
+    <path>'File/Save Vector Layer'</path>
+    <callback>self.save_vector_layer_request</callback>
+  </entry>
+  <entry>
+    <path>'File/Save Project'</path>
+    <callback>self.menu_save_project</callback>
+  </entry>
+  <entry>
+    <path>'File/Save Project as...'</path>
+    <callback>self.menu_save_project_as</callback>
+  </entry>
+  <entry>
+    <path>'File/New View'</path>
+    <callback>self.menu_new_view</callback>
+  </entry>
+  <entry>
+    <path>'File/Print'</path>
+    <callback>self.print_cb</callback>
+  </entry>
+  <entry>
+    <path type="separator">'File/'</path>
+  </entry>
+  <entry>
+    <path>'File/rfl1'</path>
+    <callback>self.rfl_cb</callback>
+    <arguments>
+      <arg>1</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path>'File/rfl2'</path>
+    <callback>self.rfl_cb</callback>
+    <arguments>
+      <arg>2</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path>'File/rfl3'</path>
+    <callback>self.rfl_cb</callback>
+    <arguments>
+      <arg>3</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path>'File/rfl4'</path>
+    <callback>self.rfl_cb</callback>
+    <arguments>
+      <arg>4</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path>'File/rfl5'</path>
+    <callback>self.rfl_cb</callback>
+    <arguments>
+      <arg>5</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path type="separator">'File/'</path>
+  </entry>
+  <entry>
+    <path>'File/Close'</path>
+    <callback>self.close</callback>
+  </entry>
+  <entry>
+    <path>'File/Exit'</path>
+    <accelerator>control+Q</accelerator>
+    <callback>self.exit</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Undo'</path>
+    <callback>self.undo</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Layers...'</path>
+    <callback>self.app.show_layerdlg</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Vector Layer Attributes...'</path>
+    <callback>self.show_oeattedit</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Edit Toolbar...'</path>
+    <callback>self.app.show_toolbardlg</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Go To...'</path>
+    <callback>self.goto_dlg</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Python Shell...'</path>
+    <callback>self.pyshell</callback>
+  </entry>
+  <entry>
+    <path>'Edit/3D Position...'</path>
+    <callback>self.position_3d</callback>
+  </entry>
+  <entry>
+    <path>'Edit/Preferences...'</path>
+    <callback>self.app.launch_preferences</callback>
+  </entry>
+  <entry>
+    <path>'Help/Help...'</path>
+    <callback>self.helpcb</callback>
+    <arguments>
+      <arg>'openevmain.html'</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path type="separator">'Help/'</path>
+  </entry>
+  <entry>
+    <path>'Help/Web Page...'</path>
+    <callback>self.helpcb</callback>
+    <arguments>
+      <arg>'http://OpenEV.Sourceforge.net/'</arg>
+    </arguments>
+  </entry>
+  <entry>
+    <path>'Help/About...'</path>
+    <callback>self.aboutcb</callback>
+  </entry>
+ </Menu>
+</GViewAppMenu>

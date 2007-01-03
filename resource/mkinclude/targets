@@ -1,0 +1,888 @@
+
+#############################################################################
+# GENERIC MAKEFILE OBJECTS                                                  #
+#############################################################################
+
+#
+# Combine source files, locate if needed
+#
+
+  ifeq ($(origin LOCALSRCS), undefined)
+    ifeq ($(origin CSRCS), undefined)
+      ifeq ($(PYMODCS),)
+        CSRCS := $(wildcard *.c)
+        ifeq ($(origin CPPSRCS), undefined)
+          CPPSRCS := $(wildcard *.cc *.cxx *.cpp)
+        endif
+      endif
+    endif
+  endif
+  ifeq ($(origin LOCALINCS), undefined)
+    ifeq ($(origin CHEADERS), undefined)
+      CHEADERS := $(wildcard *.h)
+    endif
+  endif
+  ifeq ($(origin SWIGINCS), undefined)
+    SWIGIS := $(wildcard *.i)
+  else
+    SWIGIS := $(SWIGINCS)
+  endif
+  ifeq ($(origin _ALLSRCS), undefined)
+    ALLSRCS := $(LOCALSRCS) $(CSRCS) $(CPPSRCS)
+  else
+    ALLSRCS := $(_ALLSRCS)
+  endif
+  ALLSRCS += $(_PYMODCS)
+  ALLSRCS += $(_EXESRCS)
+  
+
+#
+# Set linker based on whether or not c++ files are included
+#
+
+  SWIGCMODE = -c++
+  CCLDX := $(CCCLD)
+  ifeq (,$(findstring .cc,$(ALLSRCS) $(PYMODCS)))
+    ifeq (,$(findstring .cpp,$(ALLSRCS) $(PYMODCS)))
+      ifeq (,$(findstring .cxx,$(ALLSRCS) $(PYMODCS)))
+        CCLDX := $(CCLD)
+        SWIGCMODE =
+      endif
+    endif
+  endif
+
+  USHAREDTYPE := $(strip $(call ucase, $(SHAREDTYPE)))
+  ALLOBJS := $(call objs, $(ALLSRCS))
+  LOCALLIB = lib$(LIB)$(MKALT).a
+  INSTLIB = $(SYSLIBDIR)/$(LOCALLIB)
+  ALLINCS = $(LOCALINCS) $(CHEADERS) $(OTHERINCS)
+  INSTINCS = $(addprefix $(SYSINCDIR)/,$(CHEADERS))
+  MOVEOBJS = $(ALLOBJS) $(LOCALLIB) $(TAGFILE) $($(USHAREDTYPE)FILES)
+  MOVEOBJS += $(PYMODOBJS)
+  ULIB = $(call ucase, $(LIB))
+  ifeq ($(LIB),)
+    LIB:=$(EXE_NAME)
+  endif
+  ifneq ($(EXE_NAME),)
+    EXE_NAME := $(EXE_NAME)$(EXE_SUFFIX)
+    INSTEXE = $(SYSBINDIR)/$(MKALT)$(EXE_NAME)
+  endif
+  MOVEOBJS += $(EXE_NAME)
+  TAGFILE = $(LIB).x
+
+# Windows shared library vars
+  DLL = $(SLIBPREFIX)$(LIB).dll
+  DLLFILES = lib$(SLIBPREFIX)$(LIB)dll.a $(DLL) $(LIB).def
+  INSTDLL = $(DLLLIBDIR)/$(DLL)
+
+# Unix shared library vars
+  SO = $(SLIBPREFIX)$(LIB).so
+  SOFILES = $(SO)
+  INSTSO = $(SOLIBDIR)/$(SO)
+
+#
+# vpath call, used by many targets
+#
+
+  ifeq ($(USEVPATH),yes)
+    VPATH_EXPORT = cd $(BLDDIR); export SYSTEM=$(SYSTEM)/../..; \
+      export SUBSYSTEM=$(SUBSYSTEM)/../..; export VPATH=../..; \
+      export _ALLSRCS="$(ALLSRCS)"; make -e -f ../../Makefile do_
+  else
+    USEVPATH := no
+  endif
+
+#
+# Cleanup case in makefile flags and set to 'no' if unrecognized
+#
+
+  ifeq ($(USEPYMOD),YES)
+    USEPYMOD := yes
+  endif
+  ifeq ($(USEPYMOD),BOTH)
+    USEPYMOD := both
+  endif
+  ifneq ($(USEPYMOD),yes)
+    ifneq ($(USEPYMOD),both)
+      USEPYMOD := no
+    endif
+  endif
+  ifeq ($(USECVSIGNORE),YES)
+    USECVSIGNORE := yes
+  endif
+  ifneq ($(USECVSIGNORE),yes)
+    USECVSIGNORE := no
+  endif
+  ifeq ($(USESHARED),YES)
+    USESHARED := yes
+  endif
+  ifeq ($(USESHARED),BOTH)
+    USESHARED := both
+  endif
+  ifneq ($(USESHARED),yes)
+    ifneq ($(USESHARED),both)
+      USESHARED := no
+    endif
+  endif
+
+#
+# Set types of build to perform, including python module, executable,
+# and library type.
+#
+
+  ifeq ($(USEPYMOD),yes)
+    PYMODBLD := pymod_
+  else
+    ifeq ($(USEPYMOD),both)
+      PYMODBLD := pymod_
+    endif
+  endif
+  ifneq ($(EXE_NAME),)
+    ifneq ($(USEPYMOD),yes)
+      EXEBLD := exe_
+    endif
+  else
+    ifneq ($(LIB),)
+      ifeq ($(USESHARED),yes)
+        LIBBLD := shared_
+      else
+        ifeq ($(USESHARED),both)
+          LIBBLD := static_ shared_
+        else
+          LIBBLD := static_
+        endif
+      endif
+    endif
+  endif
+  ifneq ($(MANAGED_DIRS),)
+    MGDBLD := mgd_
+  endif
+  BLDTARGETS := $(LIBBLD) $(EXEBLD) $(PYMODBLD) $(MGDBLD)
+  ifeq ($(strip $(BLDTARGETS)),)
+    ifneq ($(INSTINCS),)
+      BLDTARGETS := header_
+    endif
+  endif
+
+#
+# Create targets for managing subdirectories
+#
+
+MGD_TARGETS += all clean clean_install install squeaky svnignore
+MGD_TARGETS := $(sort $(MGD_TARGETS))
+
+#
+# Python module vars
+#
+# Use PYMODMOD, not _PYMODCS, to redefine module src file
+# $(LIB)module.c, if needed (better to stick with convention).
+# PYMODSRC is an automatically generated .c file named after
+# the library name.
+#
+# Use PYMODCS in makefiles that do not use automatic python module
+# generation to specify CSRCS that should only be built into python
+# module shared library.
+#
+# See further notes below in pymod section
+#
+
+PYMODSRC :=
+ifneq ($(LIB),)
+  PYENUMSRC = $(LIB)-enum-types.c
+  PYOVERRIDE = $(LIB).override
+  ifeq ($(PYMODBLD),pymod_)
+    PYMODSRC := $(LIB)_pwrap.c
+  endif
+  PYMODMOD = $(LIB)module.c
+  PYMODDEFS = $(LIB).defs
+  PYMODSRCS = $(PYMODSRC) $(PYENUMSRC) $(PYMODMOD)
+  PYMODOBJS = $(call objs, $(PYMODSRCS) $(PYMODCS))
+  PYMODFILES = $(PYMODDEFS) $(PYPREFIX)$(LIB).dll \
+               lib$(PYPREFIX)$(LIB)dll.a $(LIB)-enum-types.h \
+               $(LIB)-enum-types.c
+  PYMODINST = $($(USHAREDTYPE)LIBDIR)/$(PYPREFIX)$($(USHAREDTYPE)) \
+              $($(USHAREDTYPE)LIBDIR)/lib$(PYPREFIX)$(LIB)dll.a
+  PYINCS = $(LIB)-enum-types.h
+endif
+
+#
+# The following looks at the current directory, splits at the last /src/
+# location, removes the first and last directory, and adds whatever is
+# left to the python installation location. 
+#
+
+  PYINSTDIR := $(SYSPYDIR)
+  ifeq ($(USE_PY_HIERARCHY),yes)
+    TOKENPATH := $(subst /src/, ,$(PWD))
+    ifneq ($(word 2,$(TOKENPATH)),)
+      WORDCOUNT := $(words $(TOKENPATH))
+      PYSUBPATH := $(word $(WORDCOUNT),$(TOKENPATH))
+      TDIRS := $(foreach TOKENDIR,$(subst /, ,$(dir $(PYSUBPATH))),$(TOKENDIR))
+      empty :=
+      space := $(empty) $(empty)
+      INITDIRTOKEN := blech$(word 1,$(TDIRS))
+      TDIRS1 := blech$(subst $(space),/,$(TDIRS))
+      TDIRS2 := $(subst $(INITDIRTOKEN),,$(TDIRS1))
+      PYINSTDIR := $(PYINSTDIR)$(strip $(TDIRS2))
+    endif
+  endif
+
+#
+# Install any .py files into a SYSPYDIR directory tree equivalent to
+# the library directory tree.  Note:  If you do not want .py's installed,
+# set "PYS = " in the makefile.
+#
+# PENDING: This will install .py files in a hierarchy equal to the
+# library or program hierarchy, but does not automatically create
+# the init files.
+#
+
+  ifeq ($(origin PYS), undefined)
+    ifneq ($(USEPYMOD),no)
+      PYS := $(wildcard $(SUBSYSTEM)/*.py)
+    endif
+  endif
+  ifneq ($(PYS),)
+    PYINSTS = $(addprefix $(PYINSTDIR)/,$(notdir $(PYS)))
+  endif
+
+#
+# Combine all libraries needed
+#
+
+  LDFLAGS += -L $(BLDDIR)
+  INSTLIBS += $(ARCHLIBS) $(POSTLIBS)
+
+#############################################################################
+# TARGETS                                                                   #
+#############################################################################
+
+#
+# default option: Which target to run if these targets precede all 
+# others in the makefile
+#
+
+default_target: targets
+
+#
+# targets option: Listing of targets for this makefile
+#
+
+  SEP_LINE = "-----------------------------------------------------"
+  STATIC_TARGETS += all install clean clean_install squeaky static_install \
+                    svnignore what
+  SHARED_TARGETS += all install clean clean_install \
+                    squeaky $(SHAREDTYPE) shared_install svnignore what
+  EXE_TARGETS += all install clean clean_install squeaky svnignore what
+  PYMOD_TARGETS += all install clean clean_install squeaky pymod \
+                   pymod_install svnignore what
+  HEADER_TARGETS += install clean_install what
+  TARGET_INFO1 := $(call ucase, $(BLDTARGETS:_=_TARGETS))
+ifneq ($(SWIGIS),)
+  SWIG_TARGETS := swig
+endif
+  TARGET_INFO := $(sort $(SWIG_TARGETS) $(foreach ii,$(TARGET_INFO1), $($(ii))))
+ifeq ($(LIB),)
+  BLD_PACKAGE = $(PWD)
+else
+  BLD_PACKAGE = $(LIB)
+endif
+
+help: targets
+targets: build_info target_info
+	@echo $(SEP_LINE)
+
+build_info: build_info1 $(BLDTARGETS:_=_info1)
+
+build_info1:
+	@echo; \
+	echo $(SEP_LINE); \
+	echo "Build for $(BLD_PACKAGE)"
+header_info1:
+static_info1:
+	@echo "  Static library: $(LOCALLIB)"
+shared_info1:
+	@echo "  Shared library: $($(USHAREDTYPE))"
+pymod_info1:
+	@echo "  Python module: $(PYPREFIX)$(LIB).$(SHAREDTYPE)"
+exe_info1:
+	@echo "  Executable: $(EXE_NAME)"
+mgd_info1:
+	@echo $(SEP_LINE); \
+	echo "Managed Directories:"; \
+	echo "  $(MANAGED_DIRS)"
+
+target_info:
+	@echo $(SEP_LINE); \
+	echo "Targets:"; \
+	echo "  $(wordlist 1,4,$(TARGET_INFO))"; \
+	echo "  $(wordlist 5,8,$(TARGET_INFO))"; \
+	echo "  $(wordlist 9,99,$(TARGET_INFO))"
+
+#
+# what option: Description of what gets built
+#
+
+ifneq ($(CHEADERS),)
+  HEADER_INFO = header_info
+endif
+ifneq ($(LOCALINCS),)
+  LOCAL_INFO = local_header_info
+endif
+ifneq ($(strip $(ALLOBJS)),)
+  OBJ_INFO = object_info
+endif
+
+what: build_info $(HEADER_INFO) $(LOCAL_INFO) $(OBJ_INFO)
+	@echo $(SEP_LINE)
+
+header_info:
+	@echo $(SEP_LINE); \
+	echo "Installed headers:"; \
+	echo "  $(CHEADERS)"
+
+local_header_info:
+	@echo "Local headers:"; \
+	echo "  $(LOCALINCS)"
+
+object_info:
+	@echo $(SEP_LINE); \
+	echo "Object files:"; \
+	echo "  $(strip $(ALLOBJS))"
+
+#
+# all option: Perform local build.
+#
+
+all: build_info1 $(BLDTARGETS:_=_all) mgd_all
+
+ifneq ($(LIB),)
+static_all: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_static_all: $(TAGFILE) $(LOCALLIB) post_compile
+
+header_all:
+
+shared_all: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_shared_all: $(TAGFILE) $($(USHAREDTYPE)) post_compile
+
+pymod_all: pre_compile $(PYMODSRC)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+          export _PYMODCS="$(PYMODSRCS)"; \
+	else \
+	  export _PYMODCS="$(PYMODCS)"; \
+        fi; \
+	export SLIBPREFIX=$(PYPREFIX); \
+	$(VPATH_EXPORT)shared_all
+endif
+
+ifneq ($(EXE_NAME),)
+exe_all: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_exe_all: $(TAGFILE) $(EXE_NAME) post_compile
+endif
+
+#
+# install option: Perform local build and export to
+# install location.
+#
+
+install: build_info1 $(BLDTARGETS:_=_install) mgd_install
+
+ifneq ($(LIB),)
+static_install: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_static_install: $(TAGFILE) $(LOCALLIB) $(INSTLIB) $(INSTINCS) post_compile
+
+shared_install: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_shared_install: $(TAGFILE) $($(USHAREDTYPE)) $(INST$(USHAREDTYPE)) \
+                   $(INSTINCS) $(PYINSTS) post_compile
+	@ if [ -f $(SYSLIBDIR)/$(patsubst %.dll,%.a,\
+          $(patsubst %.so,%.a,$($(USHAREDTYPE)))) ]; then \
+          echo "Note: Existing static libs may cause problems" \
+               "when linking with shared libs."; \
+	else \
+	  if [ -f $(SYSLIBDIR)/lib$(patsubst %.dll,%.a,\
+            $(patsubst %.so,%.a,$($(USHAREDTYPE)))) ]; then \
+            echo "Note: Existing static libs may cause problems" \
+                 "when linking with shared libs."; \
+	  fi; \
+	fi
+
+pymod: pymod_install
+pymod_install: pre_compile $(PYMODSRC)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+          export _PYMODCS="$(PYMODSRCS)"; \
+	else \
+	  export _PYMODCS="$(PYMODCS)"; \
+        fi; \
+	export SLIBPREFIX=$(PYPREFIX); \
+	$(VPATH_EXPORT)shared_install
+
+$(USHAREDTYPE): shared_install
+endif
+
+ifneq ($(EXE_NAME),)
+exe_install: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_exe_install: $(TAGFILE) $(INSTEXE) post_compile
+endif
+
+ifneq ($(INSTINCS),)
+header_install: pre_compile
+	@ $(VPATH_EXPORT)$@
+do_header_install: $(TAGFILE) $(INSTINCS) $(PYINSTS) post_compile
+endif
+
+#
+# pymod option: Build python module.
+#
+# The python module shared object library is by default named 
+# the library name $(LIB) or executable name $(EXE_NAME) with a
+# prepended underscore $(PYPREFIX).
+#
+# If a $(PYOVERRIDE) file exists, this indicates that pygtk automatic
+# wrapper generation should be used.  There will be an automatically
+# generated .c file named after the library ($(LIB.c))!!!  Other files
+# created include $(PYMODDEFS), $(LIB)-enum-types.h, $(LIB)-enum-types.c.
+# Required are a $(LIB)module.c and $(PYOVERRIDE) file.  Look at
+# existing examples or web resources.  For example:
+# http://www-106.ibm.com/developerworks/linux/library/l-wrap
+#
+# If the $(PYOVERRIDE) file does not exist, it is assumed that the
+# python module should be built as a typical shared object library,
+# with the exception that the $(PYPREFIX) naming convention will be
+# used instead of the usual $(SLIBPREFIX), and $(PYMODCS) will be
+# included in the library.
+#
+
+#
+# clean option: Remove libraries, programs, objects, and headers
+#
+
+clean: local_clean mgd_clean
+local_clean:
+	@ $(RM) $(MOVEOBJS); \
+	$(RMDIR) SunWS_cache
+	@ for filename in $(MOVEOBJS) $(PYMODFILES); do \
+	  if [ -f $(BLDDIR)/$$filename ]; then \
+	    $(RM) $(BLDDIR)/$$filename; \
+	  fi; \
+	  if [ -f $$filename ]; then \
+	    $(RM) $$filename; \
+	  fi; \
+	  if [ -f $($(USHAREDTYPE)LIBDIR)/$$filename ]; then \
+	    $(RM) $($(USHAREDTYPE)LIBDIR)/$$filename; \
+	  fi; \
+	done
+	@ if [ -f $(PYOVERRIDE) ]; then \
+	  if [ -f $(PYMODSRC) ]; then \
+	    $(RM) $(PYMODSRC); \
+	  fi; \
+	fi
+	@ echo "`pwd` is clean."
+
+#
+# clean_install option: Remove 'installed' objects
+#
+
+install_clean: clean_install
+clean_install: local_clean_install mgd_clean_install
+local_clean_install:
+	@ $(RM) $(INSTLIB) $(INSTEXE) $(INSTDLL) $(INSTSO) $(PYMODINST) $(PYINSTS); \
+	for filename in $(CHEADERS) blechh; do \
+	  if [ -f $(SYSINCDIR)/$$filename ]; then \
+	    $(RM) $(SYSINCDIR)/$$filename; \
+	  fi; \
+	done
+
+#
+# squeaky option: Remove additional artifacts, clean all
+# architecture builds
+#
+
+squeaky: local_clean local_clean_install local_squeaky mgd_squeaky
+local_squeaky:
+	@ $(RM) core *.stackdump *~ .*~ *.o *.obj ./#*#;
+	@ $(RMDIR) $(BLDDIR);
+
+#
+# lint option: Run sources through lint
+#
+
+lint: $(LOCALSRCS)
+	lint $(LINTFLAGS) $(LOCALSRCS)
+
+#
+# Generate wrappers using swig
+#
+
+swig:
+	echo SWIGFLAGS: $(SWIGFLAGS)
+	$(SWIG) $(SWIGFLAGS) $(INCLUDES) $(LIB).i
+
+#
+# Make sure architecture specific mkinclude file is defined
+#
+
+check_arch:
+	@ if [ ! -f $(MKLOCALARCH) ]; then \
+	  if [ ! -f $(MKINCLDARCH) ]; then \
+	    echo "***** ERROR - $(ARCH) mkinclude file not defined!"; \
+	    CURRENTARCH; \
+	  fi; \
+	fi
+
+#
+# alternate option: Build alternate version by setting env variable to
+# use different mkinclude files and running make install
+#
+
+alternate: alt
+alt:
+	@ exec $(ALTSCRIPT)
+
+#
+# Create a .cvsignore file in the current directory
+#
+
+cvsignore: $(USECVSIGNORE)_cvsignore
+no_cvsignore:
+yes_cvsignore:
+	@ if [ ! -f .cvsignore ]; then \
+	  if [ "$(strip $(IGNOREFILES))" != "" ]; then \
+	    if [ ! -f .cvsignoretmpdir ]; then \
+	      $(MKDIR) .cvsignoretmpdir; \
+	    fi; \
+	    cd .cvsignoretmpdir; \
+	    for ignorefile in $(IGNOREFILES); do \
+	      if [ ! -f ../.cvsignore ]; then \
+	        echo "Created .cvsignore file"; \
+	        echo "$$ignorefile" > ../.cvsignore; \
+	      else \
+                echo "$$ignorefile" >> ../.cvsignore; \
+	      fi; \
+	    done; \
+	    cd ..; $(RMDIR) .cvsignoretmpdir; \
+          fi; \
+        fi
+
+#
+# Steps to take prior to building, such as setting up directories
+#
+
+pre_compile: cvsignore check_arch setup_blddir $(USEVPATH)_move
+
+setup_blddir:
+	@ if [ ! -d $(BLDDIR) ]; then \
+	  $(MKDIR) $(BLDDIR); \
+	  $(CHMOD) $(MODE) $(BLDDIR); \
+	fi; \
+	if [ ! -d $(SYSBLDDIR) ]; then \
+	  $(MKDIR) $(SYSBLDDIR); \
+	  $(CHMOD) $(MODE) $(SYSBLDDIR); \
+	fi;
+	@ if [ ! -f $(BLDDIR)/$(TAGFILE) ]; then \
+	  $(TOUCH) $(BLDDIR)/$(TAGFILE); \
+	  $(CHMOD) $(MODE) $(BLDDIR)/$(TAGFILE); \
+	fi
+
+#
+# Steps to take after building, such as touching tagfile
+#
+
+post_compile: create_tagfile $(USEVPATH)_return
+
+create_tagfile:
+	@ if [ -f $(TAGFILE) ]; then \
+	  $(RM) $(TAGFILE); \
+	fi; \
+	if [ -f $(BLDDIR)/$(TAGFILE) ]; then \
+	  $(RM) $(BLDDIR)/$(TAGFILE); \
+	fi;
+	@ $(TOUCH) $(TAGFILE); \
+	$(CHMOD) $(MODE) $(TAGFILE);
+
+#
+# move option: Move all files (objects and old lib) from BLDDIR
+# to build location.
+#
+# 'yes' means using vpath, which means nothing to move
+#
+
+no_move:
+	@ for filename in $(MOVEOBJS); do \
+	  if [ -f $(BLDDIR)/$$filename ]; then \
+	    if [ -f $$filename ]; then \
+	      $(RM) $$filename; \
+	    fi; \
+	    $(OBJ_LINK) $(BLDDIR)/$$filename ./$$filename; \
+	  fi; \
+	done
+yes_move:
+
+#
+# return option: Return all files (objects and old lib) back to BLDDIR
+#
+# 'yes' means using vpath, which means don't move
+#
+
+no_return: yes_return
+	@ for filename in $(MOVEOBJS); do \
+	  if [ -f $$filename ]; then \
+	    if [ -f $(BLDDIR)/$$filename ]; then \
+	      $(RM) $$filename; \
+	    else $(MV) $$filename $(BLDDIR); \
+	fi; fi; done
+yes_return:
+	@ if [ -f $(TAGFILE) ]; then \
+	  $(RM) $(TAGFILE); \
+	fi; \
+	$(TOUCH) $(TAGFILE)
+
+#
+# love option: Necessary in all Makefiles to keep out evil spirits
+#
+
+love:
+	@ echo "...not war? `whoami` is groovy."
+
+#
+# Create targets for managing subdirectories.  For each target
+# in MGD_TARGETS, we create a mgd_<target> target to call the
+# target in each of the MANAGED_DIRS subdirectories.
+#
+
+define mgd_tmpl1
+	@ for mgdir in $(MANAGED_DIRS) dummyxx; do \
+	  if [ -d $$mgdir ]; then \
+	    cd $$mgdir; $(MAKE) $(subst mgd_,,$@); cd ..; \
+	  fi; \
+	done
+endef
+
+define mgd_tmpl
+mgd_$(1):
+	$(value mgd_tmpl1)
+endef
+
+$(foreach tgt,$(MGD_TARGETS),$(eval $(call mgd_tmpl,$(tgt))))
+
+#
+# Set svn:ignore property for targets to IGNOREFILES
+#
+
+svnignore: rm_cvsignore yes_cvsignore do_svnignore mgd_svnignore
+
+rm_cvsignore:
+	@ $(RM) ./.cvsignore
+
+do_svnignore:
+	@ echo "Setting svn:ignore property to .cvsignore contents"; \
+	svn propset svn:ignore -F .cvsignore .
+
+#############################################################################
+# BUILD DEPENDENCIES                                                        #
+#############################################################################
+
+#
+# TAGFILE assures builds are more recent than any header
+#
+
+$(TAGFILE): $(ALLINCS)
+	@ for filename in $(ALLOBJS); do \
+	  $(RM) $$filename; \
+	done;
+
+$(LOCALLIB): $(ALLOBJS)
+	echo LOCALLIB: _PYMODCS: $(_PYMODCS)
+	ar $(ARFLAGS) $@ $?;
+	@ if $(NEED_RANLIB); then echo $(RANLIB) $@; $(RANLIB) $@; fi
+
+$(INSTLIB): $(LOCALLIB)
+	@ if [ -f $(INSTLIB) ]; then \
+	  $(RM) $(INSTLIB); \
+	fi; \
+	if [ ! -d $(SYSLIBDIR) ]; then \
+	  $(MKDIR) $(SYSLIBDIR); \
+	  $(CHMOD) $(MODE) $(SYSLIBDIR); \
+	fi; \
+	$(CP) $(LOCALLIB) $(SYSLIBDIR); \
+	echo "Installed $(LOCALLIB) in $(SYSLIBDIR)"
+
+$(DLL): $(ALLOBJS)
+	$(CCLDX) -shared -o $@ $(ALLOBJS) $(LDFLAGS) $(INSTLIBS)
+
+$(DLL)OLD: $(LOCALLIB)
+	@ $(RM) $(LIB).def $(SLIBPREFIX)$(LIB).dll lib$(SLIBPREFIX)$(LIB)dll.a; \
+	echo EXPORTS > $(LIB).def; \
+	nm $(LOCALLIB) | grep ' T _' | sed 's/.* T _//' >> $(LIB).def
+	dllwrap --def=$(LIB).def --output-lib=lib$(SLIBPREFIX)$(LIB)dll.a \
+          --dllname=$(DLL) --driver-name=$(CCLDX) \
+          $(LOCALLIB) $(LDFLAGS) $(INSTLIBS)
+	@echo Created $(DLL)
+
+$(SO): $(ALLOBJS)
+	@ $(RM) $(LIB).def $@
+	$(CCLDX) -shared -o $@ $(ALLOBJS) $(LDFLAGS) $(INSTLIBS)
+
+$(DLLLIBDIR)/%.dll : %.dll
+	@ if [ ! -d $(DLLLIBDIR) ]; then \
+	  $(MKDIR) $(DLLLIBDIR); \
+	  $(CHMOD) $(MODE) $(DLLLIBDIR); \
+	fi; \
+	if [ -f $@ ]; then \
+	  $(RM) $@; \
+	fi; \
+	$(CP) $< $@; \
+	echo Installed $@
+
+$(SOLIBDIR)/%.so : %.so
+	@ if [ ! -d $(SOLIBDIR) ]; then \
+	  $(MKDIR) $(SOLIBDIR); \
+	  $(CHMOD) $(MODE) $(SOLIBDIR); \
+	fi; \
+	if [ -f $@ ]; then \
+	  $(RM) $@; \
+	fi; \
+	$(CP) $< $@; \
+	echo Installed $@
+
+$(PYMODMOD):
+$(PYOVERRIDE):
+
+#
+# Pygtk-style automatically generated python wrappers for library.
+# This functionality is turned on with a pymod build if the
+# $(PYOVERRIDE) file exists.
+#
+
+$(PYMODSRC): $(PYMODDEFS) $(PYENUMSRC) $(PYMODMOD) $(PYOVERRIDE) $(PYINCS)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+	  $(PYTHON) $(PYCODEGEN) --prefix $(PYPREFIX)$(LIB) $(PYREGISTER) \
+          --override $(PYOVERRIDE) $(PYMODDEFS) > $@; \
+	fi
+
+$(PYMODDEFS): $(CHEADERS) $(OTHERINCS)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+	  $(PYTHON) $(PYH2DEF) $(CHEADERS) $(OTHERINCS) > $(PYMODDEFS); \
+	fi
+
+$(LIB)-enum-types.h: $(CHEADERS) $(PYMODDEFS)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+	  ( glib-mkenums \
+	  --fhead "#ifndef __$(ULIB)_ENUM_TYPES_H__\n#define __$(ULIB)_ENUM_TYPES_H__\n\n#include <glib-object.h>\n\nG_BEGIN_DECLS\n" \
+	  --fprod "/* enumerations from \"@filename@\" */\n" \
+	  --vhead "GType @enum_name@_get_type (void);\n#define $(ULIB)_TYPE_@ENUMSHORT@ (@enum_name@_get_type())\n"         \
+	  --ftail "G_END_DECLS\n\n#endif /* __$(ULIB)_ENUM_TYPES_H__ */" \
+	  $(CHEADERS) ) > $(LIB)-enum-types.h; \
+	fi
+
+$(LIB)-enum-types.c: $(CHEADERS) $(PYMODDEFS)
+	@ if [ -f $(PYOVERRIDE) ]; then \
+	  ( glib-mkenums \
+	  --fhead "#include \"$(LIB)-enum-types.h\"" \
+	  --fprod "\n/* enumerations from \"@filename@\" */" \
+	  --fprod "\n#include \"@filename@\"" \
+	  --vhead "GType\n@enum_name@_get_type (void)\n{\n  static GType etype = 0;\n  if (etype == 0) {\n    static const G@Type@Value values[] = {"     \
+	  --vprod "      { @VALUENAME@, \"@VALUENAME@\", \"@valuenick@\" }," \
+	  --vtail "      { 0, NULL, NULL }\n    };\n    etype = g_@type@_register_static (\"@EnumName@\", values);\n  }\n  return etype;\n}\n" \
+	  $(CHEADERS) ) > $(LIB)-enum-types.c; \
+	fi
+
+#
+# Build program
+#
+
+$(EXE_NAME): $(ALLOBJS)
+	@ $(RM) $@; \
+	if [ -f $(EXE_NAME).exe ]; then \
+	  $(RM) $(EXE_NAME).exe; \
+ 	fi; \
+	echo $(CCLDX) $? -o $(EXE_NAME).exe $(LDFLAGS) $(INSTLIBS); \
+	$(CCLDX) $? -o $(EXE_NAME).exe $(LDFLAGS) $(INSTLIBS); \
+	if [ -f $(EXE_NAME).exe ]; then \
+	  if [ -f $(EXE_NAME) ]; then \
+	    $(RM) $(EXE_NAME); \
+	  fi; \
+	  $(MV) $(EXE_NAME).exe $(EXE_NAME); \
+ 	fi; \
+	$(CHMOD) $(EXEMODE) $(EXE_NAME)
+
+$(INSTEXE): $(EXE_NAME)
+	@ if [ -f $(INSTEXE) ]; then \
+	  $(RM) $(INSTEXE); \
+	fi; \
+	if [ -f $(INSTEXE).exe ]; then \
+	  $(RM) $(INSTEXE).exe; \
+	fi; \
+	if [ ! -d $(SYSBINDIR) ]; then \
+	  $(MKDIR) $(SYSBINDIR); \
+	  $(CHMOD) $(MODE) $(SYSBINDIR); \
+	fi; \
+	$(CP) $(EXE_NAME) $(INSTEXE); \
+	$(CHMOD) $(EXEMODE) $(INSTEXE); \
+	echo "Installed $(EXE_NAME) as $(INSTEXE)"
+
+#
+# Determines headers in installed location that need to be updated
+#
+
+$(SYSINCDIR)/%.h : %.h
+	@ if [ ! -d $(SYSINCDIR) ]; then \
+	  $(MKDIR) $(SYSINCDIR); \
+	  $(CHMOD) $(MODE) $(SYSINCDIR); \
+	fi;
+	@ $(RM) $@
+	@ $(CP) $< $(SYSINCDIR); \
+	$(CHMOD) $(INCMODE) $@; \
+	echo Installed $< in $(SYSINCDIR)
+
+$(SYSINCDIR)/%.inc : %.inc
+	@ if [ ! -d $(SYSINCDIR) ]; then \
+	  $(MKDIR) $(SYSINCDIR); \
+	  $(CHMOD) $(MODE) $(SYSINCDIR); \
+	fi;
+	@ $(RM) $@
+	@ $(CP) $< $(SYSINCDIR); \
+	$(CHMOD) $(INCMODE) $@; \
+	echo Installed $< in $(SYSINCDIR)
+
+$(SYSINCDIR)/%.i : %.i
+	@ if [ ! -d $(SYSINCDIR) ]; then \
+	  $(MKDIR) $(SYSINCDIR); \
+	  $(CHMOD) $(MODE) $(SYSINCDIR); \
+	fi;
+	@ $(RM) $@
+	@ $(CP) $< $(SYSINCDIR); \
+	$(CHMOD) $(INCMODE) $@; \
+	echo Installed $< in $(SYSINCDIR)
+
+#
+# Determines .py files in installed location that need to be updated
+#
+
+$(PYINSTDIR)/%.py : %.py
+	@ if [ ! -d $(PYINSTDIR) ]; then \
+	  $(MKDIR) $(PYINSTDIR); \
+	  $(CHMOD) $(MODE) $(PYINSTDIR); \
+	fi;
+	@ $(RM) $@
+	@ $(CP) $< $(PYINSTDIR); \
+	$(CHMOD) $(PYMODE) $@; \
+	echo Installed $< in $(PYINSTDIR)
+
+#
+# Note: Overridden as defaults both using CPPFLAGS and not CFLAGS or CCFLAGS
+#
+
+%.o : %.c
+	$(CC) $(CFLAGS) $(INCLUDES) $^
+%.o : %.cc
+	$(CCC) $(CCFLAGS) $(INCLUDES) $^
+%.o : %.cpp
+	$(CCC) $(CCFLAGS) $(INCLUDES) $^
+%.o : %.cxx
+	$(CCC) $(CCFLAGS) $(INCLUDES) $^

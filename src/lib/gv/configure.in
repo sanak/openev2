@@ -1,0 +1,212 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(Makefile.in)
+AC_CONFIG_HEADER(gv_config.h)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_CXX
+
+AC_PROG_RANLIB
+
+dnl We always want to check /usr/local for stuff.
+LIBS="$LIBS -L/usr/local/lib"
+CFLAGS="$CFLAGS -I/usr/local/include"
+CPPFLAGS="$CPPFLAGS -I/usr/local/include"
+
+dnl Checks for libraries.
+AC_CHECK_LIB(dl,dlopen,,,)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h unistd.h dbmalloc.h dlfcn.h string.h strings.h)
+
+dnl Checks for library functions.
+AC_C_BIGENDIAN
+AC_FUNC_VPRINTF
+
+AC_COMPILER_WFLAGS
+AC_COMPILER_PIC
+AC_LD_SHARED
+
+dnl
+dnl Python related checks.
+dnl
+AM_PATH_PYTHON
+
+AM_INIT_PYEXEC_MOD
+
+AM_CHECK_PYMOD(thread,,extra_mods=gthread,extra_mods=)
+
+AM_PATH_GTK(1.2.1,,,$extra_mods)
+
+AM_PATH_GTKGL(build_gtkgl=true, build_gtkgl=false)
+
+if test "$build_gtkgl" != "true" ; then 
+  echo "=============================================================="
+  echo "GView will not work without GtkGLArea widget, please install."
+  echo "See http://www.student.oulu.fi/~jlof/gtkglarea/"
+  echo "=============================================================="
+fi
+
+LIBS="$GTKGL_LDOPTS -lgtkgl $GL_LDOPTS $GL_LIBS $GTK_LIBS $LIBS"
+CFLAGS="$GTKGL_CFLAGS $GTK_CFLAGS $CFLAGS"
+
+dnl ---------------------------------------------------------------------------
+
+dnl
+dnl Find the required GDAL libraries, and include files.
+dnl
+
+AC_ARG_WITH(gdal,[  --with-gdal[=ARG]         Path to GDAL installation tree],,)
+
+if test "x$with_gdal" != "x" ; then
+  GDAL_HOME=$with_gdal
+  AC_MSG_NOTICE([Using requested GDAL_HOME of $GDAL_HOME])
+elif test "x$GDAL_HOME" != "x" ; then
+  AC_MSG_NOTICE([Using predefined GDAL_HOME=$GDAL_HOME])
+elif test -f ../gdal/GDALmake.opt.in -o -f ../gdal/include/gdal.h ; then
+  GDAL_HOME=`pwd`/../gdal
+  AC_MSG_NOTICE([Found local GDAL_HOME=$GDAL_HOME])
+fi
+
+GDAL_LIB="-lgdal"
+
+dnl Check $GDAL_HOME/lib for library binary first.
+ORIG_LIBS="$LIBS"
+LIBS="$GDAL_LIB -L$GDAL_HOME/lib $ORIG_LIBS"
+AC_CHECK_LIB(gdal,GDALOpen,gdal_found=1,gdal_found=0)
+ 
+dnl Not found? Now check $GDAL_HOME.
+if test "$gdal_found" != "1" ; then
+  LIBS="$GDAL_LIB -L$GDAL_HOME $ORIG_LIBS"
+  AC_CHECK_LIB(gdal,GDALOpen,gdal_found=1,gdal_found=0)
+fi
+
+dnl Still not found? Check for system wide installation.
+if test "$gdal_found" != "1" ; then
+  LIBS="$ORIG_LIBS"
+  AC_CHECK_LIB(gdal,GDALOpen,gdal_found=1,gdal_found=0)
+fi
+ 
+gdal_missing_msg='
+OpenEV requires GDAL library, but it was not found.  Please download 
+and install it.  See http://www.remotesensing.org/gdal
+'
+if test "$gdal_found" != "1" ; then
+  AC_MSG_ERROR([$gdal_missing_msg])
+fi
+
+gdal_h_missing_msg='
+OpenEV requires GDAL, but gdal.h was not found.  Please ensure GDAL,
+and the development include files are installed, or that you run configure
+with --with-gdal=/path/to/gdal/installation.  
+See http://www.remotesensing.org/gdal
+'
+ 
+GDAL_INC=""
+
+if test "x$GDAL_HOME" != "x" ; then
+
+  if test -f "$GDAL_HOME/include/gdal.h" ; then
+    GDAL_INC="-I$GDAL_HOME/include"
+  elif test -f "$GDAL_HOME/port/cpl_port.h" \
+	  -a -f "$GDAL_HOME/gcore/gdal.h" \
+	  -a -f "$GDAL_HOME/ogr/ogr_api.h" ; then
+    GDAL_INC="-I$GDAL_HOME/port -I$GDAL_HOME/gcore -I$GDAL_HOME/ogr"
+  else
+    AC_MSG_ERROR([$gdal_h_missing_msg])
+  fi
+
+fi
+
+CPPFLAGS="$GDAL_INC $CPPFLAGS"
+
+AC_CHECK_HEADERS(gdal.h)
+if test "x$ac_cv_header_gdal_h" != "xyes" ; then
+  AC_MSG_ERROR([$gdal_h_missing_msg])
+fi
+
+AC_SUBST(GDAL_INC,$GDAL_INC)
+AC_DEFINE_UNQUOTED(USE_GDAL)
+
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(ogr,[  --with-ogr              Enable OGR Linkage],,)
+
+if test "$with_ogr" != no ; then
+  echo "checking for OGR ... enabled"
+  AC_DEFINE_UNQUOTED(HAVE_OGR)
+  CFLAGS="-I$GDAL_HOME/ogr/ogrsf_frmts $CFLAGS"
+  OGR_SOURCE=gvogr.cpp
+else
+  echo "checking for OGR ... disabled by user"
+  OGR_SOURCE=
+fi
+
+AC_SUBST(OGR_SOURCE,$OGR_SOURCE)
+
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(double-geocoord,[  --with-double-geocoord  Use double precision GL coordinates],,)
+
+AC_MSG_CHECKING([geoocord type])
+if test "$with_double_geocoord" == "yes" ; then
+  CFLAGS="$CFLAGS -DGV_USE_DOUBLE_PRECISION_COORD"
+  AC_MSG_RESULT([double])
+else
+  AC_MSG_RESULT([float])
+fi
+
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(render-plugin,[  --with-render-plugin    Enable plugin (rendering)],,)
+
+AC_MSG_CHECKING([for plugin enabled])
+if test "$with_render_plugin" == "yes" ; then
+    # Will enable g_module_* code.
+     CFLAGS="$CFLAGS -malign-double -fPIC -DGV_USE_RENDER_PLUGIN"
+    # This is needed to access stuff inside libgv.a from the plugin.
+    LDFLAGS="$LDFLAGS -rdynamic"
+    
+    AC_MSG_RESULT([yes])
+else
+    AC_MSG_RESULT([no])
+fi
+
+dnl --------------------------------------------------------------------------
+
+AC_ARG_WITH(debug,[  --with-debug            Build debug (else optimized)],,)
+
+AC_MSG_CHECKING([debug/opt compile options])
+
+CXXFLAGS=`echo "$CXXFLAGS " | sed "s/-g //"`
+CFLAGS=`echo "$CFLAGS " | sed "s/-g //"`
+CXXFLAGS=`echo "$CXXFLAGS " | sed "s/-O2 //"`
+CFLAGS=`echo "$CFLAGS " | sed "s/-O2 //"`
+CXXFLAGS=`echo "$CXXFLAGS " | sed "s/-O //"`
+CFLAGS=`echo "$CFLAGS " | sed "s/-O //"`
+
+if test "$with_debug" == "yes" ; then
+
+  OPTFLAGS=-g
+  AC_MSG_RESULT([adding -g])
+
+elif test "$with_debug" == "no" ; then
+
+  OPTFLAGS=-O2
+  AC_MSG_RESULT([adding -O2])
+
+elif test "$with_debug" != "" ; then
+
+  OPTFLAGS=$with_debug
+  AC_MSG_RESULT([adding $with_debug])
+
+else
+  OPTFLAGS="-O2 -g"
+  AC_MSG_RESULT([adding -O2 -g])
+fi
+
+
+AC_SUBST(CFLAGS,$CFLAGS)
+AC_SUBST(OPTFLAGS,$OPTFLAGS)
+AC_OUTPUT(Makefile pymod/Makefile)

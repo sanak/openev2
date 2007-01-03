@@ -1,0 +1,28 @@
+/* XPM */
+static char *nonelut[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        3            1",
+/* colors */
+". c #000000",
+"# c #808080",
+"a c None",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaa.................aa",
+"aaa.############....aa",
+"aaa.aaaaaaaaaaaa.##.aa",
+"aaa.aaaaaaaaaaa.#a#.aa",
+"aaa.aaaaaaaaaa.#aa#.aa",
+"aaa.aaaaaaaaa.#aaa#.aa",
+"aaa.aaaaaaaa.#aaaa#.aa",
+"aaa.aaaaaaa.#aaaaa#.aa",
+"aaa.aaaaaa.#aaaaaa#.aa",
+"aaa.aaaaa.#aaaaaaa#.aa",
+"aaa.aaaa.#aaaaaaaa#.aa",
+"aaa.aaa.#aaaaaaaaa#.aa",
+"aaa.aa.#aaaaaaaaaa#.aa",
+"aaa.a.#aaaaaaaaaaa#.aa",
+"aaa..#aaaaaaaaaaaa#.aa",
+"aaa.................aa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

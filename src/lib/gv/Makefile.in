@@ -1,0 +1,85 @@
+
+INST_PREFIX =	@prefix@
+
+SRC = gvviewarea.c  gvdata.c gvlayer.c gvutils.c gvrecords.c \
+      gvpolylines.c  gvlinelayer.c  gvtool.c  gvlinetool.c \
+      gvtoolbox.c   gvshapelayer.c  gvselecttool.c  gextra.c \
+      gvareas.c  gvarealayer.c  gvareatool.c  gvtess.c gvtessshape.c \
+      gvnodetool.c  gvundo.c  gvpoints.c  gvpointlayer.c gvpointtool.c \
+      gvpquerylayer.c gvviewlink.c gvroitool.c gvmesh.c gvrasterlayer.c \
+      gvraster.c gvrasterlut.c gvrasteraverage.c gvrasterconvert.c \
+      gvrastercache.c gvtracktool.c gtkcolorwell.c crs.c gvprint.c \
+      gvproperties.c gvshape.c gvshapes.c gvshapeslayer.c gvzoompantool.c \
+      gvmanager.c gvrastersource.c gvtexturecache.c ipgcplayer.c \
+      gvrecttool.c appcurlayer.c gvrenderinfo.c gvskirt.c gvogr.c \
+      invdistance.c gvrasterize.c llrasterize.c gvpoitool.c gvsymbolmanager.c \
+      gvrotatetool.c \
+	\
+	gvshapefile.c shpopen.c dbfopen.c
+
+CXXSRC =  
+
+OBJ = $(SRC:.c=.o) $(CXXSRC:.cpp=.o)
+
+CC	=	@CC@
+CXX	=	@CXX@
+
+OPTFLAGS =	@OPTFLAGS@
+
+CFLAGS = $(OPTFLAGS) @C_WFLAGS@ @CFLAGS@
+LDFLAGS = @LDFLAGS@
+
+
+LIBS = $(LDFLAGS) @LIBS@ 
+
+INSTALL = 	./install-sh -c
+INSTALL_LIB 	=	./install-sh -c
+INSTALL_DIR	= 	./install-sh -d
+
+default: configure libgv.a gvtest
+	(cd pymod; $(MAKE))
+
+all:	default
+
+%.o : %.c
+	$(CC) $(CFLAGS) -c $<
+
+libgv.a: $(OBJ)
+	rm -f $@
+	ar cq $@ $(OBJ)
+	@RANLIB@ $@
+
+gvtest:	testmain.o libgv.a
+	$(CXX) -g -o $@ testmain.o libgv.a $(LIBS)
+
+clean:
+	rm -f gvtest *.o *.so *.a
+	(cd pymod; $(MAKE) clean)
+
+distclean: dist-clean
+
+dist-clean: clean
+	rm Makefile config.log config.cache config.status
+
+configure:	configure.in
+	-autoconf
+
+install:
+	$(INSTALL_DIR) $(INST_PREFIX)/bin
+	$(INSTALL_DIR) $(INST_PREFIX)/ramps
+	$(INSTALL_DIR) $(INST_PREFIX)/tools
+	$(INSTALL_DIR) $(INST_PREFIX)/pymod
+	$(INSTALL_DIR) $(INST_PREFIX)/html
+	$(INSTALL_DIR) $(INST_PREFIX)/pics
+	$(INSTALL_DIR) $(INST_PREFIX)/symbols
+	$(INSTALL) gvtest $(INST_PREFIX)/bin
+	$(INSTALL_LIB) pymod/_gvmodule.so $(INST_PREFIX)/pymod
+	$(INSTALL_LIB) pymod/_gtkmissing.so $(INST_PREFIX)/pymod
+	cp pymod/*.* $(INST_PREFIX)/pymod
+	chmod a+x $(INST_PREFIX)/pymod/openev.py
+	chmod a+x $(INST_PREFIX)/pymod/ibrowse.py
+	chmod a+x $(INST_PREFIX)/pymod/gvplot.py
+	cp tools/*.* $(INST_PREFIX)/tools
+	cp ramps/*.* $(INST_PREFIX)/ramps
+	cp html/*.* $(INST_PREFIX)/html
+	cp symbols/*.* $(INST_PREFIX)/symbols

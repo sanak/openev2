@@ -1,0 +1,137 @@
+################################################################################
+#
+# File: Makefile (library)
+#
+# Targets: all, clean, install, what, dll
+#
+# Author: Pete Nagy
+# Version: %I%, %G%
+#
+################################################################################
+
+SYSTEM = ../../..
+MKINCLDIR = $(SYSTEM)/resource/mkinclude$(DEF_MKINCL)
+
+################################################################################
+# GENERIC DEFS - SHOULD NOT BE CHANGED FOR INDIVIDUAL FILES                    #
+################################################################################
+
+#
+# Include generic definitions for programs
+#
+
+include $(MKINCLDIR)/generic
+
+#
+# Override any defs for special purposes
+#
+
+include $(MKINCLDIR)/redefine
+
+################################################################################
+# PROGRAM SPECIFIC DEFS - CHANGE FOR INDIVIDUAL PROGRAMS                       #
+################################################################################
+
+#
+# Library name
+#
+
+  LIB = libevtess
+
+#
+# Source files managed by this makefile
+#
+
+  CSRCS = dict.c \
+          memalloc.c \
+	  normal.c \
+	  priorityq.c \
+          sweep.c \
+          tessmono.c \
+          geom.c \
+          mesh.c \
+          render.c \
+          tess.c
+#
+# Header files managed by this makefile
+#
+
+  CHEADERS = dict-list.h \
+             dict.h \
+             geom.h \
+             memalloc.h \
+             mesh.h \
+             normal.h \
+             priorityq-heap.h \
+             priorityq-heap.c \
+             priorityq-sort.h \
+             priorityq.h \
+             render.h \
+             sweep.h \
+             tess.h \
+             tessmono.h
+
+#
+# Libraries to use in library dependency order
+# INSTLIBS depends on ARCHLIBS depends on POSTLIBS
+#
+
+CFLAGS += -DBUILD_MGW_DLL
+
+POSTLIBS =
+
+################################################################################
+# MAKEFILE OBJECTS AND TARGETS                                                 #
+################################################################################
+
+#
+# Include generic definitions
+#
+
+include $(MKINCLDIR)/$(ARCHTARGETS)lib_targets
+
+#
+# Create dll 
+#
+
+DLLFILES = libevtessdll.a evtess.dll
+DLLLIBDIR = $(SYSLIBDIR)
+MOVEOBJS += 
+
+dll: create_dll post_compile
+
+create_dll: pre_compile $(TAGFILE) $(LOCALLIB)
+	@ $(RM) evtess.dll evtess.a libevtessdll.a
+	dllwrap --output-lib=libevtessdll.a --dllname=evtess.dll \
+          --driver-name=gcc $(ALLOBJS)
+	@ echo "Note: We use '__declspec(dllexport)' to determine"; \
+          echo "exports, not a def file, so ignore previous warning."
+
+install_dll: dll
+	@ for filename in $(DLLFILES); do \
+	  if [ -f $(DLLLIBDIR)/$$filename ]; then \
+	    $(RM) $(DLLLIBDIR)/$$filename; \
+	  fi; \
+	  if [ -f $$filename ]; then \
+	    $(CP) $$filename $(DLLLIBDIR)/$$filename; \
+	    echo Installed $$filename in $(DLLLIBDIR)/$$filename; \
+	    $(CHGRP) $(GROUP) $(DLLLIBDIR)/$$filename; \
+	  fi; \
+	done;
+
+#
+#       Test stuff..
+#
+#	gcc -v -shared --add-stdcall-alias -o evtess.dll $(ALLOBJS)
+#	dlltool -A -d evtess.def -l evtess.a $(ALLOBJS)
+#
+#	gcc -v -shared -o evtess.dll $(ALLOBJS)
+#
+#
+#	echo EXPORTS > evtess.def
+#	nm evtess.dll | grep ' T _' | sed 's/.* T _//' >> evtess.def
+#
+#
+#
+#	gcc -v -shared -o evtess.dll $(ALLOBJS)
+#

@@ -1,0 +1,2 @@
+glib-genmarshal --prefix gvmarshal marshal_list.txt --header > gvmarshal.h
+glib-genmarshal --prefix gvmarshal marshal_list.txt --body > gvmarshal.c

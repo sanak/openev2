@@ -1,0 +1,89 @@
+<GViewAppIconBar>
+ <Iconbar>
+   <icon>
+     <xpm>'openfile.xpm'</xpm>
+     <hint>'Open and Display Raster/Vector File'</hint>
+     <callback>self.file_open_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'print.xpm'</xpm>
+     <hint>'Print Current View'</hint>
+     <callback>self.print_cb</callback>
+     <help>'gvprint.html'</help>
+   </icon>
+   <icon>
+     <xpm>'nonelut.xpm'</xpm>
+     <hint>'Revert to no Enhancement'</hint>
+     <callback>self.nonelut_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'linear.xpm'</xpm>
+     <hint>'Linear Stretch/Enhancement'</hint>
+     <callback>self.linear_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'equalize.xpm'</xpm>
+     <hint>'Apply Equalization Enhancement to Raster'</hint>
+     <callback>self.equalize_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'log.xpm'</xpm>
+     <hint>'Logarithmic Enhancement to Raster'</hint>
+     <callback>self.log_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'windowed.xpm'</xpm>
+     <hint>'Windowed Raster Re-enhancement'</hint>
+     <callback>self.restretch_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'classify.xpm'</xpm>
+     <hint>'Classify Layer'</hint>
+     <callback>self.classify_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'legend.xpm'</xpm>
+     <hint>'Show Legend'</hint>
+     <callback>self.show_legend_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'seeall.xpm'</xpm>
+     <hint>'Fit All Layers'</hint>
+     <callback>self.seeall_cb</callback>
+   </icon>
+   <icon>
+     <widget>self.zoom_factor</widget>
+     <hint>'Zoom Ratio'</hint>
+   </icon>
+   <icon>
+     <xpm>'zoomin.xpm'</xpm>
+     <hint>'Zoom in x2'</hint>
+     <callback>self.zoomin_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'zoomout.xpm'</xpm>
+     <hint>'Zoom out x2'</hint>
+     <callback>self.zoomout_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'refresh.xpm'</xpm>
+     <hint>'Refresh Rasters From Disk'</hint>
+     <callback>self.refresh_cb</callback>
+   </icon>
+   <icon>
+     <pixmap>self.rawgeo_pixmap</pixmap>
+     <hint>'Georeferenced'</hint>
+     <callback>self.rawgeo_cb</callback>
+   </icon>
+   <icon>
+     <xpm>'help.xpm'</xpm>
+     <hint>'Launch Online Help'</hint>
+     <callback>self.helpcb</callback>
+   </icon>
+   <icon>
+     <pixmap>self.idlebusy_pixmap</pixmap>
+     <hint>'Busy Indicator'</hint>
+     <callback>self.do_nothing</callback>
+   </icon>
+ </Iconbar>
+</GViewAppIconBar>

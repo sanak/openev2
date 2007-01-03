@@ -1,0 +1,568 @@
+OpenEV modification notes, build on windows with MinGW, gtk2.4, gtkglext
+instead of GtkGLArea
+
+========================================================================
+
+In gvdata.h, removed ref to gtk/gtkdata.h, which is no longer in gtk.
+Kept the GtkData objects defined by moving the defs into gvdata.h
+Added #include <gtk/gtkobject.h>
+
+copied gv_config.h_win32 to gv_config.h
+
+gtk
+Files which ref GtkGLArea:
+gvviewarea.c
+gvviewarea.h
+
+Files which ref gtk_gl_area:
+gvrasterlayer.c
+gvviewarea.c
+gvviewlink.c
+
+
+gtkcolorwell.c used gtkcompat.h, removed
+gtkcolorwell.c used GtkColorSelDialog, gtk2.x requires adding
+  new header: gtkcolorseldialog.h
+
+gvrasterlayer.h, gvsymbolmanager.h, gvviewarea.h, changed gtkgl/gdkgl.h
+include to gtk/gtkgl.h
+
+gvtess.c, gvtessshapes.c, removed define of WIN_CALLBACK to FAR PASCAL
+  for WIN32, as this screws up mingw build
+
+Many files had changes due to incompatibilities from 1.2 to 2.x.  These are
+highlighted in http://developer.gnome.org/doc/API/2.0/gtk/gtk-changes-2-0.html.
+The main points of concern are the 'Type system changes' and the
+'Object system changes'.  These changes seem to be mainly of the find and
+replace type.
+
+
+gvlayer.c, changed signal creation to new style.  Added finalize function, to
+correct leaking of projection string.
+
+gvdata.c, removed check for destroyed object in gv_data_set_name
+GTK_OBJECT_DESTROYED is not in GTK2.  Also now extends GtkObject and
+not GtkData, as GtkData no longer exists.  Looked at GtkAdjustment, which
+also used to extend GtkData.
+
+gvviewarea.c, big changes regarding fonts, but API for bmfont.. functions
+nearly the same so should not affect other apps much
+
+glu, gl dll problems:
+I had a glu32.dll on my system, who knows where it came from, and so I tried
+to use it.  There were function naming problems, which I had to hack to fix.
+I did this by creating a glu32.def file (listed glu functions in glu32.dll using
+pexport command piped to a file).  I then copied from the error messages, where
+the errors said:
+
+c:/proj/openev/src/cc/openev/gvroitool.c:551: undefined reference to `gluPickMatrix@36'
+
+So I added in the def file:
+gluPickMatrix@36 = gluPickMatrix
+
+Then, I created the .a for the .dll using:
+
+dlltool -k  -d glu32.def -l libglu32.a
+
+A better way will have to be found!
+
+==============================================================================
+  From 'Building and using dlls, programming with cygwin':
+
+  echo EXPORTS > foo.def
+  nm foo.dll | grep ' T _' | sed 's/.* T _//' >> foo.def
+
+  Note that this will only work if the DLL is not stripped. Otherwise you
+  will get an error message: "No symbols in foo.dll".
+
+  Once you have the .def file, you can create an import library like this:
+
+  dlltool --def foo.def --dllname foo.dll --output-lib foo.a
+==============================================================================
+
+
+testmain.c, Add gtk_gl_init (&argc, &argv) immediately after gtk_init
+
+Marshalling functions do not exist for all types, must use glib-genmarshal
+utility to create marshalling functions; I created make_marshal to do this,
+and we now have gvmarshal.h, gvmarshal.c that need to be included
+in the build and added to code header include statements
+
+Pango not 'installed', looks for etc/pango directory with pango.modules; this
+is a text file that points to dlls that are in whatever location we've put
+pango.  Manually editing this file to windows paths worked.
+
+Cannot get scrolling signals to work.  Removed direct scroll handling from
+view and added to scrollpane with a viewport, instead.  The scroll
+adjustments may be obtained from the viewport, perhaps this is better
+anyway?
+
+gvshapelayer.c - The selection_changed and subselection_changed functions
+had incorrect signals and marshalling functions.  Should have been created
+with a single parameter argument of type POINTER.
+
+Created test program for signal handling by modifying gtk tictactoe example.
+I have discovered that there does not seem to be any problem with mixing
+signals created with g_signal_new with gtk_signal_connect.  If replacing
+gtk_signal_connect / gtk_signal_connect_object, you just have to be sure
+to use g_signal_connect / g_signal_connect_swapped.
+
+Discovered problem with displaying initial shape layer has to do with
+bad shapefile (tesselation?).  A simple shapefile without much concavity
+works, concavity causes crashes.
+
+Problem with tools not receiving button-pressed-event had to do with
+toolbox receiving that event.  Commenting out code where toolbox is
+connected to event makes it so tools receive event.  Will investigate..
+
+Problems with scroll had to do with 'disconnect' signal.  Commenting out
+the gtk_signal_connect to the 'disconnect' signal eliminated errors.  Will
+need to look to see if there is a needed alternative to 'disconnect'.
+
+Default for mouse events that do not return a boolean return value is to
+assume that the callback 'consumed' the event.  Changed gvtoolbox
+gv_toolbox_view_event to return a boolean, so that it will not consume
+button-press-event over the view area before the tools can receive them.
+
+Removed static area variable in gvtessshape to see if it might help crash
+with gluTessEndPolygon, just in case thread issue.  Did not help, but
+nicer not to have static vars.
+
+gvtessshape: Had to compile tessellation code from SGI sample implementation
+to avoid crashes in callbacks.  Added combine callback which corrects various
+display problems.
+
+3-02-2005
+
+  Organized project layout, modified makefiles
+
+  Some test stuff from dll creation:
+    #
+    #	gcc -v -shared --add-stdcall-alias -o evtess.dll $(ALLOBJS)
+    #	dlltool -A -d evtess.def -l evtess.a $(ALLOBJS)
+    #
+    #	gcc -v -shared -o evtess.dll $(ALLOBJS)
+    #
+    #
+    #	echo EXPORTS > evtess.def
+    #	nm evtess.dll | grep ' T _' | sed 's/.* T _//' >> evtess.def
+    #
+    #	gcc -v -shared -o evtess.dll $(ALLOBJS)
+
+3-07-2005
+
+  Could not build python_bindings.  Errors like 
+
+_gv.a(gvmodule.o.b):c:/proj/ev2/src/lib/python_bindings/lib/lib.CYGWIN_NT-5.1/
+../../gvmodule.c:434: undefined reference to `_imp___Py_NoneStruct'
+
+c:/proj/ev2/src/lib/python_bindings/lib/lib.CYGWIN_NT-5.1/../../gvmodule.c:455:
+undefined reference to `_imp__PyExc_ValueError'
+
+_gv.a(gvmodule.o.b):c:/proj/ev2/src/lib/python_bindings/lib/lib.CYGWIN_NT-5.1/
+../../gvmodule.c:732: undefined reference to `_imp__PyList_Type'
+
+_gv.a(gvmodule.o.b):c:/proj/ev2/src/lib/python_bindings/lib/lib.CYGWIN_NT-5.1/
+../../gvmodule.c:1365: undefined reference to `_imp__PyExc_IndexError'
+
+c:/proj/ev2/src/lib/python_bindings/lib/lib.CYGWIN_NT-5.1/../../gvmodule.c:1562:
+undefined reference to `_PyGObject_API'
+
+I used to get many more errors before I got the python dll linking
+properly, so I think perhaps the `_imp___Py_NoneStruct' indicate
+that there is really some python difference regarding these functions,
+and not a dll problem.  (Usually the _imp__ indicates a problem locating
+the file in the dll).
+
+3-08-2005
+
+Corrected python problem with the following:
+
+Search the file python24.dll in your windows folder. After you found it, launch
+MSYS. Change into the windows folder, for example cd c:\winnt\system32. Then 
+execute pexports python24.dll > python24.def. Then use the dlltool with:
+dlltool --dllname python24.dll --def python24.def --output-lib libpython24.a
+The resulting library has to be placed in the same directory as python24.lib.
+(Should be the libs directory under your Python installation directory,
+for example c:\Python24\Libs\.)
+
+Notes on some type stuff:
+
+For the stable bindings (0.6.x), you should include the <pygtk.h> header 
+file in your python extension, and call init_pygtk() during module 
+initialisation.  Then you can check if a PyObject is a GtkObject wrapper 
+with PyGtk_Check(o), or use the "O!" typecode to PyArg_ParseTuple(), 
+using &PyGtk_Type as the type object.  You will need to pass the 
+"widget._o" to your C extension rather than just "widget" as there is 
+two levels of wrapping in the stable bindings (a straight procedural 
+binding in the _gtk module, then a OO binding built on top).
+
+For the development bindings (1.99.x), things are a bit easier because 
+there is only one layer of wrapping.  Just include <pygobject.h>, and 
+call init_pygobject() during module initialisation.  You can use 
+pygobject_get() to retrieve the C level GObject.  No _o's are used.
+
+
+Success on python_bindings!  Needed to change the #include <pygobject.h>
+line to be ABOVE the #include <pygtk/pygtk.h> block.  Also had to remove
+the PyGtk_Check lines in gvmodule_impl (removed in the resulting auto-
+generated c code, not yet from generate.py), will need to revisit the
+checking to do it properly.
+
+3/09/2005
+
+Python changes:
+
+All gtk.GtkXXX calls have been changed; there is no longer a Gtk label
+since they are referenced with the gtk module anyway (now gtk.XXX)
+
+Changed all set_usize calls to set_size_request
+
+Changed all set_uposition to move
+
+toolexample.py: Changed gtk.Text() to be a combination of TextBuffer and
+TextView.
+
+pgugrid.py: Changed cmap.alloc to cmap.alloc_color
+
+Note: Need to make font changes!! style.font no longer applicable
+
+
+lib/gv/gvrasterlayer: Corrected error:
+called g_object_unref() on an object that had only a floating
+reference; the initial floating reference is not owned by anyone
+and must be removed with gtk_object_sink() after a normal
+reference is obtained with g_object_ref().
+
+The gvrasterlayer was calling unref on a 'mesh' object that it had
+never obtained a ref for; added ref and sink methods.
+
+3/14/2005
+
+gtkmissing - removed override of toolbar append_item, removed override
+of get_position and window_move.  Are these still necessary?!
+
+GtkExtra 
+
+3/16/2005
+
+pygtk list subscription failed, keep trying...finally!
+
+http://www.daa.com.au/mailman/listinfo/pygtk
+
+There is no longer a PyGtk_Type type to use in O! ParseTuple checks,
+so I'm changing them all to O:
+  gv_ciet.c
+  gv_module.c
+  generate.py - rewrite code generator
+
+3/21/2005
+
+  Replaced gtk object casts in generate.py to eliminate compiler warnings
+  Added gvwinprint.c back to libgv compilation and worked out errors;
+    needed -lcomdlg32 in Makefile to link with windows comdlg32.dll.
+
+3/23/2005
+
+  After replacing gtk extra stuff (use pygtk dialog, use GvMenuFactory),
+  and getting version of gdal compiled with python24 from Frank, has passed
+  imports and now am fixing other problems:
+
+  gview.py - Changed class GvData(_gtk.Data) to just GvData()
+
+3/28/2005
+
+  gvhtml.py - Changed from gtk.compat import GDK to from gtk.gtk import *,
+  changed F1 and CONTROL_MASK to what I think might work...
+  - event.state should be gtk.gdk.<state>, like gtk.gdk.CONTROL_MASK
+  - event.keyval should be gtk.keysyms.<value>, like gtk.keysyms.F1
+  Same applies to:
+    gvclassifydlg.py
+    ibrowse.py
+    pgucolor.py
+    pgushapesgrid.py
+    pyshell.py
+
+  Gtk<Class> changed to gtk.<Class> and import gtk used for all of:
+    filedlg.py
+    gviewapp.py
+    gvlabeledit.py
+    gvlegenddlg.py
+    gvogrdlg.py
+    gvogrfsgui.py
+    gvpquerypropdlg.py
+    gvprint.py
+    gvrasterpropdlg.py
+    gvsdsdlg.py
+    gvselbrowser.py
+    gvvectorpropdlg.py
+    gvviewwindow.py
+    ibrowse.py
+    layerdlg.py
+    oeattedit.py
+    pgucolor.py
+    pgucolorsel.py
+    pgufont.py
+    pgumenu.py
+    pguprogress.py
+    pgutogglebutton.py
+
+  CList used in:
+    filedlg.py
+    generate.py
+    gvogrdlg.py
+    gvsdsdlg.py
+    layerdlg.py
+    pgucombo.py
+    pyshell.py
+
+
+  layerdlg.py - Removed tooltips ref, there was a FIXME comment and the
+  GtkTooltips class does not exist; should research this and figure out
+  best way of handling it..  Also, changing all Gtk<Class> to gtk.<Class>
+
+03/29/2005
+
+  problems with pygtk2.4 vs older..  how do ref/unref/sink, etc. work?
+  commented out calls to _gtkmissing ref/unref/etc.. for now, need to
+  figure this out.  Also, gtk objects no longer have a ._o!! This is used
+  in places, will try passing actual object instead of ._o object in the
+  _gv calls:
+  File "c:\proj\ev2\src\pymod\gview.py", line 3989, in __init__
+    self._o = _gv.gv_track_tool_new(label._o)
+  AttributeError: 'gtk.Label' object has no attribute '_o'
+
+  Changed all gtk.mainquits to main_quit, gtk.mainloop to main
+
+  Many changes to text items in pyshell, will need to use new TextView and
+  TextBuffer and new ways to mark text to set fonts, colors, etc.
+
+  Note: Need gtk lib and etc dirs copied to running directory, pixmap loader
+  dlls were not being found and it was a headache trying to figure out why.
+
+  Problems with new style object creation... Changed GvTool to extend a
+  gtk.Button instead of gtk.Object, so that init method could be called, so
+  that a signal could be added (gviewapp.py)... Needs to be revisited!
+  PENDING
+  
+  It appears _raise was renamed raise_.  Took me a while to notice the problem,
+  since the function names in the documentation are underlined anyway and I
+  didn't realize that raise even had an underscore.  Changed in 11 files
+
+  gvviewwindow.py - menu factory is not an object that can be added to
+  containers.  It does have an __w object that can be added, but this is
+  the actual menu and not the menuf, so later functions that try to treat
+  the added item as a menu factory fail.  Seems that perhaps there should
+  be a menu object that extends the gtk.MenuBar to give us extra 
+  functionality instead of the 'factory' class.  I'm sorry, MenuFactory is
+  just plain stupid (though perhaps it was once a good solution...)
+
+  other deprecated - MenuItem right justify, use set_right_justified(TRUE) 
+
+04/26/2005
+
+  Added GvCompat class, will attempt to glue old and new style pygtk objects.
+  Files defining classes that correspond to the _gv module are:
+
+gdal.py
+gtkmissing.py
+gview.py
+ogr.py
+osr.py
+
+  Files that currently redefine __getattr__ are:
+
+gview.py
+gvutils.py
+ogr.py
+pgumenu.py
+
+04/27/2005
+
+  Need to use new style wrapping mechanism.  First crack at h2def.py.
+  Guess what, the script does not work on all the code; there are a
+  number of headers that choke it:
+
+gvraster.h
+gvtypes.h
+gvshapeslayer.h
+gvshapes.h
+gvrasterlayer.h
+
+  These headers choke the script individually.  A header can be fixed by
+  deleting pieces of code.  This can be needed code or comments.  The
+  problem is that combinations of headers passed to the script at the
+  same time crash it at different times.
+
+OK:
+
+Adding: appcurlayer.h
+Adding: crs.h
+Adding: dllfct.h
+Adding: gextra.h
+Adding: glu.h
+Adding: gluos.h
+Adding: gtkcolorwell.h
+Adding: gv_config.h
+Adding: gvarealayer.h
+Adding: gvareas.h
+Adding: gvareatool.h
+Adding: gvdata.h
+Adding: gview.h
+Adding: gvlayer.h
+Adding: gvlinelayer.h
+Adding: gvlinetool.h
+Adding: gvmanager.h
+Adding: gvmarshal.h
+Adding: gvmesh.h
+Adding: gvnodetool.h
+Adding: gvpointlayer.h
+Adding: gvpoints.h
+Adding: gvpointtool.h
+Adding: gvpoitool.h
+Adding: gvpolylines.h
+Adding: gvpquerylayer.h
+Adding: gvproperties.h
+
+(Gets past gvpoints.h running headers individually, but chokes if they are
+ grouped together up to gvpoints, below: )
+
+$ python "c:/Python24/share/pygtk/2.0/codegen/h2def.py" appcurlayer.h crs.h dllfct.h gextra.h glu.h gluos.h gtkcolorwell.h gv_config.h gvarealayer.h gvareas.h gvareatool.h gvdata.h gview.h gvlayer.h gvlinelayer.h gvlinetool.h gvmanager.h gvmarshal.h gvmesh.h gvnodetool.h gvpointlayer.h gvpoints.h > gv.defs
+Traceback (most recent call last):
+  File "c:/Python24/share/pygtk/2.0/codegen/h2def.py", line 513, in ?
+    sys.exit(main(sys.argv))
+  File "c:/Python24/share/pygtk/2.0/codegen/h2def.py", line 510, in main
+    write_def(filename,None,prefix=modulename)
+  File "c:/Python24/share/pygtk/2.0/codegen/h2def.py", line 445, in write_def
+    buf = define_func(buf, fp, prefix)
+  File "c:/Python24/share/pygtk/2.0/codegen/h2def.py", line 331, in define_func
+    if func[0] == '_':
+IndexError: string index out of range
+
+OK - Turns out this is a bug in my windows version of python, it works
+properly when run on ibmer.  Will get python2.4.1 and see if that clears
+up the problem.
+
+
+05/02/2005
+
+Working on creating python modules using codegen.
+
+Cleaning up headers, need variable names in prototypes, cannot
+have spaces after opening paren or before closing paren.
+
+Need to redefine enumerations.  See this note:
+	  <para><emphasis>GType</emphasis>: the type registry.  Every
+            type used in GTK has (or should have) a type registered
+            with the type system.  From integers to enumerations to
+            GObjects.  This registry is used for runtime introspection
+            at various parts of the binding.</para>
+
+Finally dug up out of google the info on how to deal with enumerations.
+The autogen code was failing because enumeration types were not defined,
+like GV_TYPE_SAMPLE_METHOD.  In looking at other libs, I found enumeration
+types defined in a <lib>-enum-types.h file, which can be placed in the
+.override file.  But, where are the functions for the prototypes defined
+in the header?  No leads on web, but finally, after realizing that there
+was a good chance that if the ..enum-types.h is automatically generated,
+then a c file with the same name might also be, and this turned up the
+makefile code that can create these files.  Adding targets to lib-targets
+mkinclude file.
+
+glib-mkenums not working with shapefil.h; adding special 'trigraph' comments
+to get to work
+
+5/25/2005
+
+Worked out many issues with subtyping, _o handling, wrapping, etc.
+
+Includes:
+  GvObject, (GvCompat try did not work)
+  GvParse.java - wrote to sift through needed files and add to gv.override
+  gv_override.c, gv_override.h, gvmodule.h
+  
+
+=============================================================================
+
+Notes for Frank W:
+------------------
+avoid emitting signal in gv_data_set_name if object is destroyed, gvdata.c
+GTK_OBJECT_DESTROYED no longer available, may need alternative.
+
+shapefil.h modified to add comment used by glib-mkenums
+
+
+=============================================================================
+
+Temp:
+-----
+
+marshaller functions:
+
+g_cclosure_marshal_BOOLEAN__FLAGS
+g_cclosure_marshal_BOOL__FLAGS
+g_cclosure_marshal_STRING__OBJECT_POINTER
+g_cclosure_marshal_VOID__BOOLEAN
+g_cclosure_marshal_VOID__BOXED
+g_cclosure_marshal_VOID__CHAR
+g_cclosure_marshal_VOID__DOUBLE
+g_cclosure_marshal_VOID__ENUM
+g_cclosure_marshal_VOID__FLAGS
+g_cclosure_marshal_VOID__FLOAT
+g_cclosure_marshal_VOID__INT
+g_cclosure_marshal_VOID__LONG
+g_cclosure_marshal_VOID__OBJECT
+g_cclosure_marshal_VOID__PARAM
+g_cclosure_marshal_VOID__POINTER
+g_cclosure_marshal_VOID__STRING
+g_cclosure_marshal_VOID__UCHAR
+g_cclosure_marshal_VOID__UINT
+g_cclosure_marshal_VOID__UINT_POINTER
+g_cclosure_marshal_VOID__ULONG
+g_cclosure_marshal_VOID__VOID
+
+TEMP:
+
+
+  Configure often does not work with the unix-like cygwin environment and
+the MSCVRT mingw compiler.  As an example 'make' in cygwin is unix-like, 
+but I have to pass include files with paths like:
+INCLUDES += -Ic:\\proj\\gtk\\gtk+-dev-2.4.13\\include\\gtk-2.0
+INCLUDES += -Ic:\\proj\\gtk\\gtk+-dev-2.4.13\\lib\\gtk-2.0\\include
+INCLUDES += -Ic:\\proj\\gtk\\atk-dev-1.6.0\\include\\atk-1.0
+INCLUDES += -Ic:\\proj\\gtk\\pango-dev-1.4.1\\include\\pango-1.0
+So, makefiles that use gnu tools to obtain the -I and -L lines for
+included libraries break, since those tools do not return the windows
+path.  Another similar example was with the pango library.  It depends on
+a pango.module file to dynamically find fonts; this text file has lines  
+like:
+/target/lib/pango/1.4.0/modules/pango-arabic-fc.dll ArabicScriptEngineFc
+PangoEngineShape PangoRenderFc arabic:*
+/target/lib/pango/1.4.0/modules/pango-hebrew-fc.dll HebrewScriptEngineFc
+PangoEngineShape PangoRenderFc hebrew:*
+A unix installation would replace the /target/ with the directory chosen
+for installation, but with windows and mingw I just fixed errors by
+manually changing these lines to:
+c:\proj\gtk\pango-1.4.1\lib\pango\1.4.0\modules\pango-arabic-fc.dll
+ArabicScriptEngineFc PangoEngineShape PangoRenderFc arabic:*
+c:\proj\gtk\pango-1.4.1\lib\pango\1.4.0\modules\pango-hebrew-fc.dll
+HebrewScriptEngineFc PangoEngineShape PangoRenderFc hebrew:*
+
+
+===============================================================================
+Tessellation issues:
+
+Found this in a list exchange for HOpenGL, posted by Sven.Panne at aedion.de:
+
+"The OpenGL implementation should really not matter at all, the only issue
+I'm aware of is tessellation under any WinDoze: Microsoft's DLL only supports
+an ancient GLU version, so someday I'll have to find a workaround. It doesn't
+seem to be mission-critical for anybody so far, so I was simply too lazy
+fixing this."
+
+Found this at http://sourceforge.net/mailarchive/message.php?msg_id=5359505:
+
+ (I think OpenGL is expecting _cdecl function, whereas delegate are exported
+as _stdcall, no way to change that except by hacking the IL, ask Ridge, he 
+might help .....)
+

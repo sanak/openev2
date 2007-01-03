@@ -1,0 +1,27 @@
+/* XPM */
+static char *idle {
+/* width height num_colors chars_per_pixel */
+"    22    18        2            1",
+/* colors */
+"a c None",
+". c #00ff00",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaa....aaaaaaaaa",
+"aaaaaaa.......aaaaaaaa",
+"aaaaaa..........aaaaaa",
+"aaaaa...........aaaaaa",
+"aaaaaa..........aaaaaa",
+"aaaaaaa........aaaaaaa",
+"aaaaaaaaa....aaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

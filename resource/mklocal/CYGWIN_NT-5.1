@@ -1,0 +1,115 @@
+###############################################################################
+# Architecture specific variables                                             #
+###############################################################################
+
+  ARCHCFLAGS = -c -g -LANG:std -DHAVE_OGR -mms-bitfields
+  ARCHCCFLAGS = -c -g -LANG:std -DHAVE_OGR -mms-bitfields -Wall -Wno-deprecated
+  ARCHFFLAGS = -e
+  ARCHLIBS  = 
+  ARCHLDFLAGS = -g -LANG:std -DHAVE_OGR -mms-bitfields
+  ARCHLINTFLAGS = 
+  ARCHINSTFLAGS = 
+  ARCHARFLAGS = -ruv
+  ARCHINCLUDES =
+
+#
+#  Platform specific compilers
+#
+
+  CCC = g++
+  GNU_CC = gcc
+  CC = ${GNU_CC}
+  CCLD = ${GNU_CC}
+  CXX = ${CCC}
+  CCCLD = ${CCC}
+
+#
+# Some platform specific stuff is more generic; for example, shared
+# object libs for unix like systems are all named .so.
+#
+# The mkinclude file named by GENARCH is included AFTER the platform
+# specific file; the platform specific file will defer some definitions
+# to the more generic file to reduce the size of the platform specific
+# file.
+#
+# The default generic platform named by GENARCH is 'unix'.
+#
+# Overridden for CYGWIN_NT-5.1 to use the windows/mingw mkinclude file
+#
+
+  GENARCH = mgw
+
+###############################################################################
+# Module specific definitions                                                 #
+###############################################################################
+
+#
+# Create definitions used by this project, such as gtk2,
+# gtkglext, gdal, opengl, and python.  These defs should be
+# saved in resource/mklocal for the project.
+#
+
+#
+# GTK
+#
+
+  GTK_INCS = `pkg-config --cflags gtk+-2.0 atk pango gdk-2.0 glib-2.0 gtkglext-1.0`
+  GTK_LIBSL = `pkg-config --libs-only-L gtk+-2.0 atk pango gdk-2.0 glib-2.0 gtkglext-1.0`
+  GTK_LIBS = `pkg-config --libs-only-l gtk+-2.0 atk pango gdk-2.0 glib-2.0 gtkglext-1.0`
+
+#
+# GDAL
+#
+
+  GDAL_INCS = -I/proj/gdal-1.2.6/include
+  GDAL_LIBSL = -L/proj/gdal-1.2.6/bin
+  GDAL_LIBS = -lgdal12
+
+#
+# Python
+#
+#
+#PYTHON_INC = `python -c "import distutils.sysconfig;\
+#             print distutils.sysconfig.get_python_inc()"`
+
+  PYTHON_VER = `python -c "import sys;print sys.version[0]+sys.version[2]"`
+  PYTHON_VER = 24
+  PYTHON_ROOT = c:/Python$(PYTHON_VER)
+  PYGTK = $(PYTHON_ROOT)/share/pygtk
+  PYGTK_VER = 2.0
+  PYTHON = $(PYTHON_ROOT)/python
+
+  PYTHON_INC = $(PYTHON_ROOT)/include
+  PYTHON_INCS = -I$(PYTHON_INC)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)/pygtk
+
+  PYTHON_LIBSL = -Lc:/Python$(PYTHON_VER)/libs
+
+  PYTHON_LIBS = -lpython$(PYTHON_VER)
+
+#
+# Python module library vars
+#
+
+  PYGTK_DEFS = $(PYGTK)/$(PYGTK_VER)/defs
+  PYH2DEF = $(PYGTK)/$(PYGTK_VER)/codegen/h2def.py
+  PYCODEGEN = $(PYGTK)/$(PYGTK_VER)/codegen/codegen.py
+  PYREGISTER = --register $(PYGTK_DEFS)/gdk-types.defs \
+	       --register $(PYGTK_DEFS)/gtk-types.defs
+
+#
+# OpenGL
+#
+
+  GL_INCS =
+  GL_LIBSL =
+  GL_LIBS = -levtess -lglu32 -lcomdlg32 -lopengl32
+
+#
+# Tie it all together 
+#
+
+  EV_INCS = $(GTK_INCS) $(GDAL_INCS) $(PYTHON_INCS) $(GL_INCS)
+  EV_LIBSL = $(GTK_LIBSL) $(GDAL_LIBSL) $(PYTHON_LIBSL) $(GL_LIBSL)
+  EV_LIBS = $(GTK_LIBS) $(GDAL_LIBS) $(PYTHON_LIBS) $(GL_LIBS)

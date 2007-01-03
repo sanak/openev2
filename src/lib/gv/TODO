@@ -1,0 +1,90 @@
+
+Thinking about (Gillian):
+
+* Update Open Raw to use VRT (optionally?) instead of Paux so that binary 
+  files with more data types can be opened.  This would possibly require 
+  updates to the VRT format.
+
+* Line of interest (LOI) tool and possibly a general polygon Area of 
+  interest (AOI) tool similar to existing POI/ROI tools.
+  LOI: Should have "changing" (new node added to incomplete line) and 
+  "changed" signals (line has been completed by right clicking, or an 
+  already complete line has been modified).  Should allow one line.  Once 
+  a line is complete, should behave like node edit tool (allow moving nodes 
+  or adding new nodes) except that left clicking that doesn't fall on the 
+  line should start a new loi and delete the old one.  Tool should not 
+  require a shape layer.
+
+* Add linestyles with points at nodes only to methods of drawing lines
+  (follow ogr spec).
+
+* Graphical tool for combining files into a single dataset, splitting a
+  dataset into several files, importing ground control points into a 
+  dataset, adding a colourtable or metadata, reprojecting existing 
+  geocoding information (not resampling- just reprojecting gcp's). 
+  Basically, a tool for manipulating VRT's without the user having to 
+  know so much about them.
+
+Would like to have (Frank):
+
+* The Tabular Shapes Attribute Grid Demo should have the ability to 
+  edit the attributes added, and it should move into the Edit menu to
+  replace the existing crappy Vector Layer Attributes dialog.  It should
+  also likely report the layer it is displaying somewhere on the dialog. 
+
+Short-term (Andrey)
+
+* Tool for manual image enchancements (both for the whole image and
+  in the ROI area)
+
+* GUI to edit geocoding information
+
+* `Open Sub-area' dialog.
+
+Long-term (Andrey)
+
+* Vector layer reprojection.
+
+* Image calibration.
+
+* GUI frontend for GDAL warping interface.
+
+* GUI for image registration.
+
+* Filter tool.
+
+* Spectral plots, profile plots.
+
+* Angle measurement.
+
+* Image classification, pixel editor, pseudocolor table editor.
+
+Old to-do list (Sept. 2000)
+
+-*-mode: text; mode: auto-fill-*-
+
+* ROI mode shouldn't stop showing roi when user clicks in a
+  different window.
+
+* Select mode should be able to select from any layer ... perhaps
+  based on a setup option.
+
+* Line tool: continue existing line if the first click is over
+an end vertex.
+
+* toolbox: preserve selection state across certain tools
+
+* Select tool: it's easy to accidentally translate a line when you
+just want to select it.  Possibly add some kind of sensitivity
+measure, e.g. no translation if only one motion event recieved.
+
+* Tools: should use the view draw signal to invoke a draw instead of
+connecting to the layer draw method?  Or make the base tool class
+handle this somehow?
+
+* View area: change cursor when panning/rotating/scaling.
+
+* Undo: add redo capablility.
+
+* Node tool: Add and drag a new node is entered as two operations to
+undo.  This might be more intuative as one compound operation.

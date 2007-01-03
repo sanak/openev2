@@ -1,0 +1,300 @@
+###############################################################################
+#                                                                             #
+# Generic commands / aliases for all makefiles regardless of architecture     #
+#                                                                             #
+###############################################################################
+
+  CHGRP = \chgrp -h -f
+  CHMOD = \chmod
+  CP = \cp -f
+  FALSE = \false
+  INSTALL = \install
+  LINT = \lint
+  LN = \ln -f -s
+  LS = \ls
+  MAKE = make
+  MKDIR = \mkdir -p
+  MV = \mv -f
+  OBJ_LINK = $(MV)
+  PWD := $(shell pwd)
+  RANLIB = ranlib
+  RM = \rm -f
+  RMDIR = \rm -rf
+  SHELL = sh
+  SWIG = \swig
+  TOUCH = \touch
+  TRUE = \true
+
+#
+# An ugly solution to no toupper string substitution function in make.
+# Usage: UCASEVAR = $(call ucase, $(VAR))
+#
+
+ucase = $(subst a,A,$(subst b,B,$(subst c,C,$(subst d,D,\
+$(subst e,E,$(subst f,F,$(subst g,G,$(subst h,H,$(subst i,I,$(subst j,J,\
+$(subst k,K,$(subst l,L,$(subst m,M,$(subst n,N,$(subst o,O,$(subst p,P,\
+$(subst q,Q,$(subst r,R,$(subst s,S,$(subst t,T,$(subst u,U,$(subst v,V,\
+$(subst w,W,$(subst x,X,$(subst y,Y,$(subst z,Z,$(1)))))))))))))))))))))))))))
+
+#
+# Get objects for various flavors of c files
+#
+
+objs = $(patsubst %.c,%.o,$(patsubst %.cc,%.o,\
+$(patsubst %.cxx,%.o,$(patsubst %.cpp,%.o,$(1)))))
+
+###############################################################################
+#                                                                             #
+# Define platform specific behavior for makefiles.  This variable should      #
+# name a file in this mkinclude directory that defines platform specific      #
+# variables, and will be used to create subdirectory names for storing        #
+# platform specific objects and executables.                                  #
+#                                                                             #
+# By default this variable is set to the CURRENTARCH environment variable;    #
+# if undefined will default to `uname`.  Alternate build configurations can   #
+# be enabled by setting CURRENTARCH to another value (and defining the        #
+# corresponding mkinclude file) and rebuilding.                               #
+#                                                                             #
+###############################################################################
+
+  CURRENTARCH ?= $(shell uname -s)
+  ARCH = $(CURRENTARCH)
+
+###############################################################################
+#                                                                             #
+# Architecture specific definitions to be overridden in file                  #
+# pointed to by CURRENTARCH environment variable; as a default                #
+# set this variable to `uname` in shell startup script                        #
+#                                                                             #
+###############################################################################
+
+  ARCHCFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHCCFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHFFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHLDFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHARFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHLINTFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHINSTFLAGS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHINCLUDES = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+  ARCHLIBS = *** NO ARCH ENVIRONMENT VARIABLE SET ***
+
+  CCC = g++
+  GNU_CC = gcc
+  CC = ${GNU_CC}
+  CCLD = ${GNU_CC}
+  CXX = ${CCC}
+  CCCLD = ${CCC}
+
+###############################################################################
+#                                                                             #
+# Generic variables for all java makefiles regardless of architecture         #
+#                                                                             #
+###############################################################################
+
+#
+# Define paths
+#
+
+  JSRCPATH = $(SYSTEM)/src/java
+  JCLASSSRC = $(SYSTEM)/output/classes
+  JCLASSPATH = $(SYSTEM)/output/classes
+  JALLDEST = $(SYSTEM)/output/classes
+  JAVADOCDEST = $(SYSTEM)/output/html
+  JINSTALLDEST = $(SYSTEM)/output/jar
+  JJARSRC = $(SYSTEM)/..
+  HOMELOC = $(HOMEDIR)/src/java/$(JPACKAGE)
+  JAVAC = javac
+  JAVADOC = javadoc
+
+#
+#  Define flags 
+#
+
+  JFLAGS =
+
+###############################################################################
+#                                                                             #
+# Generic variables for cc library/binary makefiles regardless of architecture#
+#                                                                             #
+###############################################################################
+
+  SUBSYSTEM = .
+  MODE = 775
+  EXEMODE = 775
+  INCMODE = 666
+  OBJMODE = 666
+  PYMODE = 666
+  LIB =
+  EXE_NAME =
+
+#
+# Define paths
+#
+
+  INCDIR = $(SUBSYSTEM)/include
+  BLDDIR = $(SUBSYSTEM)/obj/$(MKALT)$(ARCH)
+  SYSBINDIR = $(SYSTEM)/output/bin/bin.$(MKALT)$(ARCH)
+  SYSINCDIR = $(SYSTEM)/output/lib/include
+  SYSLIBDIR = $(SYSTEM)/output/lib/lib.$(MKALT)$(ARCH)
+  SYSPYDIR = $(SYSTEM)/output/pymod
+  LIBINCDIR = $(SYSINCDIR)
+  RESINCDIR = $(SYSTEM)/resource/lib/include
+  RESLIBDIR = $(SYSTEM)/resource/lib/lib.$(MKALT)$(ARCH)
+  ALTSCRIPT = $(SYSTEM)/resource/etc/altscript
+  DLLLIBDIR = $(SYSLIBDIR)
+  SOLIBDIR = $(SYSLIBDIR)
+
+###############################################################################
+#                                                                             #
+# Default settings used by makefiles regardless of architecture               #
+#                                                                             #
+###############################################################################
+
+#
+# Enable vpath build in object directory.  May be overridden by
+# individual makefiles by setting to 'no'.  Assumes objects are
+# located in a subdirectory two levels from sources.
+#
+
+  USEVPATH = yes
+
+#
+# Default to building static libraries, not shared libraries.  Individual
+# library makefiles can set this to 'yes' to make building a shared
+# library the default for that library.
+#
+
+  USESHARED = no
+
+#
+# Default to not building a python module when building a shared object
+# library.  Should be set to 'yes' to automatically create a python module
+# when creating a shared library.  May be set to 'both' to create both a
+# shared object library and a python module.
+#
+
+  USEPYMOD = no
+
+#
+# Install .py files into a SYSPYDIR directory tree equivalent to the
+# library or program directory tree.  To turn off this default
+# behavior for a program or library, set "PYS = " in the individual
+# Makefile.  To turn it off as the default, uncomment the following
+# line.  PYS may be set to specific .py files to install.
+#
+# PYS = 
+
+#
+# When installing .py files, install using the same directory structure
+# as the library or program by setting USE_PY_HIERARCHY to 'yes'.  Setting
+# to 'no' will install all .py files directly to PYINSTDIR
+#
+
+  USE_PY_HIERARCHY = yes 
+
+#
+# Default prefix for a python module shared object library.
+#
+
+  PYPREFIX = _
+
+#
+# Default to building a .cvsignore file if it does not exist in a program 
+# or library directory.  This will ONLY build a .cvsignore file if it does
+# not exist; no updates are ever done, and .cvsignore is never cleaned.
+# If set to 'yes', then the .cvsignore file will be created using the
+# contents of the CVSIGNORE variable.
+#
+
+  USECVSIGNORE = yes
+
+  IGNOREFILES = *.pyc *.lib *.pdb *.exe *.ilk *.a *.o *.obj *.dll *~ .*~ \
+	obj config.status config.log config.cache tempout temperr junk \
+        .cvsignore
+
+#
+# Enable/Disable license checking for programs.  To enable, leave
+# LIC blank ("LIC = ").  To disable, set to "no" ("LIC = no")
+#
+
+  LIC =
+
+#
+# Some platform specific stuff is more generic; for example, shared
+# object libs for unix like systems are all named .so.
+#
+# The mkinclude file named by GENARCH is included AFTER the platform
+# specific file; the platform specific file will defer some definitions
+# to the more generic file to reduce the size of the platform specific
+# file.
+#
+# The default generic platform named by GENARCH is 'unix'.
+#
+
+  GENARCH = unix
+
+###############################################################################
+#                                                                             #
+# Default settings used by makefiles regardless of architecture               #
+#                                                                             #
+###############################################################################
+
+#
+# Add architecture specific definitions
+#
+# Target platforms typically have a file named `uname` in the mklocal
+# directory adjacent to the MKINCLDIR.  mklocal/`uname` will override many
+# other alternatives, which include any template `uname` file in MKINCLDIR,
+# mklocal/setup, and mklocal/setup_`uname`.
+#
+
+  MKINCLDARCH = $(MKINCLDIR)/$(MKALT)$(ARCH)
+
+-include $(MKINCLDARCH)
+
+  MKLOCALARCH := $(MKINCLDIR)/../mklocal/setup
+
+-include $(MKLOCALARCH)
+
+  MKLOCALARCH := $(MKINCLDIR)/../mklocal/setup_$(MKALT)$(ARCH)
+
+-include $(MKLOCALARCH)
+
+  MKLOCALARCH := $(MKINCLDIR)/../mklocal/$(MKALT)$(ARCH)
+
+-include $(MKLOCALARCH)
+
+#
+# Add more generic architecture specific definitions
+#
+
+include $(MKINCLDIR)/$(GENARCH)
+-include $(MKINCLDIR)/../mklocal/$(GENARCH)
+
+#
+#  Define flags 
+#
+
+  CFLAGS = $(ARCHCFLAGS)
+  CCFLAGS = $(ARCHCCFLAGS)
+  INCLUDES = -I$(SUBSYSTEM) -I$(INCDIR) -I$(SYSINCDIR) -I$(RESINCDIR) $(ARCHINCLUDES)
+  LDFLAGS = -L$(SYSLIBDIR) -L$(RESLIBDIR) $(ARCHLDFLAGS)
+  LINTFLAGS = $(INCLUDES) $(ARCHLINTFLAGS)
+  ARFLAGS = $(ARCHARFLAGS)
+  SWIGFLAGS = $(SWIGCMODE) -python
+  NEED_RANLIB = $(TRUE)
+
+###############################################################################
+#
+# Add more flexibility with an include override file which may be used for
+# special purposes.  Define an environment variable $(REDEFINE) specifying an
+# include file for make, where the file is named redef$(REDEFINE).
+#                                                                 
+# Can use this file to redefine makefile macros for specific purposes
+# such as debugging, adding baseline include paths to locate libs
+# not found locally, etc.
+#
+###############################################################################
+
+-include $(MKINCLDIR)/redef$(REDEFINE)
+-include $(MKINCLDIR)/../mklocal/redef$(REDEFINE)

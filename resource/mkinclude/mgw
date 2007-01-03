@@ -1,0 +1,38 @@
+###############################################################################
+#                                                                             #
+# Generic platform type definitions                                           #
+#                                                                             #
+###############################################################################
+
+#
+# Shared object library type.  (e.g. so, dll)
+# Should be lower case.  When used in nested variable names,
+# an upper case replacement (USHAREDTYPE) will be used instead.
+#
+
+  SHAREDTYPE = dll
+
+#
+# Define windows shared object library prefix to nothing.  This
+# is overridden when creating a python module to PYMOD_PREFIX, which
+# defaults to '_'.
+#
+
+  SLIBPREFIX =
+
+#
+# Define path separator character for windows
+#
+
+ CLASSPATH_SEP =;
+
+#
+# Override symbolic linking to use move (only used if USEVPATH is not)
+#
+
+  OBJ_LINK = $(MV)
+
+#
+# Can set suffix for all executables here, e.g. '.exe'
+#
+# EXE_SUFFIX = .EXE

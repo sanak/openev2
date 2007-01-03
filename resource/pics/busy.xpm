@@ -1,0 +1,27 @@
+/* XPM */
+static char *busy {
+/* width height num_colors chars_per_pixel */
+"    22    18        2            1",
+/* colors */
+"a c None",
+". c #ff0000",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaa.aaaaaaaaaaaaaa.aaa",
+"aaaa.aaaaaaaaaaaa.aaaa",
+"aaaaa.aaaaaaaaaa.aaaaa",
+"aaaaaa.aa....aa.aaaaaa",
+"aaaaaaa.......aaaaaaaa",
+"aaaaaa..........aaaaaa",
+"aa..................aa",
+"aaaaaa..........aaaaaa",
+"aaaaaaa........aaaaaaa",
+"aaaaaa.aa....aa.aaaaaa",
+"aaaaa.aaaaaaaaaa.aaaaa",
+"aaaa.aaaaaaaaaaaa.aaaa",
+"aaa.aaaaaaaaaaaaaa.aaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

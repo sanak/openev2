@@ -1,0 +1,36 @@
+/* XPM */
+static char *world[] = {
+/* width height num_colors chars_per_pixel */
+"    27    23        6            1",
+/* colors */
+". c None",
+"# c None",
+"a c None",
+"b c #00ff00",
+"c c #0000ff",
+"d c #ffffff",
+/* pixels */
+"...........................",
+".##########################",
+".#aaaaaaaaaaaaaaaaaaaaaaaaa",
+".#aaaaaaaaaaaaaaaaaaaaaaaaa",
+".#aaaaaaaddaaaabdcadaaaaaaa",
+".#aaaaaaccbcaabcccbbbbcaaaa",
+".#aaaaabcbbcaacccbbbbbbcaaa",
+".#aaaaccbbbbccccbbbbbbcccca",
+".#aaacccbbbcccccccbbbbbcccc",
+".#aaccccbbbccccbbbbbbbbcccc",
+".#aaccccbcccccbbbbbbbcbcccc",
+".#accccccbccccbbbbbcbcccbcc",
+".#acccccccbbbcccbbbccccbccc",
+".#acccccccbbbcccbbccccbbbcc",
+".#accccccccbbcccbbccccbbbbc",
+".#aacccccccbcacccbccccbcbcc",
+".#aacccccccbcaacccccacccccb",
+".#aaccccaccccaacccccaacccca",
+".#aaacccaacccaaccccaaacccca",
+".#aaacccaacccaaacccaaaaccaa",
+".#aaaaddaaaddaaaaddaaaadaaa",
+".#aaaaaaaaaaaaaaaaaaaaaaaaa",
+".#aaaaaaaaaaaaaaaaaaaaaaaaa"
+};

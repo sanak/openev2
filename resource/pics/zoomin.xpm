@@ -1,0 +1,30 @@
+/* XPM */
+static char *zoomin[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        5            1",
+/* colors */
+". c #000000",
+"# c #808080",
+"a c None",
+"b c #ff0000",
+"c c #ffffff",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa",
+"aaaaaaa...aaaaaaaaaaaa",
+"aaaaa..aaa..aaaaaaaaaa",
+"aaaa.aaabaaa.aaaaaaaaa",
+"aaaa.aaabaaa.aaaaaaaaa",
+"aaa.aaaabaaaa.aaaaaaaa",
+"aaa.abbbbbbba.aaaaaaaa",
+"aaa.aaaabaaaa.aaaaaaaa",
+"aaaa.aaabaaa..aaaaaaaa",
+"aaaa..aabaaa.aaaaaaaaa",
+"aaaaa..aaa....#aaaaaaa",
+"aaaaaaa....a...#aaaaaa",
+"aaaaaaaaaaaa#...#aaaaa",
+"aaaaaaaaaaaaa#...caaaa",
+"aaaaaaaaaaaaaa#.ccaaaa",
+"aaaaaaaaaaaaaaaccaaaaa",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

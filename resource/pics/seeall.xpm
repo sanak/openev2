@@ -1,0 +1,27 @@
+/* XPM */
+static char *seeall[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        2            1",
+/* colors */
+". c #000000",
+"a c None",
+/* pixels */
+"aaaaaaaaaaaaaaaaaaaaaa",
+"a....................a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a.a...aaaaaaaaaa...a.a",
+"a.a..aaaaaaaaaaaa..a.a",
+"a.a.a.aaaaaaaaaa.a.a.a",
+"a.aaaa.aaaaaaaa.aaaa.a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a.aaaa.aaaaaaaa.aaaa.a",
+"a.a.a.aaaaaaaaaa.a.a.a",
+"a.a..aaaaaaaaaaaa..a.a",
+"a.a...aaaaaaaaaa...a.a",
+"a.aaaaaaaaaaaaaaaaaa.a",
+"a....................a",
+"aaaaaaaaaaaaaaaaaaaaaa"
+};

@@ -1,0 +1,4 @@
+LIBRARY		_gv
+VERSION		1.0
+EXPORTS
+	init_gv	@1

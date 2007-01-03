@@ -1,0 +1,8 @@
+<GvShape type="2">
+  <rings>
+    <ring>0.0,-3.0,0.0 0.0,0.0,0.0</ring>
+  </rings>
+  <Properties>
+    <Property name="_gv_ogrfs" value="PEN(c:#00FF00)"/>
+  </Properties>
+</GvShape>
