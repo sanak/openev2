@@ -42,44 +42,42 @@ def is_of_class(class_obj,class_name):
             return 1
     return 0
     
-class GvOptionMenu(_gtk.OptionMenu):
+class GvOptionMenu(_gtk.ComboBox):
+    def __init__(self, contents, callback=None):
+        model = _gtk.ListStore(str)
+        _gtk.ComboBox.__init__(self, model)
 
-    def __init__(self, contents, callback = None):
-        _gtk.OptionMenu.__init__(self)
-
-        menu = _gtk.Menu()
         self.callback = callback
 
-        item_widget = None
-        counter = 0
+        cell = _gtk.CellRendererText()
+        self.pack_start(cell, True)
+        self.add_attribute(cell, 'text', 0)
+
         for item in contents:
-            item_widget = _gtk.RadioMenuItem( item_widget, item )
-            item_widget.show()
-            item_widget.connect('activate', self.set_om_selection,
-                                counter )
-            menu.append(item_widget)
-            counter = counter + 1
+            model.append((item,))
 
         self.cur_selection = 0
-        menu.show()
-        self.set_menu(menu)
+        self.set_active(0)
+        if callback is not None:
+            self.connect('changed', callback)
+        self.show()
 
     def set_history(self, item):
         if item == self.cur_selection:
             return
-        
+
         self.cur_selection = item
-        _gtk.OptionMenu.set_history( self, item )
+        self.set_active(item)
 
         if self.callback is not None:
-            self.callback( self )
+            self.callback(self)
 
     def get_history(self):
         return self.cur_selection
-        
-    def set_om_selection(self, widget, data ):
-        if widget.active:
-            self.set_history( data )
+
+    def set_om_selection(self, widget, data):
+        if widget.get_active():
+            self.set_history(data)
 
 pgu.gtk_register('GvOptionMenu',GvOptionMenu)
 
