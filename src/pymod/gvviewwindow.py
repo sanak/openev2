@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: gvviewwindow.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  OpenEV General Purpose GvViewWindow class.
@@ -260,7 +260,7 @@ class GvViewWindow(gtk.Window):
             pass
 
     def rfl_cb(self, menuitem, rfl_index, *args):
-        self.file_open_by_name(menuitem.children()[0].get(), sds_check=0)
+        self.file_open_by_name(menuitem.get_children()[0].get(), sds_check=0)
     
     def make_active(self, *args):
         self.app.view_manager.set_active_view( self )
@@ -271,9 +271,9 @@ class GvViewWindow(gtk.Window):
 
     def busy_changed_cb(self,*args):
         if gview.manager.get_busy():
-            self.idlebusy_pixmap.set( self.busy_icon[0], self.busy_icon[1] )
+            self.idlebusy_pixmap.set_from_pixmap(self.busy_icon[0], self.busy_icon[1])
         else:
-            self.idlebusy_pixmap.set( self.idle_icon[0], self.idle_icon[1] )
+            self.idlebusy_pixmap.set_from_pixmap(self.idle_icon[0], self.idle_icon[1])
 
     def print_cb(self, *args):
         import gvprint
@@ -935,8 +935,7 @@ class GvViewWindow(gtk.Window):
                    os.path.join(gview.home_dir,'pics', 'worldg.xpm'))
         self.geo_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
                    os.path.join(gview.home_dir,'pics', 'worldrgb.xpm'))
-        self.rawgeo_pixmap = gtk.Pixmap(self.raw_icon[0],
-                                           self.raw_icon[1])
+        self.rawgeo_pixmap = gtk.Image()
 
         # idle / busy pixmap
         self.idle_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
@@ -944,8 +943,7 @@ class GvViewWindow(gtk.Window):
         self.busy_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
                    os.path.join(gview.home_dir,'pics', 'busy.xpm'))
 
-        self.idlebusy_pixmap = gtk.Pixmap(self.busy_icon[0],
-                                             self.busy_icon[1])
+        self.idlebusy_pixmap = gtk.Image()
 
         gview.manager.connect('busy-changed', self.busy_changed_cb)
 
@@ -1225,18 +1223,18 @@ class GvViewWindow(gtk.Window):
     
     def add_icon_to_bar(self, filename, text, hint_text, cb, help_topic=None):
         full_filename = os.path.join(gview.home_dir,'pics',filename)
-        pix, mask = gtk.gdk.pixmap_create_from_xpm(self.window,None,full_filename)
-        item = self.iconbar.append_item(text,hint_text, hint_text,
-                                        gtk.Pixmap(pix,mask), cb)
+        pix = gtk.Image()
+        pix.set_from_file(full_filename)
+        item = self.iconbar.append_item(text, hint_text, hint_text, pix, cb)
         if help_topic is not None:
             gvhtml.set_help_topic(item, help_topic)
 
     def insert_tool_icon(self, filename, text, hint_text, cb, help_topic=None, pos=0):
         # Tool specifies full filename (file may not be in pics directory)
         
-        pix, mask = gtk.create_pixmap_from_xpm(self,None,filename)       
-        item = self.iconbar.insert_item(text,hint_text, hint_text,
-                                        gtk.Pixmap(pix,mask), cb, pos )
+        pix = gtk.Image()
+        pix.set_from_file(filename)
+        item = self.iconbar.append_item(text, hint_text, hint_text, pix, cb)
         if help_topic is not None:
             gvhtml.set_help_topic(item, help_topic)
 
@@ -1714,6 +1712,6 @@ class GvViewWindow(gtk.Window):
 
         ref_layer = self.viewarea.active_layer()
         if self.viewarea.get_raw( ref_layer ):
-            self.rawgeo_pixmap.set( self.raw_icon[0], self.raw_icon[1] )
+            self.rawgeo_pixmap.set_from_pixmap(self.raw_icon[0], self.raw_icon[1])
         else:
-            self.rawgeo_pixmap.set( self.geo_icon[0], self.geo_icon[1] )
+            self.rawgeo_pixmap.set_from_pixmap(self.geo_icon[0], self.geo_icon[1])

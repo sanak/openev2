@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: gviewapp.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GViewApp and related definitions.
@@ -958,81 +958,87 @@ class GViewApp(Signaler):
 class Toolbar(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
+        self.set_size_request(-1,425)
+        self.set_title("Tools")
 
-        gvhtml.set_help_topic( self, "edittools.html" );
+        gvhtml.set_help_topic(self, "edittools.html")
 
         toolbox = gview.GvToolbox()        
-        toolbox.add_tool("select", gview.GvSelectionTool())
-        toolbox.add_tool("zoompan", gview.GvZoompanTool())
-        toolbox.add_tool("line", gview.GvLineTool())
-        toolbox.add_tool("rect", gview.GvRectTool())
-        toolbox.add_tool("rotate", gview.GvRotateTool())
-        toolbox.add_tool("area", gview.GvAreaTool())
-        toolbox.add_tool("node", gview.GvNodeTool())
-        toolbox.add_tool("point", gview.GvPointTool())
-        toolbox.add_tool("pquery", gview.GvPointTool())
+        toolbox.add_tool('select', gview.GvSelectionTool())
+        toolbox.add_tool('zoompan', gview.GvZoompanTool())
+        toolbox.add_tool('line', gview.GvLineTool())
+        toolbox.add_tool('rect', gview.GvRectTool())
+        toolbox.add_tool('rotate', gview.GvRotateTool())
+        toolbox.add_tool('area', gview.GvAreaTool())
+        toolbox.add_tool('node', gview.GvNodeTool())
+        toolbox.add_tool('point', gview.GvPointTool())
+        toolbox.add_tool('pquery', gview.GvPointTool())
         self.roi_tool = gview.GvRoiTool()
-        toolbox.add_tool("roi", self.roi_tool)
+        toolbox.add_tool('roi', self.roi_tool)
         self.poi_tool = gview.GvPoiTool()
-        toolbox.add_tool("poi", self.poi_tool)
+        toolbox.add_tool('poi', self.poi_tool)
 
-        toolbar = gtk.Toolbar()
-        toolbar.set_orientation(gtk.ORIENTATION_VERTICAL);
-        self.add(toolbar)
+        self.UImgr = gtk.UIManager()
+        self.add_accel_group(self.UImgr.get_accel_group())
+        self.actiongroup = gtk.ActionGroup('EditToolbar')
 
         # Add radio button tools
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, None,
-                                     'Select', 'Selection tool',
-                                     None, None, self.toggle, "select")
-        self.select_button=but         
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Zoom', 'Zoom/Pan mode',
-                                     None, None, self.toggle, "zoompan")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Point Edit', 'Point editing tool',
-                                     None, None, self.toggle, "point")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Point Query', 'Point query tool',
-                                     None, None, self.toggle, "pquery")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Draw Line', 'Line drawing tool',
-                                     None, None, self.toggle, "line")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Rotate/Resize','Rotate/resize symbol tool',
-                                     None, None, self.toggle, "rotate")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Draw Rectangle','Rectangle drawing tool',
-                                     None, None, self.toggle, "rect")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Draw Area', 'Area drawing tool',
-                                     None, None, self.toggle, "area")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Edit Node', 'Node edit tool',
-                                     None, None, self.toggle, "node")
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Draw Labels', 'Label drawing tool',
-                                     None, None, self.toggle, "label")
-
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Draw ROI', 'ROI drawing tool',
-                                     None, None, self.toggle, "roi")
-        self.roi_button = but
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON, but,
-                                     'Choose POI', 'POI selection tool',
-                                     None, None, self.toggle, "poi")
-        self.poi_button = but
+        self.actiongroup.add_radio_actions([
+            ('zoompan', None, "Zoom", None, "Zoom/Pan mode"),
+            ('point', None, "Point Edit", None, "Point editing tool"),
+            ('pquery', None, "Point Query", None, "Point query tool"),
+            ('line', None, "Draw Line", None, "Line drawing tool"),
+            ('rotate', None, "Rotate/Resize", None, "Rotate/resize symbol tool"),
+            ('rect', None, "Draw Rectangle", None, "Rectangle drawing tool"),
+            ('area', None, "Draw Area", None, "Area drawing tool"),
+            ('node', None, "Edit Node", None, "Node edit tool"),
+            ('labels', None, "Draw Labels", None, "Label drawing tool"),
+            ('roi', None, "Draw ROI", None, "ROI drawing tool"),
+            ('poi', None, "Choose POI", None, "POI selection tool"),
+            ('select', None, "Select", None, "Selection tool"),
+            ], on_change=self.toggle)
 
         # Add toggle tools
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_TOGGLEBUTTON, None,
-                                     'Link Views', 'Link views together',
-                                     None, None, self.link, None)
-        but = toolbar.append_element(gtk.TOOLBAR_CHILD_TOGGLEBUTTON, None,
-                                     'Cursor', 'Create cursor in all views',
-                                     None, None, self.cursor, None)
-        self.cursor_button=but
+        self.actiongroup.add_toggle_actions([
+            ('LinkViews', None, "Link views", None, "Link views together", self.link),
+            ('Cursor', None, "Cursor", None, "Create cursor in all views", self.cursor),
+            ])
+
+        # Add the actiongroup to the uimanager
+        self.UImgr.insert_action_group(self.actiongroup, 0)
+        self.UImgr.add_ui_from_string(
+        """
+        <toolbar name='EditToolbar'>
+          <toolitem action='select'/>
+          <toolitem action='zoompan'/>
+          <toolitem action='point'/>
+          <toolitem action='pquery'/>
+          <toolitem action='line'/>
+          <toolitem action='rotate'/>
+          <toolitem action='rect'/>
+          <toolitem action='area'/>
+          <toolitem action='node'/>
+          <toolitem action='labels'/>
+          <toolitem action='roi'/>
+          <toolitem action='poi'/>
+          <separator/>
+          <toolitem action='LinkViews'/>
+          <toolitem action='Cursor'/>
+        </toolbar>
+        """)
+
+        toolbar = self.UImgr.get_widget('/EditToolbar')
+        toolbar.set_style(gtk.TOOLBAR_TEXT)
+        toolbar.set_orientation(gtk.ORIENTATION_VERTICAL)
+        self.add(toolbar)
+
+        self.select_button = self.actiongroup.get_action('select')
+        self.roi_button = self.actiongroup.get_action('roi')
+        self.poi_button = self.actiongroup.get_action('poi')
+        self.cursor_button = self.actiongroup.get_action('Cursor')
 
         toolbox.activate_tool("select")
-        toolbar.show()
+        toolbar.show_all()
         self.toolbox = toolbox
         self.toolbar = toolbar
         self.link = gview.GvViewLink()
@@ -1042,9 +1048,8 @@ class Toolbar(gtk.Window):
         self.hide()
         return True
         
-    def toggle(self, button, data):
-        if not button.get_active():
-            return
+    def toggle(self, action, current):
+        data = current.get_name()
 
         # For Point Query Tool:
         # Make the special point query layer the current layer and if there
@@ -1066,7 +1071,7 @@ class Toolbar(gtk.Window):
 
                 view.set_active_layer( result_layer )
 
-        if data == 'label':
+        if data == 'labels':
             import gvlabeledit
             gvlabeledit.launch()
             data = 'select'
