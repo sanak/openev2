@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: vrtutils.py,v 1.3 2004/10/28 16:29:06 gwalter Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Utilities for creating vrt files.
@@ -45,12 +45,12 @@ class VRTCreationOptions:
         self.band_opts={}
         self.geocode_preference=None
         self.reproj=None
-        
+
         for cband in range(1,num_dstbands+1):
             self.band_opts[str(cband)]={}
             self.band_opts[str(cband)]['band']=str(cband)
             self.band_opts[str(cband)]['SourceBand']=str(cband)
-            
+
     def set_geopref(self,geocode_pref=None):
         # Set the geocode preference
         # (None or 'geotransform' or 'gcps')
@@ -74,7 +74,7 @@ class VRTCreationOptions:
             during serialization.
         """
         self.reproj=proj
-        
+
     def set_src_window(self,src_tuple,band_list=None):
         if band_list is None:
             # Window all bands
@@ -83,7 +83,7 @@ class VRTCreationOptions:
         else:
             for cband in band_list:
                 self.band_opts[str(cband)]['SrcRect']=src_tuple
-            
+
     def set_dst_window(self,dst_tuple,band_list=None):
         if band_list is None:
             # Window all bands
@@ -110,7 +110,7 @@ class VRTCreationOptions:
         else:
             for cband in band_list:
                 self.band_opts[str(cband)]['ColorInterp']=color_interp
-        
+
 
     def set_scaling(self,scale_tuple,band_list=None):
         srcmin=scale_tuple[0]
@@ -135,25 +135,25 @@ class VRTCreationOptions:
             for cband in band_list:
                 self.band_opts[str(cband)]['ScaleRatio']=ratio                
                 self.band_opts[str(cband)]['ScaleOffset']=offset
-        
+
 
     def get_opts(self):
         return self.band_opts
 
 def serializeMetadata(indataset=None, dict=None):
     """ Serialize metadata.
-    
+
         Inputs:
-        
+
             indataset- gdal dataset to extract metadata from
                        (None if not using)
-                       
+
             dict- dictionary to use for metadata (None
                   if not using)
 
         Values in dict will override values in indataset.
     """
-    
+
     if indataset is not None:
         metadict=indataset.GetMetadata()
         if dict is not None:
@@ -161,7 +161,7 @@ def serializeMetadata(indataset=None, dict=None):
                 metadict[item] = dict[item]
     else:
         metadict=dict
-        
+
     if len (metadict) > 0:
         metabase=[gdal.CXT_Element,'Metadata']
         for ckey in metadict.keys():
@@ -171,7 +171,7 @@ def serializeMetadata(indataset=None, dict=None):
             metabase.append(mdibase)
     else:
         metabase=None
-        
+
     return metabase
 
 
@@ -196,19 +196,19 @@ def serializeGCPs(indataset=None, vrt_options=None,with_Z=0,gcplist=None,
             serializeGCPs(gcplist=gcps,projection_attr_txt='GEOGCS...',
                           reproj='PROJCS...')
     """
-            
+
     if gcplist is None:
         gcplist=indataset.GetGCPs()
 
     if projection_attr_txt is None:
         projection_attr_txt=indataset.GetGCPProjection()
-        
+
     srtrans=None
     if vrt_options is not None:
         reproj=vrt_options.reproj
         if reproj == projection_attr_txt:
             reproj=None
-        
+
     if (reproj is not None):
         sr1=osr.SpatialReference()
         sr2=osr.SpatialReference()
@@ -223,7 +223,7 @@ def serializeGCPs(indataset=None, vrt_options=None,with_Z=0,gcplist=None,
         except:
             srtrans=None
             print 'Warning: unable to reproject gcps- invalid destination projection string'
-            
+
     if len(gcplist) > 0:
         gcpbase=[gdal.CXT_Element,'GCPList']
         if (srtrans is not None):
@@ -288,7 +288,7 @@ def serializeGCPs(indataset=None, vrt_options=None,with_Z=0,gcplist=None,
                     gcpbase.append(gcpbase2)
     else:
         gcpbase=None
-        
+
     return gcpbase
 
 
@@ -300,11 +300,11 @@ def GeoTransformToGCPs(gt,num_pixels,num_lines,grid=2):
         grid=0             grid=1                grid=2
 
         *           *      *     *     *         *   *   *   *
-        
+
                                                  *   *   *   *    
                            *     *     *
                                                  *   *   *   *
-                                               
+
         *           *      *     *     *         *   *   *   *
 
         This function is meant to be used to convert a geotransform
@@ -314,9 +314,9 @@ def GeoTransformToGCPs(gt,num_pixels,num_lines,grid=2):
                 num_pixels- number of pixels in the dataset
                 num_lines- number of lines in the dataset
                 grid- see above.  Defaults to 2.
-        
+
     """
-    
+
     gcp_list=[]
 
     parr=Numeric.arange(0.0,num_pixels+1.0,num_pixels/(grid+1.0))
@@ -332,7 +332,7 @@ def GeoTransformToGCPs(gt,num_pixels,num_lines,grid=2):
         cgcp.GCPZ=0.0
         cgcp.GCPPixel=pix
         cgcp.GCPLine=line
-        
+
         gcp_list.append(cgcp)
 
     return gcp_list
@@ -342,7 +342,7 @@ def serializeGeoTransform(indataset=None,vrt_options=None,geotransform=None):
         gt=indataset.GetGeoTransform()
     else:
         gt=geotransform
-        
+
     default_geo=(0.0,1.0,0.0,0.0,0.0,1.0)
     # Don't add anything if the transform
     # is the default values
@@ -351,7 +351,7 @@ def serializeGeoTransform(indataset=None,vrt_options=None,geotransform=None):
     for i in range(6):
         if gt[i] != default_geo[i]:
             usegeo=1
-            
+
     if usegeo==1:
         if (vrt_options is None):
             geo_text='  %0.22E, %0.22E, %0.22E, %0.22E, %0.22E, %0.22E' % (gt[0], gt[1], gt[2], gt[3], gt[4], gt[5])
@@ -364,7 +364,7 @@ def serializeGeoTransform(indataset=None,vrt_options=None,geotransform=None):
                 # Geotransform should be updated to reflect the window
                 # All the bands should have the same windowing/overview options,
                 # so just look at first one
-                
+
                 (spix,sline,xsize,ysize)=bopts['SrcRect']
                 (dpix,dline,dxsize,dysize)=bopts['DstRect']
                 gt0=gt[0]+gt[1]*(spix-dpix)+gt[2]*(sline-dline)
@@ -376,7 +376,7 @@ def serializeGeoTransform(indataset=None,vrt_options=None,geotransform=None):
                 gt4=float(gt[4])*Numeric.floor(xsize)/Numeric.floor(dxsize)
                 gt5=float(gt[5])*Numeric.floor(ysize)/Numeric.floor(dysize)
                 geo_text='  %0.22E, %0.22E, %0.22E, %0.22E, %0.22E, %0.22E' % (gt0, gt1, gt2, gt3, gt4, gt5)
-  
+
         gbase=[gdal.CXT_Element,'GeoTransform',[gdal.CXT_Text,geo_text]]
     else:
         gbase=None
@@ -395,7 +395,7 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
                           indatasetlist).
         band_lists- list of lists of bands, or None (use all bands).
     """
-    
+
     if vrt_options_list is None:
         band_opts=[]
         for ds in indatasetlist:
@@ -411,7 +411,7 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
         else:
             for ds in indatasetlist:
                 band_opts.append(vrt_options_list.get_opts())
-        
+
     # band opts: A dictionary of band option dictionaries,
     # indexed by the str(band number)
     base=[gdal.CXT_Element,'VRTDataset']
@@ -448,7 +448,7 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
     else:
         geopref=vrt_options_list.get_geopref()
         vrt_options=vrt_options_list
-        
+
     if ((geopref == 'gcps') or (geopref is None)):
         # If preference is gcps or none, copy any available gcp information
         gcpbase=serializeGCPs(indatasetlist[0],vrt_options)
@@ -457,7 +457,7 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
 
         if ((gcpbase is None) and (geopref == 'gcps')):
             print 'Warning- No gcp information to transfer.'
-        
+
     if ((geopref == 'geotransform') or (geopref is None)):
         # If preference is geotransform or none, copy any available
         # geotransform information.  If geopref is None and
@@ -471,17 +471,17 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
                 reproj=None
         else:
             reproj=None
-            
+
         if ((reproj is not None) and (srs_text is not None) and
             (len(srs_text) > 0) and (gcpbase is None)):
-            
+
             if geopref is None:
                 gcps=GeoTransformToGCPs(indatasetlist[0].GetGeoTransform(),
                                         indatasetlist[0].RasterXSize,
                                         indatasetlist[0].RasterYSize)
                 gcpbase=serializeGCPs(indatasetlist[0],vrt_options,
                          gcplist=gcps,projection_attr_txt=srs_text)
-                
+
                 if gcpbase is not None:
                     base.append(gcpbase)
             else:
@@ -491,7 +491,7 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
             if ((srs_text is not None) and (len(srs_text) > 0)):
                 prjbase=[gdal.CXT_Element,'SRS',[gdal.CXT_Text,srs_text]]      
                 base.append(prjbase)
-           
+
             gbase=serializeGeoTransform(indatasetlist[0],vrt_options)
             if gbase is not None:
                 base.append(gbase)
@@ -500,14 +500,14 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
                 print 'Warning- No geotransform information to transfer.'
         elif gcpbase is None:
             print 'Warning- No reprojectable geotransform information found.'
-    
+
     for idx in range(len(indatasetlist)):
         indataset=indatasetlist[idx]
         if band_lists is None:
             band_list=None
         else:
             band_list=band_lists[idx]
-            
+
         if band_list is None:
             for cband in range(1,indataset.RasterCount+1):
                 if band_opts[idx].has_key(str(cband)):
@@ -532,16 +532,16 @@ def serializeCombinedDatasets(indatasetlist,vrt_options_list=None,
                     opt_dict['SourceBand']=str(cband)
                     bbase=serializeBand(indataset,opt_dict=opt_dict)
                     base.append(bbase)
-        
+
     return base
-                    
-    
+
+
 def serializeDataset(indataset,vrt_options=None,band_list=None):
     if vrt_options is None:
         band_opts={}
     else:
         band_opts=vrt_options.get_opts()
-        
+
     # band opts: A dictionary of band option dictionaries,
     # indexed by the str(band number)
     base=[gdal.CXT_Element,'VRTDataset']
@@ -582,7 +582,7 @@ def serializeDataset(indataset,vrt_options=None,band_list=None):
 
         if ((gcpbase is None) and (geopref == 'gcps')):
             print 'Warning- No gcp information to transfer.'
-        
+
     if ((geopref == 'geotransform') or (geopref is None)):
         # If preference is geotransform or none, copy any available
         # geotransform information.  If geopref is None and
@@ -596,17 +596,17 @@ def serializeDataset(indataset,vrt_options=None,band_list=None):
                 reproj=None
         else:
             reproj=None
-            
+
         if ((reproj is not None) and (srs_text is not None) and
             (len(srs_text) > 0) and (gcpbase is None)):
-            
+
             if geopref is None:
                 gcps=GeoTransformToGCPs(indataset.GetGeoTransform(),
                                         indataset.RasterXSize,
                                         indataset.RasterYSize)
                 gcpbase=serializeGCPs(indataset,vrt_options,gcplist=gcps,
                                       projection_attr_txt=srs_text)
-                
+
                 if gcpbase is not None:
                     base.append(gcpbase)
             else:
@@ -616,7 +616,7 @@ def serializeDataset(indataset,vrt_options=None,band_list=None):
             if ((srs_text is not None) and (len(srs_text) > 0)):
                 prjbase=[gdal.CXT_Element,'SRS',[gdal.CXT_Text,srs_text]]      
                 base.append(prjbase)
-           
+
             gbase=serializeGeoTransform(indataset,vrt_options)
             if gbase is not None:
                 base.append(gbase)
@@ -625,7 +625,7 @@ def serializeDataset(indataset,vrt_options=None,band_list=None):
                 print 'Warning- No geotransform information to transfer.'
         elif gcpbase is None:
             print 'Warning- No reprojectable geotransform information found.'
-         
+
 
     if band_list is None:
         for cband in range(1,indataset.RasterCount+1):
@@ -649,27 +649,27 @@ def serializeDataset(indataset,vrt_options=None,band_list=None):
                 opt_dict['SourceBand']=str(cband)
                 bbase=serializeBand(indataset,opt_dict=opt_dict)
                 base.append(bbase)
-        
+
     return base
 
 def serializeRawBand(SourceFilename, band, DataType, ByteOrder,
                       ImageOffset, PixelOffset, LineOffset,Description=None):
     """ Serialize a raw (flat binary) raster band.
         Inputs:
-        
+
         SourceFilename- filename of a gdal dataset (a string)
-                    
+
         band- band number that the serialized band will correspond
               to in the output dataset (an integer).
 
         DataType- data type (a string).  May be 'Byte', 'UInt16',
                   'Int16', 'UInt32', 'Int32', 'Float32', 'Float64',
                   'CInt16', 'CInt32', 'CFloat32', 'CFloat64'.
-                  
+
         ByteOrder- MSB or LSB (string)
-        
+
         ImageOffset- offset to first pixel of band (int)
-                
+
         PixelOffset- offset between successive pixels in the input (int)
 
         LineOffset- offset between successive lines in the input (int)
@@ -677,10 +677,10 @@ def serializeRawBand(SourceFilename, band, DataType, ByteOrder,
         Description- OPTIONAL description for the band (a string)
     """
     base=[gdal.CXT_Element,'VRTRasterBand']
-        
+
     base.append([gdal.CXT_Attribute,'dataType',
                      [gdal.CXT_Text,DataType]])
-        
+
     base.append([gdal.CXT_Attribute,'band',[gdal.CXT_Text,str(band)]])
 
     base.append([gdal.CXT_Attribute,'subClass',
@@ -689,7 +689,7 @@ def serializeRawBand(SourceFilename, band, DataType, ByteOrder,
     if Description is not None:
         base.append([gdal.CXT_Element,'Description',
                        [gdal.CXT_Text,Description]])
-        
+
     base.append([gdal.CXT_Element,'SourceFilename',
                        [gdal.CXT_Text,SourceFilename]])
     base[len(base)-1].append([gdal.CXT_Attribute,'relativeToVRT',
@@ -708,23 +708,23 @@ def serializeRawBand(SourceFilename, band, DataType, ByteOrder,
                        [gdal.CXT_Text,str(LineOffset)]])
 
     return base
-    
+
 def serializeBand(indataset=None,opt_dict={}):
     """ Serialize a raster band.
         Inputs:
             indataset- dataset to take default values from for
                        items that are not specified in opt_dict.
                        Set to None if not needed.
-                       
+
             opt_dict- dictionary to take values from.
 
         opt_dict will be searched for the following keys:
 
         SourceFilename- filename of a gdal dataset (a string)
-        
+
         SourceBand- an integer indicating the band from SourceFilename
                     to use.  1 if not specified.
-                    
+
         band- band number that the serialized band will correspond
               to in the output dataset (an integer).  1 if not specified.
 
@@ -751,7 +751,7 @@ def serializeBand(indataset=None,opt_dict={}):
 
         DstRect- a tuple of four integers specifying the extents that
                  SrcRect will correspond to in the output file.
-                     
+
     """
     base=[gdal.CXT_Element,'VRTRasterBand']
 
@@ -759,12 +759,12 @@ def serializeBand(indataset=None,opt_dict={}):
         inband=int(opt_dict['SourceBand'])
     else:
         inband=1
-    
+
     if opt_dict.has_key('band'):    
         outband=int(opt_dict['band'])
     else:
         outband=1
-     
+
     if opt_dict.has_key('DataType'):
         base.append([gdal.CXT_Attribute,'dataType',
                      [gdal.CXT_Text,opt_dict['DataType']]])        
@@ -775,7 +775,7 @@ def serializeBand(indataset=None,opt_dict={}):
             indataset.GetRasterBand(inband).DataType)]])
     else:
         base.append([gdal.CXT_Attribute,'dataType',[gdal.CXT_Text,'Byte']])
-        
+
     base.append([gdal.CXT_Attribute,'band',[gdal.CXT_Text,str(outband)]])
 
     if opt_dict.has_key('Description'):
@@ -786,14 +786,14 @@ def serializeBand(indataset=None,opt_dict={}):
         if len(desc) > 0:
             base.append([gdal.CXT_Element,'Description',
                          [gdal.CXT_Text,desc]])
-        
+
     if opt_dict.has_key('ColorInterp'):
         if opt_dict['ColorInterp'] != 'Undefined':
             base.append([gdal.CXT_Element,'ColorInterp',
                          [gdal.CXT_Text,opt_dict['ColorInterp']]])
             if opt_dict['ColorInterp'] == 'Palette':
                 base.append(opt_dict['Palette'].serialize())
-            
+
     elif indataset is not None:
         cinterp=indataset.GetRasterBand(inband).GetRasterColorInterpretation()
         if cinterp != gdal.GCI_Undefined:
@@ -812,7 +812,7 @@ def serializeBand(indataset=None,opt_dict={}):
         if ((nodata_val is not None) and (nodata_val != '')):
             base.append([gdal.CXT_Element,'NoDataValue',
                          [gdal.CXT_Text,str(nodata_val)]])
-                
+
     if opt_dict.has_key('ScaleOffset') or opt_dict.has_key('ScaleRatio'):
         ssbase=[gdal.CXT_Element,'ComplexSource']
     else:
@@ -853,13 +853,13 @@ def serializeBand(indataset=None,opt_dict={}):
         yoff='0'
         xsize='0'
         ysize='0'
-        
+
     srcwinbase.append([gdal.CXT_Attribute,'xOff',[gdal.CXT_Text,xoff]])        
     srcwinbase.append([gdal.CXT_Attribute,'yOff',[gdal.CXT_Text,yoff]])        
     srcwinbase.append([gdal.CXT_Attribute,'xSize',[gdal.CXT_Text,xsize]])        
     srcwinbase.append([gdal.CXT_Attribute,'ySize',[gdal.CXT_Text,ysize]])        
     ssbase.append(srcwinbase)
-    
+
     dstwinbase=[gdal.CXT_Element,'DstRect']
     if opt_dict.has_key('DstRect'):
         x2off=str(opt_dict['DstRect'][0])
@@ -888,7 +888,7 @@ def serializeBand(indataset=None,opt_dict={}):
 
     if opt_dict.has_key('ScaleRatio'):
         ssbase.append([gdal.CXT_Element,'ScaleRatio',[gdal.CXT_Text,str(opt_dict['ScaleRatio'])]])
-        
+
     base.append(ssbase)
 
     return base
@@ -899,11 +899,11 @@ def serializeDerivedBand(indataset=None,opt_dict={}):
             indataset- dataset to take default values from for
                        items that are not specified in opt_dict.
                        Set to None if not needed.
-                       
+
             opt_dict- dictionary to take values from.
 
         opt_dict will be searched for the following keys:
-                    
+
         band- band number that the serialized band will correspond
               to in the output dataset (an integer).  1 if not specified.
 
@@ -928,12 +928,12 @@ def serializeDerivedBand(indataset=None,opt_dict={}):
         inband=int(opt_dict['SourceBand'])
     else:
         inband=1
-    
+
     if opt_dict.has_key('band'):    
         outband=int(opt_dict['band'])
     else:
         outband=1
-     
+
     if opt_dict.has_key('DataType'):
         base.append([gdal.CXT_Attribute,'dataType',
                      [gdal.CXT_Text,opt_dict['DataType']]])        
@@ -958,14 +958,14 @@ def serializeDerivedBand(indataset=None,opt_dict={}):
         if len(desc) > 0:
             base.append([gdal.CXT_Element,'Description',
                          [gdal.CXT_Text,desc]])
-        
+
     if opt_dict.has_key('ColorInterp'):
         if opt_dict['ColorInterp'] != 'Undefined':
             base.append([gdal.CXT_Element,'ColorInterp',
                          [gdal.CXT_Text,opt_dict['ColorInterp']]])
             if opt_dict['ColorInterp'] == 'Palette':
                 base.append(opt_dict['Palette'].serialize())
-            
+
     elif indataset is not None:
         cinterp=indataset.GetRasterBand(inband).GetRasterColorInterpretation()
         if cinterp != gdal.GCI_Undefined:
@@ -998,13 +998,13 @@ def serializeSource(bbase, indataset=None,opt_dict={}):
             indataset- dataset to take default values from for
                        items that are not specified in opt_dict.
                        Set to None if not needed.
-                       
+
             opt_dict- dictionary to take values from.
 
         opt_dict will be searched for the following keys:
 
         SourceFilename- filename of a gdal dataset (a string)
-        
+
         SourceBand- an integer indicating the band from SourceFilename
                     to use.  1 if not specified.
 
@@ -1027,7 +1027,7 @@ def serializeSource(bbase, indataset=None,opt_dict={}):
         inband=int(opt_dict['SourceBand'])
     else:
         inband=1
-      
+
     if opt_dict.has_key('ScaleOffset') or opt_dict.has_key('ScaleRatio'):
         ssbase=[gdal.CXT_Element,'ComplexSource']
     else:
@@ -1068,13 +1068,13 @@ def serializeSource(bbase, indataset=None,opt_dict={}):
         yoff='0'
         xsize='0'
         ysize='0'
-        
+
     srcwinbase.append([gdal.CXT_Attribute,'xOff',[gdal.CXT_Text,xoff]])        
     srcwinbase.append([gdal.CXT_Attribute,'yOff',[gdal.CXT_Text,yoff]])        
     srcwinbase.append([gdal.CXT_Attribute,'xSize',[gdal.CXT_Text,xsize]])        
     srcwinbase.append([gdal.CXT_Attribute,'ySize',[gdal.CXT_Text,ysize]])        
     ssbase.append(srcwinbase)
-    
+
     dstwinbase=[gdal.CXT_Element,'DstRect']
     if opt_dict.has_key('DstRect'):
         x2off=str(opt_dict['DstRect'][0])
@@ -1103,7 +1103,7 @@ def serializeSource(bbase, indataset=None,opt_dict={}):
 
     if opt_dict.has_key('ScaleRatio'):
         ssbase.append([gdal.CXT_Element,'ScaleRatio',[gdal.CXT_Text,str(opt_dict['ScaleRatio'])]])
-        
+
     bbase.append(ssbase)
 
     return bbase
@@ -1115,7 +1115,7 @@ def GetSimilarFiles(filename):
 
     import os
     import glob
-    
+
     fdir=os.path.dirname(filename)
     froot,fext=os.path.splitext(filename)
     flist=glob.glob(os.path.join(fdir,'*'+fext))
@@ -1136,7 +1136,7 @@ def GetRelativeToVRT(path):
     if path[0] == '<':
         # input path is an in-memory vrt file
         return "0"
-    
+
     if os.path.isabs(path):
         return "0"
     else:
@@ -1174,7 +1174,7 @@ class VRTDatasetConstructor:
         """ Add a simple raster band
 
         SourceFilename- filename of a gdal dataset (a string)
-        
+
         SourceBand- an integer indicating the band from SourceFilename
                     to use.
 
@@ -1189,7 +1189,7 @@ class VRTDatasetConstructor:
         DstRect- a tuple of four integers specifying the extents that
                  SrcRect will correspond to in the output file.
                  Defaults to (0, 0, xsize, ysize) for the dataset.
-                 
+
         ColorInterp- OPTIONAL colour interpretation (a string).  One of
                      'Gray', 'Red', 'Green', 'Blue', 'Alpha', 'Undefined', or
                      'Palette'.  If 'Palette' is specified, then colortable
@@ -1197,7 +1197,7 @@ class VRTDatasetConstructor:
 
         colortable- OPTIONAL GDAL colortable object (only used if ColorInterp
                     is set to 'Palette').
-          
+
         NoDataValue- OPTIONAL no data value.  Floating point or integer.
 
         ScaleOffset, ScaleRatio- OPTIONAL scaling offset and ratio for
@@ -1205,7 +1205,7 @@ class VRTDatasetConstructor:
                      outband = ScaleOffset + (ScaleRatio*inband)
 
         Description- OPTIONAL description for the band (a string).
-       
+
         metadict-   OPTIONAL metadata for band, may contain default lut
                     enhancement type.
 
@@ -1217,7 +1217,7 @@ class VRTDatasetConstructor:
             if colortable is None:
                 raise 'Color table not specified!'
             opt_dict['Palette']=colortable
-        
+
         if SrcRect is not None:
             opt_dict['SrcRect']=SrcRect
         else:
@@ -1241,7 +1241,7 @@ class VRTDatasetConstructor:
             opt_dict['Description']=Description
 
         opt_dict['band']=self.band_idx
-        
+
         bbase=serializeBand(None,opt_dict)
 
         if metadict is not None:
@@ -1259,7 +1259,7 @@ class VRTDatasetConstructor:
         """ Add a flat binary source raster band.
             Inputs:
                 SourceFilename- path to source file name (string)
-                
+
                 DataType- datatype (string).  One of:
                                 Byte        Float64
                                 UInt16      CInt16
@@ -1269,9 +1269,9 @@ class VRTDatasetConstructor:
                                 Float32
 
                 ByteOrder- MSB or LSB (string)
-                
+
                 ImageOffset- offset to first pixel of band (int)
-                
+
                 PixelOffset- offset between successive pixels in the input (int)
 
                 LineOffset- offset between successive lines in the input (int)
@@ -1297,7 +1297,7 @@ class VRTDatasetConstructor:
         DataType- data type (a string).  May be 'Byte', 'UInt16',
                   'Int16', 'UInt32', 'Int32', 'Float32', 'Float64',
                   'CInt16', 'CInt32', 'CFloat32', 'CFloat64'
-                 
+
         ColorInterp- OPTIONAL colour interpretation (a string).  One of
                      'Gray', 'Red', 'Green', 'Blue', 'Alpha', 'Undefined', or
                      'Palette'.  If 'Palette' is specified, then colortable
@@ -1305,11 +1305,11 @@ class VRTDatasetConstructor:
 
         colortable- GDAL colortable object (only used if ColorInterp
                     is set to 'Palette').
-                    
+
         NoDataValue- OPTIONAL no data value.  Floating point or integer.
 
         Description- OPTIONAL description for the band (a string).
-              
+
         metadict-   OPTIONAL metadata for band, may contain default lut
                     enhancement type.
 
@@ -1349,7 +1349,7 @@ class VRTDatasetConstructor:
         bbase- base string of derived band, to append source
 
         SourceFilename- filename of a gdal dataset (a string)
-        
+
         SourceBand- an integer indicating the band from SourceFilename
                     to use.
 
@@ -1360,7 +1360,7 @@ class VRTDatasetConstructor:
         DstRect- a tuple of four integers specifying the extents that
                  SrcRect will correspond to in the output file.
                  Defaults to (0, 0, xsize, ysize) for the dataset.
-                    
+
         NoDataValue- OPTIONAL no data value.  Floating point or integer.
 
         ScaleOffset, ScaleRatio- OPTIONAL scaling offset and ratio for
@@ -1368,11 +1368,11 @@ class VRTDatasetConstructor:
                      outband = ScaleOffset + (ScaleRatio*inband)
 
         Description- OPTIONAL description for the band (a string).
-       
+
         """
 
         opt_dict={'SourceFilename':SourceFilename,'SourceBand':SourceBand}
-        
+
         if SrcRect is not None:
             opt_dict['SrcRect']=SrcRect
         else:
@@ -1397,7 +1397,7 @@ class VRTDatasetConstructor:
         """ Add metadata from a dictionary """
         if len(metadict.keys()) < 1:
             return
-        
+
         mbase=serializeMetadata(dict=metadict)
         self.base.append(mbase)
 
@@ -1496,7 +1496,7 @@ class VRTDatasetXMLUtil(VRTDatasetConstructor):
 
         PixFunctionName - Name of pixel function applied to sources to
                  generate band data
-                 
+
         ColorInterp- OPTIONAL colour interpretation (a string).  One of
                      'Gray', 'Red', 'Green', 'Blue', 'Alpha', 'Undefined', or
                      'Palette'.  If 'Palette' is specified, then colortable
@@ -1504,14 +1504,14 @@ class VRTDatasetXMLUtil(VRTDatasetConstructor):
 
         colortable- GDAL colortable object (only used if ColorInterp
                     is set to 'Palette').
-                    
+
         NoDataValue- OPTIONAL no data value.  Floating point or integer.
 
         Description- OPTIONAL description for the band (a string).
 
         enhance- OPTIONAL initial lut enhancement type to be applied to band, 
                  see gvconst.GV_RASTER_LUT_ENHANCE_TYPES
-       
+
         """
         metadict=dict_append_lut_type(enhance)
         dict_append_min_max(lut_min, lut_max, metadict)
@@ -1717,7 +1717,7 @@ class VRTDatasetXMLUtil(VRTDatasetConstructor):
         """
         Add color entry to a GDAL color table by applying a gradient between the
         colors at the last entry index and the new entry index.
-       
+
         @param color_table - GDAL color table to modify
         @param index - Integer index of new color to add
         @param entry - (red, green, blue) tuple for new color entry
@@ -1843,7 +1843,7 @@ def create_PSCI_dataset(hue_band_info, intensity_band_info=None,
     """ Create a VRT dataset using the specified band indexes in the 
         specified dataset for hue and intensity bands.  The band sizes and
         datatypes will be based on the source dataset.
-        
+
         *_band_info = (<filename>, <band index>, (lut_min, lut_max))
 
      """
@@ -1912,7 +1912,7 @@ def dict_append_min_max(lut_min=None, lut_max=None, metadict=None):
 
 if __name__ ==  '__main__':
     import string
-    
+
     ds=VRTDatasetConstructor(2000,2000)
     ds.AddSimpleBand('reltest.tif',2,'Float32')
     ds.AddSimpleBand('/data/abstest.tif',1,'Byte',

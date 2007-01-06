@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvcorecmds.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Implementation of some sample OpenEV core commands.
@@ -41,9 +41,9 @@ class GvCommandsCommand(gvcommand.CommandBase):
                in group "core" only).
 
         /v- verbose mode.  Display full help for commands.
-        
+
     """
-    
+
     def __init__(self):
         self.Name = 'commands'
         self.Usage = 'commands [group] [-v]'
@@ -54,11 +54,11 @@ class GvCommandsCommand(gvcommand.CommandBase):
                               required=0 ),
             gvcommand.ArgDef( name = 'v', type = 'switch', required=0 )
             ]
-        
+
     def execute( self, args, line, interp ):
         group=args[0]
         verbose=args[1]
-        
+
         commands = gview.app.shell.get_commands()
         interp.showText( '%-24s %s' % ('Command', 'Usage' ), 'result' )
         interp.showText( '%-24s %s' % ('-------', '-----' ), 'result' )
@@ -88,7 +88,7 @@ class GvCommandsCommand(gvcommand.CommandBase):
                             interp.showText(cmd.Name+':\n'+txt+'\n','result')
 
         return 1
-        
+
 ###############################################################################
 # Functions command.
 
@@ -110,9 +110,9 @@ class GvFunctionsCommand(gvcommand.CommandBase):
                 python shell will be displayed.
 
         /v- verbose mode.  Display full help for each function.
-        
+
     """
-    
+
     def __init__(self):
         self.Name = 'functions'
         self.Usage = 'functions [module] [-v]'
@@ -123,7 +123,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
                               required=0 ),
             gvcommand.ArgDef( name = 'v', type = 'switch', required=0 )
             ]
-        
+
     def execute( self, args, line, interp ):
         import string
         import os
@@ -131,7 +131,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
 
         modname=args[0]
         verbose = args[1]
-        
+
         local_dict = interp.locals
         next_txt=''
         if modname is not None:
@@ -141,7 +141,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
             # to do: use the help in the
             # helpfiles, but only if the module
             # names match
-            
+
             if modname in local_dict.keys():
                 modinst=local_dict[modname]
                 modkeys=dir(local_dict[modname])                
@@ -154,9 +154,9 @@ class GvFunctionsCommand(gvcommand.CommandBase):
                     interp.showText('Unable to locate module '+modname+'.',
                                     'error')
                     return 0
-                
+
             # If particular module is specified,
- 
+
             keys_to_show = []
             for ckey in modkeys:
                 ckey_type=None
@@ -170,7 +170,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
                 elif (ckey_type == type(hasattr) and
                     ckey[0] != "_"):
                     keys_to_show.append(ckey)
-    
+
             interp.showText( 'Functions: '+modname , 'result' )
             interp.showText(
                 '------------------------------------------------' , 'result' )
@@ -192,15 +192,15 @@ class GvFunctionsCommand(gvcommand.CommandBase):
             for ckey in keys_to_show:
                 # First, check to see if there is help for
                 # the function.
-                
+
                 txt=interp.get_function_help(ckey,modname,quiet=1)
                 if txt is None:
                     txt=interp.get_builtin_help(ckey,modname,quiet=1)
 
                 interp.showText( '%s:\n\n%s' % (ckey, txt),'result')
-                
+
             return 1
-            
+
 
         interp.showText( 'Functions:' , 'result' )
         interp.showText( '------------------------------------------------' ,
@@ -216,7 +216,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
             elif (type(local_dict[ckey]) == type(hasattr) and
                ckey[0] != "_"):
                 keys_to_show.append(ckey)
-               
+
         keys_to_show.sort()
         count=1
         for ckey in keys_to_show:
@@ -235,12 +235,12 @@ class GvFunctionsCommand(gvcommand.CommandBase):
                     next_txt=''
                 else:
                     next_txt=next_txt+'%-24s' % ckey
-                
+
             count=count+1
 
         return 1
 
-    
+
 ###############################################################################
 # NewView command.
 class GvNewViewCommand(gvcommand.CommandBase):
@@ -250,9 +250,9 @@ class GvNewViewCommand(gvcommand.CommandBase):
     Parameters:
 
         title- title for the new view.
-        
+
     """
-    
+
     def __init__(self):
         self.Name = 'newview'
         self.Usage = 'newview [title]'
@@ -262,7 +262,7 @@ class GvNewViewCommand(gvcommand.CommandBase):
             gvcommand.ArgDef( name = 'title', type = 'string_chunk',
                               required=0 )
             ]
-        
+
     def execute( self, args, line, interp ):
 
         title = args[0]
@@ -275,27 +275,27 @@ class GvNewViewCommand(gvcommand.CommandBase):
         else:
             gview.app.new_view( title )
         return 1
-        
+
 ###############################################################################
 # ClearView command.
 class GvClearViewCommand(gvcommand.CommandBase):
     """
     Clear the active view.
-    
+
     The clearview command is used to clear the currently
     active view.  The currently active view is the one
     selected in the layer dialog (Edit->Layers); usually,
     it is the last view modified or clicked on.
-    
+
     """
-    
+
     def __init__(self):
         self.Name = 'clearview'
         self.Usage = 'clearview'
         self.HelpURL = ''
         self.Group = 'core'
         self.Args = []
-        
+
     def execute( self, args, line, interp ):
 
         view = gview.app.sel_manager.get_active_view()
@@ -306,7 +306,7 @@ class GvClearViewCommand(gvcommand.CommandBase):
             layer_list = view.list_layers()
 
         return 1
-        
+
 ###############################################################################
 # View3D Command
 class GvView3DCommand(gvcommand.CommandBase):
@@ -327,7 +327,7 @@ class GvView3DCommand(gvcommand.CommandBase):
                 elevation values (numeric).
 
     """
-    
+
     def __init__(self):
         self.Name = 'view3d'
         self.Usage = 'view3d <demfile> [drapefile] [mesh_lod] [hscale]'
@@ -342,9 +342,9 @@ class GvView3DCommand(gvcommand.CommandBase):
                               required=0 ),
             gvcommand.ArgDef( name = 'hscale', type = 'numeric', required=0 )
             ]
-        
+
     def execute( self, args, line, interp ):
-        
+
         dem_filename = args[0]
         drape_filename = args[1]
         if drape_filename is None:
@@ -358,7 +358,7 @@ class GvView3DCommand(gvcommand.CommandBase):
         else:
             hscale = float(args[3])
 
-            
+
         view_win = gview.app.sel_manager.get_active_view_window()
 
         view_win.view3d_action( dem_filename, drape_filename, mesh_lod, hscale)
@@ -377,7 +377,7 @@ class GvHelpCommand(gvcommand.CommandBase):
     (GUI).  The help GUI displays help for currently loaded commands 
     and functions, and may display help on other functions
     and commands if additional help files have been registered.
-       
+
     The procedure followed by the help GUI to locate information
     is the following:
 
@@ -410,7 +410,7 @@ class GvHelpCommand(gvcommand.CommandBase):
         cf_name- command or function name.
 
         /g- launch the help GUI.
-        
+
     """
 
     def __init__(self):
@@ -427,13 +427,13 @@ class GvHelpCommand(gvcommand.CommandBase):
     def execute(self, args, line, interp):
         cf_name = args[0]
         gui_switch=args[1]
-        
+
         import Numeric
 
         if ((cf_name is None) and (gui_switch == 0)):
             print interp.get_command_help('help')
             return 1
-            
+
 
         if gui_switch == 1:
             # user requested GUI help
@@ -448,7 +448,7 @@ class GvHelpCommand(gvcommand.CommandBase):
                         else:
                             txt='\t\t\t'+cf_name+\
                             ' (command)\n\nNo help available.'
-                    
+
                     else:
                         if txt is not None:
                             txt='\t\t\t'+cf_name+\
@@ -465,7 +465,7 @@ class GvHelpCommand(gvcommand.CommandBase):
                         else:
                             txt='\t\t\t'+cf_name+\
                             ' (function)\n\nNo help available.'
-                    
+
                     else:
                         if txt is not None:
                             txt='\t\t\t'+cf_name+\
@@ -482,7 +482,7 @@ class GvHelpCommand(gvcommand.CommandBase):
                         else:
                             txt='\t\t\t'+cf_name+\
                             ' (built-in function)\n\nNo help available.'
-                    
+
                     else:
                         if txt is not None:
                             txt='\t\t\t'+cf_name+\
@@ -494,9 +494,9 @@ class GvHelpCommand(gvcommand.CommandBase):
                 else:
                     txt=cf_name+\
                  ' not recognized as a command or function.\nNo help available'
-                    
+
                 helpwin.update_text(txt)
-            
+
             return 1
 
         # GUI not requested
@@ -543,7 +543,7 @@ class GvHelpCommand(gvcommand.CommandBase):
                             'report')
             txt=interp.get_function_help(cf_name)
             interp.showText(str(txt),'report')
-            
+
         else:
             interp.showText('No help found for '+cf_name+'.','report')
 
@@ -566,11 +566,11 @@ class GvLocalsCommand(gvcommand.CommandBase):
               be listed.
 
     """
-    
+
     def __init__(self):
         self.Name='locals'
         self.Usage = 'locals [type]'
-                     
+
         self.HelpURL = ''
         self.Group = 'core'
         self.Args = [
@@ -628,9 +628,9 @@ class GvMacroCommand(gvcommand.CommandBase):
                     OpenEV macros are text files and must
                     start with the line:
                     # openev macro
-                    
+
     """
-    
+
     def __init__(self):
         self.Name = 'macro'
         self.Usage = 'macro <macro_file>'
@@ -646,7 +646,7 @@ class GvMacroCommand(gvcommand.CommandBase):
                         'error')
         return 1
 
-    
+
 ############################################################
 # Store commands to a file
 
@@ -665,13 +665,13 @@ class GvJournalCommand(gvcommand.CommandBase):
 
         umode- whether to append to filename (/a) or overwrite
                it (/w).  Defaults to /a.
-               
+
     """
-    
+
     def __init__(self):
         self.Name = 'journal'
         self.Usage = "journal <filename> [mode] [umode]" 
-        
+
         self.HelpURL = ''
         self.Group = 'core'
         self.Args = [
@@ -691,7 +691,7 @@ class GvJournalCommand(gvcommand.CommandBase):
 
         # If journal file was open before,
         # close it.
-        
+
         if interp.journal_fh is not None:
             interp.journal_fh.close()
             interp.journal_fh = None
@@ -702,7 +702,7 @@ class GvJournalCommand(gvcommand.CommandBase):
         if ((fname is not None) and (len(fname) == 0) and
             (interp.journal_fname is None)):
             fname = SelectFile("Journal File") 
-            
+
         if (fname is not None) and (len(fname) > 0):
             interp.journal_fname=fname
 
@@ -721,7 +721,7 @@ class GvJournalCommand(gvcommand.CommandBase):
                 'Unable to launch journaling- no filename specified','error')
             return 0
 
-        
+
 #############################################################################
 # import a group of commands
 class GvLoadextCommand(gvcommand.CommandBase):
@@ -731,9 +731,9 @@ class GvLoadextCommand(gvcommand.CommandBase):
     The loadext command is used to load an extension
     module of OpenEV commands.  This is similar
     to the import keyword for pure python code.
-    
+
     """
-    
+
     def __init__(self):
         self.Name = 'loadext'
         self.Usage = 'loadext <extension_name>'
@@ -751,7 +751,7 @@ class GvLoadextCommand(gvcommand.CommandBase):
 
         # Get the current python shell
         import gview
-        
+
         exec "import " + module_name
         exec "reload(" + module_name + ")"
         exec module_name + '.Register(gview.app.shell)'
@@ -798,11 +798,11 @@ class GvGetCommand(gvcommand.CommandBase):
         varname- name of python shell variable to extract 
                  data to (will overwrite any existing
                  variable by that name).
-      
+
         /s- screenshot mode switch (off by default).
-        
+
     """
-    
+
     def __init__(self):
         self.Name = 'get'
         self.Usage = 'get <varname> [/s]'
@@ -815,16 +815,16 @@ class GvGetCommand(gvcommand.CommandBase):
             ]
 
     def execute(self, args, line, interp):
- 
+
         import gvutils
         import gview
         import gdalnumeric
-        
+
         clayer = gview.app.sel_manager.get_active_layer()
         if clayer is None:
             interp.showText('No layer is currently active!','error')
             return 0
- 
+
 
         try:
             roi=gview.app.toolbar.get_roi()
@@ -836,7 +836,7 @@ class GvGetCommand(gvcommand.CommandBase):
         # NOTE: roi is ignored for screenshot option
         is_ss=args[1]
         shell_vars={}
-        
+
         if is_ss == 1:
             cview=gview.app.sel_manager.get_active_view()
             if roi is not None:
@@ -853,7 +853,7 @@ class GvGetCommand(gvcommand.CommandBase):
                                     '_temp.tif','GTiff',1)
 
             import os
-            
+
             if err != 0:
                 interp.showText(
             'Error grabbing screenshot- unable to generate temporary file.\n',
@@ -881,10 +881,10 @@ class GvGetCommand(gvcommand.CommandBase):
             os.unlink('_temp.tif')
 
             return(1,shell_vars)
-        
+
         if gvutils.is_of_class(clayer.__class__,'GvRasterLayer'):
             ds=clayer.get_parent().get_dataset()
-                
+
             if roi is None:
                 shell_vars[args[0]]=gdalnumeric.DatasetReadAsArray(ds)
                 return (1,shell_vars)
@@ -916,7 +916,7 @@ class GvGetCommand(gvcommand.CommandBase):
                     # that fully encloses the parallelogram
                     roi = (min_pix,min_line,max_pix-min_pix,max_line-min_line)
 
-                
+
                 shell_vars={}
                 shell_vars[args[0]]=gdalnumeric.DatasetReadAsArray(ds,roi[0],
                                                    roi[1],roi[2],roi[3]) 
@@ -932,7 +932,7 @@ class GvGetCommand(gvcommand.CommandBase):
                 for shp in shps:
                     if shp is not None:
                         newshps.append(shp.copy())
-                    
+
                 shell_vars={}
                 shell_vars[args[0]]=newshps
                 return (1,shell_vars)
@@ -980,9 +980,9 @@ class GvShowCommand(gvcommand.CommandBase):
         /o- switch to indicate that varname should be
             displayed in the current view rather than
             in a new view.
-            
+
     """
-    
+
     def __init__(self):
         self.Name = 'show'
         self.Usage = 'show <varname> [/nocopy] [/o]'
@@ -1004,7 +1004,7 @@ class GvShowCommand(gvcommand.CommandBase):
         if data is None:
             interp.showText('No input variable supplied','error')
             return 0
-        
+
         ncswitch=args[1]
         vswitch=args[2]
 
@@ -1042,9 +1042,9 @@ class GvShowCommand(gvcommand.CommandBase):
                     txt=txt+'so that show is permitted to reshape it for you.'
                     interp.showText(txt,'error')
                     return 0
-                
+
                 newdata=data
-            
+
             try:
                 # Only array data should get to here
                 array_name = gdalnumeric.GetArrayFilename(newdata)
@@ -1058,9 +1058,9 @@ class GvShowCommand(gvcommand.CommandBase):
             except:
                 interp.showText('Unable to open array.','error')
                 return 0
-            
+
         elif type(data) == type(gview.GvShapes()):
-            
+
             cview = gview.app.sel_manager.get_active_view_window()
             cview.make_active()
 
@@ -1070,7 +1070,7 @@ class GvShowCommand(gvcommand.CommandBase):
             for clayer in layer_list:          
                 layer_map[clayer.get_name()]=clayer
             counter = 0
-                
+
             name = dataname
             while layer_map.has_key(name):
                 counter = counter + 1
@@ -1085,7 +1085,7 @@ class GvShowCommand(gvcommand.CommandBase):
                         newdata.append(shp.copy())
             else:
                 newdata=data
-                    
+
             newdata.set_name(name)
             gview.undo_register(newdata)
             layer = gview.GvShapesLayer(newdata)     
@@ -1121,13 +1121,13 @@ class GvSaveCommand(gvcommand.CommandBase):
         dataset- Only for varnames of Numeric python array
                  type.  Dataset to copy metadata from in
                  saving.
-                 
+
     """
-    
+
     def __init__(self):
         self.Name = 'save'
         self.Usage = 'save <varname> <filename> [format] [dataset]' 
-        
+
         self.HelpURL = ''
         self.Group = 'core'
         self.Args = [
@@ -1152,14 +1152,14 @@ class GvSaveCommand(gvcommand.CommandBase):
         dataset=args[3]
         if dataset is not None:
             dataset=dataset[0]
-        
+
         if data is None:
             interp.showText('No input variable supplied','error')
             return 0
-        
+
         import Numeric
         if type(data) == type(Numeric.zeros([1,1])):
-            
+
             # Only array data should get to here                
             if ((fmt is None) or (len(fmt) == 0)):
                 fmt = 'GTiff'
@@ -1173,7 +1173,7 @@ class GvSaveCommand(gvcommand.CommandBase):
                 for cDriver in gdal.GetDriverList():
                     txt = txt + cDriver.ShortName + ' '
                 interp.showText(txt,'error')
-            
+
         else:
             try:
                 if fmt is not None:
@@ -1192,7 +1192,7 @@ class GvSaveCommand(gvcommand.CommandBase):
                 interp.showText('Unable to save '+\
                                 dataname+' to file '+fname,'error')
 
-         
+
 ###############################################################################
 # The Shell command.
 class GvShellCommand(gvcommand.CommandBase):
@@ -1228,7 +1228,7 @@ class GvShellCommand(gvcommand.CommandBase):
         print result
 
         return 1
-        
+
 
 def RegisterHelp( target ):
     # If the gvcorecmd_help.txt file
@@ -1255,8 +1255,8 @@ def Register( target ):
     target.add_command( GvShellCommand() )    
     target.add_command( GvShowCommand() )    
     target.add_command( GvSaveCommand() )    
-    
+
     RegisterHelp( target )
-    
-    
-        
+
+
+

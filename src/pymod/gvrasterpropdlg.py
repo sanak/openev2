@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvrasterpropdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GvRasterLayer Properties Dialog
@@ -72,7 +72,7 @@ class GvRasterSource(gtk.Frame):
         vbox.set_border_width(5)
         self.add(vbox)
         self.updating = True
-        
+
         # ------ Band Selection -------
         hbox = gtk.HBox(spacing=5)
         vbox.pack_start(hbox,expand=False)
@@ -113,7 +113,7 @@ class GvRasterSource(gtk.Frame):
         delta = smax - smin
         smax = smax + delta * 0.25
         smin = smin - delta * 0.25
-        
+
         if self.layer.get_mode() == gview.RLM_COMPLEX:
             smin = 0.0
         elif self.layer.get_parent().get_band().DataType == gdal.GDT_Byte:
@@ -194,7 +194,7 @@ class GvRasterSource(gtk.Frame):
                 if (type(nodata) != type(complex(1,0))):
                     nodata=complex(nodata,0)
                 self.layer.nodata_set(src_index,nodata.real,nodata.imag)
-            
+
         # ------- Constant Value -----
         self.const_entry = gtk.Entry()
         self.const_entry.set_max_length(8)
@@ -203,9 +203,9 @@ class GvRasterSource(gtk.Frame):
         vbox.pack_start(self.const_entry)
 
         self.updating = False
-            
+
         self.gui_refresh()
-        
+
         self.connect( 'destroy', self.cleanup)
 
     def combo_entry_key_press_cb( self, entryBox, event, *args ) :
@@ -242,7 +242,7 @@ class GvRasterSource(gtk.Frame):
                     entryBox.set_text("")
                 except KeyError :
                     entryBox.set_text("")
-        
+
     def __del__(self):
         print 'Destroying GvRasterSource'
 
@@ -259,12 +259,12 @@ class GvRasterSource(gtk.Frame):
             return '%d: %s' % (iband,band.GetDescription())
         else:
             return '%d' % iband
-        
+
     def gui_refresh(self, *args):
 
         if self.layer is None:
             return
-        
+
         # GTK2 PORT PENDING - GTK_OBJECT_DESTROYED should no longer be used;
         #   if necessary should respond to destroy signal.
         #if self.flags( DESTROYED ) > 0:
@@ -377,7 +377,7 @@ class GvRasterSource(gtk.Frame):
                 print self.__bandDic
                 traceback.print_exc()
                 tokens = ""
-                
+
             try:
                 band_number = int(tokens[0])
             except:
@@ -402,7 +402,7 @@ class GvRasterSource(gtk.Frame):
                                     self.layer.get_const_value(self.src_index),
                                     self.layer.source_get_lut(self.src_index),
                           dataset.GetRasterBand(band_number).GetNoDataValue())
-                
+
         if self.src_index < 3 and self.master_dialog.greyscale_is_set():
             self.master_dialog.enforce_greyscale(self.src_index)
 
@@ -411,7 +411,7 @@ class GvRasterSource(gtk.Frame):
             self.layer.blend_mode_set( RL_BLEND_FILTER )
 
         self.gui_refresh()
-        
+
     def adjustment_cb(self,adjustment,*args):
         if self.updating:
             return
@@ -424,11 +424,11 @@ class GvRasterSource(gtk.Frame):
             self.layer.min_set( self.src_index, value )
         else:
             self.layer.max_set( self.src_index, value )
-        
+
         if self.src_index < 3 and self.master_dialog.greyscale_is_set():
             self.master_dialog.enforce_greyscale(self.src_index)
 
-    
+
     def entry_cb(self,entry,*args):
         if self.updating:
             return
@@ -469,7 +469,7 @@ class GvRasterSource(gtk.Frame):
         # enable alpha support if user modifies alpha band.
         if self.src_index == 3:
             self.layer.blend_mode_set( RL_BLEND_FILTER )
-    
+
         if self.src_index < 3 and self.master_dialog.greyscale_is_set():
             self.master_dialog.enforce_greyscale(self.src_index)
 
@@ -492,16 +492,16 @@ class GvRasterPropDialog(gtk.Window):
                                                         self.refresh_cb)
             self.teardown_id = layer.connect('teardown',self.close)
 
-        
+
         # create the general layer properties dialog
         self.create_notebook()
 
         self.create_pane1()
-        
+
         self.updating = True
         self.create_sourcepane()
         self.updating = False
-        
+
         self.create_openglprop()
         self.create_lutprop()
 	self.create_projprop()
@@ -510,7 +510,7 @@ class GvRasterPropDialog(gtk.Window):
         self.update_gui()
         self.show_all()
         self.update_gui()
-        
+
         for source in self.sources:
             source.gui_refresh()
 
@@ -524,7 +524,7 @@ class GvRasterPropDialog(gtk.Window):
         self.connect('delete-event', self.close)
 
     def create_lutprop(self):
-        
+
         self.lut_pane = gtk.VBox(spacing=10)
         self.lut_pane.set_border_width(10)
         self.notebook.append_page( self.lut_pane, gtk.Label('LUT'))
@@ -556,15 +556,15 @@ class GvRasterPropDialog(gtk.Window):
             source = GvRasterSource('Red',self.layer,0,self)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
-            
+
             source = GvRasterSource('Green',self.layer,1,self)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
-            
+
             source = GvRasterSource('Blue',self.layer,2,self)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
-            
+
             source = GvRasterSource('Alpha',self.layer,3,self)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
@@ -588,16 +588,16 @@ class GvRasterPropDialog(gtk.Window):
             scaleHBox.pack_start( self.scale_toggle    ) 
             scaleHBox.pack_start( self.scale_min_entry )
             scaleHBox.pack_start( self.scale_max_entry )
-            
+
             self.scale_toggle.connect( "toggled", self.scalelock_cb)
             self.source_pane.pack_start( scaleHBox, expand=False )
             self.scale_toggle.set_active( self.scalelock_is_set() )
-            
+
         else:
             source = GvRasterSource('Raster',self.layer,0,self)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
-        
+
     def create_pane1(self):
         # Setup General Properties Tab
         self.pane1 = gtk.VBox(spacing=10)
@@ -689,7 +689,7 @@ class GvRasterPropDialog(gtk.Window):
 	    row += 1
 
 	self.proj_vbox.pack_end(self.proj_table, expand=False)
-	
+
     def create_projprop(self):
         projpane = gtk.VBox(spacing=10)
         projpane.set_border_width(10)
@@ -753,7 +753,7 @@ class GvRasterPropDialog(gtk.Window):
         except:
             traceback.print_exc()
             self.datum_name = None
-            
+
 	self.datum_names = {None:"None", osr.SRS_DN_NAD27:"NAD27", \
 	    osr.SRS_DN_NAD83:"NAD83", osr.SRS_DN_WGS72:"WGS72", \
 	    osr.SRS_DN_WGS84:"WGS84"}
@@ -844,14 +844,14 @@ class GvRasterPropDialog(gtk.Window):
                                + ' ' + str(transform[3]) + '\n'
             text = text + 'Pixel Size: ' + str(transform[1])           \
                                  + ' x ' + str(transform[5]) + '\n'
-                                               
+
         projection = gdal_ds.GetProjection()
         if ((projection is None) or (len(projection) == 0)):
             projection = gdal_ds.GetGCPProjection()
 
         if projection is None:
             projection=""
-            
+
         if len(projection) > 0:
             sr = osr.SpatialReference()
             if sr.ImportFromWkt( projection ) == 0:
@@ -884,10 +884,10 @@ class GvRasterPropDialog(gtk.Window):
             return
 
         self.updating = True
-        
+
         # Layer name.
         self.layer_name.set_text( self.layer.get_name() )
-        
+
         # Visibility radio buttons
         self.vis_yes.set_active( self.layer.is_visible() )
         self.vis_no.set_active( not self.layer.is_visible() )
@@ -931,7 +931,7 @@ class GvRasterPropDialog(gtk.Window):
             else:
                 lut_tuple = self.layer.lut_get()
                 self.sources[3].show()
-            
+
         if lut_tuple is None:
             self.lut_pane.hide()
         elif lut_tuple[2] == 1:
@@ -1015,14 +1015,14 @@ class GvRasterPropDialog(gtk.Window):
             for iSource in [0,1,2] :
                 self.layer.min_set(iSource, min_scale)
                 self.layer.max_set(iSource, max_scale)
-            
+
     def greyscale_is_set(self):
         if self.layer.get_property('_greyscale_lock') is not None \
            and self.layer.get_property('_greyscale_lock') == 'locked':
             return 1
         else:
             return 0
-    
+
     def greyscale_cb(self, *args):
         if self.greyscale_is_set():
             self.layer.set_property('_greyscale_lock','unlocked')
@@ -1074,12 +1074,12 @@ class GvRasterPropDialog(gtk.Window):
                                   self.layer.get_const_value(3),
                                   self.layer.source_get_lut(3),
                                   None)
-    
+
     def complex_lut_cb(self, *args):
         # Magnitude
         if self.complex_lut_om.get_history() == 0:
             method = 'magnitude'
-            
+
         # Phase
         elif self.complex_lut_om.get_history() == 1:
             method = 'phase'
@@ -1097,7 +1097,7 @@ class GvRasterPropDialog(gtk.Window):
             method = 'imaginary'
 
         self.layer.complex_lut( method )
-        
+
         self.update_gui()
 
     # Set modulation color
@@ -1109,7 +1109,7 @@ class GvRasterPropDialog(gtk.Window):
         if color[3] != 1.0:
             self.layer.blend_mode_set( RL_BLEND_FILTER )
         self.layer.texture_mode_set( 1, color )
-            
+
 
     def set_interp_cb(self,*args):
         if self.interp_om.get_history() == 0:
@@ -1127,7 +1127,7 @@ class GvRasterPropDialog(gtk.Window):
         # GTK2 PORT
 	#self.proj_text.delete_text(0, self.proj_text.get_length())
 	#self.proj_text.insert_defaults(self.proj_full)
-    
+
     def parm_entry_cb(self, entry, parm):
 	"""Set projection parameters"""
 	self.parm_dict[parm] = float(entry.get_text())
@@ -1169,7 +1169,7 @@ class GvRasterPropDialog(gtk.Window):
         self.sources = None
         self.layer = None
         self.destroy()
-        
+
     # Force GUI Refresh
     def refresh_cb( self, widget, args ):
         self.update_gui()
@@ -1178,7 +1178,7 @@ def band_is_complex(layer,src_index):
     """ Returns 1 if src_index'th band of layer is present
         and complex; 0 otherwise.
     """
-    
+
     try:
         srctype=layer.get_data(src_index).get_band().DataType
         ctypes=[gdal.GDT_CInt16, gdal.GDT_CInt32, gdal.GDT_CFloat32,
@@ -1190,7 +1190,7 @@ def band_is_complex(layer,src_index):
     except:
         traceback.print_exc()
         return 0
-        
+
 if __name__ == '__main__':
     dialog = GvRasterPropDialog(None)
     dialog.connect('delete-event', gtk.main_quit)

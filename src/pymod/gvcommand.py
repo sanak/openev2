@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvcommand.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Base classes for Command Parsing.
@@ -64,7 +64,7 @@ Argument Attributes
 type:
  - The type of the argument. Legal values are "string_word", "string_token",
  "switch", "numeric" and "string_chunk".  Details are later in docs.
- 
+
 name:
  - The name of the argument.  Used as the key for argument values in the
    dictionary of arguments passed into the Evaluate method. 
@@ -115,7 +115,7 @@ default:
  - The value that should be assigned to this argument if it isn't found on
    the commandline.  If not provided, None is assumed.  Not applicable to
    switch arguments.
-   
+
 
 Argument Types
 --------------
@@ -164,7 +164,7 @@ variable:
     if need be.
 
     """
-   
+
 
     def __init__(self, name = None, type = 'string_word', prompt = None,
                  prompt_func = None, required = 1, valid_list = None,
@@ -185,7 +185,7 @@ variable:
 
         if self.type == 'list_type' and valid_opts is None:
             raise AttributeError,'list type requires a list of valid string arguments (valid_opts)'
-        
+
         # Ensure "valid_list" entries are all forced into lower case for
         # comparison purposes.
 
@@ -194,22 +194,22 @@ variable:
             self.valid_list_lower = []
             for item in self.valid_list:
                 self.valid_list_lower.append( string.lower(item) )
-            
+
         # Validate some requirements
         if self.type not in [ 'string_word', 'string_token', 'switch','list_type',
                               'multi_switch','numeric', 'string_chunk', 'variable']:
             raise ValueError, 'Unsupported argument type: ' + self.type
-        
+
         # Provide token reader if not specified in args.
         if read_token_method is not None:
             self.read_token_method = read_token_method
-        
+
         elif type == 'string_word':
             self.read_token_method = self.read_quotable_token
-        
+
         elif type == 'variable':
             self.read_token_method = self.read_quotable_token
-                
+
         elif type == 'string_chunk':
             self.read_token_method = self.read_remainder_token
 
@@ -264,10 +264,10 @@ variable:
                     if cchar not in later_char:
                         return '%s: %s is not a valid variable name.' % \
                                (self.name, arg_text)
-                    
+
 
         return None
-            
+
     ###########################################################################
     def read_simple_token(self, line, cc ):
         tokens = string.split(line,None,1)
@@ -277,13 +277,13 @@ variable:
             return (tokens[0], tokens[1])
         else:
             return (None,'')
-        
+
     ###########################################################################
     def read_quotable_token(self, line, cc ):
         # Check for non-keyword quoted string
         if len(line) < 1:
             return (None,'')
-        
+
         if (line[0] == '"'):
             tokens1 = string.split(line,'"',1)
             tokens2 = string.split(tokens1[1],'"',1)
@@ -298,10 +298,10 @@ variable:
                 interpreter.showText( "Unmatched '  in argument line ",'error' )
                 return (None,'')
             return (tokens2[0],tokens2[1])
-        
+
         # Check for keyword
         tokens1=string.split(line,None,1)
-        
+
         if string.find(tokens1[0],'=') == -1:
             # No keyword found- simple token
             return self.read_simple_token( line, cc )
@@ -354,11 +354,11 @@ variable:
 ############################################################################### 
     def process_numeric_token(self, token, cc ):
         return string.atof( token )
-        
+
 ###############################################################################    
     def process_simple_token(self, token, cc):
         return token
-    
+
 ###############################################################################
 # The following is intended to document the methods a command interpreter
 # must implement.  It isn't critical that custom command interpreters
@@ -374,7 +374,7 @@ class CommandInterpreter:
         provided.
         """
         pass
-    
+
     def showText( text, text_class ):
         """
         Show text to the user.
@@ -412,19 +412,19 @@ class CommandContext:
         self.line = line
 
         self.text_remaining = line
-        
+
         # The following are set after a successful parse.
         self.args = None
         self.cmd_obj = None
         self.parsed = 0
         self.error = 0
         self.args_parsed = 0
-        
+
 
     ###########################################################################
     def parse_command_text(self):
         tokens = string.split( self.line, None, 1 )
-        
+
         # Null input line is considered valid.
         if len(tokens) == 0:
             return ('', '')
@@ -433,7 +433,7 @@ class CommandContext:
             return (string.lower(tokens[0]), '')
         else:
             return (string.lower(tokens[0]), tokens[1])
-            
+
     ###########################################################################
     def parse_args(self):
 
@@ -459,7 +459,7 @@ class CommandContext:
 
     ###########################################################################
     def parse_one_arg(self):
-        
+
         #######################################################################
         # Argument parsing logic:
         # Maintain an argument "current_arg" to indicate which argument is
@@ -477,7 +477,7 @@ class CommandContext:
         # later argument.  Next, reread the token using the proper argument
         # method (discard the quotable token results) and finish parsing the
         # argument.
-        
+
         if self.arg_is_parsed[self.current_arg] == 1:
             # argument has already been found and parsed by keyword
             self.current_arg = self.current_arg + 1
@@ -485,7 +485,7 @@ class CommandContext:
 
         # Index of next argument to search for
         next_arg_index = self.current_arg + 1
-        
+
         arg = self.cmd_obj.Args[self.current_arg]
         interpreter = self.interpreter
 
@@ -526,9 +526,9 @@ class CommandContext:
                     next_arg_index = self.current_arg + 1
                 else:
                     arg_keyword=string.strip(checknamed[0])
-                
 
-        
+
+
             elif (len(checknamed) == 1) and (len(test_token) > 1) and (test_token[0] in ['/','-']):
                 #######################################################################
                 # Check to make sure this isn't a switch or multi_switch argument
@@ -536,7 +536,7 @@ class CommandContext:
                 # line argument list in order, stopping at the first switch or
                 # multi_switch variable that is compatible with the switch value
                 # and has not been parsed yet.
-            
+
                 for idx in range(len(self.cmd_obj.Args)):
                     new_arg=self.cmd_obj.Args[idx]
                     if ((new_arg.type in ['switch','multi_switch']) and
@@ -546,12 +546,12 @@ class CommandContext:
                             arg = new_arg
                             self.current_arg = idx
 
-        
+
         #######################################################################
         # At this point, the correct argument should have been selected.                
         # Parse out a candidate token using the appropriate method for this 
         # argument.
-        
+
         if arg_keyword is None:
             token, next_remainder = arg.read_token_method( self.text_remaining,
                                                        self )
@@ -565,7 +565,7 @@ class CommandContext:
         if ((arg.type == 'switch') and (token is not None) and
             (token[0] not in ['/','-'])):
             token = None
-        
+
         #######################################################################
         # If we are out of tokens, ensure that the arg is optional.
         if token is None:
@@ -606,7 +606,7 @@ class CommandContext:
         else:
             interpreter.showText( val_msg, 'error' )
             return 0
-        
+
         # If argument type was variable, do required processing
         token = arg.process_token_method(token, self)
 
@@ -621,7 +621,7 @@ class CommandContext:
             self.arg_is_parsed[self.current_arg] = 1
             self.current_arg = next_arg_index
             self.args_parsed = self.args_parsed + 1
-            
+
         elif arg.type == 'list_type':
             if token not in self.valid_opts:
                 txt=token+' is not a valid option. Valid options are:\n'
@@ -634,7 +634,7 @@ class CommandContext:
                 self.arg_is_parsed[self.current_arg] = 1            
                 self.current_arg = next_arg_index
                 self.args_parsed = self.args_parsed + 1
-                
+
         else:
             self.args[self.current_arg] = token
             self.arg_is_parsed[self.current_arg] = 1            
@@ -654,7 +654,7 @@ class CommandContext:
 
         #######################################################################
         # Parse out the command and check for it in the command dictionary.
-        
+
         cmd, self.text_remaining = self.parse_command_text()
 
         if not self.command_dict.has_key(cmd):

@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvsignaler.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Signaler - implements subscription/notification system a bit like
@@ -27,7 +27,7 @@
 """
 MODULE
    gvsignaler
-   
+
 DESCRIPTION
    Provides an event subscription/notification mechanism a bit like
    Gtk signal handling.  Classes which derive from Signaler can
@@ -103,4 +103,4 @@ class Signaler:
         except KeyError:
             raise UnpublishedSignalError
 
-    
+

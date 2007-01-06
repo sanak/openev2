@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvselbrowser.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GUI component to show the current list of selected objects, and
@@ -39,7 +39,7 @@ class GvSelBrowser(gtk.VBox):
         gtk.VBox.__init__(self, spacing=spacing)
 
         self.updating = 0
-        
+
         self.sel_manager = gview.app.sel_manager
 
         self.sel_manager.subscribe('active-layer-changed', self.update_gui)
@@ -61,7 +61,7 @@ class GvSelBrowser(gtk.VBox):
         hbox.pack_start(self.oid_tb)
 
         left_button = gtk.Button()
-        
+
         print os.path.join(gview.home_dir,'pics', 'pan_left.xpm')
         im = gtk.Image()
         im.set_from_file(os.path.join(gview.home_dir,'pics', 'pan_left.xpm'))
@@ -72,7 +72,7 @@ class GvSelBrowser(gtk.VBox):
 
         self.n_of_n_label = gtk.Label('XXXX of XXXX')
         hbox.pack_start(self.n_of_n_label)
-        
+
         right_button = gtk.Button()
         im = gtk.Image()
         im.set_from_file(os.path.join(gview.home_dir,'pics', 'pan_rght.xpm'))
@@ -88,7 +88,7 @@ class GvSelBrowser(gtk.VBox):
         hbox.pack_start(self.layer_label, expand=False)
 
         self.connect('unrealize', self.close)
-        
+
         self.update_gui()
         self.show_all()
 
@@ -96,7 +96,7 @@ class GvSelBrowser(gtk.VBox):
         self.sel_manager.unsubscribe('active-layer-changed', self.update_gui)
         self.sel_manager.unsubscribe('selection-changed', self.update_gui)
         self.sel_manager.unsubscribe('subselection-changed', self.update_gui)
-        
+
     def update_gui(self, *args):
         self.updating = 1
         layer = self.sel_manager.get_active_layer()
@@ -104,7 +104,7 @@ class GvSelBrowser(gtk.VBox):
             self.layer_label.set_text('Layer: <none selected>')
         else:
             self.layer_label.set_text('Layer: '+layer.get_name())
-            
+
         try:
             layer = self.sel_manager.get_active_layer()
             selected = layer.get_selected()
@@ -114,20 +114,20 @@ class GvSelBrowser(gtk.VBox):
             self.oid_tb.set_text('')
             self.updating = 0
             return
-        
+
         self.oid_tb.set_text(str(subsel))
 
         index_of = self.get_sel_index(subsel,selected)
-        
+
         label = '%d of %d' % (index_of+1, len(selected))
         self.n_of_n_label.set_text(label)
-        
+
         self.updating = 0
 
     def oid_cb(self, *args):
         if self.updating:
             return
-        
+
         try:
             new_oid = int(self.oid_tb.get_text())
             layer = self.sel_manager.get_active_layer()
@@ -149,7 +149,7 @@ class GvSelBrowser(gtk.VBox):
             selected = layer.get_selected()
         except:
             return
-        
+
         index_of = self.get_sel_index( layer.get_subselected(), selected )
         if index_of > 0:
             layer.subselect_shape( selected[index_of-1] )
@@ -160,7 +160,7 @@ class GvSelBrowser(gtk.VBox):
             selected = layer.get_selected()
         except:
             return
-            
+
         index_of = self.get_sel_index( layer.get_subselected(), selected )
         if index_of < len(selected)-1:
             layer.subselect_shape( selected[index_of+1] )
@@ -229,14 +229,14 @@ class GvSelectionManager(Signaler):
         self.sel_len = 0
         self.ssel = -1
         self.ssel_layer = None
-        
+
         self.publish('active-view-changed')
         self.publish('active-layer-changed')
         self.publish('selection-changed')
         self.publish('subselection-changed')
 
         self.layer_change()
-        
+
     def view_change(self, *args):
         if self.view == self.view_manager.get_active_view():
             return
@@ -244,13 +244,13 @@ class GvSelectionManager(Signaler):
         if self.view_cb_id is not None:
             self.view.disconnect(self.view_cb_id)
             self.view_cb_id = None
-            
+
         self.view = self.view_manager.get_active_view()
-        
+
         if self.view is not None:
             self.view_cb_id \
                 = self.view.connect('active-changed', self.layer_change)
-        
+
         Signaler.notify(self, 'active-view-changed')
         self.layer_change()
 
@@ -270,7 +270,7 @@ class GvSelectionManager(Signaler):
 
         if new_layer == self.layer:
             return
-        
+
         if self.layer_selcb_id is not None:
             self.layer.disconnect(self.layer_selcb_id)
             self.layer.disconnect(self.layer_sselcb_id)
@@ -321,6 +321,6 @@ class GvSelectionManager(Signaler):
         self.ssel = new_ssel
 
         Signaler.notify(self, 'subselection-changed')
-    
+
 
 pgu.gtk_register('GvSelBrowser',GvSelBrowser)

@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvclassifydlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Raster classification dialogs
@@ -196,17 +196,17 @@ class GvClassificationDlg(gtk.Window, Signaler):
         btn_load.connect('clicked', self.load_cb)
         save_box.pack_start(btn_load)
         save_box.pack_start(btn_save)
-        
+
         self.property_list = gtk.combo_box_entry_new_text()
         #try:
         #    import pgucombo
         #    self.property_list = pgucombo.pguCombo()
         #except ImportError:
         #    self.property_list = gtk.Combo()
-            
+
         self.property_list.child.connect('changed',self.property_select_cb)
         self.update_property_list()
-        
+
         save_box.pack_start(self.property_list)
         vbox.pack_start(save_box, expand=False)
 
@@ -300,7 +300,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.publish('classification-changed')
 
         self.update_property_list()
-        
+
     def close(self, *args):
         """close and destroy this dialog"""
         self.hide()
@@ -326,7 +326,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         """close the classification dialog without doing anything
         about the classification"""
         return self.close()
-        
+
     def list_selected( self, *args ):
         self.class_list.unselect_all()
 
@@ -359,7 +359,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
                           symbol = symbol,
                           symbol_scale = scale)
         self.insert_class( n )                          
-        
+
     def insert_class( self, class_id ):
         """Create gui elements for the class_id and insert them
         into the gui
@@ -394,7 +394,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         else:
             self.sym_menus.insert( class_id, None )
             self.scale_spinners.insert( class_id, None )
-        
+
         self.ranges.insert(class_id, pguEntry())
         rng = cls.get_range(class_id)
         rng_txt = str( rng[0] )
@@ -473,7 +473,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
             sym_frm = gtk.Frame()
             sym_frm.add( gtk.Label( 'Symbol' ))
             sym_frm.set_shadow_type( gtk.SHADOW_OUT )
-        
+
             scale_frm = gtk.Frame()
             scale_frm.add( gtk.Label( 'Scale' ))
             scale_frm.set_shadow_type( gtk.SHADOW_OUT )
@@ -492,12 +492,12 @@ class GvClassificationDlg(gtk.Window, Signaler):
         #for each class, create an entry in the list
         for n in range(cls.count):
             self.insert_class( n )
-            
+
         self.class_list.show_all()
 
         if self.ramp is not None:
             self.apply_ramp(self.ramp)
-            
+
     def reclassify_cb(self, *args):
         """show the reclassify dlg"""
         dlg = GvReclassifyDlg(ok_cb = self.reset_dlg_cb, 
@@ -532,13 +532,13 @@ class GvClassificationDlg(gtk.Window, Signaler):
     def color_button_cb(self, widget, num):
         """Handle the user changing a color value"""
         self.classification.set_color(num, widget.get_color())
-        
+
     def symbol_change( self, widget, index, symbol ):
         self.classification.set_symbol( index, symbol )
-            
+
     def scale_change( self, widget, index ):
         self.classification.set_scale( index, widget.value )
-        
+
     def range_changed_cb(self, widget, num):
         """Handle the user changing a range value.  This requires validation"""
         print 'range_changed_cb'
@@ -565,7 +565,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
             except:
                 low = '-' + vals[1]
                 hi = vals[2]
-            
+
         elif len(vals) == 3 and vals[1] == '':
             try:
                 low = float(vals[0])
@@ -573,7 +573,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
             except:
                 low = vals[0]
                 hi = '-' + vals[2]
-            
+
         elif len(vals) == 2:
             #two vals
             try:
@@ -594,7 +594,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         else:
             #too many values
             return
-        
+
         try:
             if int(low) == low:
                 low_txt = "%.0f" % low
@@ -602,7 +602,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
                 low_txt = "%s" % low
         except:
             low_txt = low
-            
+
         try:
             if int(hi) == hi:
                 hi_txt = "%.0f" % hi
@@ -610,10 +610,10 @@ class GvClassificationDlg(gtk.Window, Signaler):
                 hi_txt = "%s" % hi
         except:
             hi_txt = hi
-            
+
         r_low, r_hi = self.classification.get_range( num )
         old_name = self.classification.get_name( num )
-        
+
         try:
             if int(r_low) == r_low:
                 r_low_txt = "%.0f" % r_low
@@ -621,7 +621,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
                 r_low_txt = "%s" % r_low
         except:
             r_low_txt = r_low
-        
+
         try:
             if int(r_hi) == r_hi:
                 r_hi_txt = "%.0f" % r_hi
@@ -629,12 +629,12 @@ class GvClassificationDlg(gtk.Window, Signaler):
                 r_hi_txt = "%s" % r_hi
         except:
             r_hi_txt = r_hi
-            
+
         if r_hi_txt == "":
             calc_name = r_low_txt
         else:
             calc_name = "%s - %s" % (r_low_txt, r_hi_txt)
-        
+
         print 'old rng is ', r_low, r_hi
         print 'new rng is ', low, hi
         print 'name is ', old_name
@@ -736,13 +736,13 @@ class GvClassificationDlg(gtk.Window, Signaler):
 
         if self.property_updating:
             return
-        
+
         layer = self.classification.layers[0]
-        
+
         if not issubclass(layer.__class__,gview.GvShapesLayer):
             self.property_list.hide()
             return
-        
+
         new_property = self.property_list.child.get_text()
 
         self.classification.set_classify_property( layer, new_property )
@@ -754,15 +754,15 @@ class GvClassificationDlg(gtk.Window, Signaler):
     def update_property_list( self, *args ):
         if len(self.classification.layers) == 0:
             return
-        
+
         layer = self.classification.layers[0]
 
         if not issubclass(layer.__class__,gview.GvShapesLayer):
             self.property_list.hide()
             return
-        
+
         self.property_list.show()
-        
+
         property = self.classification.get_classify_property( layer )
         schema = layer.get_parent().get_schema()
         fields = []
@@ -798,7 +798,7 @@ class GvReclassifyDlg(gtk.Window):
         type_box.pack_start(gtk.Label('Type:'), expand=False)
         opt_menu = gtk.OptionMenu()
         type_menu = gtk.Menu()
-        
+
         #using classification_types dictionary from gvclassification
         for i in range(len(classification_types)):
             for type in classification_types.iteritems():
@@ -806,7 +806,7 @@ class GvReclassifyDlg(gtk.Window):
                     item = gtk.MenuItem( type[0] )
                     item.connect( 'activate', self.type_menu_cb, classification_types[type[0]] )
                     type_menu.append( item )
-            
+
         opt_menu.set_menu(type_menu)
         opt_menu.set_history( classify_type )
         opt_menu.resize_children()
@@ -860,7 +860,7 @@ if __name__ == '__main__':
     dlg = GvClassificationDlg( cls )
     dlg.apply_button.connect('clicked', cls.dump)
     dlg.apply_button.connect('clicked', gtk.main_quit)
-    
+
     dlg.connect('delete-event', gtk.main_quit)
     dlg.show()
     gtk.main()

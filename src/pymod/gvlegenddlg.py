@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvlegenddlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  CIETMap / OpenEV
 # Purpose:  Implement Legend Display Dialog
@@ -77,7 +77,7 @@ class GvLegendDialog(gtk.Window):
         self.changed_id = None
         self.resizing = False
         self.resize_count = 0
-        
+
         self.set_title('Legend: Empty')
         self.set_resizable(True)
         self.set_size_request(300, 300)
@@ -128,7 +128,7 @@ class GvLegendDialog(gtk.Window):
     def prepare_legend(self):
         if self.resizing:
             return
-      
+
         if self.layer.get_property('Class_sn') is not None:
             self.Class_sn = int(self.layer.get_property('Class_sn'))
 
@@ -185,7 +185,7 @@ class GvLegendDialog(gtk.Window):
             # get a default font if preferred one
             # can't be loaded.
             gdk_font = gtk.load_font('*')
-            
+
         h = gdk_font.height("Wj")
         samp_offset = max(samp_y_size, h) + 10
 
@@ -267,7 +267,7 @@ class GvLegendDialog(gtk.Window):
             self.set_title('Legend: ' + lines[0] + '...')
         else:
             self.set_title(lines[0] + '...')
-            
+
         y_offset = y_offset + 10
         title_offset = y_offset
 

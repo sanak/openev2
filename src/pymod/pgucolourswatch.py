@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgucolourswatch.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  Python Gtk Utility Widgets
 # Purpose:  Embeddable color swatch.
@@ -31,7 +31,7 @@ class ColourSwatch(gtk.DrawingArea, Signaler):
     '''
     Class ColourSwatch is a simple widget that
     displays a colour.
-    
+
     The colour attribute is an RGBA tuple.  Internally, however,
     a GdkColour object is used that has values in the range 0-65535
     for red, green and blue.      
@@ -52,7 +52,7 @@ class ColourSwatch(gtk.DrawingArea, Signaler):
         self.publish('colour-changed')
         #cached graphics context
         self.gc = None
-        
+
     def realize_event(self, *args):
         self.gc = self.window.new_gc(foreground=self.icolour)
 
@@ -60,7 +60,7 @@ class ColourSwatch(gtk.DrawingArea, Signaler):
         #don't know the correct way to destroy a gc yet
         #self.gc.destroy()
         pass
-                
+
     def configure_event(self, *args):
         #is this required?
         return False
@@ -74,7 +74,7 @@ class ColourSwatch(gtk.DrawingArea, Signaler):
         win.draw_rectangle(self.gc, True,
             3, 3, width-3, height-3)
         return False
-        
+
     def set_colour(self, colour=(0,0,0,0)):
         self.colour = colour
         #the color - use GdkColourMap's alloc method to get it

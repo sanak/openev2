@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: gvogrfs.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Classes for building, and parsing OGR Feature Style Specifications
@@ -73,7 +73,7 @@ class OGRFeatureStyleParam:
     def parse(self, parm):
         (key,value) = string.split(parm,':',1)
         self.param_name = key
-        
+
         #trap params that have no value
         if len(value) == 0:
             self.role='numeric_value'
@@ -236,7 +236,7 @@ class OGRFeatureStyle:
         #      or can be turned into a string as well
         if style is None:
             return
-            
+
         style = string.strip(style)
         if style == '':
             print 'empty style'
@@ -297,7 +297,7 @@ class OGRFeatureStyle:
     def remove_part(self, part_name):
         if self.parts.has_key(part_name):
             del self.parts[part_name]
-            
+
     def has_part(self, part_name):
         return self.parts.has_key(part_name)
 

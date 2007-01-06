@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvpquerypropdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GvPqueryLayer Properties Dialog
@@ -59,14 +59,14 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
         self.updating = False
 
         gvhtml.set_help_topic( self, "gvpquerypropdlg.html" )
-        
+
         # create the general layer properties dialog
         self.create_notebook()
         self.create_pane1()
-        
+
         if self.layer is not None:
             self.layer.connect('display-change', self.refresh_cb)
-        
+
         # Setup Object Drawing Properties Tab
         self.pane2 = gtk.VBox(spacing=10)
         self.pane2.set_border_width(10)
@@ -114,26 +114,26 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
         box.pack_start(self.pixel_mode_om,expand=False)
 
         self.update_gui()
-        
+
         self.show_all()
 
     # Initialize GUI state from underlying object state.
     def update_gui(self):
-        
+
         # GTK2 PORT PENDING - GTK_OBJECT_DESTROYED should no longer be used;
         #   if necessary should respond to destroy signal.
         #if self.flags( DESTROYED ) > 0:
         #    return
         #
-        
+
         if self.layer is None or self.updating == True:
             return
 
         self.updating = True
-        
+
         # Layer name.
         self.layer_name.set_text( self.layer.get_name() )
-        
+
         # Visibility radio buttons
         self.vis_yes.set_active( self.layer.is_visible() )
         self.vis_no.set_active( not self.layer.is_visible() )

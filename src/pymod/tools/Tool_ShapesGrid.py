@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: Tool_ShapesGrid.py,v 1.1.1.1 2005/04/18 16:38:37 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Tool using scrollable text area widget for displaying GvShapes data
@@ -35,12 +35,12 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
     def __init__(self, app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
-     
+
         self.layer = None
         self.shapes = None
         self.viewarea = None
         self.layer_teardown_id=None
-        
+
         self.init_dialog()
         self.init_menu()
 
@@ -65,17 +65,17 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.column_button.connect("toggled",self.refresh_columns)
         self.column_button.set_active(True)
         hbox.pack_start(self.column_button)
-        
+
         rbutton = gtk.Button("Refresh columns")
         rbutton.connect("clicked", self.refresh_columns)
         hbox.pack_start(rbutton,expand=False)
-        
-        
+
+
         button = gtk.Button("close")
         button.connect("clicked", self.close)
         shell.pack_start(button,expand=False)
         button.show()
-        
+
         shell.show_all()
 
         # Trap window close event
@@ -111,9 +111,9 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 	    if func is not None:
                 menu_item.connect("activate", func, args)
             self.cell_popup_menu[0].append(menu_item)
-            
+
         self.cell_popup_menu[0].show_all()
-        
+
         itemlist2=[#('Configuration',None,None),
                   ('Set subset/Selected',self.set_subset_selected_cb,None),
                   ('Set subset/Unseleted',self.set_subset_unselected_cb,None),
@@ -133,25 +133,25 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 	    if func is not None:
                 menu_item.connect("activate", func, args)
             self.cell_popup_menu[1].append(menu_item)
-            
+
         self.cell_popup_menu[1].show_all()
         # Only do actions when grid is visible
         self.active=0
 
-                  
+
     def init_menu(self):
         self.menu_entries.set_entry("Tools/Tabular Shapes Grid",1,self.show_cb)
-        
+
     def clicked_cb(self,*args):
         """ Show popup menus """
-        
+
         if self.shapes is None:
             return
 
         row=args[1]
         if row == -1:
             return
-        
+
         event=args[3]
         if ((event.button == 3) and (not
             (event.state & gtk.GDK.CONTROL_MASK)) and (not
@@ -181,13 +181,13 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
                 else:
                     self.cell_popup_menu[1].popup(None,None,None,event.button,
                                           event.time)
-                
+
 
     def set_subset_selected_cb(self,*args):
         """ Set the grid subset to selected rows only """
 
         selected=self.pgugrid.get_selected_row_indices()
-        
+
         if len(selected) == 0:
             gvutils.warning('No rows selected- ignoring!')
         else:
@@ -195,7 +195,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
     def set_subset_unselected_cb(self,*args):
         """ Set the grid subset to selected rows only """
-        
+
         unselected=self.pgugrid.get_unselected_row_indices()
 
         if len(unselected) == 0:
@@ -210,7 +210,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
     def new_layer_selected_cb(self,*args):
         """ Create new layer of only selected shapes """
-        
+
         sel=self.pgugrid.get_selected_row_indices()
         if len(sel) == 0:
             gvutils.warning('No rows selected- ignoring!')
@@ -221,7 +221,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         if src is None:
             gvutils.warning('No source layer found- ignoring!')
             return
-        
+
         schema=src.get_schema()
         for item in schema:
             newshps.add_field(item[0],item[1],item[2],item[3])
@@ -239,7 +239,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
     def new_layer_unselected_cb(self,*args):
         """ Create new layer of only selected shapes """
-        
+
         unselected=self.pgugrid.get_unselected_row_indices()
 
         if len(unselected) == 0:
@@ -251,7 +251,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         if src is None:
             gvutils.warning('No source layer found- ignoring!')
             return
-        
+
         schema=src.get_schema()
         for item in schema:
             newshps.add_field(item[0],item[1],item[2],item[3])
@@ -294,7 +294,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
             set={}
             key_list=\
                [set.setdefault(e,e) for e in klist if not set.has_key(e)]
-            
+
         else:
             #klist.sort()
             key_list=klist
@@ -305,7 +305,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
                 flist.append(fdict[item])
             else:
                 flist.append("%s")
-            
+
         return key_list,flist
 
     def edit_schema(self,*args):
@@ -314,8 +314,8 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
             return
 
         sch=SchemaDialog(self.shapes,self)
-        
-            
+
+
     def add_property_column(self,*args):
         """ Add a property column """
 
@@ -325,7 +325,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
         if ((pname is None) or (len(pname) == 0)):
             return
-        
+
         current_columns=self.pgugrid.get_current_columns()
         mems=current_columns[0]
         titles=current_columns[1]
@@ -335,7 +335,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         nodatas=current_columns[5]
         justify=current_columns[6]
         tjustify=current_columns[7]
-        
+
         mems.append(pname)
         titles.append(pname)
         editables.append(1)
@@ -348,8 +348,8 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.pgugrid.define_columns(members=mems,titles=titles,
              editables=editables,formats=formats,types=types,
              nodata=nodatas,justify=justify,title_justify=tjustify)
-        
-        
+
+
     def refresh_columns(self,*args):
         """ Update column headers """
         if self.shapes is not None:
@@ -363,7 +363,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         for view in self.app.view_manager.view_list:
             if view.title == args[1]:
                 self.app.view_manager.set_active_view(view)
-                
+
         self.active=1
         self.dialog.show_all()
         self.dialog.window.raise_()
@@ -374,13 +374,13 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.layer_teardown_cb()
         self.dialog.hide()
         return True
-    
+
 
     def layer_update(self,*args):
         # Disconnect from the old layer
         if self.active == 0:
             return
-        
+
         self.layer_teardown_cb()
 
         try:
@@ -406,7 +406,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
 
             self.pgugrid.set_source(self.layer,self.viewarea)
             self.pgugrid.define_columns(members=key_list,formats=fmt_list)
-            
+
             self.layer_teardown_id = \
                 self.layer.connect('teardown',self.layer_teardown_cb)
         except:
@@ -441,12 +441,12 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         """ Test the grid selection mechanism- debug code """
         print "cell_cb..."
         print "cell selection: ",args[1]
-            
+
     def cellch_cb(self,*args):
         """ Test the grid selection mechanism- debug code """
         print "cellch_cb..."
         print "altered cell: ",args[1]
-            
+
     def row_cb(self,*args):
         """ Test the grid selection mechanism- debug code """
         print "row_cb..."
@@ -454,12 +454,12 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         src=self.pgugrid.src2grid(args[1])
         print "grid row selection: ",src
         print "row selection 2: ",self.pgugrid.grid2src(src)
-        
+
     def column_cb(self,*args):
         """ Test the grid selection mechanism- debug code """
         print "column_cb..."
         print "column selection: ",args[1]
-            
+
 
 class SchemaDialog(gtk.Window):
     def __init__(self,shapes,shapesgridtool=None):
@@ -491,7 +491,7 @@ class SchemaDialog(gtk.Window):
         self.new_field_precision_entry.set_text('0')
         self.new_field_precision_entry.set_editable(False)
         self.new_field_precision_entry.set_sensitive(False)
-        
+
         self.new_field_types = ('string','integer','float')
         self.new_field_type_menu = gvutils.GvOptionMenu(self.new_field_types, self.new_field_precision_cb)
         self.new_field_type_menu.set_history(0)
@@ -506,10 +506,10 @@ class SchemaDialog(gtk.Window):
         button = gtk.Button("Add")
         box3.attach(button,0,2,4,5)
         button.connect("clicked", self.add_field)
-        
+
         shell.pack_start(nf_frame)
         nf_frame.show_all()
-        
+
         # Ability to delete fields?
         self.fill_grid()
         self.grid.resize_to_default()
@@ -529,7 +529,7 @@ class SchemaDialog(gtk.Window):
     def add_field(self,*args):
         """ Add field """
         import string
-        
+
         sch=self.shapes.get_schema()
         name=self.new_field_name_entry.get_text()
 
@@ -538,7 +538,7 @@ class SchemaDialog(gtk.Window):
                 gvutils.error('Field '+name+' already present!')
                 return
 
-        
+
         ftype = self.new_field_types[self.new_field_type_menu.get_history()]
 
 
@@ -561,7 +561,7 @@ class SchemaDialog(gtk.Window):
         self.fill_grid()
         if self.shapesgridtool is not None:
             self.shapesgridtool.refresh_columns()
-            
+
     def changed_field(self,*args):
         """ User changed a field """
         cell=args[1]
@@ -572,7 +572,7 @@ class SchemaDialog(gtk.Window):
                       self.grid.get_cell_data_string(cell[0],cell[1]))
             if self.shapesgridtool is not None:
                 self.shapesgridtool.refresh_columns()
-          
+
         elif cell[1] == 3:
             # precision updated
             # width updated
@@ -582,15 +582,15 @@ class SchemaDialog(gtk.Window):
                      self.grid.get_cell_data_string(cell[0],cell[1]))
                 if self.shapesgridtool is not None:
                     self.shapesgridtool.refresh_columns()
-                
+
             else:
                 if self.grid.get_cell_data_string(cell[0],cell[1]) != '0':
                     self.grid.set_cell_data_string(cell[0],cell[1],0)
                     gvutils.error('Precision can only be reset for float.')
-                   
+
         else:
             gvutils.error('Name and type of a field cannot be changed.')
-            
+
 
     def new_field_precision_cb(self,*args):
         if self.new_field_types[self.new_field_type_menu.get_history()] ==\
@@ -602,9 +602,9 @@ class SchemaDialog(gtk.Window):
             self.new_field_precision_entry.set_text('0')
             self.new_field_precision_entry.set_editable(False)
             self.new_field_precision_entry.set_sensitive(False)
-            
-        
+
+
 
 TOOL_LIST = ["ShapesGridTool"]
-                   
-        
+
+

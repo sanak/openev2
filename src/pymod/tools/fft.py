@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: fft.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV Python tools
 # Purpose:  Tool to calculate forward or inverse Fast Fourier Transform
@@ -43,7 +43,7 @@ def layer_is_raster(layer):
         return False
 
 class FFTTool(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
         self.init_menu()
@@ -57,7 +57,7 @@ class FFTTool(gviewapp.Tool_GViewApp):
 
 class FFTDialog(gtk.Window):
     def __init__(self,app=None):
-        
+
         gtk.Window.__init__(self)
         self.set_title('Fast Fourier Transform')
         self.create_gui()
@@ -101,7 +101,7 @@ class FFTDialog(gtk.Window):
         execute_btn = gtk.Button("Ok")
         execute_btn.connect("clicked", self.execute_cb)
 	box2.pack_start(execute_btn)
-        
+
         close_btn = gtk.Button("Cancel")
         close_btn.connect("clicked", self.close)
         box2.pack_start(close_btn)

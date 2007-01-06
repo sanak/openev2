@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgufilesel.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Simplified File Selection API.
@@ -140,13 +140,13 @@ def SimpleFileSelectCB( item, ok_cb, *args ):
     The following fragment passed to GtkExtra.MenuFactory creates a File
     Open menu item, and it launches a file selector.  When a file is called
     the caller supplied self.file_open_by_name() method is called.
-    
+
             ('File/Open', '<control>O', pgufilesel.SimpleFileSelectCB,
                                         self.file_open_by_name ),
 
     def file_open_by_name(self, filename, *args):
         ...
-                                        
+
     """
 
     if len(args) == 0: 
@@ -167,7 +167,7 @@ class pguFileSelection(_gtk.FileSelection):
 
         elif simple_file_sel_dir is not None:
             self.set_filename(simple_file_sel_dir)
-            
+
         self.ok_button.connect  ("clicked", self.ok_cb)
         self.cancel_button.connect("clicked", self.cancel_cb)
         self.connect("delete_event", self.cancel_cb)
@@ -186,7 +186,7 @@ class pguFileSelection(_gtk.FileSelection):
 	self.hide()
 	self.destroy()
 	_gtk.main_quit()
-	
+
 
 def GetFileName(title = 'Select File', default_filename = None):
     win = pguFileSelection(title, default_filename)

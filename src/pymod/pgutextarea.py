@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgutextarea.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Scrollable text area widget
@@ -66,13 +66,13 @@ documentation ;)
 import gtk
 
 class pguTextArea( gtk.Table ):
-    
+
     def __init__(self):
         gtk.Table.__init__( self, rows=2, columns=2 )
-        
+
         self.hadj = gtk.Adjustment()
         self.vadj = gtk.Adjustment()
-        
+
         self._hscroll = gtk.HScrollbar( adj = self.hadj )
         self._vscroll = gtk.VScrollbar( adj = self.vadj )
         self._area = gtk.DrawingArea()
@@ -87,29 +87,29 @@ class pguTextArea( gtk.Table ):
         self.start_col = 0
         self.freeze_count = 0
         self.updating = False
-        
+
         frm = gtk.Frame()
         frm.set_shadow_type( gtk.SHADOW_ETCHED_OUT )
         frm.add(self._area)
         self.attach( frm, 0, 1, 0, 1 )
         self.attach( self._vscroll, 1, 2, 0, 1, xoptions=gtk.SHRINK)
         self.attach( self._hscroll, 0, 1, 1, 2, yoptions=gtk.SHRINK )
-                                                
+
         self.show_all()
-        
+
         self._area.connect( 'expose-event', self.expose )
         self.connect( 'configure-event', self.configure )
         self.hadj.connect( 'value-changed', self.changed )
         self.vadj.connect( 'value-changed', self.changed )
         self._area.connect( "scroll-event", self.event )
         self.connect( 'style-set', self.expose )
-        
+
     def freeze( self ):
         """Freeze the widget - no further updates until thawed
         """
         self.freeze_count = self.freeze_count + 1
         return
-        
+
     def thaw( self ):
         """Thaw the widget - this may not cause an update unless
         the freeze count reaches 0
@@ -118,7 +118,7 @@ class pguTextArea( gtk.Table ):
         if self.freeze_count == 0:
             self.calc_adjustments()
             self.expose()
-        
+
     """
     this would handle scroll events but it seems to get into an endless
     loop sometimes????
@@ -145,7 +145,7 @@ class pguTextArea( gtk.Table ):
 
     def append_text( self, text ):
         """Append a block of text to the widget
-        
+
         Record new max width/length for scrollbar calculations
         """
         if len(text) > 0 and text[-1] == '\n':
@@ -160,7 +160,7 @@ class pguTextArea( gtk.Table ):
             #use ascent only, height (ascent+descent) includes extra whitespace
             if self.line_height == 0:
                 self.line_height = int( font.extents(row)[3] )
-        
+
         if self.freeze_count == 0:
             self.calc_adjustments()
 
@@ -169,7 +169,7 @@ class pguTextArea( gtk.Table ):
         """
         if self.freeze_count > 0:
             return
-            
+
         self.updating = True
         geom = self._area.get_allocation()
         #horizontal min/max are 0 and max line length - page size
@@ -192,18 +192,18 @@ class pguTextArea( gtk.Table ):
         self.vadj.set_all( vpos, 0, vmax, 1, vstep, vpage )
         self.vadj.changed()
         self.updating = False
-        
+
     def expose( self, *args ):
         """Draw the widget
         """
         if self.freeze_count > 0:
             return
-            
+
         if not (self.flags() & gtk.REALIZED):
             return
         if not (self.flags() & gtk.MAPPED):
             return
-            
+
         geom = self._area.get_allocation()
         pix = gtk.create_pixmap( self._area.window, geom[2], geom[3] )    
         style = self.get_style()
@@ -212,7 +212,7 @@ class pguTextArea( gtk.Table ):
         gtk.draw_rectangle(pix, style.black_gc, False, 0, 0, 
                                   geom[2], geom[3])
         font = self.get_style().font
-        
+
         v_offset = 0
         for line in self.contents[self.start_line:]:
             v_offset = v_offset + self.line_height
@@ -220,21 +220,21 @@ class pguTextArea( gtk.Table ):
                                     v_offset, line[self.start_col:] )
             if v_offset > geom[3]:
                 break
-        
+
         self._area.draw_pixmap(style.white_gc, pix, 0, 0, 0, 0, geom[2]-1, geom[3]-1 )
 
         return False
-           
+
     def configure( self, widget, event, *args ):
         """Track changes in width, height
         """
         self.resize_children()
         self.calc_adjustments()
         self.expose()
-        
+
     def scroll_to( self, line ):
         """Scroll the window to the requested line number
-        
+
         Attempt to put the line at the top.  If there are less lines
         after the requested line than will fit the page, then it will
         move to a lower line number to display the whole last page
@@ -245,41 +245,41 @@ class pguTextArea( gtk.Table ):
             self.vadj.set_value( line )
         if int(self.hadj.value) != 0:
             self.hadj.set_value( 0 )
-            
+
     def page_up(self):
         self.scroll_to( self.vadj.value - self.vadj.page_size )
-        
+
     def page_down(self):
         self.scroll_to( self.vadj.value + self.vadj.page_size )
-    
+
 
 class TestText( gtk.Window ):
 
     def __init__(self):
         gtk.Window.__init__( self )
         self.set_title("Test TextArea")
-        
+
         vbox = gtk.VBox()
         self.text = pguTextArea()
         self.entry = gtk.Entry()
         self.button = gtk.Button( "insert" )
         self.button.connect( "clicked", self.insert_text )
-        
+
         vbox.pack_start( self.text )
         vbox.pack_start( self.entry, expand=False )
         vbox.pack_start( self.button, expand=False )
         self.add(vbox)
         self.show_all()
-        
+
     def insert_text( self, *args ):
         self.text.append_text( self.entry.get_text() )
         self.entry.set_text( "" )
-        
-        
+
+
 if __name__ == "__main__":
     win = TestText()
     for i in range(3):
         win.text.append_text( "This is a\ntest of some\nlonger inserts and should work really well" )
     win.connect( 'delete-event', gtk.main_quit )
     gtk.main()
-    
+

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: oeattedit.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Shape attribute display, and editing.
@@ -54,12 +54,12 @@ def launch():
 def launch_hidden():
     if not hasattr(gview,'oeattedit'):
         gview.oeattedit = OEAttEdit()
-        
+
 class OEAttEdit(gtk.Window,Signaler):
 
     def __init__(self):
         gtk.Window.__init__(self)
-        
+
         self.set_title('Shape Attributes')
         gview.app.sel_manager.subscribe( 'selection-changed',
                                          self.gui_update )
@@ -69,7 +69,7 @@ class OEAttEdit(gtk.Window,Signaler):
         # signal for external tools to connect to
         self.publish('hidden')
         self.publish('shown')
-        
+
         # self.text_contents = ''
         self.selected_shape = None
         self.layer = None
@@ -92,7 +92,7 @@ class OEAttEdit(gtk.Window,Signaler):
         self.hide()
         self.visibility_flag = 0
         Signaler.notify(self, 'hidden')
-        
+
         return True
 
     def reconnect(self, *args):
@@ -100,7 +100,7 @@ class OEAttEdit(gtk.Window,Signaler):
                                          self.gui_update )
         gview.app.sel_manager.subscribe( 'subselection-changed',
                                          self.gui_update )
-        
+
     def create_gui(self):
         box1 = gtk.VBox()
         self.add(box1)
@@ -161,7 +161,7 @@ class OEAttEdit(gtk.Window,Signaler):
         self.new_field_precision_entry.set_text('0')
         self.new_field_precision_entry.set_editable(False)
         self.new_field_precision_entry.set_sensitive(False)
-        
+
         self.new_field_types = ('string','integer','float')
         self.new_field_type_menu = gvutils.GvOptionMenu(self.new_field_types, self.new_field_precision_cb)
         self.new_field_type_menu.set_history(0)
@@ -170,7 +170,7 @@ class OEAttEdit(gtk.Window,Signaler):
         box3.pack_start(self.new_field_precision_entry,expand=False,fill=False)
         box2.pack_start(nf_frame)
         nf_frame.show_all()
-        
+
         button = gtk.Button("close")
         button.connect("clicked", self.close)
         box2.pack_start(button)
@@ -187,7 +187,7 @@ class OEAttEdit(gtk.Window,Signaler):
             self.new_field_precision_entry.set_text('0')
             self.new_field_precision_entry.set_editable(False)
             self.new_field_precision_entry.set_sensitive(False)
-            
+
     def gui_update(self,*args):
         text_contents = ''
         self.text_buff.set_text('')
@@ -224,7 +224,7 @@ class OEAttEdit(gtk.Window,Signaler):
             return
 
         shape = shape.copy()
-        
+
         lines = string.split(self.text_buff.get_text(self.text_buff.get_bounds()),'\n')
         #lines = string.split(self.text.get_chars(0,-1),'\n')
         for line in lines:
@@ -238,7 +238,7 @@ class OEAttEdit(gtk.Window,Signaler):
                         property_exists=1
                 if property_exists != 1:
                     ftype = self.new_field_types[self.new_field_type_menu.get_history()]
-                       
+
                     response = \
                        gvutils._message_box('Confirmation',
                          'Create new ' + ftype + '-type property ' + tokens[0] + '?' ,
@@ -249,7 +249,7 @@ class OEAttEdit(gtk.Window,Signaler):
                         except:
                             gvutils.error('Field width must be an integer!')
                             continue
-                        
+
                         if ftype == 'float':
                             try:
                                 fprec = int(self.new_field_width_entry.get_text())
@@ -258,7 +258,7 @@ class OEAttEdit(gtk.Window,Signaler):
                                 continue
                         else:
                             fprec = 0
-                            
+
                         shapes.add_field(tokens[0],ftype,fwidth,fprec)
 
         shapes[self.selected_shape] = shape

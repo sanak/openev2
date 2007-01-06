@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: gvsdsdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Subdataset Selection Dialog
@@ -46,7 +46,7 @@ class GvSDSDlg(gtk.Window):
         layerbox = gtk.ScrolledWindow()
         shell.pack_start(layerbox)
         layerlist = gtk.CList(cols=2)
-            
+
         layerbox.add_with_viewport(layerlist)
         layerlist.set_shadow_type(gtk.SHADOW_NONE)
         layerlist.set_selection_mode(gtk.SELECTION_SINGLE)
@@ -77,7 +77,7 @@ class GvSDSDlg(gtk.Window):
         self.not_sel_pixmap = \
             gtk.Image().set_from_file(os.path.join(gview.home_dir,'pics',
                                         'ck_off_l.xpm'))
-        
+
         shell.show_all()
 
         self.dataset = dataset
@@ -88,12 +88,12 @@ class GvSDSDlg(gtk.Window):
         self.sds_sel = []
         for entry in self.sds:
             self.sds_sel.append( 0 )
-            
+
         self.show_all()
 
     def help_cb(self,*args):
         pass
-    
+
     def close(self,*args):
         self.hide()
         return True
@@ -114,7 +114,7 @@ class GvSDSDlg(gtk.Window):
         i = 0
         for entry in sds:
             lst.append(('', entry[1]))
-                
+
             lst.set_pixmap(i, 0, self.not_sel_pixmap)
 
             i = i + 1
@@ -123,22 +123,22 @@ class GvSDSDlg(gtk.Window):
 
     def list_clicked(self, lst, event):
         #print event.type
-        
+
         row, col = lst.get_selection_info(int(event.x), int(event.y))        
 	lst.emit_stop_by_name('button-press-event')
 
         if event.type is gtk.gdk._2BUTTON_PRESS:
             for i in range(len(self.sds_sel)):
                 self.sds_sel[i] = 0
-                
+
             self.sds_sel[row] = 1
             self.accept()
         else:
             self.sds_sel[row] = not self.sds_sel[row]
-        
+
         if self.sds_sel[row]:
             lst.set_pixmap(row, 0, self.sel_pixmap)
         else:
             lst.set_pixmap(row, 0, self.not_sel_pixmap)
-        
+
 

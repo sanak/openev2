@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: mil_symbols.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  LBTB GDA
 # Purpose:  test page for military symbols
@@ -33,7 +33,7 @@ import os
 import gviewapp
 
 class MilitarySymbolTool(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
         self.init_menu()
@@ -54,7 +54,7 @@ class RenderTest(gtk.Window):
         self.set_title('Military Symbols')
 
         self.view = gview.app.sel_manager.get_active_view()
-        
+
         self.text_contents = ''
         self.selected_shape = None
         self.layer = None
@@ -93,7 +93,7 @@ class RenderTest(gtk.Window):
         self.prev_btn = gtk.Button("<--- Previous")
         self.prev_btn.connect("clicked", self.prev_cb)
         box2.pack_start(self.prev_btn)
-        
+
         self.next_btn = gtk.Button("Next --->")
         self.next_btn.connect("clicked", self.next_cb)
         box2.pack_start(self.next_btn)
@@ -110,7 +110,7 @@ class RenderTest(gtk.Window):
 
     def show_step( self ):
         self.cleanup()
-        
+
         func = self.step_list[self.step]
         func()
 
@@ -124,7 +124,7 @@ class RenderTest(gtk.Window):
 
     def set_step_name( self, text ):
         self.set_title( '%d: %s' % (self.step, text) )
-    
+
     def set_text( self, text ):
 
         text_buff = self.text_view.get_buffer()
@@ -140,7 +140,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Vector symbols (GvShapes via symbolmanager requested via ogrfs).
-        
+
     def size_symbols( self ):
         self.set_step_name( 'Military Size Symbols' )
         self.set_text( \
@@ -151,15 +151,15 @@ class RenderTest(gtk.Window):
         gview.undo_register( shapes)
 
         sm = gview.GvSymbolManager()
-        
+
         #symbol_size * base_size * 2 define the size of the symbol on screen.
         base_size = 1.0
         symbol_size = 3.0 
-        
+
         #the number of pixels wide to make the task force indicator
         tf_offset = ( symbol_size * base_size * 2 ) + 2 
         symbol_offset = tf_offset
-                           
+
         #create the circle symbol as a multiline with n points
         import math
         circle = gview.GvShape( type=gview.GVSHAPE_LINE )
@@ -176,7 +176,7 @@ class RenderTest(gtk.Window):
         filled_circle.set_property( "_gv_ogrfs", "PEN(w:1);BRUSH()" )
         sm.inject_vector_symbol( "%scircle" % os.sep, circle )
         sm.inject_vector_symbol( "%sfilled_circle" % os.sep, filled_circle)
-        
+
         #create a vertical bar symbol
         shape = gview.GvShape(type=gview.GVSHAPE_LINE )
         shape.add_node( 0.0, -base_size, 0.0 )
@@ -196,7 +196,7 @@ class RenderTest(gtk.Window):
         shape.add_node( base_size, -base_size, 0.0 )
         shape.set_property( "_gv_ogrfs", "PEN(w:1)" )
         sm.inject_vector_symbol( "%sline_315" % os.sep, shape )
-        
+
         shape = gview.GvShape(type=gview.GVSHAPE_POINT )
         shape.add_node( 0.0, 0.0, 0.0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(id:%sline_45);SYMBOL(id:%sline_315)" % ( os.sep, os.sep ) )
@@ -205,7 +205,7 @@ class RenderTest(gtk.Window):
         #taskforce 1
         shape = self.create_taskforce_indicator( 1, symbol_size * base_size, tf_offset )
         sm.inject_vector_symbol( "%stf_1" % os.sep, shape )
-        
+
         #taskforce 2
         shape = self.create_taskforce_indicator( 2, symbol_size * base_size, tf_offset )
         sm.inject_vector_symbol( "%stf_2" % os.sep, shape )
@@ -221,18 +221,18 @@ class RenderTest(gtk.Window):
         #taskforce 5
         shape = self.create_taskforce_indicator( 5, symbol_size * base_size, tf_offset )
         sm.inject_vector_symbol( "%stf_5" % os.sep, shape )
-        
+
         #taskforce 6
         shape = self.create_taskforce_indicator( 6, symbol_size * base_size, tf_offset )
         sm.inject_vector_symbol( "%stf_6" % os.sep, shape )
-        
+
 
         #team symbol
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 0.0, 0.0, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(id:%scircle,s:%s);SYMBOL(id:%sline_45,s:%s)" % (os.sep, symbol_size, os.sep, symbol_size) )
         sm.inject_vector_symbol( "%steam" % os.sep, shape )
-        
+
         #squad symbol
         shape = self.create_size_indicator( "filled_circle", 1, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%ssquad" % os.sep, shape )
@@ -248,15 +248,15 @@ class RenderTest(gtk.Window):
         #company symbol
         shape = self.create_size_indicator( "vertical_bar", 1, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%scompany" % os.sep, shape )
-        
+
         #battalion symbol
         shape = self.create_size_indicator( "vertical_bar", 2, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sbattalion" % os.sep, shape )
-        
+
         #regiment symbol
         shape = self.create_size_indicator( "vertical_bar", 3, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sregiment" % os.sep, shape )
-        
+
         #brigade symbol
         shape = self.create_size_indicator( "cross", 1, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sbrigade" % os.sep, shape )
@@ -264,30 +264,30 @@ class RenderTest(gtk.Window):
         #division symbol
         shape = self.create_size_indicator( "cross", 2, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sdivision" % os.sep, shape )
-        
+
         print 'Division:' + shape.get_property('_gv_ogrfs')
-        
+
         #corps symbol
         shape = self.create_size_indicator( "cross", 3, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%scorps" % os.sep, shape )
-        
+
         #army symbol
         shape = self.create_size_indicator( "cross", 4, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sarmy" % os.sep, shape )
-        
+
         #armygroup symbol
         shape = self.create_size_indicator( "cross", 5, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sarmygroup" % os.sep, shape )
-        
+
         #region symbol
         shape = self.create_size_indicator( "cross", 6, symbol_size, symbol_offset )
         sm.inject_vector_symbol( "%sregion" % os.sep, shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 10, 10, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"team\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 10, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%steam)" % os.sep ) 
@@ -302,7 +302,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 15, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"squad\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 15, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%ssquad)" % os.sep ) 
@@ -317,7 +317,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 20, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"section\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 20, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%ssection)" % os.sep ) 
@@ -332,7 +332,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 25, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"platoon\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 25, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%splatoon)" % os.sep ) 
@@ -347,7 +347,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 30, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"company\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 30, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%scompany)" % os.sep ) 
@@ -362,7 +362,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 35, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"battalion\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 35, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sbattalion)" % os.sep ) 
@@ -377,7 +377,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 40, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"regiment\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 40, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sregiment)" % os.sep ) 
@@ -392,7 +392,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 45, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"brigade\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 45, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sbrigade)" % os.sep ) 
@@ -407,7 +407,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 50, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"division\")") 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 50, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sdivision)" % os.sep ) 
@@ -422,7 +422,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 55, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"corps\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 55, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%scorps)" % os.sep ) 
@@ -437,7 +437,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 60, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"army\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 60, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sarmy)" % os.sep ) 
@@ -452,7 +452,7 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 65, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"armygroup\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 65, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sarmygroup)" % os.sep ) 
@@ -467,12 +467,12 @@ class RenderTest(gtk.Window):
         shape.set_node( 10, 70, node=0 )
         shape.set_property( "_gv_ogrfs", "LABEL(c:#00FFFF,t:\"region\")" ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 30, 70, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sregion)" % os.sep ) 
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 50, 70, node=0 )
         shape.set_property( "_gv_ogrfs", "SYMBOL(c:#00FFFF,id:%sregion);SYMBOL(c:#00FFFF,id:%stf_6" % (os.sep,os.sep) ) 
@@ -482,7 +482,7 @@ class RenderTest(gtk.Window):
 
         #turn off display lists for now.
         #gview.set_preference('display_lists', "OFF" )
-        
+
         layer = gview.GvShapesLayer( shapes )
         layer.set_name( 'test' )
         layer.set_property( "_gl_antialias", "1" )
@@ -490,7 +490,7 @@ class RenderTest(gtk.Window):
         self.view.set_active_layer( layer )
 
         self.view.fit_extents( 0, 0, 100, 100 )
-        
+
     def create_size_indicator( self, sym_name, repeat, size, offset ):
         """
         compose a size indicator based on some number (repeat) of symbols
@@ -511,9 +511,9 @@ class RenderTest(gtk.Window):
             ogrfs = ogrfs + sym
             dx_val = dx_val + offset
         shape.set_property( "_gv_ogrfs", ogrfs )
-        
+
         return shape
-        
+
     def create_taskforce_indicator( self, repeat, size, offset ):
         """
         create a taskforce indicator which is a rectangle with
@@ -522,20 +522,20 @@ class RenderTest(gtk.Window):
         the number of pixels apart that they are.  Size is the
         vertical size of the symbol.
         """
-        
+
         dx = ((offset/2.0) * (repeat)) + 2
         dy = size + 2
 
         shape = gview.GvShape( type = gview.GVSHAPE_LINE )
-        
+
         shape.add_node( -dx, -dy )
         shape.add_node( -dx, dy )
         shape.add_node( dx, dy )
         shape.add_node( dx, -dy )
-        
+
         return shape
-        
-                
+
+
 
 
 

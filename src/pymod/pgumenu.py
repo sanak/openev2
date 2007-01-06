@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgumenu.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Extended Menu handling classes
@@ -103,7 +103,7 @@ class pguMenuFactory(gtk.Widget):
                 hbox.pack_start(self.create_pixmap(img_name), expand=False)
             except:
                 print 'Unable to load menu pixmap: ' + img_name
-        
+
             lbl = gtk.Label(label[end+1:])
             lbl.set_justify(gtk.JUSTIFY_LEFT)
             hbox.pack_start(lbl, expand=False)
@@ -112,7 +112,7 @@ class pguMenuFactory(gtk.Widget):
             item.show_all()
         elif label[:8] == '<toggle>':
             item = pguToggleMenuItem(label[8:])
-                
+
         elif label[:7] == '<check>':
             item = gtk.CheckMenuItem(label[7:])
         else:
@@ -227,36 +227,36 @@ class pguMenuFactory(gtk.Widget):
         return gtk.Pixmap(pix, mask)
 
 class pguToggleMenuItem( gtk.MenuItem ):
-    
+
     def __init__(self, label=""):
         import pgutogglebutton
         gtk.MenuItem.__init__( self )
-            
+
         hbox = gtk.HBox( spacing = 2 )
         self.tb = pgutogglebutton.pguToggleButton( )
         self.tb.connect( 'toggled', self.toggled_cb)
         hbox.pack_start( self.tb, expand=False )
-        
+
         evt_box = gtk.EventBox()
         evt_box.connect( 'button-release-event', self.toggle_it )
-        
+
         lbl = gtk.Label( label )
         evt_box.add( lbl )
-        
+
         hbox.pack_start( evt_box )
         self.add( hbox )
         self.show_all()
-        
+
     def set_active( self, bState ):
         self.tb.set_active( bState )
-        
+
     def get_active( self ):
         return self.tb.get_active()
-        
+
     def toggle_it( self, widget, event, *args ):
         self.set_active( not self.tb.get_active() )
-        
+
     def toggled_cb( self, widget, *args ):
         self.activate()
         self.get_ancestor( gtk.MenuShell.get_type() ).deactivate()
-        
+

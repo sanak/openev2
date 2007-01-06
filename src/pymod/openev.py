@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: openev.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  OpenEV Application Mainline
@@ -67,7 +67,7 @@ def main():
         mfile=None
         ifile=None
         pfile=None
-        
+
     tfile = None
 
     for opt in options[0:]:
@@ -95,4 +95,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+

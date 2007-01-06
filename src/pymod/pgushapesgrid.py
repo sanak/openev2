@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgushapesgrid.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Scrollable text area widget for displaying GvShapes data
@@ -38,18 +38,18 @@ import Numeric
 from gvsignaler import Signaler
 
 class pguShapesGrid( gtk.Table, Signaler ):
-    
+
     def __init__(self,editable=1):
-        
+
         self._editable=editable
         if self._editable == 1:
             gtk.Table.__init__( self, rows=3, columns=2 )
         else:
             gtk.Table.__init__( self, rows=2, columns=2 )
-            
+
         self.hadj = gtk.Adjustment()
         self.vadj = gtk.Adjustment()
-        
+
         self._hscroll = gtk.HScrollbar(self.hadj)
         self._vscroll = gtk.VScrollbar(self.vadj)
         self._area = gtk.DrawingArea()
@@ -64,7 +64,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self._entry = gtk.Entry()
             self._entry.set_sensitive( False )
             self._entry.connect( 'changed', self.entry_changed )
-        
+
         #the data source
         self.source = None
         self.source_changed_id = None
@@ -77,51 +77,51 @@ class pguShapesGrid( gtk.Table, Signaler ):
         self.subindices = None
         self.inv_subindices = None
         self.sort_reverse=0
-        
+
         #string values to use as titles
         self.titles = [ ]
-        
+
         #fonts for drawing titles and cells put here
         self.title_font = None
         self.cell_font = None
-        
+
         #the overall size of the data set
         self.n_rows = 0
         self.n_cols = 0
-        
+
         #the height of a single row and title row
         self.row_height = 0
         self.title_height = 0
-        
+
         #the row/col to put in the top left corner
         self.start_row = 0
         self.start_col = 0
-        
+
         #the current row/col selected (when we support clicking :)
         self.current_row = 0      # current row in display widget coordinates
         self.current_row_src = -1 # current row in source coordinates (source index)
         self.current_col = 0
-        
+
         self.col_widths = []
-               
+
         #the number of pixels around each cell
         self.cell_half = 4
         self.cell_full = (self.cell_half) * 2 + 1
-        
+
         self.max_width = 0
         self.max_height = 0
-        
+
         #flag to recalculate the adjustments
         self.bCalcAdjustments = True
 
         # list of indices of currently selected shapes (NOT the same as the
         # currently editable cell)
         self.selected_shapes=None
-        
+
         #set to true if changing some value that would end up causing multiple
         #expose events or an endless loop even.
         self.updating = False
-        
+
         frm = gtk.Frame()
         frm.set_shadow_type(gtk.SHADOW_ETCHED_OUT)
         frm.add(self._area)
@@ -135,7 +135,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self.attach( frm, 0, 1, 0, 1, xoptions=gtk.FILL, yoptions=gtk.FILL )
             self.attach( self._vscroll, 1, 2, 0, 1, xoptions=gtk.SHRINK)
             self.attach( self._hscroll, 0, 1, 1, 2, yoptions=gtk.SHRINK )
-            
+
         self.show_all()
 
         # signals: Note that the right-click (button 3) event
@@ -144,14 +144,14 @@ class pguShapesGrid( gtk.Table, Signaler ):
         self.publish('clicked-selected-row')
         self.publish('clicked-unselected-row')
         self.publish('title-clicked')
-        
+
         self._area.connect( 'expose-event', self.expose )
         self._area.connect( 'configure-event', self.configure )
         self._area.connect( 'button-press-event', self.click )
         self.hadj.connect( 'value-changed', self.changed )
         self.vadj.connect( 'value-changed', self.changed )
         self.connect( 'style-set', self.expose )
-        
+
     def entry_changed( self, widget ):
         """called when the user has changed the text in an entry
         """
@@ -159,18 +159,18 @@ class pguShapesGrid( gtk.Table, Signaler ):
             if self.current_row > 0:
                 self.source[self.current_row_src].set_property( \
                     self.titledict[self.titles[self.current_col]], self._entry.get_text() )
-                    
+
         self.expose()
-        
+
     def click( self, widget, event ):
         """the user clicked the widget, select a cell?
         """
-        
+
         # If left button clicked, select/delect a row; if right button
         # clicked, select a column.
         if len(self.col_widths) < 1:
             return
-        
+
         #
         # determine the column that the user clicked in by first offsetting
         # for the current start column (accounts for columns scrolled off the
@@ -179,7 +179,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         current = 0
         for i in range(self.start_col):
             current = current + self.col_widths[i] + self.cell_full
-        
+
         #
         # now actually look for the right column.  If nCol is None at the end
         # then the user clicked off the right edge.
@@ -191,9 +191,9 @@ class pguShapesGrid( gtk.Table, Signaler ):
             if event.x < current_temp:
                 nCol = i
                 break
-            
+
         current = current + current_temp
-        
+
         #
         # now determine the row.  If its 0 then they clicked a 'title'.  If it
         # is None then they clicked off the bottom edge.
@@ -212,7 +212,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             row = max(self.start_row-1,0) + int(event.y / (self.row_height + self.cell_full))
             if row <= self.n_rows:
                 nRow = row
-        
+
         if nRow == 0 and nCol is not None:
             cprop=self.titledict[self.titles[nCol]]
             Signaler.notify(self, 'title-clicked',nCol,cprop)
@@ -233,7 +233,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             if self._editable == 1:
                 self._entry.set_sensitive( False )
             self.expose()
-         
+
         else:
             self.current_row = nRow
             self.current_row_src = self.grid2src(nRow)
@@ -250,48 +250,48 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     self._entry.set_sensitive( False )
 
             self.expose()           
-        
-            
+
+
     def changed( self, widget ):
         """Track changes to the scrollbars and record the 
         """
-        
+
         self.start_row = int(self.vadj.value)
         self.start_col = int(self.hadj.value)
         self.expose()
-        
+
     def set_subset( self, subset = []):
         """Sets an array of shape indexes that constitute a displayable
         subset of the shapes
-        
+
         subset - list of integer values
-        
+
         If selected is None or an empty list, then all records will be
         displayed.
         """
         if subset is None:
             subset = []
-            
+
         self.subset = subset
-        
+
         self.start_row = 0
         self.start_col = 0
         if len(self.subset) > 0:
             self.n_rows = len(self.subset)
-        
+
         self.bCalcAdjustments = True
         self.source_sort()
         self.expose()
 
     def set_source( self, source, titledict=None, hidden=None ):
         """Set the data source
-        
+
         shapes - a GvShapes instance
 
         titledict - dictionary of titles for properties (optional)
 
         hidden - properties to hide
-        
+
         reset all the internal parameters
         """       
         self.clear()
@@ -322,9 +322,9 @@ class pguShapesGrid( gtk.Table, Signaler ):
         self.sort_reverse=0
         self.subindices=None
         self.inv_subindices=None
-        
+
         self.sort_property=None
-        
+
         self.titledict={}
         if titledict is None:
             titledict={}
@@ -344,7 +344,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                 else:
                     self.titles.append(title)
                     self.titledict[title]=title
-                
+
         #update the scrollbars
         self.bCalcAdjustments = True
         self.expose()
@@ -354,7 +354,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         # to grid row # (1...Nsrc or 1...Nsubset)
         if ((self.source is None) or (ss_index > len(self.source)-1) or (ss_index < 0)):
             return 0
-        
+
         if len(self.subset) > 0:
             if ss_index > len(self.subset)-1:
                 return 0
@@ -369,7 +369,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         # to grid row # (1...Nsrc or 1...Nsubset)
         if ((self.source is None) or (s_index > len(self.source)-1) or (s_index < 0)):
             return 0
-        
+
         if len(self.subset) > 0:
             ss_index=None
             for ind in range(len(self.subset)):
@@ -377,7 +377,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     ss_index=ind
             if ss_index is None:
                 return 0
-            
+
             grid_row = self.subindices[ss_index] 
         else:
             grid_row = self.indices[s_index]
@@ -389,7 +389,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         # to source or subset index # (1...Nsrc-1 or 1...Nsubset-1)
         if ((self.source is None) or (grid_row > len(self.source)) or (grid_row < 1)):
             return -1
-        
+
         if len(self.subset) > 0:
             if grid_row > len(self.subset):
                 return -1
@@ -404,7 +404,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         # to source index # (1...Nsrc-1)
         if ((self.source is None) or (grid_row > len(self.source)) or (grid_row < 1)):
             return -1
-        
+
         if len(self.subset) > 0:
             if grid_row > len(self.subset):
                 return -1
@@ -414,7 +414,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
 
         return src_index
 
-            
+
     def source_sort( self, sort_property=None,reverse=None ):
         # Need to call expose event after sorting to display
         # inv_indices/inv_subindices map (nRow-1)->source/subset
@@ -425,14 +425,14 @@ class pguShapesGrid( gtk.Table, Signaler ):
         # clear editing cell selections
         self.current_row = 0
         self.current_row_src = -1
-        
+
         if sort_property is None:
             # default to last one if sort property not specified
             sort_property=self.sort_property
-            
+
         if reverse is None:
             reverse=self.sort_reverse
-          
+
         if (len(self.subset) == 0):
             self.subindices=None
             self.inv_subindices=None
@@ -460,8 +460,8 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     self.inv_subindices=Numeric.array(range(len(self.subset)-1,-1,-1))
                 self.subindices=Numeric.argsort(self.inv_subindices)+1
                 return
-            
-            
+
+
         # Check that requested sort property exists
         have_prop=0
         prop_type='string'
@@ -469,7 +469,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             if cprop[0] == sort_property:
                 have_prop=1
                 prop_type=cprop[1]
-                
+
         if have_prop == 1:
             self.sort_property=sort_property
             self.sort_reverse=reverse             
@@ -486,7 +486,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     for cshape in self.source:
                         ind_list.append((cshape.get_property(sort_property),count))
                         count=count+1
-                        
+
                 ind_list.sort()
                 if self.sort_reverse == 1:
                     ind_list.reverse()
@@ -506,7 +506,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     for cindex in self.subset:
                         ind_list.append((self.source[cindex].get_property(sort_property),count))
                         count=count+1
-                        
+
                 ind_list.sort()
                 if self.sort_reverse == 1:
                     ind_list.reverse()                
@@ -516,7 +516,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                 self.subindices=Numeric.argsort(self.inv_subindices)+1
         else:
             print 'Invalid sort property.'
-            
+
     def source_changed_cb( self, *args ):
         # If shapes have been added/deleted, update relevant info:
         if len(self.source) > self.n_rows:
@@ -547,7 +547,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                         self.titledict[new_schema[i][0]]=new_schema[i][0]
                         self.titles.append(new_schema[i][0])
             self.schema=new_schema
-            
+
         self.source_sort()
         self.bCalcAdjustments = True
         self.expose()
@@ -569,14 +569,14 @@ class pguShapesGrid( gtk.Table, Signaler ):
             win_width = win_width - self.col_widths[i] - self.cell_full
             if win_width < 0:
                 break;
-                
+
         if i == 0 and win_width >= 0:
             h_max = 0
         elif i == 0:
             h_max = 1
         else:
             h_max = i + 2
-        
+
         self.hadj.set_all( hpos, h_min, h_max, 1, 1, 1 )
         self.hadj.changed()
 
@@ -586,14 +586,14 @@ class pguShapesGrid( gtk.Table, Signaler ):
                        self.row_height - self.cell_full
         row_height = self.row_height + self.cell_full
         rows = cells_height / row_height
-        
+
         if len(self.subset) == 0:
             v_max = len(self.source)
         else:
             v_max = len(self.subset)
         #v_max = max( 0, v_max - rows ) + 1
         v_max = max( 0, v_max - rows ) + 2 
-        
+
         self.vadj.set_all( vpos, v_min, v_max, 1, 1, 1)
         self.vadj.changed()
         self.bCalcAdjustments = False
@@ -636,7 +636,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             if expose == 1:
                 self.expose()                  
             return 1
-        
+
     def select_all(self,expose=1):
         if self.selected_shapes is not None:
             self.selected_shapes[:]=1
@@ -646,7 +646,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         else:
             print 'No shapes to select...'
             return 0
-        
+
     def unselect_all(self,expose=1):
         if self.selected_shapes is not None:
             self.selected_shapes[:]=0
@@ -662,7 +662,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             return self.source[row].get_node()
         else:
             return None
-        
+
     def expose( self, *args ):
         """Draw the widget
         """
@@ -682,7 +682,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self. max_length = self.cell_full + \
                                ( len(self.titles) * ( self.row_height + self.cell_full ) )
 
-        
+
         #
         # pre-calculate half a cell spacing because we use it a lot
         #
@@ -695,18 +695,18 @@ class pguShapesGrid( gtk.Table, Signaler ):
         win = self._area.window
         width, height = win.get_size()
         pix = self._pixmap
-        
+
         #
         # prefetch the style
         #
         style = self.get_style()
-        
+
         #
         # clear the pixmap
         #
         pix.draw_rectangle(style.white_gc, True, 
                              0, 0, width, height )
-                            
+
         if self.source == None or self.source._o == None or len(self.source) == 0:
             msg = "NO DATA TO DISPLAY"
             msg_width = self.title_font.string_width( msg )
@@ -720,12 +720,12 @@ class pguShapesGrid( gtk.Table, Signaler ):
                                    0, 0, 0, 0, width, height )
             return False
 
-        
+
         #
         # track changes in column width because of wide columns
         #
         bResetAdj = False
-        
+
         #
         # calculate the number of rows to draw
         #
@@ -733,17 +733,17 @@ class pguShapesGrid( gtk.Table, Signaler ):
         title_height = self.title_height
         data_height = base_height - title_height
         disp_rows = int(data_height / ( self.row_height + 3 ))
-        
+
         #
         # starting x for the the first column
         #
         x = cell_half 
-        
+
         first_row = self.start_row
         last_row = first_row + disp_rows
         first_col = self.start_col
         last_col = len(self.titles)
-        
+
         #
         # loop through a column at a time
         #
@@ -753,13 +753,13 @@ class pguShapesGrid( gtk.Table, Signaler ):
             #
             if x > width:
                 continue
-            
+
             #
             # pre-calculate the column width for this draw
             # and remember the text values to draw
             #
             cells = []
-            
+
             # Info on whether or not shapes are selected (1 if selected)
             cell_is_selected = []
 
@@ -767,7 +767,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
                 idx = self.grid2src(j)
                 if idx == -1:
                     continue
-                
+
                 txt = self.source[idx].get_property( self.titledict[self.titles[i]] )
                 if txt is None:
                     txt = ""
@@ -785,7 +785,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             y = self.title_height + cell_half
             title_width = self.title_font.string_width( self.titles[i] )
             self.col_widths[i] = max( self.col_widths[i], title_width )
-            
+
             #
             # draw the 'button'
             #
@@ -795,7 +795,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             bh = self.title_height + cell_full
             pix.draw_rectangle(style.bg_gc[gtk.STATE_NORMAL], 
                                 True, bx, by, bw, bh)
-            
+
             pix.draw_line(style.bg_gc[gtk.STATE_PRELIGHT],
                            bx, by, bx, by + bh - 1 )
             pix.draw_line(style.bg_gc[gtk.STATE_PRELIGHT],
@@ -807,7 +807,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             pix.draw_text(self.title_font, 
                            style.fg_gc[gtk.STATE_NORMAL], 
                            tx, y, self.titles[i] )
-            
+
             #
             # draw the horizontal line below the title
             #            
@@ -859,13 +859,13 @@ class pguShapesGrid( gtk.Table, Signaler ):
                     lx = x + self.col_widths[i] + cell_half - 1
                     pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE], 
                                    0, ly - 1, lx, ly - 1) 
-                              
+
             #
             # where does the line go
             #
             ly = y + cell_half + 1
             lx = x + self.col_widths[i] + cell_half
-            
+
             #
             # special case for first column, start under the title row
             #
@@ -878,12 +878,12 @@ class pguShapesGrid( gtk.Table, Signaler ):
             #
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE], 
                            lx, 1, lx , y + cell_half )
-            
+
             #
             #advance to next column
             #
             x = x + self.col_widths[i] + cell_full
-            
+
         #draw the backing pixmap onto the screen
         win.draw_drawable(style.white_gc, self._pixmap, 0, 0, 0, 0, 
                                width, height )
@@ -892,19 +892,19 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self.calc_adjustments()
 
         return False
-           
+
     def configure( self, widget, event, *args ):
         """Track changes in width, height
         """
         #only do this if we have been realized
         if not self.flags() & gtk.REALIZED:
             return
-            
+
         # create a memory pixmap to render into
         a_win = self._area.window
         w,h = a_win.get_size()
         self._pixmap = gtk.gdk.Pixmap( a_win, w, h)
-        
+
         style = self.get_style()
 
         if self.title_font is None:
@@ -922,7 +922,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self.row_height = self.cell_font.ascent
 
         self.bCalcAdjustments=True
-        
+
     def clear( self, *args ):
         if self.source_changed_id is not None and self.source is not None:
             self.source.disconnect( self.source_changed_id )
@@ -939,7 +939,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         self.current_row = 0
         self.current_row_src = -1
         self.current_col = 0
-        
+
         # indices/info for sorting (indices maps source index to nRow; inv_indices
         # maps nRow to source index, and similar for subindices).
         self.indices = None
@@ -980,38 +980,38 @@ class pguShapesGrid( gtk.Table, Signaler ):
             self.vadj.set_value(c_row)
 
         self.vadj.value_changed()
-        
-        
+
+
 class TestGrid( gtk.Window ):
 
     def __init__(self):
         gtk.Window.__init__( self )
         self.set_title("Test ShapesGrid")
-        
+
         vbox = gtk.VBox()
         self.grid = pguShapesGrid()
         self.grid.set_size_request( 300, 300 )
         self.entry = gtk.Entry()
         self.button = gtk.Button( "set shapes file" )
         self.button.connect( "clicked", self.set_shapes )
-        
+
         vbox.pack_start( self.grid )
         vbox.pack_start( self.entry, expand=False )
         vbox.pack_start( self.button, expand=False )
         self.add(vbox)
         self.show_all()
-        
+
     def set_shapes( self, widget=None, src=None ):
         if src is None:
             src = self.entry.get_text()
         else:
             self.entry.set_text( src )
-            
+
         shapes = gview.GvShapes( shapefilename = src )
         if shapes is not None:
             self.grid.set_source( shapes )
-        
-        
+
+
 if __name__ == "__main__":
     import sys
     win = TestGrid()
@@ -1024,4 +1024,4 @@ if __name__ == "__main__":
     win.set_shapes( src = file)
     win.connect( 'delete-event', gtk.main_quit )
     gtk.main()
-    
+

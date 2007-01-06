@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ##############################################################################
-# $Id: Tool_DriverList.py,v 1.1.1.1 2005/04/18 16:38:37 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Graphical tool to list drivers built into current version of GDAL.
@@ -58,7 +58,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
                     next_list.append(mdata["DCAP_CREATECOPY"])
                 else:
                     next_list.append("NO")
-                    
+
                 if mdata.has_key("DMD_CREATIONDATATYPES"):
                     next_list.append(mdata["DMD_CREATIONDATATYPES"])
                 else:
@@ -113,7 +113,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
         #        row=row+1
         #    frame1.add(s_table)
         #    self.show_list.append(s_table)
-        
+
         num_us=len(self.unsupported_list)
         frame2=gtk.Frame()
         pixel_scroll = gtk.ScrolledWindow()
@@ -162,7 +162,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
         txt=txt+'Creation support: '+info_list[2]+'\n'
         txt=txt+'Data types: '+info_list[3]
         self.tooltips.set_tip(clabel,txt)
-        
+
     def close(self,*args):
         self.dialog.hide()
         return True

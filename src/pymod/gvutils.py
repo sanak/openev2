@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvutils.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Convenience widgets, and services built on Gtk widgets.
@@ -41,7 +41,7 @@ def is_of_class(class_obj,class_name):
         if is_of_class(c,class_name) == 1:
             return 1
     return 0
-    
+
 class GvOptionMenu(_gtk.ComboBox):
     def __init__(self, contents, callback=None):
         model = _gtk.ListStore(str)
@@ -122,7 +122,7 @@ class _MessageBox(_gtk.Dialog):
                 self.destroy()
                 if self.modal:
                     _gtk.main_quit()
-                    
+
         def click(self, button):
                 self.ret = button.get_data("user_data")
                 self.quit()
@@ -130,7 +130,7 @@ class _MessageBox(_gtk.Dialog):
 def warning( text ):
     import gview
     import os.path
-    
+
     warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
     win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=False )
     win.set_title('Warning')
@@ -140,13 +140,13 @@ def warning( text ):
 def error( text ):
     import gview
     import os.path
-    
+
     warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
     win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=True )
     win.set_title('ERROR')
     win.show()
     _gtk.main()
-    
+
     return
 
 def is_shapefile( filename ):
@@ -274,7 +274,7 @@ class GvMenuFactory(_gtk.MenuBar):
         for i in self.__menus.keys():
             if i[:length] == path:
                 result.append(self.__menus[i])
-		
+
 	return result
     def remove_entries(self, paths):
         for path in paths:
@@ -488,7 +488,7 @@ def XMLFind( node, path, maxfind=1, attr=None,value=None ):
                     submaxfind=maxfind
                 else:
                     submaxfind=maxfind-len(found_list)
-                    
+
                 sub_list = XMLFind( subnode, rest_of_path, submaxfind,attr, value )
                 if sub_list is not None:
                     if submaxfind > 1:
@@ -496,7 +496,7 @@ def XMLFind( node, path, maxfind=1, attr=None,value=None ):
                         found_list.extend(sub_list)
                     else:
                         found_list.append(sub_list)
-                        
+
     if len(found_list) == 0:
         return None
     elif maxfind == 1:
@@ -549,10 +549,10 @@ def XMLSerializeSimpleObjAttributes( obj, attrib_list, xml_list = [] ):
 
     attrib_list = [ (filename, str), (xsize, int), (ysize, int) ]
 
-    
+
     """ 
     import gdal
-    
+
     for item in attrib_list:
         if obj.__dict__.has_key( item[0] ):
             text_value = str(obj.__dict__[item[0]])
@@ -563,7 +563,7 @@ def XMLSerializeSimpleObjAttributes( obj, attrib_list, xml_list = [] ):
 
 def XMLDeserializeSimpleObjAttributes( obj, attrib_list, xml_tree ):
     failures = 0
-    
+
     for item in attrib_list:
         text_value = XMLFindValue( xml_tree, item[0], None )
         if text_value is not None:
@@ -575,7 +575,7 @@ def XMLDeserializeSimpleObjAttributes( obj, attrib_list, xml_tree ):
                 failures = failures + 1
                 print 'Failed to decode %s attribute with text value (%s).' \
                       % ( item[0], text_value )
-        
+
     return failures
 
 # XMLPop, XMLInsert, XMLReplaceAttr: tools for manipulating xml files-
@@ -589,7 +589,7 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
     # Returns (cnode,list of popped nodes), where cnode
     # is a copy of node with the excess stuff removed
     # if overwrite is set to 'y', node is altered and returned
-    
+
     import gdal
 
 
@@ -599,7 +599,7 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
         cnode=copy.deepcopy(node)
     else:
         cnode=node
-        
+
     broken_up = string.split( path, '.', 1 )
     popped_list=[]
     subpopped=[]
@@ -610,11 +610,11 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
 
     if ((maxpop is not None) and (maxpop < 1)):
         return (cnode,[])
-    
+
     indx=1
     indxlist=[]
     count=0
-    
+
     for subnode in cnode[2:]:
         indx=indx+1
         if subnode[1] == component and \
@@ -641,10 +641,10 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
                 if len(sub_list) > 0:
                     count=count+len(sub_list)
                     subpopped.extend(sub_list)
-                    
+
                 if count >= maxpop:
                     break
-                
+
     # pop the top-level values now
     pcount=0
     for indx in indxlist:
@@ -652,7 +652,7 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
         # index should decrease with each pop...
         pcount=pcount+1
 
-        
+
     return (cnode,popped_list)
 
 
@@ -669,11 +669,11 @@ def XMLInsert(node,path,newnode,maxinsert=1,attr=None,value=None,overwrite='n'):
         cnode=copy.deepcopy(node)
     else:
         cnode=node
-     
+
     broken_up = string.split( path, '.', 1 )
     if ((maxinsert is not None) and (maxinsert < 1)):
         return (cnode,0)
-    
+
     insert_num=0
     if len(broken_up) == 2:
         component, rest_of_path = broken_up
@@ -681,12 +681,12 @@ def XMLInsert(node,path,newnode,maxinsert=1,attr=None,value=None,overwrite='n'):
         component, rest_of_path = broken_up[0], None
 
     indx=1
-    
+
     if path == '' and attr is None:
         # Insert at top level and return
         cnode.append(newnode)
         return (cnode,1)
-    
+
     for subnode in cnode[2:]:
         indx=indx+1
         if subnode[1] == component and \
@@ -719,7 +719,7 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
     # at the same level as the attribute to be replaced.
     import gdal
     import os.path
-    
+
     if overwrite == 'n':
         import copy
         cnode=copy.deepcopy(node)
@@ -728,7 +728,7 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
     replaced=0
     if ((maxreplace is not None) and (maxreplace < 1)):
         return (cnode,replaced)
-    
+
     if path == '' or path == None:
         print 'Error- No attribute to replace was entered...'
         return
@@ -759,7 +759,7 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
 
         if len(tnode) < 1:
             return (cnode, replaced)
-        
+
         if maxreplace == 1:
             tnode=tnode[0]
 
@@ -777,7 +777,7 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
                     replaced=replaced+1
                     if ((maxreplace is not None) and (replaced >= maxreplace)):
                         return (cnode,replaced)
-        
+
     return (cnode,replaced)
 
 
@@ -819,7 +819,7 @@ class GvDataFilesFrame(_gtk.Frame):
             file_table.attach(self.entry_dict[ch], 1,5, idx,idx+1)
             if editable == True:
                 self.entry_dict[ch].connect('leave-notify-event',self.update_ds)
-                
+
 
         for bkey in self.button_dict.keys():
             self.button_dict[bkey].connect('clicked',self.set_dsfile_cb,bkey)
@@ -849,13 +849,13 @@ class GvDataFilesFrame(_gtk.Frame):
 
     def set_dsfile(self,fname,fkey):
         self.file_dict[fkey] = fname
-        
+
         # Save selected file directory
         head = os.path.dirname(fname)
         if len(head) > 0:
             if os.access(head,os.R_OK):
                 pgufilesel.simple_file_sel_dir = head+os.sep
-                
+
         if self.entry_dict.has_key(fkey):            
             if self.file_dict[fkey] is None:
                 self.entry_dict[fkey].set_text('')
@@ -930,7 +930,7 @@ class GvEntryFrame(_gtk.Frame):
                     self.table.attach(self.entries[item],
                                       1,2,ridx,ridx+1)
                 ridx=ridx+1
-            
+
         else:
             ridx=0
             for item in entry_list:
@@ -971,7 +971,7 @@ class GvEntryFrame(_gtk.Frame):
                     self.table.attach(self.entries[item],
                                       1,2,ridx,ridx+1)
                 ridx=ridx+1
-            
+
 
     def get(self,fkey):
         if self.entries.has_key(fkey):
@@ -1003,7 +1003,7 @@ class GvEntryFrame(_gtk.Frame):
                         self.entries[ckey].set_history(useidx)
                     else:
                         print cval+' not a valid entry for '+ckey
-                    
+
             else:
                 print 'No entry '+ckey+'- skipping'
 
@@ -1020,7 +1020,7 @@ class GvEntryFrame(_gtk.Frame):
                     self.entries[ckey].set_max_length(cval)
                 else:
                     print 'Length cannot be set for a menu ('+ckey+')'
-                    
+
             else:
                 print 'No entry '+ckey+'- skipping'
 
@@ -1031,14 +1031,14 @@ class GvEntryFrame(_gtk.Frame):
         self.table.set_row_spacings(rowspc)
         self.table.set_col_spacings(colspc)
 
-                
+
 if __name__ == '__main__':
     dialog = _gtk.Window()
 
     om = GvOptionMenu( ('Option 1', 'Option 2') )
     om.show()
     dialog.add( om )
-    
+
     dialog.connect('delete-event', _gtk.main_quit)
     dialog.show()
 

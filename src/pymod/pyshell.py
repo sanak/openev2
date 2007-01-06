@@ -54,7 +54,7 @@ def launch(pyshellfile=None):
         gvcorecmds.Register( shell )
 
         shell.show_all()
-    
+
     return gview.app.shell
 
 def launch_standalone(pyshellfile=None):
@@ -74,7 +74,7 @@ def launch_standalone(pyshellfile=None):
 
     shell.show_all()
 
-    
+
 
 class MyInteractiveConsole(code.InteractiveConsole):
 
@@ -90,9 +90,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
             code.InteractiveConsole.__init__(self, locals=locals)
         else:
             code.InteractiveConsole.__init__(self)
-                                         
+
         self.cmdlist = {}
-        
+
         # GTK2 Port PENDING
         # style = text_shell.get_style()
         # self.fg = style.fg[STATE_NORMAL]
@@ -142,7 +142,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
         if msg is not None:
             if (self.status_msg_id is not None):
                 self.status_bar.remove(self.status_bar.shell_context,self.status_msg_id)
-                
+
             self.status_msg_id = self.status_bar.push(self.status_bar.shell_context,msg)
 
     def clear_history(self):
@@ -152,7 +152,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
         self.history_list.clear()
         self.history_list.thaw()
 
-        
+
     def push(self, line):
         if ((self.in_macro == 0) and (self.history_list is not None)):
             self.history_list.freeze()
@@ -175,7 +175,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
             if ((len(fname) > 11) and (fname[:11] == 'macro_file=')):
                 # User has specified macro_file keyword
                 fname=fname[11:]
-                
+
             # Search order for macro:
             # 1) fname
             # 2) OPENEV_MACRO_PATH/fname (multiple semi-colon separated
@@ -208,8 +208,8 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     temp=os.path.join(temp,fname)
                     if os.path.isfile(temp):
                         fname=temp
-                
-                    
+
+
             if os.path.isfile(fname):
                 # keep track of indentation, in case macros
                 # are called within for loops of other
@@ -218,7 +218,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 indent_txt=''
                 for count in range(mac_indent_level):
                     indent_txt=indent_txt+' '
-                    
+
                 fh=open(fname)
                 line1=fh.read(20)
                 if (string.find(line1,"openev macro") > 0):
@@ -231,13 +231,13 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         cline=string.replace(cline,chr(10),"")
                         cline=indent_txt+cline
                         self.my_write(cline+chr(10),'command')
-                        
+
                         # Set in_macro flag before each command, in
                         # case there is a macro within a macro, and
                         # in_macro gets set to 0 after exiting the
                         # nested macro
                         self.in_macro=1
-                        
+
                         self.push(string.rstrip(cline))
 
                         # If an error has been encountered, return
@@ -251,26 +251,26 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         # even if an error is encountered...
                         if self.last_err == 1:
                             return 0
-                        
+
                     self.history_pos = None
                     if self.history_list is not None:
                         self.history_list.unselect_all()
-                        
+
                     fh.close()
             else:
                 self.showText(fname+' does not exist or is not a file.','error')
 
             self.in_macro=0
             return 0
-        
+
         # If journaling is on, write the line unless the line
         # is itself a journal command
         if self.journal_fh is not None:
             if not ((len(line) >= 7) and (line[:7] == 'journal')):
                 self.journal_fh.writelines(line+'\n')
                 self.journal_fh.flush()
-            
-        
+
+
         if len(self.cmdlist) > 0:
             cmd_name, remainder = parse_interpreter_line(line)
             if self.cmdlist.has_key( cmd_name ):
@@ -326,7 +326,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 txt=''
                 for count in range(indent_level):
                     txt=txt+' '
-                        
+
                 if string.find(line,'"') == -1:
                     txt=txt+'_run_command_line("'+line+'")'
                 elif string.find(line,"'") == -1:
@@ -339,7 +339,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
 
 
         return code.InteractiveConsole.push(self,line)
-           
+
     # This is a CommandInterpreter method as per gvcommand.py
     def isInteractive( self ):
         return 1
@@ -369,10 +369,10 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 txt = txt + '\n  Type  : '+str(sys.exc_type)                
                 if sys.exc_info()[1] is None: 
                     txt = txt + '\n  Description: '+ 'Undefined\n'
-                
+
                 else:       
                     txt = txt + '\n  Description: '+str(sys.exc_info()[1]) + '\n'
-                
+
                 if len(exc_info) > 2:
                     # Ignore the first 2 tuples- in the context of the interpreter,
                     # these are just the console and the exec statement and are
@@ -383,19 +383,19 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         txt = txt + '\n    line number: '+str(ctuple[1])
                         txt = txt + '\n    function   : '+str(ctuple[2])
                         txt = txt + '\n    line       : '+str(ctuple[3])+'\n'
-            
+
             else:
                 txt = 'Unexpected Error:'
                 txt = txt + '\n    No description available.\n'
         except:
             txt = 'Unexpected Error:'
             txt = txt + '\n    No description available.\n'
-            
+
         self.write(txt)
 
         # Status of last line pushed via toplevel shell's echo function
         self.last_err = 1
-        
+
     def write(self, data):
         # Override base class write
         # Red - tracebacks
@@ -423,7 +423,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
             #self.text_view.scroll_to_mark(mark, 0, True, 0.0, 1.0)
             self.text_view.scroll_mark_onscreen(mark)
             buffer.delete_mark(mark)
- 
+
 
         # Normal output is reported in GREEN
         if name == 'stdout':
@@ -462,7 +462,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
     def get_command_help(self, command,quiet=0):
         # quiet- if quiet is 0, include module,
         #        and group info; otherwise don't.
-        
+
         if self.cmdlist.has_key(command):
             # Command is loaded.  Determine what module
             # it is in.
@@ -483,7 +483,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         if quiet == 0:
                             ctext=ctext+'Module: '+centry[0]+'\n'
                             ctext=ctext+'Group: '+centry[1]+'\n\n'
-                            
+
                         ctext=ctext+centry[3] + '\n'
                     return ctext
 
@@ -493,9 +493,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         if quiet == 0:
                             ctext='Module: '+centry[0]+'\n'
                             ctext=ctext+'Group: '+centry[1]+'\n\n'
-                            
+
                         ctext=ctext+centry[3] + '\n'
-                        
+
                         return ctext
 
 
@@ -507,20 +507,20 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     txt=txt+'Unknown\n'
                 else:
                     txt=txt+mname+'\n'
-                
+
                 if hasattr(self.cmdlist[command],'Group'):
                     txt=txt+'Group: '+self.cmdlist[command].Group + '\n\n'
                 else:
                     txt='Group: None\n\n'
             else:
                 txt=''
-                
+
             txt=txt+'Usage: '+self.cmdlist[command].Usage + '\n'
             if hasattr(self.cmdlist[command],'__doc__'):
                 txt=txt+_format_doc(self.cmdlist[command].__doc__)+'\n'
-                
+
             return txt
-            
+
         elif self.help_cmdtxt.has_key(command):
             # If module unknown, return all
             # text help.
@@ -529,9 +529,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 if quiet == 0:
                     ctext=ctext+'Module: '+centry[0]+'\n'
                     ctext=ctext+'Group: '+centry[1]+'\n'
-                            
+
                 ctext=ctext+centry[3] + '\n\n'
-                 
+
             return ctext
 
         else:                            
@@ -572,9 +572,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     dtxt='Module: unknown\n\n'
             else:
                 dtxt=''
-                
+
             dtxt=dtxt+_format_doc(self.locals[func].__doc__) + '\n'
-        
+
         elif ((self.locals.has_key(func)) and
               (type(self.locals[func]) == type(Numeric.cos)) and
               (hasattr(self.locals[func],'__doc__'))):
@@ -584,7 +584,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 dtxt='Universal function (ufunc)\n\n'
             else:
                 dtxt=''
-                
+
             dtxt=dtxt+_format_doc(self.locals[func].__doc__) + '\n'
 
         if self.help_functxt.has_key(func):
@@ -614,7 +614,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
 
                         ctext=ctext+centry[2]
                         return ctext
-                    
+
             # If no module specified or found, return
             # all text file help available on func.
             else:
@@ -622,9 +622,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 for centry in self.help_functxt[func]:
                     if quiet == 0:
                         ctext=ctext+'Module: '+centry[0]+'\n\n'
-                        
+
                     ctext=ctext+centry[2]+'\n\n'
-                    
+
                 return ctext
 
         # At this point, no suitable text file help has been found
@@ -648,7 +648,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     dtxt=''
                 dtxt=dtxt+_format_doc(docstr)+'\n'
                 return dtxt
-            
+
             elif (type(funcinst) == type(Numeric.cos)):
                 if quiet == 0:
                     dtxt='Module: '+module_name+'\n\n'
@@ -657,12 +657,12 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     dtxt=''
                 dtxt=dtxt+_format_doc(docstr)+'\n'
                 return dtxt
-            
+
             else:
                 # Not a recognized non-builtin function
                 # (type must be either function or ufunc)
                 return None
-                
+
         else:
             return dtxt
 
@@ -683,9 +683,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 for centry in self.help_builtintxt[func]:
                     if quiet == 0:
                         ctext=ctext+'Module: '+centry[0]+'\n\n'
-                        
+
                     ctext=ctext+centry[2]+'\n\n'
-                    
+
                 return ctext
 
         # If code gets to here, no suitable help
@@ -703,7 +703,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                     return txt
                 except:
                     return None
-                
+
         # No help has been found yet, and specific module has been requested
         try:
             exec 'import '+module_name
@@ -727,7 +727,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
         if helpfilename in self.helpfiles:
             # Already registered.
             return 1
-        
+
         if os.path.isfile(helpfilename) == 0:
             self.showText('Warning: help file '+helpfilename+'\n does not exist','error')
             return 0
@@ -738,12 +738,12 @@ class MyInteractiveConsole(code.InteractiveConsole):
         ckey=None
         ctext=''
         ctype=None
-        
+
         # add a dummy line to the end to force the last
         # command to be assigned (since assignment is
         # done once a new command is started).
         helplines.append('COMMAND_NAME=dummyhelpline')
-        
+
         for cline in helplines:
             # linetype: 0 if an ordinary line is read, 1 if help for
             # a new command is being defined, 2 if help for a new
@@ -752,13 +752,13 @@ class MyInteractiveConsole(code.InteractiveConsole):
             linetype=0
             if(( len(cline) > 13) and (cline[:13] == 'COMMAND_NAME=')):
                 linetype=1
-                
+
             if(( len(cline) > 14) and (cline[:14] == 'FUNCTION_NAME=')):
                 linetype=2
-                
+
             if(( len(cline) > 13) and (cline[:13] == 'BUILTIN_NAME=')):
                 linetype=3
-                
+
             if (linetype > 0):
                 if (ckey is not None) and (ctype is not None):
                     # Assign last function/command's text, if
@@ -771,12 +771,12 @@ class MyInteractiveConsole(code.InteractiveConsole):
                             errtxt='Invalid helpfile '+helpfilename+\
                                     ':\nBad entry for command'+ckey+'.'
                             raise errtxt
-                        
+
                         mname=parsed_help[0]
                         gname=parsed_help[1]
                         hname=parsed_help[2]
                         ctext=parsed_help[3]
-                        
+
                         if self.help_cmdtxt.has_key(ckey):
                             # Some help has already been registered
                             # for a function of this name.
@@ -796,18 +796,18 @@ class MyInteractiveConsole(code.InteractiveConsole):
                         else:
                             self.help_cmdtxt[ckey]=[]
                             self.help_cmdtxt[ckey].append([mname,gname,hname,ctext])                          
-                            
+
                     elif ctype == 'blt':
                         parsed_help=_parse_funchelp_text(ctext)
                         if parsed_help is None:
                             errtxt='Invalid helpfile '+helpfilename+\
                                     ':\nBad entry for built-in function '+ckey+'.'
                             raise errtxt
-                        
+
                         mname=parsed_help[0]
                         hname=parsed_help[1]
                         ctext=parsed_help[2]
-                        
+
                         if self.help_builtintxt.has_key(ckey):
                             # Some help has already been registered
                             # for a function of this name
@@ -833,11 +833,11 @@ class MyInteractiveConsole(code.InteractiveConsole):
                             errtxt='Invalid helpfile '+helpfilename+\
                                     ':\nBad entry for function '+ckey+'.'
                             raise errtxt
-                        
+
                         mname=parsed_help[0]
                         hname=parsed_help[1]
                         ctext=parsed_help[2]
-                        
+
                         if self.help_functxt.has_key(ckey):
                             # Some help has already been registered
                             # for a function of this name
@@ -851,7 +851,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                                         '\nIgnoring all but first.'
                                     self.showText(txt,'error')
                                     conflict=1
-                                    
+
                             if conflict == 0:
                                 self.help_functxt[ckey].append([mname,hname,ctext]) 
                         else:
@@ -875,9 +875,9 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 ctype='blt'                
             else:
                 ctext=ctext+cline
-                        
+
         return 1
-        
+
 class PseudoFile:
 # To send stdout to our console
 
@@ -891,7 +891,7 @@ class PseudoFile:
 
         import gdal
         gdal.Debug( "stderr", s )
-        
+
     def writelines(self, l):
         map(self.write, l)
 
@@ -909,7 +909,7 @@ class PseudoFile:
 
 class Shell(gtk.Window):
     def __init__(self, inherit=None, width=550, height = 250, standalone=0,pyshellfile=None):
-        
+
         # Main Window, buttons
         gtk.Window.__init__(self)
         self.set_title('Python Shell')
@@ -922,12 +922,12 @@ class Shell(gtk.Window):
             guicmds=self.load_pyshell_file_from_xml(self.pyshellfile)
         else:
             # If pyshellfile is None, default to old appearance.
-            
+
             #menucmds=[]
             #menucmds.append(self.__get_standard_menu_entries())
             #guicmds=(menucmds,None,None,None)
             guicmds=(None,None,None,None)
-            
+
         # Use a paned window if the history area is present; a normal
         # vbox if it isn't.       
         # panel for menu, messages, icons, command line
@@ -941,7 +941,7 @@ class Shell(gtk.Window):
             self.add(vbox)
 
         self.standalone = standalone
-        
+
         # Path Preferences
         # Currently, the module and script paths
         # are treated the same way- they are added
@@ -951,7 +951,7 @@ class Shell(gtk.Window):
 
         import gview
         import sys
-        
+
         mpathstring=""
         for i in range(1,MAX_MODULE_PATHS+1):
             mpath = gview.get_preference('pyshell_module_path'+str(i))
@@ -973,10 +973,10 @@ class Shell(gtk.Window):
                     cpathstring=cpath
                 else:
                     cpathstring=cpathstring+";"+cpath
-        
+
         self.preferences['MODULE PATHS']=mpathstring    
         self.preferences['COMMAND PATHS']=cpathstring
-        
+
         self.path_dlg = None
 
         # Menu
@@ -990,7 +990,7 @@ class Shell(gtk.Window):
 
             for cmd in guicmds[0]:
                 exec cmd
-            
+
             self.add_accel_group(menuf.accelerator)
             vbox.pack_start(menuf,expand=False)
         else:
@@ -1001,11 +1001,11 @@ class Shell(gtk.Window):
             self.iconbar = gtk.Toolbar()
             for cmd in guicmds[1]:
                 exec cmd
-            
+
             vbox.pack_start(self.iconbar,expand=False)
         else:
             self.iconbar = None
-            
+
         top_console = gtk.HBox(homogeneous=False, spacing=2)
         vbox.pack_start(top_console, expand=True)
 
@@ -1022,7 +1022,7 @@ class Shell(gtk.Window):
         top_console.pack_start(text_window, expand=True)
 
         # Scrollbars
-        
+
         #scroll = gtk.VScrollbar()
         #scroll.set_update_policy(gtk.UPDATE_CONTINUOUS)
         #adj = scroll.get_adjustment()
@@ -1073,7 +1073,7 @@ class Shell(gtk.Window):
             # according to an email found with google.
             # histbox.add_with_viewport(histlist)
             histbox.add(histlist)
-            
+
             histlist.set_selection_mode(SELECTION_SINGLE)
             histlist.connect('button-press-event',self.list_clicked)
         else:
@@ -1106,10 +1106,10 @@ class Shell(gtk.Window):
             totalheight=totalheight + 50
         if histlist is not None:
             totalheight=totalheight + 250
-            
+
         self.set_size_request(width, totalheight)
         self.set_resizable(True)
-    
+
         # Text properties GTK2 Port PENDING...
         #style = text.get_style()
         #self.fg = style.fg[STATE_NORMAL]
@@ -1207,7 +1207,7 @@ class Shell(gtk.Window):
 
             # Remove any internal newlines.
             input = string.replace(input,chr(10),"")
-            
+
             # echo command in text dialog
             self.append_text(input+chr(10))
 
@@ -1227,7 +1227,7 @@ class Shell(gtk.Window):
                 self.history_list.unselect_all()
 
             return True
-            
+
         # Watch for Ctrl-D
         elif (event.keyval in (ord('d'), ord('D'))) \
                  and (event.state & gtk.gdk.CONTROL_MASK):
@@ -1251,10 +1251,10 @@ class Shell(gtk.Window):
 
                 if self.history_pos is None:
                     self.history_pos = -1
-                    
+
                 if self.history_pos < len(self.history_buffer) - 1:
                     self.history_pos = self.history_pos + 1
-                
+
                 # GTK2 Port... PENDING
                 self.prompt_buff.insert_at_cursor(self.history_buffer[self.history_pos])
                 # self.prompt.insert(self.font, self.fg, self.bg, self.history_buffer[self.history_pos])
@@ -1277,7 +1277,7 @@ class Shell(gtk.Window):
                 if self.history_list is not None:
                     if self.history_pos < self.history_list.rows:
                         self.history_list.select_row(self.history_pos,0)
-                
+
             elif (self.history_pos is not None) and (self.history_pos == 0):
                 self.set_prompt()
                 self.history_pos = None
@@ -1299,16 +1299,16 @@ class Shell(gtk.Window):
 
 
         return False
-        
+
     def list_clicked(self, lst, event):
         if self.history_list is None:
             return
-        
+
         try:
             row, col = lst.get_selection_info(int(event.x), int(event.y))
         except:
             return
-        
+
         if event.button == 1:
             lst.emit_stop_by_name('button-press-event')
             self.set_prompt()
@@ -1317,7 +1317,7 @@ class Shell(gtk.Window):
             self.history_list.select_row(row,col)
             if len(self.history_buffer) >= row:
                 self.history_pos = row
-                
+
     def append_text(self, msg):
         self.interp.my_write( msg, 'command' )
 
@@ -1340,7 +1340,7 @@ class Shell(gtk.Window):
 
     def command(self, line):
         """ Takes single line commands, doesn't echo line to console, but output will """
-        
+
         self.prompt_state = self.interp.push(line)
 
     def add_command(self, command):
@@ -1415,11 +1415,11 @@ class Shell(gtk.Window):
             # path is shared (eg. if the user specifies
             # OPENEVHOME as a path), since each path is
             # only added once.
-        
+
             for idx in range(1,MAX_MODULE_PATHS+1):
                 if gview.get_preference('pyshell_module_path'+str(idx)) is not None:
                     gview.set_preference('pyshell_module_path'+str(idx),'')
-                    
+
             for idx in range(1,MAX_COMMAND_PATHS+1):
                 if gview.get_preference('pyshell_command_path'+str(idx)) is not None:
                     gview.set_preference('pyshell_command_path'+str(idx),'')
@@ -1428,7 +1428,7 @@ class Shell(gtk.Window):
             # by commas.
             modtokens=string.split(modpaths,";")
             idx=1
-            
+
             for modpath in modtokens:
                 if len(modpath) == 0:
                     continue
@@ -1462,7 +1462,7 @@ class Shell(gtk.Window):
                         gvutils.warning('Only the first'+ str(MAX_COMMAND_PATHS+1)+\
                                          ' command paths will be loaded from preferences.')
                     idx=idx+1
-                    
+
                 else:
                     gvutils.warning(cmdpath+' does not exist or is not a directory.')
 
@@ -1478,11 +1478,11 @@ class Shell(gtk.Window):
                 "('Help/Help',None,self.launch_help_cb)"+\
                 "])"
             return menucmd
-        
+
     def load_pyshell_file_from_xml(self,pyshellfile="DefaultPyshellFile.xml"):
         import gview
         import gdal
-    
+
         pyshellfile=os.path.join(gview.home_dir,'xmlconfig',pyshellfile)
         try:
             raw_xml = open(pyshellfile).read()
@@ -1528,23 +1528,23 @@ class Shell(gtk.Window):
 
     def parse_menu_xml_node(self,menunode):
         import gview
-        
+
         tools_to_include='All'
         tools_accounted_for=[]
         menu_list=[]
-        
+
         for node in menunode[2:]:
             if node[1] == 'entry':
                 node_path  = gvutils.XMLFind( node, 'path')
                 if node_path is None:
                     raise AttributeError,"Invalid menu file format - missing path"
-                 
+
                 entry_type = gvutils.XMLFindValue( node_path, 'type', '')
                 entry_path = gvutils.XMLFindValue( node, 'path','')
-                
+
                 if (string.find(entry_path,"/") == -1):
                     raise AttributeError,"Invalid menu file format - bad path:%s" % entry_path
-                    
+
                 if (entry_type != ''):
                     entry_type = "<" + entry_type + ">"
                 path_split=string.split(entry_path,"/")
@@ -1573,10 +1573,10 @@ class Shell(gtk.Window):
                 entry = entry + ")"
 
                 menu_list.append(entry)
-                            
+
             elif node[1] == 'tools':
                 tools_to_include=node[2][1]
-                
+
             elif node[1] == 'simpletoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
@@ -1594,36 +1594,36 @@ class Shell(gtk.Window):
                         entry_accelerator=str(None)
                     else:
                         entry_accelerator="'"+entry_accelerator+"'"
-                    
+
                     entry= "("                                             \
                             + string.join(("'"+cpath+"'",entry_accelerator,   \
                            "gview.app.Tool_List[gview.app.tool_index['"+toolname+\
                            "']][1].pymenu_entries.entries['"+cpath+"'][1]"),",")+")"
-                        
+
                     menu_list.append(entry)
-                    
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
 
-                    
+
             elif node[1] == 'complextoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
                     raise AttributeError,"Invalid menu file format - missing tool name"
-                
+
                 oldpath  = gvutils.XMLFindValue( node, 'oldpath')
 
                 if oldpath is None:
                     txt="Invalid menu file format - complex tool entry\nrequires oldpath item."
                     raise AttributeError,txt
                 oldpath = oldpath[1:-1] # Entries in XML file are surrounded by quotes- get rid of them
-                
+
                 newpath  = gvutils.XMLFindValue( node, 'newpath')
                 if newpath is None:
                     txt="Invalid menu file format - complex tool entry\nrequires newpath item."
                     raise AttributeError,txt
                 newpath = newpath[1:-1] # Entries in XML file are surrounded by quotes- get rid of them
-                
+
                 if gview.app.tool_index.has_key(toolname) == 0:
                     raise AttributeError,"Invalid menu file format- tool "+toolname+" not loaded."
 
@@ -1638,22 +1638,22 @@ class Shell(gtk.Window):
                 else:
                     (key,mod)=string.split(entry_accelerator,'+')
                     entry_accelerator="<"+key+">"+mod
-                    
+
                 if entry_accelerator is None:
                     entry_accelerator=str(None)
                 else:
                     entry_accelerator="'"+entry_accelerator+"'"
-                    
+
                 entry= "("                                             \
                         + string.join(("'"+newpath+"'",entry_accelerator,   \
                         "gview.app.Tool_List[gview.app.tool_index['"+toolname+\
                         "']][1].pymenu_entries.entries['"+oldpath+"'][1]"),",") + ")"                
-                        
+
                 menu_list.append(entry)
-          
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
-                    
+
 
         if tools_to_include not in ['All','None','Some']:
             raise AttributeError,"Invalid menu file format- <tool> entry should be All, None, or Some."
@@ -1676,13 +1676,13 @@ class Shell(gtk.Window):
                             accel=str(None)
                         else:
                             accel="'"+accel+"'"
-                            
+
                         entry= "self.menuf.insert_entry(" \
                                 + string.join((str(cpos),"'"+centry+"'",accel,   \
                                "gview.app.Tool_List[gview.app.tool_index['"+citem[0]+\
                                "']][1].pymenu_entries.entries['"+centry+"'][1]"),",")+")"                
                         remaining_cmds.append(entry)
-                        
+
         # create the menu command to populate the entries
         menu_cmds=[]
         menu_cmd =  "self.menuf.add_entries([" + string.join(menu_list,',') + "])"
@@ -1694,7 +1694,7 @@ class Shell(gtk.Window):
 
     def parse_icon_xml_node(self,iconnode):
         import gview
-        
+
         tools_to_include = 'All'
         tools_accounted_for=[]
         tool_entry_list=[]
@@ -1751,19 +1751,19 @@ class Shell(gtk.Window):
                 idx=0
                 for centry in ctool.pyicon_entries.entries:
                     icon_file=centry[0]
-                    
+
                     icon_label=centry[1]
                     if icon_label is not None:
                         icon_label="'"+icon_label+"'"
                     else:
                         icon_label=str(None)
-                    
+
                     icon_hint=centry[2]
                     if icon_hint is not None:
                         icon_hint="'"+icon_hint+"'"
                     else:
                         icon_hint=str(None)
-                    
+
                     # Ignore position- it is overridden by this entry's location in the
                     # xml file
                     icon_callback=centry[4]
@@ -1772,7 +1772,7 @@ class Shell(gtk.Window):
                         icon_help="'"+icon_help+"'"
                     else:
                         icon_help=str(None)
-                     
+
                     icon_type=centry[6]
                     if icon_type == 'xpm':
                         icon = "self.add_icon_to_bar("                           \
@@ -1785,15 +1785,15 @@ class Shell(gtk.Window):
                     else:
                         raise AttributeError,"Invalid icon type "+icon_type+" in tool "+toolname+"."
                     idx=idx+1
-                    
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
-                    
+
             elif node[1] == 'complextoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
                     raise AttributeError,"Invalid icon file format - missing tool name."
-                
+
                 oindex  = gvutils.XMLFindValue( node, 'index')
 
                 if oindex is None:
@@ -1805,7 +1805,7 @@ class Shell(gtk.Window):
                     oindex=int(oindex)
                 except:
                     raise AttributeError,"Invalid icon file- icon index to replace must be an integer."
-                
+
                 if gview.app.tool_index.has_key(toolname) == 0:
                     raise AttributeError,"Invalid icon file entry- tool "+toolname+" not loaded."
 
@@ -1839,16 +1839,16 @@ class Shell(gtk.Window):
                     txt = txt+"path must be specified, or "+tempf+ " must be\n"
                     txt = txt+"placed in the tools or pics directory."
                     raise AttributeError,txt
-                
+
 
                 if icon_label is None:
                     icon_label=ctool.pyicon_entries.entries[oindex][1]
-                    
+
                 if icon_label is not None:
                     icon_label="'"+icon_label+"'" 
                 else:
                     icon_label=str(None)
-                    
+
                 if icon_hint is None:
                     icon_hint=ctool.pyicon_entries.entries[oindex][2]
 
@@ -1856,7 +1856,7 @@ class Shell(gtk.Window):
                     icon_hint="'"+icon_hint+"'"
                 else:
                     icon_hint=str(None)
-                    
+
                 if icon_help is None:
                     icon_help=ctool.pyicon_entries.entries[oindex][5]
 
@@ -1876,7 +1876,7 @@ class Shell(gtk.Window):
                     icon_list.append(icon)
                 else:
                     raise AttributeError,"Invalid icon type "+icon_type+" in tool "+toolname+"."
-                
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
 
@@ -1918,7 +1918,7 @@ class Shell(gtk.Window):
                             icon_help="'"+icon_help+"'"
                         else:
                             icon_help=str(None)
-                            
+
                         # Default position in icon bar used
                         pos=centry[3]
                         icon = "self.add_icon_to_bar(" +\
@@ -1926,7 +1926,7 @@ class Shell(gtk.Window):
                                 "gview.app.Tool_List[gview.app.tool_index['"+citem[0]+\
                                 "']][1].pyicon_entries.entries["+\
                                 str(idx)+"][4]",icon_help),",") + ")"
-                      
+
                         pos=max(pos,0)
                         if pos > len(icon_list):
                             icon_list.append(icon)
@@ -1935,7 +1935,7 @@ class Shell(gtk.Window):
                         idx=idx+1
 
         return icon_list
-    
+
     def add_icon_to_bar(self, filename, text, hint_text, cb, help_topic=None):
         # Next line doesn't overwrite filename if it is already a full
         # path (os.path.join is intelligent).
@@ -1943,7 +1943,7 @@ class Shell(gtk.Window):
         import gvhtml
         if os.name == 'nt':
             filename=string.replace(filename,"\\","\\\\")
-            
+
         full_filename = os.path.join(gview.home_dir,'pics',filename)
         pix, mask = create_pixmap_from_xpm(self,None,full_filename)
         item = self.iconbar.append_item(text,hint_text, hint_text,
@@ -1953,7 +1953,7 @@ class Shell(gtk.Window):
 
 def parse_interpreter_line(line):
         tokens = string.split( line, None, 1 )
-        
+
         # Null input line is considered valid.
         if len(tokens) == 0:
             return ('', '')
@@ -2007,9 +2007,9 @@ class PyshellHelpDialog(gtk.Window):
         self.create_commandhelp()
         self.create_functionhelp()
         self.create_builtinhelp()
-        
+
         self.show_all()
-        
+
 
     def create_commandhelp(self):
         self.cpane=gtk.VBox(spacing=10)
@@ -2018,13 +2018,13 @@ class PyshellHelpDialog(gtk.Window):
         self.cpane_scroll=gtk.ScrolledWindow()
         self.cpane_scroll.set_size_request(496,250)
         self.cpane.pack_start(self.cpane_scroll)
-        
+
         self.cpane_list=gtk.CList(cols=self.ncols_cmd)
         for idx in range(self.ncols_cmd):
             self.cpane_list.set_column_width(idx,200)
 
         self.cpane_list.set_selection_mode(SELECTION_SINGLE)
-        
+
         self.cpane_scroll.add(self.cpane_list)
 
         # Add items to the list based on interpreter
@@ -2059,7 +2059,7 @@ class PyshellHelpDialog(gtk.Window):
                         values.append(self.total_cmd_keys[crow*self.ncols_cmd+idx])
                     else:
                         values.append('')
-      
+
                 self.cpane_list.append(tuple(values))                
 
         # Connections
@@ -2083,15 +2083,15 @@ class PyshellHelpDialog(gtk.Window):
                     txt='\t\t\t'+ckey+' (command)\n\n'+txt
                 else:
                     txt='\t\t\t'+ckey+' (command)\n\nNo help available.'
-                    
+
             else:
                 if txt is not None:
                     txt='\t\t\t'+ckey+' (command- not loaded)\n\n'+txt
                 else:
                     txt='\t\t\t'+ckey+' (command- not loaded)\n\nNo help available.'
-                    
+
             self.update_text(txt)
-            
+
     def create_functionhelp(self):
         self.fpane=gtk.VBox(spacing=10)
         self.fpane.set_border_width(10)
@@ -2099,13 +2099,13 @@ class PyshellHelpDialog(gtk.Window):
         self.fpane_scroll=gtk.ScrolledWindow()
         self.fpane_scroll.set_size_request(396,250)
         self.fpane.pack_start(self.fpane_scroll)
-        
+
         self.fpane_list=gtk.CList(cols=self.ncols_func)
         for idx in range(self.ncols_func):
             self.fpane_list.set_column_width(idx,200)
 
         self.fpane_list.set_selection_mode(SELECTION_SINGLE)
-        
+
         self.fpane_scroll.add(self.fpane_list)
 
         # Add items to the list based on interpreter
@@ -2113,7 +2113,7 @@ class PyshellHelpDialog(gtk.Window):
 
         # Need numeric to locate ufunc's 
         import Numeric
-        
+
         self.loaded_func_keys=[]
         for ckey in gview.app.shell.interp.locals.keys():
             if (type(gview.app.shell.interp.locals[ckey]) == type(launch)):
@@ -2150,7 +2150,7 @@ class PyshellHelpDialog(gtk.Window):
                         values.append(self.total_func_keys[crow*self.ncols_func+idx])
                     else:
                         values.append('')
-      
+
                 self.fpane_list.append(tuple(values))                
 
         # Connections
@@ -2179,9 +2179,9 @@ class PyshellHelpDialog(gtk.Window):
                     txt='\t\t\t'+ckey+' (function- not loaded)\n\n'+txt
                 else:
                     txt='\t\t\t'+ckey+' (function- not loaded)\n\nNo help available.\n'
-                    
+
             self.update_text(txt)
-            
+
     def create_builtinhelp(self):
         self.bpane=gtk.VBox(spacing=10)
         self.bpane.set_border_width(10)
@@ -2189,18 +2189,18 @@ class PyshellHelpDialog(gtk.Window):
         self.bpane_scroll=gtk.ScrolledWindow()
         self.bpane_scroll.set_size_request(396,250)
         self.bpane.pack_start(self.bpane_scroll)
-        
+
         self.bpane_list=gtk.CList(cols=self.ncols_builtin)
         for idx in range(self.ncols_builtin):
             self.bpane_list.set_column_width(idx,200)
 
         self.bpane_list.set_selection_mode(SELECTION_SINGLE)
-        
+
         self.bpane_scroll.add(self.bpane_list)
 
         # Add items to the list based on interpreter
         import gview
-        
+
         self.loaded_builtin_keys=[]
         for ckey in gview.app.shell.interp.locals.keys():
             if (type(gview.app.shell.interp.locals[ckey]) == type(hasattr)):
@@ -2208,7 +2208,7 @@ class PyshellHelpDialog(gtk.Window):
         for ckey in gview.app.shell.interp.locals['__builtins__'].keys():
             if (type(gview.app.shell.interp.locals['__builtins__'][ckey]) == type(hasattr)):
                 self.loaded_builtin_keys.append(ckey)
-                                                  
+
 
         self.unloaded_builtin_keys=[]
         for ckey in gview.app.shell.interp.help_builtintxt.keys():
@@ -2239,7 +2239,7 @@ class PyshellHelpDialog(gtk.Window):
                         values.append(self.total_builtin_keys[crow*self.ncols_builtin+idx])
                     else:
                         values.append('')
-      
+
                 self.bpane_list.append(tuple(values))                
 
         # Connections
@@ -2268,9 +2268,9 @@ class PyshellHelpDialog(gtk.Window):
                     txt='\t\t\t'+ckey+' (built-in function- not loaded)\n\n'+txt
                 else:
                     txt='\t\t\t'+ckey+' (built-in function- not loaded)\n\nNo help available.\n'
-                    
+
             self.update_text(txt)
-                 
+
     def update_text(self,txt):
         self.help_buff.set_text(txt + '\0')
         # self.help_text.freeze()
@@ -2281,7 +2281,7 @@ class PyshellHelpDialog(gtk.Window):
 
 def _format_doc(doc_string):
     """Reformat docstring for help display."""
-    
+
     if doc_string is None:
         return 'None'
 
@@ -2305,7 +2305,7 @@ def _format_doc(doc_string):
         new_doc=string.join([new_doc,cline[indent:]],'\n')
 
     return new_doc
-    
+
 
 def _parse_cmdhelp_text(txt):
     """ Parse command help text into module, group, html, text.
@@ -2322,7 +2322,7 @@ def _parse_cmdhelp_text(txt):
         Module: my_module
         Group: my_group
         Html: my_html.html
-        
+
         documentation...
 
         The entries must be in that order if all are present,
@@ -2335,7 +2335,7 @@ def _parse_cmdhelp_text(txt):
 
     if len(stxt) < 2:
         return None
-    
+
     # first line should be module
     mline=stxt[0]
     if ((len(mline) > 7) and (mline[:7] == 'Module:')):
@@ -2382,7 +2382,7 @@ def _parse_funchelp_text(txt):
         FUNCTION_NAME=my_function
         Module: my_module
         Html: my_html.html
-        
+
         documentation...
 
         or
@@ -2390,9 +2390,9 @@ def _parse_funchelp_text(txt):
         BUILTIN_NAME=my_builtin_function
         Module: my_module
         Html: my_html.html
-        
+
         documentation...
-        
+
         The entries must be in that order if all are present,
         but Html may be omitted.  If Html or documentation
         are not present, None will be returned in their place.
@@ -2403,7 +2403,7 @@ def _parse_funchelp_text(txt):
 
     if len(stxt) < 1:
         return None
-    
+
     # first line should be module
     mline=stxt[0]
     if ((len(mline) > 7) and (mline[:7] == 'Module:')):
@@ -2428,8 +2428,8 @@ def _parse_funchelp_text(txt):
         htext=string.join(stxt[1:],'\n')
         return (mname,None,htext)
 
-    
-    
+
+
 def _run_command_line(line):
     # This part is very hackish, though consistent with
     # how openev transfers information between modules
@@ -2477,7 +2477,7 @@ class ScrollableTextView(gtk.ScrolledWindow):
 if __name__ == '__main__':
     app = Shell()
     app.show_all()
-    
+
     # Removed - GTK2 Port - Need alternative? gtk.Extra.debug_main_quit()
     app.connect('destroy', gtk.main_quit)
     gtk.main()

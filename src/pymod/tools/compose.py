@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: compose.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Tool for combining/merging datasets without loading
@@ -53,7 +53,7 @@ import gvsignaler
 spc=5
 
 class ComposeTool(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
         self.init_menu()
@@ -87,7 +87,7 @@ class DatasetComposeDialog(gtk.Window):
         self.shell.pack_start(self.button_dict['Mode'])
         self.show_list.append(self.button_dict['Mode'])
 
- 
+
         self.adv_notebook = gtk.Notebook()
         self.shell.pack_start(self.adv_notebook)
         self.adv_show_list.append(self.adv_notebook)
@@ -99,7 +99,7 @@ class DatasetComposeDialog(gtk.Window):
         echbox.set_border_width(3)
         self.shell.pack_end(echbox,False,False,0)
         self.show_list.append(echbox)
-                              
+
         self.button_dict['Close']=gtk.Button('Close')
         echbox.pack_end(self.button_dict['Close'],expand=True)
         self.button_dict['Save']=gtk.Button('Save VRT')
@@ -124,7 +124,7 @@ class DatasetComposeDialog(gtk.Window):
 
         # geocode frame hides some of its contents
         self.geo_frame.show()
-        
+
         self.button_dict['Save'].connect('clicked',self.create_cb,'Save')
         self.button_dict['New'].connect('clicked',self.create_cb,'New')
         self.button_dict['Current'].connect('clicked',self.create_cb,'Current')
@@ -134,7 +134,7 @@ class DatasetComposeDialog(gtk.Window):
         self.input_frame.subscribe('output-bands-empty', self.clear_defaults)
         self.input_frame.subscribe('output-bands-notempty',
                                    self.update_defaults)
-                       
+
         self.button_dict['Mode'].set_active(0)
         self.mode_toggled_cb()
         self.shell.show()
@@ -146,7 +146,7 @@ class DatasetComposeDialog(gtk.Window):
         else:
             for item in self.adv_show_list:
                 item.hide()
-                
+
     def close(self,*args):
         self.destroy()
 
@@ -167,7 +167,7 @@ class DatasetComposeDialog(gtk.Window):
         mbase = vrtutils.serializeMetadata(bands[0][0])
         if mbase is not None:
             vrtbase.append(mbase)
-            
+
         gbase = self.geo_frame.get_geocoding()
         for item in gbase:
             vrtbase.append(item)
@@ -183,9 +183,9 @@ class DatasetComposeDialog(gtk.Window):
             outband=outband+1
 
         vrtlines = gdal.SerializeXMLTree(vrtbase)
-    
+
         vrtds = gdal.OpenShared(vrtlines)
-        
+
         if args[1] == 'Save':
             chooser = gtk.FileChooserDialog(title="Save File", parent=self, 
                     action=gtk.FILE_CHOOSER_ACTION_SAVE, buttons=None, backend=None)
@@ -211,14 +211,14 @@ class DatasetComposeDialog(gtk.Window):
         self.geo_frame.update_default_frame(None)
         self.geo_frame.clear_gcp_frame()
         self.geo_frame.clear_geotransform_frame()
-    
+
 class GeocodingFrame(gtk.VBox):
     def __init__(self,tips):
         gtk.VBox.__init__(self)
 
         self.frames = {}
         self.tips=tips
-        
+
         hbox=gtk.HBox()
         hbox.set_border_width(spc)
         self.pack_start(hbox)
@@ -239,7 +239,7 @@ class GeocodingFrame(gtk.VBox):
         self.create_geotransform_frame()
         self.geocode_menu.set_history(0)
         self.geotype_toggled_cb()
-        
+
         self.default_fname=None # dataset to use for default info
         self.default_geotransform=None
         self.default_gcps=None
@@ -252,7 +252,7 @@ class GeocodingFrame(gtk.VBox):
                 self.frames[self.geocode_menu_list[idx]].show()
             else:
                 self.frames[self.geocode_menu_list[idx]].hide()
-                
+
 
     def create_default_frame(self):
         self.frames['Default']=gtk.Frame('')
@@ -268,10 +268,10 @@ class GeocodingFrame(gtk.VBox):
         self.default_scrolled_win.add( self.default_scrolled_text)
         vbox.pack_start(self.default_scrolled_win,expand=True)
         self.frames['Default'].show_all()
-        
+
         self.pack_start(self.frames['Default'])
 
-        
+
     def create_gcp_frame(self):
         self.frames['GCPs']=gtk.Frame('')
         self.frames['GCPs'].set_shadow_type(gtk.SHADOW_NONE)
@@ -360,7 +360,7 @@ class GeocodingFrame(gtk.VBox):
                 # lines
                 if idx != 0:
                     print 'Warning: invalid line '+str(idx)+' in GCP file!'
-                    
+
             idx=idx+1
 
         self.gcpgrid.refresh()
@@ -376,12 +376,12 @@ class GeocodingFrame(gtk.VBox):
             for item in self.default_gcps:
                 gcp=CopyGDALGCP(item) # copy so original doesn't get changed
                 self.gcplist.append(gcp)
-                
+
             self.gcpgrid.refresh()
-                
+
             self.gcpprjbox.set_input_projection(self.default_prj)
             self.gcpprjbox.set_output_projection(self.default_prj)
-               
+
     def clear_gcps(self,*args):
         while len(self.gcplist) > 0:
             self.gcplist.pop()
@@ -398,7 +398,7 @@ class GeocodingFrame(gtk.VBox):
         except:
             gvutils.error('Unable to open '+fname+' as a GDAL dataset!')
             return
-        
+
         gcps=fh.GetGCPs()
         prj=fh.GetGCPProjection()
         self.clear_gcps()
@@ -406,7 +406,7 @@ class GeocodingFrame(gtk.VBox):
             ngcp=CopyGDALGCP(gcp)
             self.gcplist.append(ngcp)
         self.gcpgrid.refresh()
-            
+
         self.gcpprjbox.set_input_projection(prj)
 
     def add_gcp_cb(self,*args):
@@ -443,7 +443,7 @@ class GeocodingFrame(gtk.VBox):
     def clear_geotransform_frame(self):
         for item in self.geotransform_entries:
             item.set_text('')
-            
+
         self.geotransformprjbox.set_input_projection('')
         self.geotransformprjbox.set_output_projection('')
 
@@ -455,7 +455,7 @@ class GeocodingFrame(gtk.VBox):
                     "%f" % self.default_geotransform[idx])
             self.geotransformprjbox.set_input_projection(self.default_prj)
             self.geotransformprjbox.set_output_projection(self.default_prj)
-        
+
     def update_default_frame(self,fname):
         self.default_scrolled_text.get_buffer().delete(0,-1)
         if fname is None:
@@ -464,9 +464,9 @@ class GeocodingFrame(gtk.VBox):
             self.default_gcps=None
             self.default_prj=''
             return
-            
+
         sr=osr.SpatialReference()
-        
+
         fh=gdal.OpenShared(fname)
         prj=''
         geot=fh.GetGeoTransform()
@@ -496,11 +496,11 @@ class GeocodingFrame(gtk.VBox):
             else:
                 prjtxt=''
             txt=txt+'Projection: '+prjtxt
-                    
+
         self.default_scrolled_text.set_text(txt)
         self.default_prj=prj
         self.default_fname=fname
-            
+
     def clear_defaults(self,*args):
         self.update_default_frame(None)
 
@@ -518,18 +518,18 @@ class GeocodingFrame(gtk.VBox):
                                geotransform=self.default_geotransform)
                 if gtxt is not None:
                     serialtxt.append(gtxt)
-                    
+
             elif self.default_gcps is not None:
                 serialtxt.append(vrtutils.serializeGCPs(
                                  gcplist=self.default_gcps,
                               with_Z=1,projection_attr_txt=self.default_prj))
             else:
                 return []
-                    
+
         elif gt == 'GCPs':
             if len(self.gcplist) == 0:
                 return []
-            
+
             inprj,outprj=self.gcpprjbox.get_projections()
             if (outprj == '') or (outprj == inprj) or (inprj == ''):
                 reproj=None
@@ -570,7 +570,7 @@ class GeocodingFrame(gtk.VBox):
                 gbase=vrtutils.serializeGeoTransform(geotransform=gt)
                 if gbase is not None:
                     serialtxt.append(gbase)
-                
+
             else:
                 ds=gdal.OpenShared(self.default_fname)
                 gcps=vrtutils.GeoTransformToGCPs(gt,ds.RasterXSize,
@@ -578,9 +578,9 @@ class GeocodingFrame(gtk.VBox):
                 serialtxt.append(vrtutils.serializeGCPs(gcplist=gcps,with_Z=1,
                                                  projection_attr_txt=inprj,
                                                  reproj=outprj))
-                
+
         return serialtxt
-            
+
 
 def getprjinfo():
     fname=GtkExtra.file_sel_box(title="Select GDAL Dataset or WKT text file")
@@ -617,13 +617,13 @@ def editprjinfo(wktinit=''):
 
     if len(prj) == 0:
         return ''
-    
+
     sr=osr.SpatialReference()
     val=sr.ImportFromWkt(prj)
     if val != 0:
         gvutils.error('Invalid projection information entered!')
         return ''
-    
+
     return prj
 
 class editprjwin(gtk.Window):
@@ -643,22 +643,22 @@ class editprjwin(gtk.Window):
         self.ok_button=gtk.Button('     OK     ')
         hbox.pack_end(self.cancel_button,expand=False)
         hbox.pack_end(self.ok_button,expand=False)
-        
+
         self.cancel_button.connect('clicked', self.quit)
         self.ok_button.connect('clicked', self.ok_cb)
         self.ret=None
         self.show_all()
-        
+
     def quit(self, *args):
         self.hide()
         self.destroy()
         gtk.mainquit()
-        
+
     def ok_cb(self, b):
         buf = self.text.get_buffer()
         self.ret = buf.get_text(*buf.get_bounds())
         self.quit()
-        
+
 
 def getgcpfile():
     win=GCPFileDialog()
@@ -694,7 +694,7 @@ class GCPFileDialog(gtk.FileSelection):
       	self.cancel_button.connect('clicked', self.quit)
         self.ok_button.connect('clicked', self.ok_cb)
         self.ret = None
-        
+
     def quit(self, *args):
         self.hide()
       	self.destroy()
@@ -778,7 +778,7 @@ class ProjectionBox(gtk.Table):
         self.attach(self.buttons['output-view'],4,5,1,2)
         self.attach(self.buttons['output-load'],5,6,1,2)        
         self.outprj=''
-        
+
         self.buttons['input-load'].connect('clicked',self.load_input_cb)
         self.buttons['input-view'].connect('clicked',self.view_input_cb)
         self.buttons['output-load'].connect('clicked',self.load_output_cb)
@@ -787,7 +787,7 @@ class ProjectionBox(gtk.Table):
         self.buttons['output-edit'].connect('clicked',self.edit_output_cb)
 
         self.toggle_output_cb()
-        
+
     def load_input_cb(self,*args):
         prj=getprjinfo()
         if prj is not None:
@@ -809,7 +809,7 @@ class ProjectionBox(gtk.Table):
             gvutils.error('Current view does not contain projection info!')
             self.inprj=''
             return
-        
+
         sr=osr.SpatialReference()
         val=sr.ImportFromWkt(prj)
         if val == 0:
@@ -817,7 +817,7 @@ class ProjectionBox(gtk.Table):
         else:
             gvutils.error('Current view contains invalid projection info!')
             self.inprj=''
-            
+
     def view_output_cb(self,*args):
         prj=gview.app.sel_manager.get_active_view().get_projection()
         if prj is None:
@@ -829,7 +829,7 @@ class ProjectionBox(gtk.Table):
             gvutils.error('Current view does not contain projection info!')
             self.outprj=''
             return
-        
+
         sr=osr.SpatialReference()
         val=sr.ImportFromWkt(prj)
         if val == 0:
@@ -837,7 +837,7 @@ class ProjectionBox(gtk.Table):
         else:
             gvutils.error('Current view contains invalid projection info!')
             self.outprj=''
-            
+
     def edit_input_cb(self,*args):
         prj=editprjinfo(self.inprj)
         if prj is not None:
@@ -853,7 +853,7 @@ class ProjectionBox(gtk.Table):
 
     def set_output_projection(self,prj):
         self.outprj=prj
-        
+
     def toggle_output_cb(self,*args):
         if self.out_toggle_useinput.get_active() == 1:
             self.buttons['output-load'].set_sensitive(0)
@@ -869,14 +869,14 @@ class ProjectionBox(gtk.Table):
             return (self.inprj, self.inprj)
         else:
             return (self.inprj, self.outprj)
-        
+
 class InputFrame(gvsignaler.Signaler):
     def __init__(self,parent,tips):
         self.frame=gtk.Frame('Raster Bands')
         self.tips=tips
         self.input_bands=get_list_of_bands_as_dict()
         self.output_bands={}
-        
+
         hbox1=gtk.HBox(spacing=spc)
         hbox1.set_border_width(spc)
         self.frame.add(hbox1)
@@ -917,7 +917,7 @@ class InputFrame(gvsignaler.Signaler):
             for i in range(1,ds.RasterCount+1):
                 curband=fname + '.band[' + str(i) + ']'
                 dict[gtk.ListItem(curband)] = (ds,i,curband)
-                
+
             if srctoggle.get_active() == True:
                 slist=vrtutils.GetSimilarFiles(fname)
                 for nname in slist:
@@ -964,7 +964,7 @@ class InputFrame(gvsignaler.Signaler):
                           'in the same directory when using Load File.')
         srcbbox.pack_start(srctoggle,expand=False)
         srctoggle.set_active(True)
-        
+
         # destination
 	btn_box = gtk.VBox(spacing=10)
 	btn_box.set_border_width(10)
@@ -978,7 +978,7 @@ class InputFrame(gvsignaler.Signaler):
                 refreshflag = 1
             else:
                 refreshflag = 0
-                
+
 	    for i in sel:
 		list_item = gtk.ListItem(self.input_bands[i][2])
 		self.dest_list.append_items([list_item])
@@ -988,7 +988,7 @@ class InputFrame(gvsignaler.Signaler):
 
             if (refreshflag == 1) and (len(sel) > 0):
                 self.notify('output-bands-notempty')
-                
+
 	def dest_del(_button,*args):
 	    selection = self.dest_list.get_selection()
 	    self.dest_list.remove_items(selection)
@@ -1000,7 +1000,7 @@ class InputFrame(gvsignaler.Signaler):
 		self.dest_list.select_child(self.dest_list.children()[-1])
             else:
                 self.notify('output-bands-empty')
-                
+
         def dest_raise(_button, *args):
             selection = self.dest_list.get_selection()
             if len(selection) != 1:
@@ -1022,8 +1022,8 @@ class InputFrame(gvsignaler.Signaler):
             self.dest_list.remove_items(selection)
             self.dest_list.insert_items(selection,pos+1)
             self.dest_list.select_item(pos+1)
-            
-            
+
+
 	add_btn = gtk.Button("Add->")
         add_btn.connect("clicked", dest_add)
         # The label below just makes things align more nicely (adds space)
@@ -1063,7 +1063,7 @@ class InputFrame(gvsignaler.Signaler):
         r_btn.add(im)
         r_btn.connect("clicked", dest_raise)
 	destbbox.pack_start(r_btn,expand=False)
-        
+
         pix = gtk.gdk.pixmap_colormap_create_from_xpm(None,
             gtk.gdk.colormap_get_system(), None,
              os.path.join(gview.home_dir,'pics','lower.xpm'))
@@ -1073,7 +1073,7 @@ class InputFrame(gvsignaler.Signaler):
         l_btn.add(im)
         l_btn.connect("clicked", dest_lower)
 	destbbox.pack_start(l_btn,expand=False)
-        
+
 	self.dest_list = gtk.List()
 	self.dest_list.set_selection_mode(gtk.SELECTION_BROWSE)
 	dest_win.add_with_viewport(self.dest_list)
@@ -1106,7 +1106,7 @@ class InputFrame(gvsignaler.Signaler):
             keys=bands.keys()
             xsize,ysize=(bands[keys[0]][0].RasterXSize,
                          bands[keys[0]][0].RasterYSize)
-            
+
         # Only add bands that are of the same size
         invalid=0
         oldbands=[]
@@ -1124,7 +1124,7 @@ class InputFrame(gvsignaler.Signaler):
                     newbands.append(self.input_bands[ckey][2])
             else:
                 invalid=1
-                
+
         if invalid != 0:
             txt='Bands for composed dataset must all\n'+\
                 'be the same size.  Bands that are not\n'+\
@@ -1151,10 +1151,10 @@ class InputFrame(gvsignaler.Signaler):
             out_list.append((self.output_bands[item][0],
                              self.output_bands[item][1]))
         return out_list
-    
+
     def show_all(self,*args):
         self.frame.show_all()
- 
+
     def show(self,*args):
         self.frame.show()
 
@@ -1177,13 +1177,13 @@ def CopyGDALGCPs(gcplist):
         ngcplist.append(CopyGDALGCP(gcp))
     return ngcplist
 
-               
+
 ########################################################################
 def get_raster_size(_layer):
     w =  _layer.get_parent().get_dataset().GetRasterBand(1).XSize
     h =  _layer.get_parent().get_dataset().GetRasterBand(1).YSize
     return (w,h)
- 
+
 
 #########################################################################
 def get_list_of_bands_as_dict(size=None):

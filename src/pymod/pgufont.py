@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: pgufont.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV Python GTK Utility classes
 # Purpose:  Embeddable Font class and font utility classes
@@ -67,7 +67,7 @@ class XLFDFontSpec:
                      font. Together with the Charset Encoding field, this
                      defines the character set for the font.
     Charset Encoding An identifier for the particular character set encoding.
-    
+
     GTK2 Port: pguFontControl removed and replaced with the standard
     FontButton control.  Examples in gvogrfsgui and gviewapp.
     """
@@ -92,7 +92,7 @@ class XLFDFontSpec:
     def parse_font_spec(self, font_spec):
         """
         parse a font specification
-        
+
         Now font spec may be XLFD or a pango description.
         """
         self.pango_desc = None
@@ -179,7 +179,7 @@ class XLFDFontSpec:
         doesn't work ...)
         """
         return str(self)
-    
+
     def get_pango_desc(self):
         """ Get a pango font description for this pgufont.
             Assumes font has been set and will not change,
@@ -212,10 +212,10 @@ class XLFDFontSpec:
             self.pango_desc.set_stretch(pango.STRETCH_CONDENSED)
         if stretch[0] == 'E' or stretch[0] == 'e':
             self.pango_desc.set_stretch(pango.STRETCH_EXPANDED)
-        
+
     def set_font_name(self, pango_name = "Sans 12"):
         self.pango_desc = pango.FontDescription(pango_name)
-        
+
     def __str__(self):
         """
         return a representation of this xfld as a string

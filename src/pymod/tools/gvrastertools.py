@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvrastertools.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Raster tools for OpenEV built using Gillian's Tool Architecture.
@@ -65,7 +65,7 @@ class HistogramROITool(toolexample.GeneralROITool):
 
     def update_roi_view(self,*args):
         pass
-    
+
     def analyze_cb(self,*args):
         # Find the view and layer
         cview = self.app.view_manager.get_active_view_window().title
@@ -108,15 +108,15 @@ class HistogramROITool(toolexample.GeneralROITool):
             dsb = target_ds.GetRasterBand(1)
 
         # Compute the histogram.
-        
+
         min = clayer.min_get(0)
         max = clayer.max_get(0)
         histogram = dsb.GetHistogram( min, max, 256, 1, 0 )
 
         pixbuf = self.RP_ToolDlg.get_histview( histogram, min, max )
-        
+
         self.RP_ToolDlg.viewarea.set_from_pixbuf(pixbuf)
-        
+
 class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
     def __init__(self):
         toolexample.General_ROIToolDlg.__init__(self)
@@ -133,9 +133,9 @@ class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
         # the frame and text object...
         self.frame_dict['histogram_frame'] = gtk.Frame()
         self.show_list.append(self.frame_dict['histogram_frame'])
-        
+
         # Initialize with dummy histogram.
-        
+
         histogram = []
         for i in range(256):
             histogram.append( 0 )
@@ -170,7 +170,7 @@ class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
             self.button_dict['Auto Update'].set_sensitive(False)
             self.button_dict['Analyze'].set_sensitive(False)
             self.button_dict['Set Tool'].set_sensitive(False)
-       
+
     def get_histview( self, histogram, min, max,set_ymin=None,set_ymax=None ):
 
         # Prepare histogram plot
@@ -182,7 +182,7 @@ class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
                           histogram[bucket_index]) )
 
         # Generate histogram graph
-        
+
         import gvplot
 
         xpm_file = gvutils.tempnam(extension='xpm')

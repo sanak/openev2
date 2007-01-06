@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvprint.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Print Dialog
@@ -61,7 +61,7 @@ class GvPrintDialog(gtk.Window):
         self.command = gview.get_preference('print_command')
         if self.command is None:
             self.command = 'lpr'
-            
+
         self.filename = 'openev.ps'
 
         cgroup = gtk.VBox(spacing=6)
@@ -227,7 +227,7 @@ class GvPrintDialog(gtk.Window):
 	    width = int(self.view.get_width() * resolution + 0.5)
 	    self.xsize_entry.set_text(str(width))
 	self.resolution_adjustment.set_value(resolution)
-	
+
 
     def device_cb(self, *args):
         if self.device.get_history() == 0:
@@ -259,7 +259,7 @@ class GvPrintDialog(gtk.Window):
             pass
 
     def update_cb(self, *args):
-        
+
         driver = self.driver.get_history()
 
         # Set FILE/PRINTER Device based on driver.
@@ -300,7 +300,7 @@ class GvPrintDialog(gtk.Window):
             self.scale_slider.hide()
             self.paper_label.hide()
             self.paper.hide()
-                    
+
     def print_cb(self, *args):
         if self.resolution_adjustment.value >= 0.99 \
            and self.resolution_adjustment.value <= 1.01:
@@ -322,7 +322,7 @@ class GvPrintDialog(gtk.Window):
         uly = (self.paper_y - height/pixels_per_inch)/2.0
         lrx = self.paper_x - ulx
         lry = self.paper_y - uly
-        
+
         try:
             os.unlink( self.file.get_text() )
         except:
@@ -333,7 +333,7 @@ class GvPrintDialog(gtk.Window):
             filename = self.file.get_text()
             if self.device.get_history() == 1:
                 filename = '|' + filename
-                
+
             err = self.view.print_postscript_to_file(width,height,
                                                ulx,uly,lrx,lry,
                                                self.output.get_history(),
@@ -359,7 +359,7 @@ class GvPrintDialog(gtk.Window):
                     gdal.RGBFile2PCTFile( '_temp.tif', '_temp2.tif' )
                     os.unlink('_temp.tif')
                     os.rename('_temp2.tif','_temp.tif')
-                
+
                 gdal.GetDriverByName('GIF').CreateCopy(self.file.get_text(),
                                                   gdal.Open('_temp.tif'),True)
             os.unlink( '_temp.tif' )
@@ -368,7 +368,7 @@ class GvPrintDialog(gtk.Window):
             gvutils.error('The request to print appears to have failed.')
 
         self.close()
-            
+
     def close(self, *args):
         if self.device.get_history() == 1:
             gview.set_preference('print_command',self.file.get_text())
@@ -380,11 +380,11 @@ class GvPrintDialog(gtk.Window):
                              str(self.resolution_adjustment.value))
         gview.set_preference('print_scale',
                              str(self.scale_adjustment.value))
-            
+
         self.destroy()
-        
+
         return True
-        
+
 
 if __name__ == '__main__':
     dialog = GvPrintDialog(None)

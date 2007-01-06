@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvvectorpropdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GvShapesLayer Properties Dialog
@@ -145,7 +145,7 @@ class GvVectorPropDialog(gtk.Window):
         self.line_color = pgucolorsel.ColorControl('Line Color',
                                          self.color_cb,'_line_color')
         box.pack_start(self.line_color)
-        
+
         #Line Width
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
@@ -153,7 +153,7 @@ class GvVectorPropDialog(gtk.Window):
         self.line_width = gtk.Entry()
         self.line_width.connect('changed', self.line_width_cb)
         box.pack_start( self.line_width, expand=False)
-        
+
 
         # AREA CONTROLS ------------------------------------------------------
         frame = gtk.Frame('Areas')
@@ -185,7 +185,7 @@ class GvVectorPropDialog(gtk.Window):
         self.area_edge_width = gtk.Entry()
         self.area_edge_width.connect('changed', self.area_edge_width_cb)
         box.pack_start( self.area_edge_width, expand=False)
-        
+
 
         # LABEL CONTROLS -----------------------------------------------------
         frame = gtk.Frame('Labels')
@@ -277,7 +277,7 @@ class GvVectorPropDialog(gtk.Window):
 
     # Initialize GUI state from underlying object state.
     def update_gui(self):
-        
+
         # GTK2 PORT PENDING - GTK_OBJECT_DESTROYED should no longer be used;
         #   if necessary should respond to destroy signal.
         #if self.flags( DESTROYED ) > 0:
@@ -313,7 +313,7 @@ class GvVectorPropDialog(gtk.Window):
         else:
             self.point_size.entry.insert_text(
                 self.layer.get_property('_point_size'))
-                
+
         #line and area edge width
         self.line_width.delete_text( 0, -1 )
         if self.layer.get_property('_line_width') is None:
@@ -328,7 +328,7 @@ class GvVectorPropDialog(gtk.Window):
         else:
             self.area_edge_width.insert_text(
                  self.layer.get_property( '_area_edge_width' ))
-                 
+
         # antialiasing
         if self.layer.get_property('_gl_antialias') is None:
             self.antialias.set_active( False )
@@ -418,57 +418,57 @@ class GvVectorPropDialog(gtk.Window):
 
         self.layer.set_property( '_point_size', new_text)
         self.layer.display_change()
-        
+
     #Handle changes to the line width
     def line_width_cb( self, *args ):
         if self.layer is None:
             return
-            
+
         new_text = self.line_width.get_chars(0, -1)
         if (len(new_text)) == 0:
             return
-            
+
         if self.layer.get_property('_line_width') is not None \
            and self.layer.get_property('_line_width') == new_text:
             return
-        
+
         self.layer.set_property('_line_width', new_text)
         self.layer.display_change()
-        
+
     #Handle changes to the area edge width
     def area_edge_width_cb( self, *args ):
         if self.layer is None:
             return
-            
+
         new_text = self.area_edge_width.get_chars(0, -1)
         if (len(new_text)) == 0:
             return
-            
+
         if self.layer.get_property('_area_edge_width') is not None \
            and self.layer.get_property('_area_edge_width') == new_text:
             return
-        
+
         self.layer.set_property('_area_edge_width', new_text)
         self.layer.display_change()
-        
+
     # Handle changes to antialiasing
     def antialias_cb( self, *args ):
         if self.layer is None:
             return
-            
+
         antialias = self.layer.get_property( "_gl_antialias" )
         if antialias is None:
             antialias = "0"
         elif antialias != "0":
             antialias = "1"
-            
+
         if self.antialias.get_active() and antialias != "1":
             self.layer.set_property( "_gl_antialias", "1" )
             self.layer.display_change()
         elif antialias != "0":
             self.layer.set_property( "_gl_antialias", "0" )
             self.layer.display_change()
-            
+
 
     # Handle updates to the label font.
     def label_change_cb(self, *args):

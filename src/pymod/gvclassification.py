@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvclassification.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  CIETMap / OpenEV
 # Purpose:  GvClassification class responsible for managing classification
@@ -87,7 +87,7 @@ class GvClassification:
 
         if layer is not None:
             self.add_layer( layer )
-            
+
     ###########################################################################
     def dump( self, *args ):
         print str(self)
@@ -112,7 +112,7 @@ class GvClassification:
     def add_raster(self, raster, init=1):
         """Add a ranster layer to the list of layers managed by this 
         classification
-        
+
         DEPRECATED - use add_layer instead
         """
         print "GvClassification.add_raster() is deprecated, " + \
@@ -146,19 +146,19 @@ class GvClassification:
             schema = layer.get_parent().get_schema()
             if len(schema) > 0:
                 self.set_classify_property( layer, schema[0][0] )
-            
+
         self.layers.append( layer )
 
     ###########################################################################
     def remove_raster(self, raster):
         """Remove a raster from the classification
-        
+
         DEPRECATED - use remove_layer instead
         """
         print "GvClassification.remove_raster() is deprecated, " + \
               "use remove_layer instead"
         self.remove_layer( raster )
-        
+
     ###########################################################################
     def remove_layer( self, layer):
         """Remove a layer from the classification
@@ -217,14 +217,14 @@ class GvClassification:
           class_id -- the class number to assign, if defaulted a new class will
           be created after the largest existing class number.  Zero
           based.
-          
+
           symbol -- the symbol to assign to this class (for point layers)
-          
+
           symbol_scale -- the scale to draw the symbol at
 
           Returns the class number assigned."""
-          
-          
+
+
           if class_id is None:
               class_id = self.count
 
@@ -236,13 +236,13 @@ class GvClassification:
               self.range.append('')
               self.point_symbols.append('')
               self.symbol_scales.append('')
-              
+
           if desc is None:
               desc = ''
 
           if range_max is None:
               range_max = range_min
-          
+
           try:
             range_min = string.strip( range_min )
             range_max = string.strip( range_max )
@@ -258,7 +258,7 @@ class GvClassification:
           if len(color) == 3:
               (r,g,b) = color
               color = (r,g,b,1.0)
-              
+
           if symbol_scale is None:
             symbol_scale = 2.0
 
@@ -311,12 +311,12 @@ class GvClassification:
         ###################################################################
         # Update properties on the GvLayer with the new classification
         # information.
-        
+
         self.update_layer_properties( layer, cd )
 
         ###################################################################
         # Do layer specific actions.
-        
+
         if issubclass(layer.__class__,gview.GvShapesLayer):
             self.update_vector( layer )
         elif issubclass(layer.__class__,gview.GvRasterLayer):
@@ -415,12 +415,12 @@ class GvClassification:
                 raw_value = shape.get_property( class_prop )
             except:
                 continue
-            
+
             try:
                 raw_value = float(raw_value)
             except:
                 pass
-                
+
             rep = self.compute_rep( raw_value )
 
             color = rep[1]
@@ -438,7 +438,7 @@ class GvClassification:
             elif stype == gview.GVSHAPE_AREA:
                 ogrfs = 'BRUSH(fc:%s);PEN(c:#010101ff)' % ogrfs_color
             shape.set_property( '_gv_ogrfs', ogrfs )
-            
+
         shapes.changed()
 
     ###########################################################################
@@ -450,7 +450,7 @@ class GvClassification:
         raw_value -- the value to run through the classification.
 
         Returns a list of property information with the following values:
-        
+
         [0] - symbol name
         [1] - symbol color
         [2] - symbol scale
@@ -532,7 +532,7 @@ class GvClassification:
         rep.append( scale )
 
         return rep
-        
+
     ###########################################################################
     # Update properties on the GvShapesLayer with the new classification
     # information.
@@ -614,7 +614,7 @@ class GvClassification:
 
               key = 'Class_%d_Range' % class_id
               cdict[key] = '%r:%r' % self.range[class_id]
-              
+
               if self.point_symbols[class_id] is not None:
                   key = 'Class_%d_Symbol' % class_id
                   cdict[key] = self.point_symbols[class_id]
@@ -629,9 +629,9 @@ class GvClassification:
 
     ###########################################################################
     def deserialize(self, dict):
-    
+
         self.remove_all_classes()
-        
+
         self.title = dict.get('Classification_Title', '')
         type = int(dict.get('Classification_Type', '1'))
         self.set_type( type )
@@ -672,7 +672,7 @@ class GvClassification:
                 range_max = float(range_max)
             except:
                 pass
-            
+
             key = 'Class_%d_Symbol' % class_id
             try:
                 symbol = dict[key]
@@ -684,13 +684,13 @@ class GvClassification:
                 scale = float(dict[key])
             except:
                 scale = None
-            
+
             self.set_class( color, range_min, range_max, name, desc,
                           class_id, symbol, scale )
 
             class_id = class_id + 1
 
-        
+
     ###########################################################################
     def set_title(self, title):
           """Set new title (for Legend)
@@ -783,7 +783,7 @@ class GvClassification:
     ###########################################################################
     def set_scale(self, idx, scale):
         self.set_value(self.symbol_scales, idx, scale)
-        
+
     ###########################################################################
     def set_type(self, type):
         """Set the classification type - affects prepare_default only
@@ -798,14 +798,14 @@ class GvClassification:
         """return the classification type
         """
         return self.type
-        
+
     ###########################################################################
     def collect_range(self, layer, property = None ):
         if issubclass(layer.__class__,gview.GvShapesLayer):
             shapes = layer.get_parent()
             min_v = None
             max_v = None
-            
+
             for shape in shapes:
                 try:
                     value = float(shape.get_property( property ))
@@ -821,7 +821,7 @@ class GvClassification:
                     pass
 
             return (min_v,max_v)
-            
+
         elif issubclass(layer.__class__,gview.GvRasterLayer):
             #is there a better way to do this, or is it even necessary?
             if layer.get_mode() == gview.RLM_RGBA:
@@ -836,7 +836,7 @@ class GvClassification:
 
         else:
             raise ValueError, 'unsupported layer type in collect_range'
-        
+
     ###########################################################################
     def collect_unique(self, layer, property = None ):
         """
@@ -849,7 +849,7 @@ class GvClassification:
         layer -- the GvLayer (GvRasterLayer or GvShapesLayer) to be queried
         property -- for GvShapesLayer this is the property name to be scanned.
         """
-        
+
         if issubclass(layer.__class__,gview.GvShapesLayer):
             shapes = layer.get_parent()
 
@@ -867,7 +867,7 @@ class GvClassification:
                     pass
 
             return val_count
-            
+
         elif issubclass(layer.__class__,gview.GvRasterLayer):
 
             raster = layer.get_data()
@@ -883,7 +883,7 @@ class GvClassification:
             h_max = h_max + delta*0.25
 
             is_int = 0
-            
+
             if datatype == gdal.GDT_Byte:
                 h_min = 0
                 h_max = 256
@@ -913,7 +913,7 @@ class GvClassification:
                         value = h_min + i
                     else:
                         value = h_min + delta * i
-                    
+
                     val_count[value] = histogram[i]
 
             return val_count
@@ -963,7 +963,7 @@ class GvClassification:
             h_max = h_max + delta*0.25
 
             is_int = 0
-            
+
             if datatype == gdal.GDT_Byte:
                 h_min = 0
                 h_max = 256
@@ -1077,7 +1077,7 @@ class GvClassification:
         negsds = int((mnval-min(values))/sdval) # SDs below the mean
         if (mnval-min(values))/sdval > negsds:
             negsds = negsds + 1
-        
+
         # Handling the maximum category values below the mean
         maxblw = range(negsds)
         blwlbl = range(negsds)
@@ -1085,7 +1085,7 @@ class GvClassification:
             maxblw[((negsds-1)-i)] = mnval - (i*sdval)
             blwlbl[((negsds-1)-i)] = "%i to %i standard deviations" % (-1*i, -1*(i+1))
         # maxblw[(negsds-1)] = mnval - 0.0001
-        
+
         # Handling the maximum category values above the mean
         maxabv = range(possds)
         abvlbl = range(possds)
@@ -1095,7 +1095,7 @@ class GvClassification:
             maxabv[i] = mnval + ((i+1)*sdval)
             abvlbl[i] = "%i to %i standard deviations" % (i, i+1)
         # maxabv[0] = mnval + 0.0001
-        
+
         maxval = maxblw + [mnval] + maxabv # concatinate the below and above max values
         meanlb = "Mean: %f" % mnval
         labels = blwlbl + [meanlb] + abvlbl
@@ -1111,15 +1111,15 @@ class GvClassification:
     ###########################################################################
     def prepare_default(self, count=5):
         """Prepare a default classification scheme.
-        
+
         count -- the number of classes to create by default (the actual number
                  may differ if creating a discrete classification)
-        
+
         If the layer is a GvShapesLayer and the classify property is not 
         numeric then the type will be changed to a discrete classication with
         a maximum of 32 discrete values
         """
-        
+
         if len(self.layers) == 0:
             return
 
@@ -1129,10 +1129,10 @@ class GvClassification:
         unique_vals = []
         symbol = None
         name = None
-        
+
         for layer in self.layers:
             property = self.get_classify_property( layer )
-            
+
             if property is not None and \
                 issubclass( layer.__class__, gview.GvShapesLayer):
                 #determine the type of the 
@@ -1148,7 +1148,7 @@ class GvClassification:
                     self.set_type( CLASSIFY_DISCRETE )
             else:
                 property_type = None
-                
+
             if self.get_type() == CLASSIFY_DISCRETE:
                 vals = self.collect_unique( layer, property )
                 keys = vals.keys()
@@ -1178,11 +1178,11 @@ class GvClassification:
         elif self.get_type() == CLASSIFY_DISCRETE:
             overall_min = 0
             overall_max = count
-            
+
         epsilon = (overall_max-overall_min) * 0.002
         overall_min = overall_min - epsilon
         overall_max = overall_max + epsilon
-        
+
         # Below are calls to the classifiers that require the entire property field
 
         if self.get_type() == CLASSIFY_QUANTILE:
@@ -1193,7 +1193,7 @@ class GvClassification:
             svalues = self.collect_values( layer, property )
             nsdminmax = self.nstddev(svalues)
             count = nsdminmax[2]
-            
+
         input_incr = (overall_max - overall_min) / count
         color_incr = float(1.0 / (count + 1))
 

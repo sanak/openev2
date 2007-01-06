@@ -98,7 +98,7 @@ class GViewApp(Signaler):
         self.menufile=menufile
         self.iconfile=iconfile
         self.pyshellfile=pyshellfile
-        
+
         # External tools to import and add to view menu
         self.Tool_List = []
         if toolfile is not None:
@@ -147,7 +147,7 @@ class GViewApp(Signaler):
         self.clear_project()
         self.filename = filename
         self.add_to_rfl( filename )
-        
+
         for subnode in tree[2:]:
             if subnode[0] == gdal.CXT_Element:
                 gvutils.XMLInstantiate( subnode, self, filename=filename )
@@ -167,7 +167,7 @@ class GViewApp(Signaler):
         pgufilesel.SimpleFileSelect( self.save_project_with_name_cb,
                                      title = 'Project Filename',
                                      default_filename = default_filename )
-    
+
     def save_project(self, filename = None):
         if filename is None and self.filename is not None:
             filename = self.filename
@@ -178,7 +178,7 @@ class GViewApp(Signaler):
 
         tree = self.serialize( filename=filename )
         open( filename, 'w' ).write( gdal.SerializeXMLTree(tree) )
-        
+
         self.filename = filename
 
     def load_tools_file(self, toolfile):
@@ -214,7 +214,7 @@ class GViewApp(Signaler):
             if file[-3:] == '.py':
                 print 'Loading tools from '+os.path.join(dir_name,file)
                 module = file[:-3]
-                
+
                 try:
                     exec "import " + module
                     exec "tool_list = " + module + ".TOOL_LIST"
@@ -264,7 +264,7 @@ class GViewApp(Signaler):
     def quit(self, *args):
         # Save preferences
         gview.save_preferences()
-        
+
         # Notify listeners of quit event
         self.notify('quit')
 
@@ -272,13 +272,13 @@ class GViewApp(Signaler):
         # Don't add NUMPY arrays to file list.
         if filename[:7] == 'NUMPY::':
             return
-        
+
         next_value = filename
         for i in range(1,6):
             rbl_name = 'recent_file_'+str(i)
             rbl_value = gview.get_preference(rbl_name)
             gview.set_preference(rbl_name, next_value)
-            
+
             if rbl_value is None or rbl_value == filename:
                 break;
 
@@ -311,7 +311,7 @@ class GViewApp(Signaler):
         # load, and where to position them.
 
         import string
-        
+
         menufile = os.path.join(gview.home_dir,'xmlconfig',menufile)
 
         # menu_list contains a mix of regular and tool menu entries,
@@ -354,21 +354,21 @@ class GViewApp(Signaler):
         # end using their defaults.
         tools_accounted_for=[]
 
-        
+
         menu_list = []
-            
+
         for node in menu_trees[2:]:
             if node[1] == 'entry':
                 node_path  = gvutils.XMLFind( node, 'path')
                 if node_path is None:
                     raise AttributeError,"Invalid menu file format - missing path"
-                 
+
                 entry_type = gvutils.XMLFindValue( node_path, 'type', '')
                 entry_path = gvutils.XMLFindValue( node, 'path','')
-                
+
                 if (string.find(entry_path,"/") == -1):
                     raise AttributeError,"Invalid menu file format - bad path:%s" % entry_path
-                    
+
                 if (entry_type != ''):
                     entry_type = "<" + entry_type + ">"
                 path_split=string.split(entry_path,"/")
@@ -397,10 +397,10 @@ class GViewApp(Signaler):
                 entry = entry + ")"
 
                 menu_list.append(entry)
-                            
+
             elif node[1] == 'tools':
                 tools_to_include=node[2][1]
-                
+
             elif node[1] == 'simpletoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
@@ -434,29 +434,29 @@ class GViewApp(Signaler):
 
                     entry="("+string.join(("'"+cpath+"'",caccel,ccb,viewstr),",")+")"
                     menu_list.append(entry)
-                    
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
 
-                    
+
             elif node[1] == 'complextoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
                     raise AttributeError,"Invalid menu file format - missing tool name"
-                
+
                 oldpath  = gvutils.XMLFindValue( node, 'oldpath')
 
                 if oldpath is None:
                     txt="Invalid menu file format - complex tool entry\nrequires oldpath item."
                     raise AttributeError,txt
                 oldpath = oldpath[1:-1] # Entries in XML file are surrounded by quotes- get rid of them
-                
+
                 newpath  = gvutils.XMLFindValue( node, 'newpath')
                 if newpath is None:
                     txt="Invalid menu file format - complex tool entry\nrequires newpath item."
                     raise AttributeError,txt
                 newpath = newpath[1:-1] # Entries in XML file are surrounded by quotes- get rid of them
-                
+
                 if self.tool_index.has_key(toolname) == 0:
                     raise AttributeError,"Invalid menu file format- tool "+toolname+" not loaded."
 
@@ -486,10 +486,10 @@ class GViewApp(Signaler):
 
                 entry="("+string.join(("'"+newpath+"'",caccel,ccb,viewstr),",")+")"
                 menu_list.append(entry)
-                                   
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
-                    
+
         if tools_to_include not in ['All','None','Some']:
             raise AttributeError,"Invalid menu file format- <tool> entry should be All, None, or Some."
 
@@ -520,7 +520,7 @@ class GViewApp(Signaler):
                             if matches > cpos:
                                 break
                             idx=idx+1
-                        
+
                         caccel=ctool.menu_entries.entries[cpath][2]
                         if caccel is None:
                             caccel=str(None)
@@ -530,7 +530,7 @@ class GViewApp(Signaler):
                              "[1].menu_entries.entries['"+cpath+"'][1]"
 
                         viewstr="('"+view_name+"')"
-                        
+
                         entry="("+string.join(("'"+cpath+"'",caccel,ccb,viewstr),",")+")"
                         menu_list.insert(idx,entry)
 
@@ -547,17 +547,17 @@ class GViewApp(Signaler):
                 idx=idx+1
 
         menu_list.extend(help_list)
-        
+
         menu_cmd =  "self.menuf.add_entries([" + string.join(menu_list,',') + "])"
         return menu_cmd
-            
-    
+
+
     def load_icons_file_from_xml(self,iconfile):
         # Scan the XML icon file to find which tools to
         # load, and where to position them.
 
         import string
-        
+
         iconfile = os.path.join(gview.home_dir,'xmlconfig',iconfile)
 
         # icon_count: current position
@@ -598,9 +598,9 @@ class GViewApp(Signaler):
         # tools that haven't been added yet, and add them at the
         # end using their defaults.
         tools_accounted_for=[]
-        
+
         icon_list = []
-            
+
         for node in icon_trees[2:]:
             if node[1] == 'icon':
                 type = None
@@ -650,23 +650,23 @@ class GViewApp(Signaler):
                     raise AttributeError,"Invalid icon file format- tool "+toolname+" not loaded."
 
                 ctool=self.Tool_List[self.tool_index[toolname]][1]
-                
+
                 idx=0
                 for centry in ctool.icon_entries.entries:
                     icon_file=centry[0]
-                    
+
                     icon_label=centry[1]
                     if icon_label is not None:
                         icon_label="'"+icon_label+"'"
                     else:
                         icon_label=str(None)
-                    
+
                     icon_hint=centry[2]
                     if icon_hint is not None:
                         icon_hint="'"+icon_hint+"'"
                     else:
                         icon_hint=str(None)
-                    
+
                     # Ignore position- it is overridden by this entry's location in the
                     # xml file
                     icon_callback=centry[4]
@@ -675,7 +675,7 @@ class GViewApp(Signaler):
                         icon_help="'"+icon_help+"'"
                     else:
                         icon_help=str(None)
-                     
+
                     icon_type=centry[6]
                     if icon_type == 'xpm':
                         icon = "self.add_icon_to_bar("                           \
@@ -683,20 +683,20 @@ class GViewApp(Signaler):
                                 "self.app.Tool_List[self.app.tool_index['"+\
                                 toolname+"']][1].icon_entries.entries["+\
                                 str(idx)+"][4]",icon_help),",")+")"     
-                                
+
                         icon_list.append(icon)
                     else:
                         raise AttributeError,"Invalid icon type "+icon_type+" in tool "+toolname+"."
                     idx=idx+1
-                                                               
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
-                    
+
             elif node[1] == 'complextoolentry':
                 toolname  = gvutils.XMLFindValue( node, 'name')
                 if toolname is None:
                     raise AttributeError,"Invalid icon file format - missing tool name."
-                
+
                 oindex  = gvutils.XMLFindValue( node, 'index')
 
                 if oindex is None:
@@ -707,12 +707,12 @@ class GViewApp(Signaler):
                     oindex=int(oindex)
                 except:
                     raise AttributeError,"Invalid icon file- icon index to replace must be an integer."
-                
+
                 if self.tool_index.has_key(toolname) == 0:
                     raise AttributeError,"Invalid icon file entry- tool "+toolname+" not loaded."
 
                 ctool=self.Tool_List[self.tool_index[toolname]][1]
-        
+
                 if len(ctool.icon_entries.entries) < (oindex+1):
                     txt='Invalid file file entry- for tool '+toolname+'.\n maximum entry index is '
                     txt=txt+str(len(ctool.icon_entries.entries)-1)+'.' 
@@ -742,16 +742,16 @@ class GViewApp(Signaler):
                     txt = txt+"path must be specified, or "+tempf+ " must be\n"
                     txt = txt+"placed in the tools or pics directory."
                     raise AttributeError,txt
-                
+
 
                 if icon_label is None:
                     icon_label=ctool.icon_entries.entries[oindex][1]
-                    
+
                 if icon_label is not None:
                     icon_label="'"+icon_label+"'" 
                 else:
                     icon_label=str(None)
-                    
+
                 if icon_hint is None:
                     icon_hint=ctool.icon_entries.entries[oindex][2]
 
@@ -759,7 +759,7 @@ class GViewApp(Signaler):
                     icon_hint="'"+icon_hint+"'"
                 else:
                     icon_hint=str(None)
-                    
+
                 if icon_help is None:
                     icon_help=ctool.icon_entries.entries[oindex][5]
 
@@ -779,7 +779,7 @@ class GViewApp(Signaler):
                     icon_list.append(icon)
                 else:
                     raise AttributeError,"Invalid icon type "+icon_type+" in tool "+toolname+"."
-                                                               
+
                 if toolname not in tools_accounted_for:
                     tools_accounted_for.append(toolname)
 
@@ -820,7 +820,7 @@ class GViewApp(Signaler):
                             icon_help="'"+icon_help+"'"
                         else:
                             icon_help=str(None)
-                            
+
                         # Default position in icon bar used
                         pos=centry[3]
                         icon = "self.add_icon_to_bar(" +\
@@ -828,14 +828,14 @@ class GViewApp(Signaler):
                                 "self.app.Tool_List[self.app.tool_index['"+\
                                 citem[0]+"']][1].icon_entries.entries["+\
                                 str(idx)+"][4]",icon_help),",") + ")"
-                      
+
                         pos=max(pos,0)
                         if pos > len(icon_list):
                             icon_list.append(icon)
                         else:
                             icon_list.insert(pos,icon)
                         idx=idx+1    
-  
+
         return icon_list
 
     def new_view(self, title=None, menufile=None,iconfile=None, *args):
@@ -849,7 +849,7 @@ class GViewApp(Signaler):
         view_window = gvviewwindow.GvViewWindow(app=self, title=title, menufile=menufile, iconfile=iconfile)
         view_name=view_window.title
         view_menu = view_window.menuf    
-              
+
         if ((len(self.Tool_List) > 0) and (menufile is None)):
             # If no menu configuration file is specified, put
             # tools in the default positions specified by
@@ -887,7 +887,7 @@ class GViewApp(Signaler):
         #              view['title'].  Note that this is not quite
         #              the same as the view's self.title, but is based
         #              on it (usually 'OpenEV: '+self.title)
-            
+
         if ((len(self.Tool_List) > 0) and (iconfile is None)):
             for cur_tool_list in self.Tool_List:
                 cur_tool=cur_tool_list[1]
@@ -924,7 +924,7 @@ class GViewApp(Signaler):
             return
 
         view.file_open_by_name( filename, lut = lut, sds_check = sds_check )
-        
+
     def launch_preferences(self, *args):
         if self.pref_dialog is None:
             self.pref_dialog = PrefDialog()
@@ -934,7 +934,7 @@ class GViewApp(Signaler):
 
     def destroy_preferences(self,*args):
         self.pref_dialog = None
-        
+
     def pyshell(self, *args):
         import pyshell
         pyshell.launch(pyshellfile=self.pyshellfile)
@@ -948,13 +948,13 @@ class GViewApp(Signaler):
             except:
                 print 'auto_load_'+str(i)+' error: import '+al
                 print sys.exc_info()[0], sys.exc_info()[1]
-            
+
             i = i + 1
             al = gview.get_preference('auto_load_'+str(i))
 
     def active_layer(self):
         return self.view_manager.active_view.viewarea.active_layer()
-        
+
 class Toolbar(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
@@ -1047,7 +1047,7 @@ class Toolbar(gtk.Window):
     def close(self, *args):
         self.hide()
         return True
-        
+
     def toggle(self, action, current):
         data = current.get_name()
 
@@ -1077,7 +1077,7 @@ class Toolbar(gtk.Window):
             data = 'select'
 
         self.toolbox.activate_tool(data)
-        
+
     def link(self, but):
         if (but.get_active()):
             self.link.enable()
@@ -1093,7 +1093,7 @@ class Toolbar(gtk.Window):
                 self.link.set_cursor_mode(2)     
         else:
             self.link.set_cursor_mode(0)
-            
+
     def add_view(self, view):
         self.toolbox.activate(view)
         self.link.register_view(view)
@@ -1103,7 +1103,7 @@ class Toolbar(gtk.Window):
 
     def get_poi(self):
         return self.poi_tool.get_point()
-        
+
 class ViewManager(Signaler):
 
     def __init__(self):
@@ -1120,7 +1120,7 @@ class ViewManager(Signaler):
 
     def layerdlg_cb(self,*args):
         self.set_active_view( self.layerdlg.get_active_view() )
-        
+
     def set_toolbar(self,toolbar):
         self.toolbar = toolbar
         self.toolbar.toolbox.connect('activate',self.toolbar_cb)
@@ -1150,23 +1150,23 @@ class ViewManager(Signaler):
             gdal.Debug( "OpenEV",
                         "unexpectedly missing view in ViewManager" )
             return
-   
+
         self.view_list.remove( view_window )
-                
+
         if view_window_in == self.active_view:
             if len(self.view_list) > 0:
                 self.set_active_view( self.view_list[0] )
             else:
                 self.set_active_view( None );
-            
+
         if self.layerdlg is not None:
             self.layerdlg.remove_view( view_window.title )
-            
+
         if self.toolbar is not None:
             self.toolbar.toolbox.deactivate( view_window.viewarea )
-        
 
-        
+
+
     def close_all_views( self, *args ):
         old_len = len(self.view_list)+1
         while len(self.view_list) < old_len and old_len > 1:
@@ -1186,7 +1186,7 @@ class ViewManager(Signaler):
         if len(self.view_list) > 0:
             print 'failed to destroy all views.'
 
-    
+
     def get_views(self):
         return self.view_list
 
@@ -1195,17 +1195,17 @@ class ViewManager(Signaler):
             return None
         else:
             return self.active_view.viewarea
-    
+
     def get_active_view_window(self):
         return self.active_view
-    
+
     def set_active_view(self, new_view):
         if self.updating:
             return
-        
+
         if new_view == self.active_view:
             return
-        
+
         if self.active_view is not None \
            and new_view == self.active_view.viewarea:
             return
@@ -1229,18 +1229,18 @@ class ViewManager(Signaler):
 class PrefDialog(gtk.Window):
     def __init__(self):
         import pgufont
-        
+
         gtk.Window.__init__(self)
         self.set_title('Preferences')
 
         gvhtml.set_help_topic( self, "preferences.html" );
-        
+
         self.default_color = (0.5, 1.0, 0.5, 1.0)
-        
+
         self.default_font = pgufont.XLFDFontSpec()
         self.default_font.set_font_part('Family', 'Arial')
         self.default_font.set_font_part('Point Size', '120')
-        
+
         self.tips = gtk.Tooltips()
 
 
@@ -1253,10 +1253,10 @@ class PrefDialog(gtk.Window):
         self.create_cache_prefs()
         self.create_paths_and_windows_prefs()
         #self.create_temporaryfile_prefs()
-        
+
         self.notebook.append_page(self.page_legend(), 
                                   gtk.Label( 'Legend' ))
-        
+
         self.show_all()
 
     def gvplot_cb(self, *args):
@@ -1277,7 +1277,7 @@ class PrefDialog(gtk.Window):
 	gdal_cache_label = gtk.Label('File Cache (bytes):')
 	gdal_cache_label.set_alignment(0, 0.5)
 	table.attach(gdal_cache_label, 0, 1, 0, 1)
-        
+
         self.gdal_cache = gtk.Entry()
         self.gdal_cache.set_max_length(9)
         self.gdal_cache.connect('activate',self.gdal_cb)
@@ -1291,7 +1291,7 @@ class PrefDialog(gtk.Window):
 	texture_cache_label = gtk.Label('GL Texture (bytes):')
 	texture_cache_label.set_alignment(0, 0.5)
 	table.attach(texture_cache_label, 0, 1, 1, 2)
-        
+
         self.texture_cache = gtk.Entry()
         self.texture_cache.set_max_length(9)
         self.texture_cache.connect('activate',self.tcache_cb)
@@ -1301,7 +1301,7 @@ class PrefDialog(gtk.Window):
         self.texture_cache.set_text(str(gview.texture_cache_get_max()))
 
     def create_raster_prefs(self):
-        
+
         self.rpp = gtk.VBox(spacing=10)
         self.rpp.set_border_width(10)
         self.notebook.append_page( self.rpp, gtk.Label('Raster'))
@@ -1315,7 +1315,7 @@ class PrefDialog(gtk.Window):
 	gcp_warp_label = gtk.Label('Display Georeferenced:')
 	gcp_warp_label.set_alignment(0, 0.5)
 	table.attach(gcp_warp_label, 0, 1, 0, 1)
-        
+
         self.gcp_warp_om = \
                gvutils.GvOptionMenu(('Yes','No'), self.set_gcp_warp_mode)
 	table.attach(self.gcp_warp_om, 1, 2, 0, 1)
@@ -1323,12 +1323,12 @@ class PrefDialog(gtk.Window):
         if gview.get_preference('gcp_warp_mode') is not None \
            and gview.get_preference('gcp_warp_mode') == 'no':
             self.gcp_warp_om.set_history(1)
-            
+
         # Sample Method
 	sm_label = gtk.Label('Overview Sampling:')
 	sm_label.set_alignment(0, 0.5)
 	table.attach(sm_label, 0, 1, 1, 2)
-        
+
         self.sm_om = \
                gvutils.GvOptionMenu(('Decimate','Average'),
                                     self.set_sample_method)
@@ -1337,12 +1337,12 @@ class PrefDialog(gtk.Window):
         if gview.get_preference('default_raster_sample') is not None \
            and gview.get_preference('default_raster_sample') == 'average':
             self.sm_om.set_history(1)
-            
+
         # Pixel Interpolation
 	im_label = gtk.Label('Subpixel Interpolation:')
 	im_label.set_alignment(0, 0.5)
 	table.attach(im_label, 0, 1, 2, 3)
-        
+
         self.im_om = \
                gvutils.GvOptionMenu(('Bilinear','Off (Nearest)'),
                                     self.set_interp_method)
@@ -1351,12 +1351,12 @@ class PrefDialog(gtk.Window):
         if gview.get_preference('interp_mode') is not None \
            and gview.get_preference('interp_mode') == 'nearest':
             self.im_om.set_history(1)
-            
+
         # Default Autoscaling Method
 	scale_label = gtk.Label('Autoscaling Method:')
 	scale_label.set_alignment(0, 0.5)
 	table.attach(scale_label, 0, 1, 3, 4)
-        
+
         self.scale_om = \
                gvutils.GvOptionMenu(('Percent Tail Trim',
                                      'Standard Deviations'),
@@ -1366,12 +1366,12 @@ class PrefDialog(gtk.Window):
         if gview.get_preference('scale_algorithm') is not None \
            and gview.get_preference('scale_algorithm') == 'std_deviation':
             self.scale_om.set_history(1)
-            
+
         # Tail Trim Percentage.
 	tt_label = gtk.Label('Tail Trim Percentage:')
 	tt_label.set_alignment(0, 0.5)
 	table.attach(tt_label, 0, 1, 4, 5)
-        
+
         self.tt_entry = gtk.Entry()
         self.tt_entry.set_max_length(9)
         self.tt_entry.connect('activate',self.tail_trim_cb)
@@ -1379,7 +1379,7 @@ class PrefDialog(gtk.Window):
 	table.attach(self.tt_entry, 1, 2, 4, 5)
 
         tt_val = gview.get_preference('scale_percent_tail')
-        
+
         if tt_val is None:
             tt_val = '0.02'
 
@@ -1389,7 +1389,7 @@ class PrefDialog(gtk.Window):
 	sd_label = gtk.Label('Standard Deviations:')
 	sd_label.set_alignment(0, 0.5)
 	table.attach(sd_label, 0, 1, 5, 6)
-        
+
         self.sd_entry = gtk.Entry()
         self.sd_entry.set_max_length(9)
         self.sd_entry.connect('activate',self.std_dev_cb)
@@ -1420,7 +1420,7 @@ class PrefDialog(gtk.Window):
 	html_command_label = gtk.Label('Browser Command:')
 	html_command_label.set_alignment(0, 0.5)
 	table.attach(html_command_label, 0, 1, 0, 1)
-        
+
         self.html_command = gtk.Entry()
         self.html_command.connect('activate',self.html_cb)
         self.html_command.connect('leave-notify-event',self.html_cb)
@@ -1462,7 +1462,7 @@ class PrefDialog(gtk.Window):
             self.save_recent_dir_om.set_history(1)
 	else:
 	    self.save_recent_dir_om.set_history(0)
-        
+
     def html_cb(self, *args):
         command = self.html_command.get_text()
         if len(command) > 0 and command[len(command)-1] != ' ':
@@ -1481,10 +1481,10 @@ class PrefDialog(gtk.Window):
 
         gdal_cache = int( 900000 + (value - 900000) * 0.25)
         gvraster_cache = value - gdal_cache
-        
+
         gview.set_preference( 'gdal_cache', str(gdal_cache) )
         gdal.SetCacheMax( gdal_cache )
-        
+
         gview.set_preference( 'gvraster_cache', str(gvraster_cache) )
         gview.raster_cache_set_max(gvraster_cache)
 
@@ -1542,7 +1542,7 @@ class PrefDialog(gtk.Window):
             self.degree_mode_om.set_history(1)
         else:
             self.degree_mode_om.set_history(0)
-            
+
         # Raster Value
 	pixel_mode_label = gtk.Label('Pixel Value:')
 	pixel_mode_label.set_alignment(0, 0.5)
@@ -1639,7 +1639,7 @@ class PrefDialog(gtk.Window):
                                       self.sd_entry.get_text())
         except:
             pass
-    
+
     def set_save_recent_dir(self, om):
         if om.get_history() == 0:
             gview.set_preference( 'save_recent_directory', 'off')
@@ -1652,7 +1652,7 @@ class PrefDialog(gtk.Window):
         """
         import pgucolor
         import pgufont
-        
+
         vbox = gtk.VBox()
         table = gtk.Table(rows=1, columns=3)
         table.set_border_width(6)
@@ -1664,7 +1664,7 @@ class PrefDialog(gtk.Window):
         lbl = gtk.Label('Legend Background Color:')
         table.attach(lbl, 0, 1, 0, 1,
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-                        
+
         color = gview.get_preference('legend-background-color', 
                                      str(self.default_color))
         tc = pgucolor.color_string_to_tuple( color ) 
@@ -1705,7 +1705,7 @@ class PrefDialog(gtk.Window):
             font_spec.set_font_name()
         self.title_font_button = gtk.FontButton()
         self.title_font_button.connect('font-set', self.set_title_font_cb)
-                    
+
         if font_spec.get_pango_desc() is not None:
             self.title_font_button.set_font_name(font_spec.get_pango_desc().to_string())
 
@@ -1714,7 +1714,7 @@ class PrefDialog(gtk.Window):
         #        'legend-title-font', title_font.get_font_string)
         #title_font.set_font(gview.get_preference('legend-title-font', 
         #                    self.default_font))
-                                                      
+
         table.attach(self.title_font_button, 2, 3, 1, 2,
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
         self.tips.set_tip(self.title_font_button,
@@ -1755,7 +1755,7 @@ class PrefDialog(gtk.Window):
         #       'legend-label-font', label_font.get_font_string)
         #label_font.set_font(gview.get_preference('legend-label-font', 
         #                    self.default_font))
-        
+
         table.attach(self.label_font_button, 2, 3, 2, 3,
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
         self.tips.set_tip(self.label_font_button, 'Select a font for legend labels')
@@ -1804,10 +1804,10 @@ class PrefDialog(gtk.Window):
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
         self.tips.set_tip(spin, 'The Y Size of a sample on the legend dialog')
         return vbox
-        
+
     def set_title_font_cb(self, font_btn):
         gview.set_preference('legend-title-font', font_btn.get_font_name())
-        
+
     def set_label_font_cb(self, font_btn):
         gview.set_preference('legend-label-font', font_btn.get_font_name())
 
@@ -1857,7 +1857,7 @@ class PrefDialog(gtk.Window):
         """
         """
         val = widget.get_value()
-        
+
         if widget.get_text() != str(widget.get_value_as_int()):
             if widget.get_text() == str(round(val,2)):
                 gview.set_preference( pref, 
@@ -1877,7 +1877,7 @@ class PrefDialog(gtk.Window):
         """
         self.set_spin_preference( widget, pref )
 
-        
+
 
 class Position_3D_Dialog(gtk.Window):
     def __init__(self, view_manager):
@@ -1893,7 +1893,7 @@ class Position_3D_Dialog(gtk.Window):
         self.dialog = gtk.VBox(homogeneous=False, spacing=3)
         self.add(self.dialog)
         self.dialog.pack_start(gtk.Label('Current Position:'))
-        
+
         # x
         x_box = gtk.HBox(homogeneous=False, spacing=5)
         self.dialog.pack_start(x_box, expand=False)
@@ -1904,11 +1904,11 @@ class Position_3D_Dialog(gtk.Window):
         x_value.set_text('')
         x_box.pack_start(x, expand=False)
         x_box.pack_start(x_value, expand=False)
-        
+
         # y
         y_box = gtk.HBox(homogeneous=False, spacing=5)
         self.dialog.pack_start(y_box, expand=False)
-        
+
         y = gtk.Label('Y: ')
         y_value = gtk.Entry()
         y_value.set_max_length(10)
@@ -1919,7 +1919,7 @@ class Position_3D_Dialog(gtk.Window):
         # z
         z_box = gtk.HBox(homogeneous=False, spacing=5)
         self.dialog.pack_start(z_box, expand=False)
-        
+
         z = gtk.Label('Z: ')
         z_value = gtk.Entry()
         z_value.set_max_length(10)
@@ -1937,11 +1937,11 @@ class Position_3D_Dialog(gtk.Window):
         self.y_value.connect('leave-notify-event',self.set_position_cb)
         self.z_value.connect('activate', self.set_position_cb)
         self.z_value.connect('leave-notify-event',self.set_position_cb)
-        
+
 
     def create_lookAt_dialog(self):
         # Assume create_position_dialog called
-        
+
         # Row or x
         self.dialog.pack_start(gtk.HSeparator())
         self.dialog.pack_start(gtk.Label('Looking At Position:'))
@@ -1954,18 +1954,18 @@ class Position_3D_Dialog(gtk.Window):
         row_value.set_text('')
         row_box.pack_start(row, expand=False)
         row_box.pack_start(row_value, expand=False)
-        
+
         # Column or y
         col_box = gtk.HBox(homogeneous=False, spacing=5)
         self.dialog.pack_start(col_box, expand=False)
-        
+
         col = gtk.Label('Y: ')
         col_value = gtk.Entry()
         col_value.set_max_length(10)
         col_value.set_text('')
         col_box.pack_start(col, expand=False)
         col_box.pack_start(col_value, expand=False)
-        
+
         self.row_value = row_value
         self.col_value = col_value
 
@@ -1973,7 +1973,7 @@ class Position_3D_Dialog(gtk.Window):
         self.row_value.connect('leave-notify-event',self.set_look_at_cb)
         self.col_value.connect('activate', self.set_look_at_cb)
         self.col_value.connect('leave-notify-event',self.set_look_at_cb)
-        
+
 
     def update_cb(self, view, *args):
         # Reset Dialog values
@@ -1999,7 +1999,7 @@ class Position_3D_Dialog(gtk.Window):
     def update_test(self, view, *args):
         eye_pos = view.get_eye_pos()
         lookat_pos = view.get_look_at_pos()
-        
+
         view.set_3d_view_look_at((eye_pos[0]+300, eye_pos[1], eye_pos[2]) , lookat_pos)
 
 
@@ -2012,12 +2012,12 @@ class Position_3D_Dialog(gtk.Window):
             lookat_pos = (float(self.row_value.get_text()), float(self.col_value.get_text()))
         except ValueError:
             lookat_pos = None
-            
+
         eye_pos = view.get_eye_pos()
 
         if lookat_pos:
             view.set_3d_view_look_at(eye_pos, lookat_pos )
-        
+
     def set_position_cb(self, *args):
         view = self.view_manager.get_active_view()
 
@@ -2035,7 +2035,7 @@ class Position_3D_Dialog(gtk.Window):
             eye_dir = view.get_eye_dir()
             view.set_3d_view(eye_pos, eye_dir)
 
-        
+
 
 class Tool_GViewApp:
     # Abstract base class to derive tools from
@@ -2055,7 +2055,7 @@ class Tool_GViewAppMenuEntries:
     # Class to store entries to be added to openev's menu
     def __init__(self):
         self.entries = {}
-    
+
     def set_entry(self,item,position=0,callback=None,accelerator=None):
         # item = a string describing menu location
         # position = default location in the menu (integer): Ignored if an
@@ -2077,12 +2077,12 @@ class Tool_GViewAppMenuEntries:
         else:
             raise AttributeError,"Menu entry item must be a string"
 
- 
+
 class Tool_GViewAppIconEntries:
     # Class to store entries to be added to openev's menu
     def __init__(self):
         self.entries = []
-    
+
     def set_entry(self,iconfile,hint_text,position=0,callback=None,help_topic=None,label=None,icontype='xpm'):
         # iconfile=icon filename (xpm case), or some other string not yet defined
         #          (pixmap/widget case- not yet supported- may never be)
@@ -2112,7 +2112,7 @@ class Tool_GViewAppIconEntries:
             if os.name == 'nt':
                 import string
                 fullfilename=string.replace(fullfilename,"\\","\\\\")
-                
+
             if (type(position) == type(0)):
                 self.entries.append((fullfilename,label,hint_text,position,callback,help_topic,icontype))
             else:

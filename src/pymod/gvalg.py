@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvalg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  CIETMap/OpenEV
 # Purpose:  Assorted algorithm python entry points.
@@ -42,7 +42,7 @@ def rasterize_shapes( raster, shapes, burn_value, fill_short = 1 ):
 
     Example:
      import gvalg, gview
-     
+
      polygons = gview.GvShapes( shapefilename = poly_filename )
 
      rfile = gdal.GetDriverByName('GTiff').Create(filename,xsize,ysize,1)
@@ -61,11 +61,11 @@ def rasterize_shapes( raster, shapes, burn_value, fill_short = 1 ):
     NEW: fill_short = 2: same algorithm as above but with less bugs
          fill_short = 3: a pixel is considered inside the shape if and only if its
          centre is inside the shape. 
-               
+
 
     Returns 0 on failure, or a non-zero value on success.
     """
-    
+
     shapes_o = []
     for shape in shapes:
         shapes_o.append( shape._o )
@@ -88,25 +88,25 @@ def wid_interpolate( raster, points, exponent = 2.0, progress_cb=None, cb_data=N
     Note that the (x,y) values for the points must be in pixel/line coordinates
     on the raster, not georeferenced coordinates.  They may have subpixel
     accuracy. 
- 
+
     points -- a list of (x,y,value,weight) tuples where each tuple is
     a point to interpolate.  
- 
+
     raster -- the GvRaster representating the band to apply changes to.
     The GvRaster must be in update mode.
- 
+
     exponent -- the exponent to apply to the distance calculate in the
     weighting formula
- 
+
     progress_cb -- progress function, leave defaulted if no progress called
     is needed.
 
     cb_data -- a value to be passed into the progress_cb. 
- 
+
     Returns a CPL error number on failure, or 0 on success.  Note that
     a user interrupt will result in CPLE_UserInterrupt being returned.
     """
-    
+
     ret = _gv.WIDInterpolate( points, raster.get_band()._o,
                               exponent, progress_cb, cb_data )
     raster.get_band().FlushCache()

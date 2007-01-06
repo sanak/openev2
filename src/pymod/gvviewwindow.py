@@ -73,7 +73,7 @@ def GvViewWindowFromXML( node, parent, filename=None ):
     if viewarea_tree != None:
         instance.viewarea.initialize_from_xml( viewarea_tree,
                                                filename=filename )
-            
+
     instance.show()
 
     # We can't move the window till after it is shown.
@@ -90,7 +90,7 @@ class GvViewWindow(gtk.Window):
 
     def __init__(self, app=None, title=None, show_menu=1, show_icons=1, 
                  show_tracker=1, show_scrollbars=1, menufile='DefaultMenuFile.xml',iconfile='DefaultIconFile.xml'):
-        
+
         gtk.Window.__init__(self)
 
         if title is None:
@@ -187,7 +187,7 @@ class GvViewWindow(gtk.Window):
         # etc.).  0 is for default, 1 for not doing anything,
         # 2 for hiding.
         self.close_flag=0
-        
+
         # Trap window close event
         self.connect('delete-event', self.close)
 
@@ -211,7 +211,7 @@ class GvViewWindow(gtk.Window):
                          [gdal.CXT_Text, '0']] )
 
         geometry = self.get_allocation()
-        
+
         base.append( [gdal.CXT_Attribute, 'width',
                       [gdal.CXT_Text, str(geometry[2])]] )
         base.append( [gdal.CXT_Attribute, 'height',
@@ -261,7 +261,7 @@ class GvViewWindow(gtk.Window):
 
     def rfl_cb(self, menuitem, rfl_index, *args):
         self.file_open_by_name(menuitem.get_children()[0].get(), sds_check=0)
-    
+
     def make_active(self, *args):
         self.app.view_manager.set_active_view( self )
 
@@ -278,7 +278,7 @@ class GvViewWindow(gtk.Window):
     def print_cb(self, *args):
         import gvprint
         pd = gvprint.GvPrintDialog( self.viewarea )
-        
+
     def helpcb(self, item, topic='openevmain.html'):
         gvhtml.LaunchHTML( topic )
 
@@ -324,7 +324,7 @@ class GvViewWindow(gtk.Window):
         vbox.pack_start(gtk.Label('Version: 1.8'))        
         vbox.pack_start(gtk.Label('Web Site:  http://OpenEV.sourceforge.net'))
         vbox.pack_start(gtk.Label('(C) Copyright 2000 Atlantis Scientific Inc.  www.atlantis-scientific.com'))
-        
+
         window.show_all()
 
     def set_close_function(self,ctype=0):
@@ -339,11 +339,11 @@ class GvViewWindow(gtk.Window):
                       reset the close function back again
                       for cases 1 and 2 if it wants to
                       close the window using the close function.
-                      
+
         """
         self.close_flag=ctype
-    
-        
+
+
     def close(self, *args):
         # first check for non-standard close settings
         if self.close_flag == 1:
@@ -360,7 +360,7 @@ class GvViewWindow(gtk.Window):
             self.destroy()
             return True
 
-        
+
         # what else do we need to do?
         if len(self.app.view_manager.get_views()) == 1:
             if self.app.request_quit() > 0:
@@ -394,7 +394,7 @@ class GvViewWindow(gtk.Window):
             return 0
         except:
             return 0
-        
+
     def show_entry(self,entrystr='File/Exit'):
         """Re-show a hidden menu entry
            Input: entrystr- eg. 'File/Exit', 'File/Close',...
@@ -408,7 +408,7 @@ class GvViewWindow(gtk.Window):
             return 0
         except:
             return 0
-   
+
     def exit(self, *args ):
         # should ask for confirmation at this point.
         self.app.request_quit()
@@ -419,11 +419,11 @@ class GvViewWindow(gtk.Window):
 
     def show_oeattedit(self, *args):
         self.make_active()
-        
+
         import oeattedit
 
         oeattedit.launch()
-        
+
     def show_layerdlg(self, *args):
         self.layerdlg.show()
         self.layerdlg.window.raise_()
@@ -449,12 +449,12 @@ class GvViewWindow(gtk.Window):
         self.coord_system_om = gvutils.GvOptionMenu(('Row/Col','Native'),
                                                     self.set_coord_system)
         box.pack_start(self.coord_system_om,expand=False)
-        
+
         # Get current position in view native projection
         #   - changing Option Menu updates this in entry fields
 
         current_pos = self.viewarea.get_translation()
-        
+
         # X Position
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
@@ -483,14 +483,14 @@ class GvViewWindow(gtk.Window):
 
         # set default to be native system - must be after x/y_pos_entry are setup
         self.coord_system_om.set_history(1)
-        
+
         window.show_all()
 
     def set_coord_system(self, om, *args):
         """ Set coordinate system goto coordinates entered in GoTo dialog from
         option menu. """
         current_pos = self.viewarea.get_translation()
-        
+
         if om.get_history() == 0:
             self.goto_coord_system = 'pixel'
         # Lat/Long Not Working Yet!
@@ -529,7 +529,7 @@ class GvViewWindow(gtk.Window):
                 position = (x,y)
             else:
                 return
-            
+
         # Doesn't work Yet!
         elif coord_system == 'lat-long':
             position = self.viewarea.map_location((x,y))
@@ -575,17 +575,17 @@ class GvViewWindow(gtk.Window):
 
     def destroy_preferences(self,*args):
         self.pref_dialog = None
-        
+
     def file_open_shape_by_name(self, filename):
         self.make_active()
         shape_data = gview.GvShapes(shapefilename=filename)
         if shape_data is None:
             gvutils.error('Unable to open '+filename+' for loading.')
             return
-        
+
         self.app.add_to_rfl(filename)
         gview.undo_register(shape_data)
-        
+
         layer = gview.GvShapesLayer( shape_data )
         layer.set_name(filename)
         self.viewarea.add_layer(layer)
@@ -602,11 +602,11 @@ class GvViewWindow(gtk.Window):
             return False
 
         self.app.add_to_rfl(filename)
-        
+
         dlg = gvogrdlg.GvOGRDlg(hDS, self )
 
         return True
-    
+
     def file_open_ogr_by_layer(self, layer):
 
         import _gv
@@ -621,14 +621,14 @@ class GvViewWindow(gtk.Window):
 
         if len(shape_data) > 0:
             gview.undo_register(shape_data)
-        
+
             layer = gview.GvShapesLayer( shape_data )
             self.viewarea.add_layer(layer)
             self.viewarea.set_active_layer(layer)
         else:
             # I am not sure how to blow away the GvShapes properly.
             pass
-                
+
         return True
 
     def file_import_cb(self, *args):
@@ -663,7 +663,7 @@ class GvViewWindow(gtk.Window):
         old_cache_max = gdal.GetCacheMax()
         if old_cache_max < 20000000:
             gdal.SetCacheMax( 20000000 )
-        
+
         new_dataset = geotiff.CreateCopy( newfile, dataset, False,
                                           ['TILED=YES',],
                                           callback = progress.ProgressCB )
@@ -675,7 +675,7 @@ class GvViewWindow(gtk.Window):
                 os.unlink(newfile)
             gdal.SetCacheMax( old_cache_max );
             return
-            
+
         if new_dataset == None:
             progress.destroy()
             gvutils.error('Unable to translate '+filename+' to '+newfile)
@@ -834,7 +834,7 @@ class GvViewWindow(gtk.Window):
         # Lots of logic to handle RGB and RGBA Layers
         if raster_layer.get_mode() == gview.RLM_RGBA \
            and dataset.RasterCount == 2:
-            
+
             alpha_band = gview.manager.get_dataset_raster(dataset,2)
             raster_layer.set_source(1,raster)
             raster_layer.set_source(2,raster)
@@ -844,7 +844,7 @@ class GvViewWindow(gtk.Window):
 
         if raster_layer.get_mode() == gview.RLM_RGBA \
            and dataset.RasterCount > 2:
-            
+
             green_raster = gview.manager.get_dataset_raster(dataset,2)
             blue_raster = gview.manager.get_dataset_raster(dataset,3)
 
@@ -917,7 +917,7 @@ class GvViewWindow(gtk.Window):
 
     def init_custom_icons(self):
         pass
-    
+
     def init_default_icons(self):
         # Zoom ratio selection box
 
@@ -971,7 +971,7 @@ class GvViewWindow(gtk.Window):
 
         for cmd in self.icon_cmds:
             exec cmd
-            
+
         gview.manager.set_busy(True)
 
     def old_icon_cmds(self):
@@ -1015,7 +1015,7 @@ class GvViewWindow(gtk.Window):
         icon_cmds.append("self.iconbar.append_item(None, 'Busy Indicator','Busy Indicator', self.idlebusy_pixmap,self.do_nothing )")
 
         return icon_cmds
-       
+
     def create_menubar(self, menufile='DefaultMenuFile.xml'):
         self.menuf = gvutils.GvMenuFactory()
 
@@ -1100,19 +1100,19 @@ class GvViewWindow(gtk.Window):
         menu_trees = gvutils.XMLFind( tree, 'Menu')
         if menu_trees is None:
             raise AttributeError,"Invalid menu file format"
-      
+
         for node in menu_trees[2:]:
             if node[1] == 'entry':
                 node_path  = gvutils.XMLFind( node, 'path')
                 if node_path is None:
                     raise AttributeError,"Invalid menu file format - missing path"
-                 
+
                 entry_type = gvutils.XMLFindValue( node_path, 'type', '')
                 entry_path = gvutils.XMLFindValue( node, 'path','')
-                
+
                 if (string.find(entry_path,"/") == -1):
                     raise AttributeError,"Invalid menu file format - bad path:%s" % entry_path
-                    
+
                 if (entry_type != ''):
                     entry_type = "<" + entry_type + ">"
                 path_split=string.split(entry_path,"/")
@@ -1143,7 +1143,7 @@ class GvViewWindow(gtk.Window):
                 menu_list.append(entry)
             else:
                 raise AttributeError,"Invalid menu file format"
-            
+
         # create the menu command to populate the entries
         menu_cmd =  "self.menuf.add_entries([" + string.join(menu_list,',') + "])"
         return menu_cmd
@@ -1173,7 +1173,7 @@ class GvViewWindow(gtk.Window):
         icon_trees = gvutils.XMLFind( tree, 'Iconbar')
         if icon_trees is None:
             raise AttributeError,"Invalid icon file format"
-        
+
         for node in icon_trees[2:]:
             if node[1] == 'icon':
                 type = None
@@ -1220,7 +1220,7 @@ class GvViewWindow(gtk.Window):
 
     def do_nothing(self, *args):
         pass
-    
+
     def add_icon_to_bar(self, filename, text, hint_text, cb, help_topic=None):
         full_filename = os.path.join(gview.home_dir,'pics',filename)
         pix = gtk.Image()
@@ -1231,7 +1231,7 @@ class GvViewWindow(gtk.Window):
 
     def insert_tool_icon(self, filename, text, hint_text, cb, help_topic=None, pos=0):
         # Tool specifies full filename (file may not be in pics directory)
-        
+
         pix = gtk.Image()
         pix.set_from_file(filename)
         item = self.iconbar.append_item(text, hint_text, hint_text, pix, cb)
@@ -1249,7 +1249,7 @@ class GvViewWindow(gtk.Window):
                 self.viewarea.active_layer().classify()
         else:
             self.viewarea.active_layer().classify()
-        
+
     def show_legend_cb(self, *args):
         print "------------------ showing legend"
         self.make_active()
@@ -1263,7 +1263,7 @@ class GvViewWindow(gtk.Window):
         except:
             gvutils.warning('This can only be applied to a raster layer.\n' \
                           + 'Select a raster layer for this view in the \nlayers dialog.' )
-        
+
     def equalize_cb(self, *args):
         self.make_active()
         try:
@@ -1273,7 +1273,7 @@ class GvViewWindow(gtk.Window):
                           + 'Select a raster layer for this view in the \nlayers dialog.' )
             #import traceback
             #traceback.print_exc()
-        
+
     def linear_cb(self, *args):
         self.make_active()
         try:
@@ -1289,7 +1289,7 @@ class GvViewWindow(gtk.Window):
         except:
             gvutils.warning('This can only be applied to a raster layer.\n' \
                           + 'Select a raster layer for this view in the \nlayers dialog.' )
-        
+
     def nonelut_cb(self, *args):
         self.make_active()
         try:
@@ -1304,7 +1304,7 @@ class GvViewWindow(gtk.Window):
             self.viewarea.fit_all_layers()
         except:
             pass
-        
+
     def onetoone_cb(self,*args):
         self.make_active()
         try:
@@ -1323,14 +1323,14 @@ class GvViewWindow(gtk.Window):
         """ Keep the focus in the view window when we selected a new zooming ratio from
         the combo box.  To ensure key events still recieved such as Home, and arrows """
         self.viewarea.grab_focus()
-    
+
     def set_zoom_factor_cb(self,*args):
         self.make_active()
-        
+
         if self.zoom_factor is None:
             # if zoom factor icon doesn't exist (no iconbar)
             return
-        
+
         try:
             ratio_text = string.split(self.zoom_factor.child.get_text(), ':')
             ratio = [string.atof(ratio_text[0]), string.atof(ratio_text[1])]
@@ -1351,7 +1351,7 @@ class GvViewWindow(gtk.Window):
                              + math.pow((point1[1]-point2[1]),2))
             factor = dist / math.sqrt(2)
             self.zoom = factor
-        
+
             # Block view-state-changed signal while we update zoom factor
             view.handler_block(self.view_state_changed_id)
             view.zoom(-1 * (math.log((ratio[1]/ratio[0])*factor) / math.log(2)) )
@@ -1367,7 +1367,7 @@ class GvViewWindow(gtk.Window):
                 gvutils.warning('This operation can only be done if a raster layer is the\nactive layer.  Please select a raster layer for this view\nin the layers dialog.')
 
         self.viewarea.grab_focus()
-          
+
     def refresh_cb(self, *args):
         self.make_active()
         try:
@@ -1381,14 +1381,14 @@ class GvViewWindow(gtk.Window):
                             'applied to raster layers.  Select a raster\n'+\
                             'layer for this view in the layers dialog.')
             pass
-        
+
     def zoomin_cb(self,*args):
         self.make_active()
         try:
             self.viewarea.zoom(1)
         except:
             pass
-        
+
     def zoomout_cb(self,*args):
         self.make_active()
         try:
@@ -1417,7 +1417,7 @@ class GvViewWindow(gtk.Window):
                 dist = math.sqrt(math.pow((point1[0]-point2[0]),2)
                                  + math.pow((point1[1]-point2[1]),2))
                 factor = dist / math.sqrt(2)
-            
+
                 if (factor > 1):
                     ratio = str(int(round((factor/1.0),1))) + ':1'
                 else:
@@ -1438,11 +1438,11 @@ class GvViewWindow(gtk.Window):
         # Return false to continue propogation of the view-state-changed signal
         return False   
 
-        
+
     def pyshell(self, *args):
         self.make_active()
         self.app.pyshell()
-        
+
     # -------- 3D File Open and Setup --------
     def open_3D_request(self, *args):
         """ 3D File Open Dialog for selecting drape and height data """
@@ -1456,11 +1456,11 @@ class GvViewWindow(gtk.Window):
         dialog.set_border_width(10)
         dialog.set_resizable(False)
         gvhtml.set_help_topic( dialog, 'open3d.html' )
-        
+
         box = gtk.VBox(homogeneous=False, spacing=5)
         dialog.add(box)
         self.file_dialog_3D = dialog
-        
+
         # Drape File Selector
         drape_label = gtk.Label('Select Drape')
         box.pack_start(drape_label)
@@ -1490,7 +1490,7 @@ class GvViewWindow(gtk.Window):
         self.scale_value.set_max_length(7)
         self.scale_value.set_max_length(7)
         self.scale_value.set_text('1.0')
-        
+
         mesh_opts.pack_start(lod_label)
         mesh_opts.pack_start(self.lod_spin_button)
         mesh_opts.pack_start(hscale_label)
@@ -1527,7 +1527,7 @@ class GvViewWindow(gtk.Window):
         okay = gtk.Button('OK')
         okay.set_size_request(64, 32)
         okay.connect('clicked', self.perform_3D_request)
-        
+
         cancel = gtk.Button('Cancel')
         cancel.set_size_request(64, 32)
         cancel.connect('clicked', dialog.destroy)
@@ -1547,7 +1547,7 @@ class GvViewWindow(gtk.Window):
         box.children()[6].hide()  # Remove Drape Ok/Cancel
         box.children()[9].hide()  # Remove DEM Create/Delete
         box.children()[14].hide() # Remove DEM Ok/Cancel
-        
+
 
     def perform_3D_request(self, *args):
         """Tries to open selected files, then creates 3D Layer and switches to 3D mode"""
@@ -1587,7 +1587,7 @@ class GvViewWindow(gtk.Window):
             mesh_lod = 3
         if hscale is None:
             hscale = 1.0
-        
+
         # Get Data
         drape_dataset = gview.manager.get_dataset(drape_filename)
         if drape_dataset is None or drape_dataset._o is None:
@@ -1597,7 +1597,7 @@ class GvViewWindow(gtk.Window):
         DEM_dataset = self.raster_open_by_name(dem_filename)
         if DEM_dataset is None or DEM_dataset._o is None:
             return
-            
+
         if (drape_dataset is not None) and (DEM_dataset is not None):
             # Get Current View & Prefs
             view = self.viewarea
@@ -1614,7 +1614,7 @@ class GvViewWindow(gtk.Window):
 
             band = drape_dataset.GetRasterBand(1)
             interp = band.GetRasterColorInterpretation()
-            
+
             # Create Drape Raster
             drape_raster = gview.manager.get_dataset_raster(drape_dataset,1)
             gview.undo_register(drape_raster)
@@ -1631,7 +1631,7 @@ class GvViewWindow(gtk.Window):
 
             # Logic to handle RGB and RGBA Layers
             if drape_raster_layer.get_mode() == gview.RLM_RGBA:
-            
+
                 green_raster= gview.manager.get_dataset_raster(drape_dataset,2)
                 blue_raster = gview.manager.get_dataset_raster(drape_dataset,3)
 
@@ -1670,7 +1670,7 @@ class GvViewWindow(gtk.Window):
             #hscale_georef = hscale*abs(hscalex2-hscalex1)/DEM_dataset.RasterXSize
             #view.height_scale(hscale_georef)
             view.height_scale(hscale) 
-           
+
             # Try to make sure everything is visible.
             self.seeall_cb()
 
@@ -1689,7 +1689,7 @@ class GvViewWindow(gtk.Window):
 
     def destroy_position_3d(self,*args):
         self.position3D_dialog = None
-                
+
     def raster_open_by_name(self,filename):
         self.make_active()
         gdal.ErrorReset()
@@ -1698,7 +1698,7 @@ class GvViewWindow(gtk.Window):
             gvutils.error('Unable to open: '+filename+'\n\n'+ \
                           gdal.GetLastErrorMsg())
             return None
-        
+
         return dataset
 
     def rawgeo_cb( self, *args ):

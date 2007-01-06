@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: imgproctemplate.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Template Image Processing "tool".  Seach for CHANGEME.
@@ -35,7 +35,7 @@ import gviewapp
 import gdalnumeric
 
 class ImageProcTool(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
         self.init_menu()
@@ -87,7 +87,7 @@ class ImageProcDialog(gtk.Window):
         self.execute_btn = gtk.Button("Execute")
         self.execute_btn.connect("clicked", self.execute_cb)
         box2.pack_start(self.execute_btn)
-        
+
         self.close_btn = gtk.Button("Close")
         self.close_btn.connect("clicked", self.close)
         box2.pack_start(self.close_btn)
@@ -113,7 +113,7 @@ class ImageProcDialog(gtk.Window):
         try:
             nd = rlayer.get_nodata(0)
             return rlayer
-        
+
         except:
             gvutils.error( 'Please select a raster layer.' )
             return None
@@ -148,7 +148,7 @@ class ImageProcDialog(gtk.Window):
 
     ##########################################################################
     # Main algorithm execution callback.
-    
+
     def execute_cb( self, *args ):
 
         print 'Entering execute_cb()'
@@ -172,7 +172,7 @@ class ImageProcDialog(gtk.Window):
             # Save results back into source raster layer.
             self.save_layer( rl, rd )
             rl.refresh()
-            
+
         except:
             print 'Trapped Error'
             sys.excepthook(sys.exc_info()[0],

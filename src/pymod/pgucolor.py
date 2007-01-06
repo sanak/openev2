@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgucolor.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  Python Gtk Utility Widgets
 # Purpose:  Color-related widgets and utilities.
@@ -215,7 +215,7 @@ class ColorRamp(gtk.Frame, Signaler):
     def serialize(self, fname = None):
         """save to a file
         """
-        
+
         result = "%s\n" % self.title.get()
         result = result + "%s\n" % self.type
         for n in self.colors:
@@ -223,7 +223,7 @@ class ColorRamp(gtk.Frame, Signaler):
                 result = result + "%s %s\n" % (str(n[0]), str(n[1]))
             else:
                 result = result + "%s\n" % str(n[1])
-                
+
         if fname is not None:
             f = open(fname, 'w')
             f.write( result )
@@ -287,7 +287,7 @@ class ColorRamp(gtk.Frame, Signaler):
         if self.colors[len(self.colors) - 1][0] <> 1.0:
             self.add_color(self.colors[len(self.colors)-1][1], 1.0)
             bHi = True
-        
+
         if ncolors > 1:
             for i in range(ncolors):
                 if self.type == RAMP_GRADIENT:
@@ -295,10 +295,10 @@ class ColorRamp(gtk.Frame, Signaler):
                 elif self.type == RAMP_DISCRETE:
                     pos = i % len(self.colors)
                     color_cb(i, self.colors[pos][1] )
-                    
+
         else:
             color_cb( 0, self.calculate_color( 0 ) )
-            
+
         #clean up
         if bLow:
             del self.colors[0]
@@ -408,4 +408,4 @@ if __name__ == '__main__':
     gtk.main()
 
 
-    
+

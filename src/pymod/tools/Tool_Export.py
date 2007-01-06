@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: Tool_Export.py,v 1.1.1.1 2005/04/18 16:38:37 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Graphical tool for translating between formats.
@@ -24,7 +24,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 ###############################################################################
-        
+
 import gtk
 import gview, gdal, gdalconst, layerdlg, gvutils
 import os, string
@@ -41,7 +41,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
 
         self.init_dialog()
         self.init_menu()
-        
+
         # store the id for the roi-changed signal
         # connection so it can be disconnected later
         self.roichanged_id=None
@@ -58,7 +58,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         for view in self.app.view_manager.view_list:
             if view.title == args[1]:
                 self.app.view_manager.set_active_view(view)
-                
+
         for item in self.show_list:
             item.show()
 
@@ -68,9 +68,9 @@ class GDALTool(gviewapp.Tool_GViewApp):
         else:
             for item in self.adv_show_list:
                 item.hide()
-            
+
         self.dialog.show()
-        
+
         self.dialog.window._raise()
         self.reconnect()
         self.refresh_cb()
@@ -96,11 +96,11 @@ class GDALTool(gviewapp.Tool_GViewApp):
 
 
         [cview, clayer] = self.app.layerdlg.get_selected_layer()
-        
+
         if (cview is None) or (clayer is None):
             # roi only makes sense in the context of a view and layer
             return None
-        
+
         if roi_info is None:
             cds=clayer.get_parent().get_dataset()
             npix=cds.RasterXSize
@@ -114,7 +114,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                 # Note that region will not be exactly the one drawn,
                 # since a rectangle is extracted rather than a 
                 # general parallelogram.  Get biggest rectangle.
-        
+
                 roi_info_nogeo = ROI_view_to_pixel(clayer,roi_info)
 
                 max_pix = roi_info_nogeo[0] + roi_info_nogeo[2]
@@ -188,7 +188,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         bopt_table.set_col_spacings(5)
         bopt_frame.add(bopt_table)
         self.show_list.append(bopt_table)
-       
+
         # Might be nice to have more formats below, but
         # this involves error checking to test for
         # supported data types, etc.
@@ -234,7 +234,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.button_dict['Mode']=gtk.CheckButton('Advanced Options')
         navshell.pack_start(self.button_dict['Mode'])
         self.show_list.append(self.button_dict['Mode'])
-        
+
         self.frame_dict['IP_window']=DataWindowFrame(navshell)
         self.adv_show_list.append(self.frame_dict['IP_window'])
 
@@ -276,7 +276,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         oadvbox=gtk.VBox(spacing=5,homogeneous=False)
         oadvbox.set_border_width(5)
         self.adv_show_list.append(oadvbox)
-        
+
         self.frame_dict['Other_Advanced'].add(oadvbox)
 
         otable=gtk.Table(2,3,False)
@@ -326,10 +326,10 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.adv_show_list.append(self.optentry)
         opthbox.pack_start(optlabel)
         opthbox.pack_start(self.optentry)
-        
+
         navshell.pack_start(self.frame_dict['Other_Advanced'],
                             False,False,0)
-        
+
         echbox=gtk.HBox(spacing=5,homogeneous=False)
         echbox.set_border_width(3)
         navshell.pack_end(echbox,False,False,0)
@@ -343,13 +343,13 @@ class GDALTool(gviewapp.Tool_GViewApp):
 
         self.button_dict['Format_help'].connect('clicked',
                                                 self.format_help_cb)
-        
+
         self.button_dict['Enable_ROI'].connect('clicked',self.set_roitool)
         self.button_dict['Refresh'].connect('clicked',
                                             self.refresh_fileinfo)        
         self.button_dict['Export'].connect('clicked',self.export_cb)
         self.button_dict['Close'].connect('clicked',self.close)
-        
+
         self.button_dict['IP_window'].connect('toggled',
                                               self.ip_window_toggled_cb)
         self.button_dict['Mode'].connect('toggled',self.mode_toggled_cb)
@@ -358,7 +358,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.button_dict['Mode'].set_active(False)
         self.frame_dict['IP_window'].set_entry_sensitivities(False)
 
-        
+
         # Trap window close event
         self.dialog.connect('delete-event', self.close)
 
@@ -371,7 +371,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         else:
             for item in self.adv_show_list:
                 item.hide()
-            
+
     def mode_toggled_cb(self,*args):
         if self.button_dict['Mode'].get_active():
             for item in self.adv_show_list:
@@ -379,7 +379,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         else:            
             for item in self.adv_show_list:
                 item.hide()
-                
+
 
     def ip_window_toggled_cb(self,*args):
         if self.button_dict['IP_window'].get_active():
@@ -387,7 +387,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             self.set_roitool()
         else:
             self.frame_dict['IP_window'].set_entry_sensitivities(False)
-            
+
     def format_help_cb(self,*args):
         opformat=self.format_list[self.format_menu.get_history()]
         driver=gdal.GetDriverByName(opformat)
@@ -401,7 +401,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             gvhtml.LaunchHTML(ttopic[0])
         else:
             gvutils.warning('No html help available for '+opformat+' format')
-            
+
     def export_cb(self,*args):
         ipfile=self.frame_dict['Files'].get('Input')
         opfile=self.frame_dict['Files'].get('Output')
@@ -413,9 +413,9 @@ class GDALTool(gviewapp.Tool_GViewApp):
         elif len(opfile) == 0:
             gvutils.error('No output filename entered!')
             return
-            
+
         use_viewscale=0
-        
+
         rast = gdal.OpenShared(ipfile, gdalconst.GA_ReadOnly)
         if rast is None:
             if len(ipfile) == 0:
@@ -433,7 +433,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         # window or scale, we'd need more complicated manipulations.  For now,
         # give an error message in that case.
         opformat=self.format_list[self.format_menu.get_history()]
-        
+
         if (ipfile[0] == '<') and (opformat == 'VRT'):
             if self.res_list[self.res_menu.get_history()] != 'Full':
                 msg='Only full output resolution is currently\n'+\
@@ -441,7 +441,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                     'to on-disk VRTs.'
                 gvutils.error(msg)
                 return
-            
+
             if ( (self.button_dict['Mode'].get_active()) and
                 ((self.button_dict['IP_window'].get_active()) or
                 (self.button_dict['Scale'].get_active()) or
@@ -451,7 +451,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                     'in-memory VRTs to on-disk VRTs'
                 gvutils.error(msg)
                 return
-                
+
             linelist=string.split(ipfile,'\n')
             newlinelist=[]
             for item in linelist:
@@ -459,14 +459,14 @@ class GDALTool(gviewapp.Tool_GViewApp):
             fh=open(opfile,'w')
             fh.writelines(newlinelist)
             fh.close()
-            
+
             ovrs=self._overview_list[self.overview_menu.get_history()]
             if ovrs != 'None':
                 outds=gdal.OpenShared(opfile)
                 if outds is None:
                     gvutils.error('Error opening '+opfile+' for overview creation!')
                     return
-                
+
                 progress = pguprogress.PGUProgressDialog( 'Building overviews...',
                                                   cancel = True )
                 if ovrs is 'Nearest':
@@ -476,11 +476,11 @@ class GDALTool(gviewapp.Tool_GViewApp):
                     outds.BuildOverviews( "average_magphase",
                                        callback = progress.ProgressCB )
                 progress.destroy()
-            
+
             return
-        
-            
-        
+
+
+
         vrt_opts=vrtutils.VRTCreationOptions(rast.RasterCount)
 
         if self._geocode_list[self.geocoding_menu.get_history()] == 'GCP':
@@ -489,7 +489,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             vrt_opts.set_geopref('geotransform')
 
         band_list = None
-        
+
         # Scale the output file according to the current view's
         # min/max
         if self.button_dict['Scale'].get_active():
@@ -593,7 +593,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         vrt_tree=vrtutils.serializeDataset(rast,vrt_opts,band_list)
         vrt_lines=gdal.SerializeXMLTree(vrt_tree)
         vrtdataset=gdal.Open(vrt_lines)
-        
+
         driver=gdal.GetDriverByName(opformat)
 
         # Parse creation options:
@@ -615,7 +615,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                 copts=string.split(optstr,',')
         else:
             copts=[]
-    
+
         progress = pguprogress.PGUProgressDialog( 'Export to '+opfile,
                                                   cancel = True )
         progress.SetDefaultMessage("translated")
@@ -627,28 +627,28 @@ class GDALTool(gviewapp.Tool_GViewApp):
             progress.destroy()
             gvutils.error('Unable to create output file '+opfile)
             return
-        
+
         ovrs=self._overview_list[self.overview_menu.get_history()]
         if ovrs is 'Nearest':
             progress.SetDefaultMessage("overviews built")
             outdataset.BuildOverviews( "nearest",
                                        callback = progress.ProgressCB )
-   
+
         elif ovrs is 'Average':
             progress.SetDefaultMessage("overviews built")
             outdataset.BuildOverviews( "average_magphase",
                                        callback = progress.ProgressCB )
-            
+
         progress.destroy()
 
 
-        
-    
+
+
     def close(self,*args):
         if self.roichanged_id is not None:
             self.app.toolbar.roi_tool.disconnect(self.roichanged_id)
             self.roichanged_id=None
-            
+
         self.dialog.hide()
         return True
 
@@ -661,7 +661,7 @@ class DataWindowFrame:
         self.frame=gtk.Frame(title)
         self.show_list=[]
         self.show_list.append(self.frame)
-        
+
         patch_table = gtk.Table(2,4,False)
         self.show_list.append(patch_table)
         self.frame.add(patch_table)
@@ -720,7 +720,7 @@ class DataWindowFrame:
         self.show_list.append(self.entry_dict['start_pix'])
         self.show_list.append(self.entry_dict['num_lines'])
         self.show_list.append(self.entry_dict['num_pix'])
-        
+
         parent_box.pack_start(self.frame,False,False,0)
 
 
@@ -768,4 +768,4 @@ def ROI_view_to_pixel(clayer,roi_info):
 
 
 TOOL_LIST = ['GDALTool']
- 
+

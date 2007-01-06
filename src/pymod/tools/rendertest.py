@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: rendertest.py,v 1.1.1.1 2005/04/18 16:38:37 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Interactive Test Suite for Various Rendering Modes.
@@ -33,7 +33,7 @@ import os
 import gviewapp
 
 class RenderTestTool(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
         gviewapp.Tool_GViewApp.__init__(self,app)
         self.init_menu()
@@ -54,7 +54,7 @@ class RenderTest(gtk.Window):
         self.set_title('GvShapesLayer Render Test')
 
         self.view = gview.app.sel_manager.get_active_view()
-        
+
         self.text_contents = ''
         self.selected_shape = None
         self.layer = None
@@ -103,7 +103,7 @@ class RenderTest(gtk.Window):
         self.prev_btn = gtk.Button("<--- Previous")
         self.prev_btn.connect("clicked", self.prev_cb)
         box2.pack_start(self.prev_btn)
-        
+
         self.next_btn = gtk.Button("Next --->")
         self.next_btn.connect("clicked", self.next_cb)
         box2.pack_start(self.next_btn)
@@ -120,7 +120,7 @@ class RenderTest(gtk.Window):
 
     def show_step( self ):
         self.cleanup()
-        
+
         func = self.step_list[self.step]
         func()
 
@@ -134,7 +134,7 @@ class RenderTest(gtk.Window):
 
     def set_step_name( self, text ):
         self.set_title( '%d: %s' % (self.step, text) )
-    
+
     def set_text( self, text ):
         self.text.get_buffer().set_text(text)
 
@@ -148,7 +148,7 @@ class RenderTest(gtk.Window):
 ###############################################################################
 #   Display a simple polygon with fill using the layer defaults
 #       mechanism. 
-        
+
     def simple_poly( self ):
         self.set_step_name( 'Simple Polygon Display' )
         self.set_text( 'You should see a five sided polygon with a red edge\n'
@@ -183,7 +183,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Transparent poly.
-        
+
     def transparent_poly( self ):
         self.set_step_name( 'Polygon Transparency' )
         self.set_text( 'You should see two overlaping polygons, with the\n'
@@ -219,7 +219,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Simple points and lines.
-        
+
     def simple_points_and_lines( self ):
         self.set_step_name( 'Simple Points and Lines' )
         self.set_text( 'You should see a four segment red line, and\n'
@@ -254,7 +254,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Test of raster symbol.
-        
+
     def raster_symbol( self ):
         self.set_step_name( 'Raster Symbol Test' )
         self.set_text( 'A red symbol (the busy indicator from thet toolbar)\n'
@@ -272,7 +272,7 @@ class RenderTest(gtk.Window):
         gview.undo_register( shapes)
         layer = gview.GvShapesLayer( shapes )
         layer.set_name( 'test' )
-        
+
         if os.name == "nt":
             sym_file = gview.home_dir + '\\pics\\busy.xpm'
             sym_file2 = gview.home_dir + '\\pics\\idle.xpm'
@@ -308,7 +308,7 @@ class RenderTest(gtk.Window):
         # but do it on the vector layer.
 
         sm = layer.get_symbol_manager( 1 )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 0.0, 0, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -319,7 +319,7 @@ class RenderTest(gtk.Window):
         sm.inject_vector_symbol( sym_name, shape )
 
         # Place the "3" idle symbol.
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 60, 50, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -342,7 +342,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   _gv_ogrfs controlled lines. 
-        
+
     def ogrfs_lines( self ):
         self.set_step_name( 'OGRFS Lines' )
         self.set_text('You should see a thick (8 pixels wide) green line\n'
@@ -364,7 +364,7 @@ class RenderTest(gtk.Window):
         shape.set_property( '_gv_ogrfs',
                             'PEN(c:#00FF00,w:8);PEN(c:#FF0000,w:2)' )
         shapes.append( shape )
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_LINE )
         shape.set_node( 20, 20, node=0 )
         shape.set_node( 40, 20, node=1 )
@@ -380,12 +380,12 @@ class RenderTest(gtk.Window):
         self.view.set_active_layer( layer )
 
         self.view.fit_extents( 0, 0, 100, 100 )
-        
-        
+
+
 
 ###############################################################################
 #   _gv_ogrfs controlled points. 
-        
+
     def ogrfs_points( self ):
         self.set_step_name( 'OGRFS Point Symbols' )
         self.set_text('You should see two rows of yellow symbols.\n'
@@ -470,7 +470,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   _gv_ogrfs controlled points. 
-        
+
     def ogrfs_points2( self ):
         self.set_step_name( 'OGRFS Point Symbols' )
         self.set_text( \
@@ -528,7 +528,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   _gv_labels
-        
+
     def ogrfs_labels( self ):
         self.set_step_name( 'OGRFS Labels' )
         self.set_text( \
@@ -584,7 +584,7 @@ class RenderTest(gtk.Window):
         shape.set_property('_gv_ogrfs',
                            'LABEL(c:#FF0000,p:3,t:"TOP_LEFT")' )
         shapes.append( shape )
-        
+
         # more anchor tests
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 50, 35, node=0 )
@@ -608,7 +608,7 @@ class RenderTest(gtk.Window):
         shapes.append( shape )
 
         # Test geographic and pixel offsets.
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 25, 25, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -645,7 +645,7 @@ class RenderTest(gtk.Window):
                            'LABEL(c:#FF0000,b:#993333,t:"Text with halo",h:)')
         shapes.append( shape )
 
-        
+
         layer = gview.GvShapesLayer( shapes )
         layer.set_name( 'test' )
         self.view.add_layer( layer )
@@ -655,7 +655,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Vector symbols (GvShapes via symbolmanager requested via ogrfs).
-        
+
     def vector_symbol( self ):
         self.set_step_name( 'OGRFS Vector Symbol' )
         self.set_text( \
@@ -677,7 +677,7 @@ class RenderTest(gtk.Window):
         # manager.
 
         sm = gview.GvSymbolManager()
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_LINE )
         shape.set_node( 0.0, -6, node=0 )
         shape.set_node( 0.0, 6,  node=1 )
@@ -692,9 +692,9 @@ class RenderTest(gtk.Window):
             sym_name = "/rendertest_arrow"
 
         sm.inject_vector_symbol( sym_name, shape )
-                                 
+
         # Place the symbol.
-    
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 50, 50, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -704,7 +704,7 @@ class RenderTest(gtk.Window):
         # Insert a vector symbol consisting of crossed arrows.
 
         sm = gview.GvSymbolManager()
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 0.0, 0, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -716,7 +716,7 @@ class RenderTest(gtk.Window):
         else:
             sym_name2 = "/rendertest_carrow"
         sm.inject_vector_symbol( sym_name2, shape )
-                                 
+
         # Place the symbol. 
 
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
@@ -728,7 +728,7 @@ class RenderTest(gtk.Window):
         # Insert a vector symbol consisting scaled arrows with offsets.
 
         sm = gview.GvSymbolManager()
-        
+
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
         shape.set_node( 0.0, 0, node=0 )
         shape.set_property('_gv_ogrfs',
@@ -740,7 +740,7 @@ class RenderTest(gtk.Window):
         else:
             sym_name2 = "/rendertest_carrow2"
         sm.inject_vector_symbol( sym_name2, shape )
-                                 
+
         # Place the symbol. 
 
         shape = gview.GvShape( type = gview.GVSHAPE_POINT )
@@ -750,7 +750,7 @@ class RenderTest(gtk.Window):
         shapes.append( shape )
 
         # Create the layer and display
-        
+
         layer = gview.GvShapesLayer( shapes )
         layer.set_name( 'test' )
         self.view.add_layer( layer )
@@ -760,7 +760,7 @@ class RenderTest(gtk.Window):
 
 ###############################################################################
 #   Loading vector symbols from XML file.
-        
+
     def vector_symbol_from_file( self ):
         symbols_dir = os.path.join(gview.home_dir, 'symbols' )
         symbol1 = os.path.join( symbols_dir, 'square.xml' )
@@ -857,7 +857,7 @@ class RenderTest(gtk.Window):
         shapes.append( shape )
 
         # Create the layer and display
-        
+
         layer = gview.GvShapesLayer( shapes )
         layer.set_name( 'test' )
         self.view.add_layer( layer )

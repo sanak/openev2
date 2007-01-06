@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvogrfsgui.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GUI Widgets for displaying and manipulating OGRFS rendering
@@ -161,13 +161,13 @@ class GvLabelStyle(gtk.VBox, Signaler):
         # Font
         table.attach(gtk.Label('Font:'), 0, 1, 2, 3,
                 xoptions=SHRINK, yoptions=SHRINK)
-        
+
         self.font_button = gtk.FontButton()
         self.font_button.connect('font-set', self.label_change_cb)
-        
+
         #self.font_button = pgufont.pguFontControl()
         #self.font_button.subscribe('font-changed', self.label_change_cb)
-        
+
         table.attach(self.font_button, 1, 2, 2, 3,
                 xoptions=SHRINK)
 
@@ -255,7 +255,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
                     font.set_font_part('Size', 12)
                 else:
                     font.parse_font_spec(default_font)
-            
+
             if font.get_pango_desc() is not None:
                 self.font_button.set_font_name(font.get_pango_desc().to_string())
 
@@ -351,7 +351,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
             field_name = model[active][0]
 
         font_name = self.font_button.get_font_name()
-        
+
         text_value = ''
         if self.text_entry is not None:
             text_value = self.text_entry.get_text()

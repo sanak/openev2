@@ -128,7 +128,7 @@ class GeneralROITool(gviewapp.Tool_GViewApp):
 
     def init_dialog(self):
         self.RP_ToolDlg = General_ROIToolDlg()
-  
+
     def init_menu(self):
         self.menu_entries.set_entry("Tools/ROI Analysis Tool",1,self.roipoitool_cb)
 
@@ -153,7 +153,7 @@ class GeneralROITool(gviewapp.Tool_GViewApp):
             return       
 
         [cview, clayer] = self.app.layerdlg.get_selected_layer()
-        
+
         if (cview is None) or (clayer is None):
             # roi only makes sense in the context of a view and layer
             return
@@ -180,7 +180,7 @@ class GeneralROITool(gviewapp.Tool_GViewApp):
                 line2 = temp
 
             roi_info = (pixel,line,pixel2-pixel,line2-line)
-  
+
         self.RP_Stored.update_roi(roi_info,clayer,cview)
         # if tooldlg is active, update its region display frame
         if self.RP_ToolDlg.is_active():
@@ -206,7 +206,7 @@ class GeneralROITool(gviewapp.Tool_GViewApp):
         sl =  self.RP_ToolDlg.entry_dict['num_lines'].get_text()
         sp =  self.RP_ToolDlg.entry_dict['num_pix'].get_text()
         print 'In roi tool analyze_cb- ROI is: ',line,'L ',pix,'P (',sl,'x',sp,')'
-        
+
 
 class General_ROIPOIToolDlg(gtk.Window,Signaler):
     # A base class that has 3 frames: a 
@@ -233,7 +233,7 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
         self.publish('roitool-needs-set')
         self.publish('poitool-needs-set')
         self.publish('analyze-pressed')
- 
+
         # Basic connections
         self.button_dict['Analyze'].connect('clicked',self.analyze_cb)
         self.button_dict['Activate'].connect('toggled',self.activate_toggled)
@@ -304,7 +304,7 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
         self.main_panel.pack_end(self.frame_dict['base_frame3'],False,False,0)
         self.add(self.main_panel)
         self.show_list.append(self.main_panel)
- 
+
     def init_customize_gui_panel(self):
         pass
 
@@ -437,7 +437,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         tip_text = 'Perform analysis.'
         self.tooltips.set_tip(self.button_dict['Analyze'],tip_text)
 
-    
+
         self.frame_dict['base_frame2'].show_all()
 
     def set_tool_cb(self,*args):
@@ -498,7 +498,7 @@ class General_POIToolDlg(General_ROIPOIToolDlg):
         self.entry_dict['pixel'].set_size_request(90, 25)
         self.entry_dict['pixel'].set_text('1')
         patch_table.attach(self.entry_dict['pixel'], 3,4, 0,1)
-    
+
         # Create tooltips
         self.tooltips = gtk.Tooltips()
         tip_text = "Re-enable point-of-interest selection mode (" + \
@@ -566,7 +566,7 @@ class Pixel_Tool(GeneralPOITool):
         [long,lat]=clayer.get_data().pixel_to_georef(float(pix),float(line))
         disp_text = disp_text + '    Latitude: ' + str(lat)
         disp_text = disp_text + '    Longitude: ' + str(long) + '\n'
-  
+
         try:
             value = gdal_dataset.ReadAsArray(int(float(pix)),int(float(line)),1,1)
         except:
@@ -575,9 +575,9 @@ class Pixel_Tool(GeneralPOITool):
 
         disp_text = disp_text +'\n    Value: ' + str(value[0,0].astype(value.typecode()))
         return disp_text
- 
 
-       
+
+
 
 class Pixel_ToolDlg(General_POIToolDlg):
     def __init__(self):
@@ -670,7 +670,7 @@ class Stats_Tool(GeneralROITool):
         if (sl == 0 or sp == 0):
             print "Trying to extract region with zero lines or zero pixels!"
             return
-        
+
         try:
             filename = clayer.get_parent().get_dataset().GetDescription()
         except:
@@ -684,7 +684,7 @@ class Stats_Tool(GeneralROITool):
         except:
             gvutils.error('Unable to extract data and/or display mode info!')
             return
-        
+
         if self.target_view_window is not None:
             # Need to delete old layer in target window and put in new one
             if self.target_view_layer is not None:
@@ -766,7 +766,7 @@ class Stats_Tool(GeneralROITool):
         pix = self.RP_ToolDlg.entry_dict['start_pix'].get_text()
         sl =  self.RP_ToolDlg.entry_dict['num_lines'].get_text()
         sp =  self.RP_ToolDlg.entry_dict['num_pix'].get_text()
-    
+
         number_of_elements = Numeric.multiply.reduce(self.target_view_data.shape)
         if (self.is_patch_complex() == 1):
             # Calculate stats for absloute and power
@@ -800,7 +800,7 @@ class Stats_Tool(GeneralROITool):
                 var_power = 0
                 var   = 0
 
-                
+
         disp_text = 'Region Attributes: \n'
         fname = clayer.get_parent().get_dataset().GetDescription()
         disp_text = disp_text + '\tFilename: ' + fname + '\n'
@@ -882,7 +882,7 @@ class Stats_ToolDlg(General_ROIToolDlg):
         log_table = gtk.Table(2,4,False)
         self.show_list.append(log_table)
         self.frame_dict['log_frame'].add(log_table)
-        
+
         log_table.set_border_width(5)
         log_table.set_col_spacings(5)
         log_table.set_col_spacing(1, 20)
@@ -956,5 +956,5 @@ class Stats_ToolDlg(General_ROIToolDlg):
             self.button_dict['Log To File'].set_sensitive(False)
             self.button_dict['Log To File'].set_active(False)
             self.button_dict['Select Log'].set_sensitive(False)
-       
+
 

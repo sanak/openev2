@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pguprogress.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Simplified progress monitor dialog.
@@ -38,12 +38,12 @@ class PGUProgressDialog(gtk.Dialog):
         vbox = gtk.VBox(spacing=5)
         vbox.set_border_width(10)
         self.vbox.pack_start(vbox)
-        
+
         label = gtk.Label(" 0% "+self.message)
         label.set_alignment(0, 0.5)
         vbox.pack_start(label, expand=True)
         self.label = label
-        
+
         pbar = gtk.ProgressBar()
         pbar.set_size_request(200, 20)
         vbox.pack_start(pbar)
@@ -69,16 +69,16 @@ class PGUProgressDialog(gtk.Dialog):
 
     def SetDefaultMessage( self, message ):
         self.message = message
-        
+
     def ProgressCB( self, complete, message, *args ):
 
         self.complete = self.min + (self.max-self.min) * complete
         if message == "":
             message = self.message
-            
+
         message = str(int(complete*100)) + "% " + message
         self.label.set_text(message)
-        
+
         self.pbar.update( complete )
         while gtk.events_pending():
             gtk.main_iteration(False)
@@ -87,10 +87,10 @@ class PGUProgressDialog(gtk.Dialog):
             return 0
         else:
             return 1
-    
+
 
 if __name__ == '__main__':
     pdialog = PGUProgressDialog( "Progress Test" )
 
     gtk.main()
-        
+

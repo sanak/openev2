@@ -73,7 +73,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
         print '         individual graphs'
         print ''
         return
-    
+
     ###########################################################################
     # Work out the shape of the data.  A 1-D array is assumed to be Y
     # values.  An Nx2 array is assumed to be (X,Y) values.  A 3-D array is
@@ -111,7 +111,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
     # Setup Plot Options.
 
     g = llplot()
-           
+
     if datastyle is not None:
         cmd = 'set data style ' + str(datastyle)
         g.add_cmd(cmd)
@@ -138,7 +138,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
             g.add_cmd(cmd)
 
     g.set_data( data,'',dim,1,multiplot,multilabels,multiopts)
-    
+
     ###########################################################################
     # Generate output.
 
@@ -151,13 +151,13 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
     elif terminal == 'postscript':
 
         g.batch = 1
-        
+
         #if (os.name == 'nt'):
         #    output = string.join(string.split(output,'\\'),'/')
 
         g.add_cmd( 'set terminal postscript color 10' )
         g.add_cmd( "set output '%s'" % output )
- 
+
         g.plot_current()
 
         return
@@ -165,7 +165,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
     elif terminal == 'pbm':
 
         g.batch = 1
-        
+
         g.add_cmd( 'set terminal pbm color' )
         g.add_cmd( "set output '%s'" % output )
 
@@ -177,9 +177,9 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
 
         import gdal
         import time
-        
+
         g.batch = 1
-        
+
         out_temp = gvutils.tempnam(extension='png')
 
         g.add_cmd( 'set terminal png ' )
@@ -202,7 +202,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
         os.unlink( out_temp )
 
         return
-    
+
     else:
         import gdal
         import gdalnumeric
@@ -210,23 +210,23 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
         import gview
 
         g.batch = 1
-        
+
         temp_file = gvutils.tempnam()
-         
+
         # make sure the file has been created
         create_temp = open(temp_file,'w')
         create_temp.close()   
-              
+
         g.add_cmd( 'set terminal pbm color' )
         g.add_cmd( "set output '%s'" % temp_file )
 
         g.plot_current()
-        
+
         time.sleep( 1 )
 
         image = gdalnumeric.LoadFile( temp_file )
         image_ds = gdalnumeric.OpenArray( image )
-        
+
         try:
             os.unlink( temp_file )
         except:
@@ -259,7 +259,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
                    [, output=ps_filename]
                    [,plottype = {"parametric","contour"}]
                    [, wintitle=text])
-                   
+
         data -- data array to plot, should be 2-D set of Z values.
                    Size of data should be length(x) x length(y), if x
                    and y are present.'
@@ -284,7 +284,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
         print ' yvec -- 1-D Vector of values for axis of second dimension of data.'
         print ''
         return
-    
+
     ###########################################################################
     # Work out the shape of the data.  A 1-D array is assumed to be Y
     # values.  An Nx2 array is assumed to be (X,Y) values.  All others are
@@ -332,11 +332,11 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 
     ###########################################################################
     # Setup Plot Options.
-    
+
     g = llplot()
 
     g.batch = 1
-    
+
     if plottype == "contour":
         g.add_cmd('set nosurface')
         g.add_cmd('set contour')
@@ -393,19 +393,19 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 
     if terminal == 'gnuplot':
         g.batch = 0
-        
+
         g.plot_current()
         raw_input('Please press return to continue...\n')
 
     elif terminal == 'postscript':
         if (os.name == 'nt'):
             output = string.join(string.split(output,'\\'),'/')
-   
+
         g.add_cmd( 'set terminal postscript color 10' )
         g.add_cmd( "set output '%s'" % output )
 
         g.plot_current()
-        
+
     else:
         import gdal
         import gdalnumeric
@@ -413,7 +413,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
         import gview
 
         temp_file = gvutils.tempnam()
-        
+
         g.add_cmd( 'set terminal pbm color' )
         g.add_cmd( "set output '%s'" % temp_file )
 
@@ -421,7 +421,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 
         image = gdalnumeric.LoadFile( temp_file )
         image_ds = gdalnumeric.OpenArray( image )
-        
+
         try:
             os.unlink( temp_file )
         except:
@@ -435,7 +435,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 
         if terminal == 'rasterlayer':
             return rlayer
-	    
+
         graphwin = GvGraphWindow( rlayer )
         if wintitle is not None:
             graphwin.set_title(wintitle)
@@ -449,7 +449,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 # Only utilized from within gvplot.py.
 
 class llplot:
-    
+
     def __init__(self):
         self.cmds = []
         self.batch = 1
@@ -470,7 +470,7 @@ class llplot:
                 return exe
             else:
                 gvutils.warning( 'Disregarding gnuplot preference "%s", executable not found.' % exe )
-        
+
         exe = gvutils.FindExecutable( 'gnuplot' )
         if exe is None:
             exe = gvutils.FindExecutable( 'pgnuplot.exe' )
@@ -496,13 +496,13 @@ class llplot:
 
         if (multiplot == True) and (len(multilabels) == 0):
             self.multilabels = range(self.data.shape[1]-1)
-            
+
         if (multiplot == True) and (len(multiopts) == 0):
             self.multiopts=[]
             for i in range(self.data.shape[1]-1):
                 self.multiopts.append("")
 
-        
+
     def plot_current( self ):
         """Data is a list of (x,y) pairs"""
 
@@ -510,7 +510,7 @@ class llplot:
             self.open_tmpfile()
         else:
             self.open_pipe()
-        
+
         for cmd in self.cmds:
             self.write(cmd + '\n')
 
@@ -519,18 +519,18 @@ class llplot:
                 self.write( 'plot "-" title "%s"\n' % self.data_title )
             else:
                 self.write( 'splot "-" title "%s"\n' % self.data_title )
-                
+
         else:
             cmd = '"-" title "' + str(self.multilabels[0]) + '" ' + self.multiopts[0]
             for i in range(self.data.shape[1]-2):
                 cmd = cmd + ',"-" title "' + str(self.multilabels[i+1]) + '" ' + self.multiopts[i+1]
             #print "cmd", cmd    
             self.write( 'plot ' + cmd  +'\n')
- 
+
         self.write_data()
 
         self.complete_command()
-            
+
         self.cleanup()
 
     def write_data( self ):
@@ -546,20 +546,20 @@ class llplot:
                     i = i + 1
                     if i % self.xlen == 0:
                         self.write( '\n' )
-                    
+
                 self.write('e\n')
         else:
             for i in range(self.data.shape[1]-1):
                 for pnt in self.data:
                     self.write( '%s %s\n' % (pnt[0], pnt[1+i]) )
                 self.write('e\n')    
-                
-            
+
+
     def open_pipe( self ):
         import os
-        
+
         self.pipe = os.popen(self.base_command, 'w')
-        
+
         # forward write and flush methods:
         self.write = self.pipe.write
         self.flush = self.pipe.flush
@@ -569,7 +569,7 @@ class llplot:
 
         self.tmpnam = gvutils.tempnam()
         self.pipe = open(self.tmpnam, 'w')
-        
+
         # forward write and flush methods:
         self.write = self.pipe.write
         self.flush = self.pipe.flush
@@ -577,7 +577,7 @@ class llplot:
     def complete_command( self ):
         if self.pipe is not None:
             self.pipe.flush()
-            
+
         if self.tmpnam is not None:
             self.pipe.close()
             self.pipe = None
@@ -640,11 +640,11 @@ class GvGraphWindow(gtk.Window):
     def print_cb(self, *args):
         import gvprint
         pd = gvprint.GvPrintDialog( self.viewarea )
- 
+
     def close( self, *args ):
         self.rlayer = None
         self.destroy()
-    
+
 
 ###############################################################################
 
@@ -671,7 +671,7 @@ if __name__ == '__main__':
     plot3d( data3, xaxis = 'X', yaxis = 'Y', zaxis = 'F(X,Y)', title='A Plot',
             terminal = 'gnuplot' , zmin=-1, zmax=5, xvec=xvals, yvec=yvals,
             cmds = ('set view 70,40','set grid','set contour base') )
-    
+
 
 
 

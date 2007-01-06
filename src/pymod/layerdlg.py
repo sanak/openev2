@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: layerdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Layer Management Dialog
@@ -45,7 +45,7 @@ static_layer_dialog = None
 
 def Launch():
     global static_layer_dialog
-    
+
     if static_layer_dialog is None:
         static_layer_dialog = LayerDlg()
 
@@ -147,8 +147,8 @@ class LayerDlg(gtk.Window,Signaler):
         # Publish signals
         self.publish('active-view-changed')
         self.publish('deleted-layer')
-        
-        
+
+
     def close(self,*args):
         self.hide()
         return True
@@ -211,7 +211,7 @@ class LayerDlg(gtk.Window,Signaler):
         if len(self.menuitems) > 0:
             newitem = self.viewmenu.get_active()
             newitem.activate()
-            
+
         if len(self.views) == 0:
             # FIXME: things get kind of screwed up here...
             # there doesn't seem to be a way to tell gtk.Menu/gtk.OptionMenu
@@ -253,7 +253,7 @@ class LayerDlg(gtk.Window,Signaler):
         if not self.flags() & gtk.REALIZED: return
 
         self.updating = True
-        
+
         lst = self.list_store
         view = self.views[self.selected_view]
         layers = self.list_layers()
@@ -387,13 +387,13 @@ class LayerDlg(gtk.Window,Signaler):
         while layer_map.has_key(name):
             counter = counter + 1
             name = 'UserShapes_'+str(counter)
-        
+
         shapes = gview.GvShapes(name=name)
         gview.undo_register(shapes)
         layer = gview.GvShapesLayer(shapes)
         view.add_layer(layer)
         view.set_active_layer(layer)
-        
+
 
     def raise_layer(self, *args):
         if not self.selected_view: return
@@ -424,9 +424,9 @@ class LayerDlg(gtk.Window,Signaler):
         layername = layer.get_name()
         if layer is not None:
             view.remove_layer(layer)
-            
+
         Signaler.notify(self, 'deleted-layer',view,layername)
-        
+
 
     def get_selected_layer(self, *args):
         """ Returns a tuple with the name of the active view and the object with the currently selected layer

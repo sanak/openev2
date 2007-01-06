@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: gvogrdlg.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  OGR Layer Selection and Loading Dialog.
@@ -47,7 +47,7 @@ class GvOGRDlg(gtk.Window):
         layerbox = gtk.ScrolledWindow()
         shell.pack_start(layerbox)
         layerlist = gtk.CList(cols=2)
-            
+
         layerbox.add_with_viewport(layerlist)
         layerlist.set_shadow_type(gtk.SHADOW_NONE)
         layerlist.set_selection_mode(gtk.SELECTION_SINGLE)
@@ -70,11 +70,11 @@ class GvOGRDlg(gtk.Window):
 
         hbox = gtk.HBox(homogeneous=False, spacing=3)
         shell.pack_start( hbox,expand=False )
-        
+
         sql_button = gtk.Button('Execute SQL:')
         sql_button.connect('clicked', self.execute_sql)
         hbox.pack_start(sql_button, expand=False)
-        
+
         self.sql_cmd = gtk.Entry()
         hbox.pack_start(self.sql_cmd,expand=True)
 
@@ -100,7 +100,7 @@ class GvOGRDlg(gtk.Window):
                                         'ck_on_l.xpm'))
         self.not_sel_pixmap = gtk.Image().set_from_file( os.path.join(gview.home_dir,'pics',
                                         'ck_off_l.xpm'))
-        
+
         shell.show_all()
 
         self.ds = ds
@@ -119,7 +119,7 @@ class GvOGRDlg(gtk.Window):
 
     def help_cb(self,*args):
         gvhtml.LaunchHTML( "veclayerselect.html" );
-    
+
     def close(self,*args):
         self.ds.Destroy()
         self.hide()
@@ -140,22 +140,22 @@ class GvOGRDlg(gtk.Window):
             rect = ogr.CreateGeometryFromWkt( wkt )
         else:
             rect = None
-            
+
         for i in range(len(self.layer_sel)):
             if self.layer_sel[i]:
                 layer = self.ds.GetLayer( i )
 
                 if rect is not None:
                     layer.SetSpatialFilter( rect )
-                    
+
                 self.viewwindow.file_open_ogr_by_layer( layer )
-                
+
                 if rect is not None:
                     layer.SetSpatialFilter( None )
 
         if rect is not None:
             rect.Destroy()
-            
+
         self.close()
 
     def realize(self, widget):
@@ -167,7 +167,7 @@ class GvOGRDlg(gtk.Window):
         i = 0
         for entry in self.layer_names:
             lst.append(('', entry))
-                
+
             lst.set_pixmap(i, 0, self.not_sel_pixmap)
 
             i = i + 1
@@ -181,17 +181,17 @@ class GvOGRDlg(gtk.Window):
         if event.type is gtk.gdk._2BUTTON_PRESS:
             for i in range(len(self.layer_sel)):
                 self.layer_sel[i] = 0
-                
+
             self.layer_sel[row] = 1
             self.accept()
         else:
             self.layer_sel[row] = not self.layer_sel[row]
-        
+
         if self.layer_sel[row]:
             lst.set_pixmap(row, 0, self.sel_pixmap)
         else:
             lst.set_pixmap(row, 0, self.not_sel_pixmap)
-        
+
     def execute_sql(self, *args):
 
         statement = self.sql_cmd.get_text()
@@ -200,5 +200,5 @@ class GvOGRDlg(gtk.Window):
 
         if layer is not None:
             self.viewwindow.file_open_ogr_by_layer( layer )
-            
+
             self.ds.ReleaseResultsSet( layer )

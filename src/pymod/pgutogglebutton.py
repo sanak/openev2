@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: pgutogglebutton.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV Python GTK Utility classes
 # Purpose:  Embeddable, configurable toggle widget
@@ -38,7 +38,7 @@ class pguToggleButton(gtk.ToggleButton):
         """
         """
         gtk.ToggleButton.__init__( self )
-        
+
         filename = os.path.join(gview.home_dir, 'pics', pix_on)
 
         pix, mask = gtk.gdk.pixmap_colormap_create_from_xpm(None,
@@ -51,7 +51,7 @@ class pguToggleButton(gtk.ToggleButton):
         #pix, mask = gtk.create_pixmap_from_xpm(self, None, filename)
         #self.pix_on = gtk.Pixmap( pix, mask )
         #self.pix_on.show()
-        
+
         filename = os.path.join(gview.home_dir, 'pics', pix_off)
 
         pix, mask = gtk.gdk.pixmap_colormap_create_from_xpm(None,
@@ -64,23 +64,23 @@ class pguToggleButton(gtk.ToggleButton):
         #pix, mask = gtk.create_pixmap_from_xpm(self, None, filename)
         #self.pix_off = gtk.Pixmap( pix, mask )
         #self.pix_off.show()
-        
+
         self.add( self.pix_off )
-        
+
         self.active_pix = self.pix_off
-        
+
         self.set_size_request(*pix.get_size())
-       
+
         self.connect( 'toggled', self.expose )
         self.connect( 'expose-event', self.expose )
         self.show()
-        
+
     def expose( self, *args ):
-        
+
         if not self.flags() & gtk.REALIZED:
             return
-            
-        
+
+
         if self.get_active():
             active_pix = self.pix_on
         else:
@@ -89,18 +89,18 @@ class pguToggleButton(gtk.ToggleButton):
             self.remove( self.active_pix )
             self.active_pix = active_pix
             self.add( self.active_pix )
-        
+
 if __name__ == "__main__":
     dlg = gtk.Dialog()
     filename = os.path.join(gview.home_dir, 'pics')
     print 'pixs from ', filename
     tb = pguToggleButton()
     dlg.vbox.pack_start( tb )
-    
+
     btn = gtk.Button( "OK" )
     btn.connect( 'clicked', gtk.main_quit )
     dlg.action_area.pack_start( btn )
     dlg.connect( 'delete-event', gtk.main_quit )
     dlg.show_all()
     gtk.main()
-    
+

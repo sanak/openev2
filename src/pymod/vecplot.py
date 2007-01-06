@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 ###############################################################################
-# $Id: vecplot.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  GvViewArea-based plotting.
@@ -158,7 +158,7 @@ GVPLOT_AXIS_VTICSLABELSTICS=4 # Show major tics with labels and minor tics
 
 DEFAULT_EDGE_PADDING=0.15
 
-        
+
 if os.name == 'nt':
     DEFAULT_FONT="-adobe-helvetica-medium-r-*-*-15-*-*-*-*-*-*-*"
 else:
@@ -181,7 +181,7 @@ class gvplot_2Ddata_cartesian:
         ###############################################################
         # Properties that will be common to other 2-D plot classes    #
         ###############################################################
-        
+
         # Data: one or more gvplot_array_cartesian objects to plot.
         #       Each will be plotted as a separate line layer.  Each item
         #       in array_layer_defaults stores the label (for legend)
@@ -190,8 +190,8 @@ class gvplot_2Ddata_cartesian:
         #       '_gl_antialias')
         self.array_data=[]      # Data to plot
         self.array_layer_defaults=[]  # Data plotting properties
-                             
-        
+
+
         # Axis: zero or more axis/lines to create.  These are all put
         #       together in a single layer.  Layer-wide properties
         #       are stored in axis_layer_properties- use this to
@@ -229,7 +229,7 @@ class gvplot_2Ddata_cartesian:
         self.pymin=pymin
         self.pymax=pymax
         self.plot_label=plot_label
-        
+
         # left/right/top/bottom border padding
         self.lborder=DEFAULT_EDGE_PADDING
         self.rborder=DEFAULT_EDGE_PADDING
@@ -250,7 +250,7 @@ class gvplot_2Ddata_cartesian:
         self.inner_border_props['_area_edge_color']='1.0 1.0 1.0 1.0'
         self.inner_border_props['_area_edge_width']='1.0'
         self.inner_border_props['_area_fill_color']='1.0 1.0 1.0 1.0'
-        
+
 
         # Label parameters:
         #     label_data- a dictionary containing several lists, each
@@ -267,7 +267,7 @@ class gvplot_2Ddata_cartesian:
         # defaults
         self.label_layer_properties['_gv_ogrfs_point']=\
              'LABEL(c:#000000FF,f:"'+DEFAULT_FONT+'",t:{label})'
-        
+
         x0=self.pxmin+(self.lborder/5.0)*(self.pxmax-self.pxmin)
         xm=(self.pxmax+self.pxmin)/2.0+self.lborder-self.rborder
         xf=self.pxmax-(self.rborder/5.0)*(self.pxmax-self.pxmin)
@@ -278,14 +278,14 @@ class gvplot_2Ddata_cartesian:
         self.label_data['xlabel']=[(xm,y0,0),'xlabel']
         self.label_data['ylabel']=[(x0,ym,0),None]
         self.label_data['title']=[(xm,yf,0),None]
-        
+
         # Legend parameters:
         #    show_legend- 1 if legend should be created; 0 otherwise
         #    location- an x,y tuple that specifies where the top left
         #              corner of the legend should fall as a fraction
         #              of pxmax-pxmin, pymax-pymin (plot extents):
         #              each value should be in the range 0-1.
-        
+
         self.show_legend=0
         self.legend_location=None
 
@@ -293,7 +293,7 @@ class gvplot_2Ddata_cartesian:
         ########################
         # Specific properties. #
         ########################
-        
+
         # Each min/max pair corresponds to
         # a continous range in the plot axis
         # NOTE: In the log axis case, these still
@@ -306,12 +306,12 @@ class gvplot_2Ddata_cartesian:
         self.xmaxs=[]
         self.xloc=None   # Major xtic locations (data coordinates)
         self.xfmt="%g"   # Formatting string for tic labels
-        
+
         self.ymins=[]
         self.ymaxs=[]
         self.yloc=None   # Major ytic locations (data coordinates)
         self.yfmt="%g"
-        
+
         self.xaxistype=GVPLOT_AXISTYPE_LINEAR
         self.yaxistype=GVPLOT_AXISTYPE_LINEAR
 
@@ -336,19 +336,19 @@ class gvplot_2Ddata_cartesian:
         for idx in range(len(self.array_data)):
             self.DataLayers.append(CreateArrayDataLayer(self,idx))
         ll.extend(self.DataLayers)
-        
+
         self.AxisLayer=CreateAxisLayer(self)
         if ll is not None:
             ll.append(self.AxisLayer)
-            
+
         self.LabelLayer=CreateLabelLayer(self)
         if self.LabelLayer is not None:
             ll.append(self.LabelLayer)
-            
+
         self.LegendLayer=Create2DLegendLayer(self)
         if self.LegendLayer is not None:
             ll.append(self.LegendLayer)
-        
+
         return ll
 
     def get_layer(self,ltype=GVPLOT_DATA_LAYER,idx=0):
@@ -400,8 +400,8 @@ class gvplot_2Ddata_cartesian:
             return self.LegendLayer
         else:
             raise RuntimeError,'create_layer: Invalid layer type'
-        
-            
+
+
 
     def get_layers(self):
         """ Return all layers that have been created, but don't
@@ -411,17 +411,17 @@ class gvplot_2Ddata_cartesian:
             ll=[self.BorderLayer]
         else:
             ll=[]
-            
+
         ll.extend(self.DataLayers)
         if self.AxisLayer is not None:
             ll.append(self.AxisLayer)
-        
+
         if self.LabelLayer is not None:
             ll.append(self.LabelLayer)
-            
+
         if self.LegendLayer is not None:
             ll.append(self.LegendLayer)
-        
+
         return ll
 
     def update_data_from_plot(self,index):
@@ -450,9 +450,9 @@ class gvplot_2Ddata_cartesian:
         newy.extend(outy)
         newx2,newy2=MakeContiguousXY(newx,newy)
         self.array_data[index]=gvplot_array_cartesian(newx2,newy2)
-        
 
-    
+
+
     def get_data_from_plot(self,index):
         """ Get (potentially modified) data from the the data layer
             corresponding to array_data[index].
@@ -479,7 +479,7 @@ class gvplot_2Ddata_cartesian:
             arrxlists.append(xdata)
             arrylists.append(ydata)
             idx=idx+1
-            
+
         return (arrxlists,arrylists)
 
     def set_extents(self,xmin=None,xmax=None,xspc=None,nxtics=0,
@@ -490,7 +490,7 @@ class gvplot_2Ddata_cartesian:
             an array of the same length, and vice versa (same for
             ymin/ymax).  Each xmin/xmax pair represents one continuous
             range of values to plot.
-            
+
             xmin- minimum in x direction (None, single value, or array)
             ymin- minimum in y direction (None, single value, or array)
             xmax- maximum in x direction (None, single value, or array)
@@ -504,7 +504,7 @@ class gvplot_2Ddata_cartesian:
                   to 0.16, etc.; 0 if plot must not alter the values.
                   Defaults to 1.
             """
-        
+
         if len(self.array_data) > 0:
             if xmin is None:
                 xmin=self.array_data[0].xmin
@@ -533,7 +533,7 @@ class gvplot_2Ddata_cartesian:
                 self.xmaxs=dxmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-            
+
                 dymin,dymax,dylocs,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                      self.yaxistype)
                 self.ymins=dymin
@@ -553,19 +553,19 @@ class gvplot_2Ddata_cartesian:
                     self.xmaxs=xmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-                    
+
                 dymin,dymax,dyspc,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                     self.yaxistype)
                 if type(ymin) not in [type([]),type((1,))]:
                     self.ymins=[ymin]
                 else:
                     self.ymins=ymin
-                    
+
                 if type(ymax) not in [type([]),type((1,))]:
                     self.ymaxs=[ymax]
                 else:
                     self.ymaxs=ymax
-                    
+
                 self.ylocs=dylocs
                 self.yfmt=fmt
         else:
@@ -581,7 +581,7 @@ class gvplot_2Ddata_cartesian:
                 self.xmaxs=dxmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-            
+
                 dymin,dymax,dylocs,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                      self.yaxistype)
                 self.ymins=dymin
@@ -596,16 +596,16 @@ class gvplot_2Ddata_cartesian:
                 self.xmaxs=xmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-                    
+
                 dymin,dymax,dyspc,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                     self.yaxistype)
                 self.ymins=list(dymin)
                 self.ymaxs=list(dymax)
                 self.ylocs=list(dylocs)
                 self.yfmt=fmt
-                
+
         self.set_axis()
-        
+
     def set_axis(self):
         """ Set the default axis """
 
@@ -623,14 +623,14 @@ class gvplot_2Ddata_cartesian:
         leftlocs=[]
         rightlocs=[]
         ext=self.get_plot_extents(include_border=0)
-        
+
         for item in pxlocs:
             toplocs.append((item,ext[4]))
             bottomlocs.append((item,ext[1]))
         for item in pylocs:
             leftlocs.append((ext[0],item))
             rightlocs.append((ext[3],item))
-    
+
         # TO DO: add minor tics    
         new_axis_data['top']=self.axis_data['top']
         new_axis_data['top'].set_data(toplocs,list(self.xlocs),self.xfmt,
@@ -656,7 +656,7 @@ class gvplot_2Ddata_cartesian:
                                       (ext[3],ext[1],0),
                                       (ext[3],ext[4],0),
                                       ybreaks)
-        
+
         self.axis_data=new_axis_data
 
     #########################################################################
@@ -676,17 +676,17 @@ class gvplot_2Ddata_cartesian:
         self.label_data['xlabel'][1]=xlabel
         self.label_data['ylabel'][1]=ylabel
         self.label_data['title'][1]=title
-    
+
     def set_plot_extents(self,pxmin,pxmax,pymin,pymax):
         """ Set/Reset the extents covered by this plot in the view.
             Update labels, axis, data info.
         """
-        
+
         oldpxmin=self.pxmin
         oldpxmax=self.pxmax
         oldpymin=self.pymin
         oldpymax=self.pymax
-        
+
         self.pxmin=pxmin
         self.pxmax=pxmax
         self.pymin=pymin
@@ -712,7 +712,7 @@ class gvplot_2Ddata_cartesian:
                               self.axis_data[ckey].vtics[idx][1],
                               GVPLOT_AXISTYPE_LINEAR)
                 self.axis_data[ckey].vtics[idx]=(xnew,ynew,0)
-                
+
             for idx in range(len(self.axis_data[key].tics)):
                 xnew=DataToPlot1D(pxmin,pxmax,oldpxmin,oldpxmax,
                               self.axis_data[ckey].tics[idx][0],
@@ -730,7 +730,7 @@ class gvplot_2Ddata_cartesian:
                               self.axis_data[ckey].start[1],
                               GVPLOT_AXISTYPE_LINEAR)
                 self.axis_data[ckey].start=(xnew,ynew,0)
-                
+
             if self.axis_data[ckey].end is not None:
                 xnew=DataToPlot1D(pxmin,pxmax,oldpxmin,oldpxmax,
                               self.axis_data[ckey].end[0],
@@ -756,10 +756,10 @@ class gvplot_2Ddata_cartesian:
                         GVPLOT_AXISTYPE_LINEAR)
                     self.axis_data[ckey].breaks[idx]=((xnew1,ynew1,0),
                                                       (xnew2,ynew2,0))
-                
+
         if len(self.xmins) == 0:
             return
-        
+
         self.reset_axis()
 
     def get_extents(self):
@@ -777,15 +777,15 @@ class gvplot_2Ddata_cartesian:
         """
         if include_border == 1:
             return (self.pxmin,self.pymin,0,self.pxmax,self.pymax,0)
-        
+
         dxmin=self.pxmin+(self.pxmax-self.pxmin)*self.lborder
         dxmax=self.pxmax-(self.pxmax-self.pxmin)*self.rborder
         dymin=self.pymin+(self.pymax-self.pymin)*self.bborder
         dymax=self.pymax-(self.pymax-self.pymin)*self.tborder
-        
+
         return (dxmin,dymin,0,dxmax,dymax,0)
-        
-        
+
+
     def get_xyposition(self,x,y):
         """ Get the data position corresponding to GvViewPlot position x,y.
             x and y may be single values or same-length 1-D arrays.
@@ -802,7 +802,7 @@ class gvplot_2Ddata_cartesian:
 
         if type(y) == type(Numeric.array([])):
             y=Numeric.ravel(y)
-            
+
         x,xok=PlotToData1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=PlotToData1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
 
@@ -826,7 +826,7 @@ class gvplot_2Ddata_cartesian:
 
         if type(y) == type(Numeric.array([])):
             y=Numeric.ravel(y)
-            
+
         x,xok=DataToPlot1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=DataToPlot1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
 
@@ -842,7 +842,7 @@ class gvplot_2Ddata_cartesian:
 
             An error will be raised if there is no idx'th data array
             to plot.
-            
+
             Example properties:
             _line_color='1.0 0.0 0.0 1.0'
             _line_width='1.0'
@@ -852,18 +852,18 @@ class gvplot_2Ddata_cartesian:
 
     def set_axislayer_properties(self,props):
         """ Set the display properties of the axis layer
-        
+
             Example properties:
             _line_color='1.0 0.0 0.0 1.0'
             _line_width='1.0'
             _gl_antialias='1' (turn on display antialiasing)
-            
+
         """
         self.axis_layer_properties=props
 
     def set_label_color(self,color):
         """ Set label layer color to color. """
-        
+
         import gvogrfs
         cstr2=gvogrfs.gv_to_ogr_color(color)
         if len(cstr2) < 9:
@@ -882,7 +882,7 @@ class gvplot_2Ddata_cartesian:
                 ogrfs.remove_part('SYMBOL')
                 ogrfs.add_part(part)
             self.label_layer_properties['_gv_ogrfs_point']=ogrfs.unparse()
-             
+
     def set_axis_color(self,color):
         """ Set all axis and axis label colours to color.
             color is a tuple of 4 values, each between
@@ -928,7 +928,7 @@ class gvplot_2Ddata_cartesian:
                     ogrfs.remove_part('SYMBOL')
                     ogrfs.add_part(part)
                 caxis.tics_properties['_gv_ogrfs']=ogrfs.unparse()
-  
+
 
     def set_axis_properties(self,key,lprops,vprops,tprops):
         """ Set the properties of the shapes forming the axis
@@ -941,7 +941,7 @@ class gvplot_2Ddata_cartesian:
                 lprops- line properties (if different from layer default)
                 vprops- vtic properties
                 tprops- tic properties
-                
+
             Example properties: (defaults for left axis shown here)
             _gv_ogrfs='LABEL(c:#000000FF,'+\
             'f:"-adobe-helvetica-medium-r-*-*-15-*-*-*-*-*-*-*",
@@ -952,11 +952,11 @@ class gvplot_2Ddata_cartesian:
                   in CreateAxisLayer, so the t:{label} portion
                   of this should be left alone.
         """
-           
+
         self.axis_data[key].line_properties=lprops
         self.axis_data[key].vtics_properties=vprops
         self.axis_data[key].tics_properties=tprops
-        
+
 
     def set_border_padding(self,top,bottom,left,right):
         """ Set border padding as a fraction of the plot
@@ -986,12 +986,12 @@ class gvplot_2Ddata_cartesian:
             outer_props['_area_edge_color']='1.0 1.0 1.0 1.0'
             outer_props['_area_edge_width']='1.0'
             outer_props['_area_fill_color']='1.0 1.0 1.0 1.0'
-        
+
         """
         self.show_outer_border=show_outer
         if outer_props is not None:
             self.outer_border_props=outer_props
-            
+
         self.show_inner_border=show_inner
         if inner_props is not None:
             self.inner_border_props=inner_props
@@ -1022,7 +1022,7 @@ class gvplot_2Ddata_cartesian:
         else:
             self.legend_location=(self.lborder+0.05,
                                   1.0-self.tborder-0.1)
-            
+
     def add_axis(self,key,properties,start_tuple,end_tuple,breaks=None,
                  type=GVPLOT_AXIS_NOTICS):
         """ Add an axis (line):
@@ -1039,10 +1039,10 @@ class gvplot_2Ddata_cartesian:
                   with major tics but no labels, shown with major tics
                   and labels, shown with major tics and labels and minor
                   tics).
-                         
+
         """
         pass
-    
+
 
 class gvplot_3Ddata_cartesiangrid:
     """ Store an accumulation of _gvplot_arraydata instances,
@@ -1056,8 +1056,8 @@ class gvplot_3Ddata_cartesiangrid:
         """
         self.array_data=[]      # Data to plot
         self.array_layer_defaults=[]  # Data plotting properties
-                             
-        
+
+
         # Axis: zero or more axis/lines to create.  These are all put
         #       together in a single layer.  Layer-wide properties
         #       are stored in axis_layer_properties- use this to
@@ -1083,7 +1083,7 @@ class gvplot_3Ddata_cartesiangrid:
         self.axis_data['leftback']=gvplot_axis(GVPLOT_AXIS_NOTICS)
         self.axis_data['rightfront']=gvplot_axis(GVPLOT_AXIS_NOTICS)
         self.axis_data['rightback']=gvplot_axis(GVPLOT_AXIS_NOTICS)
-        
+
         # axis defaults
         self.axis_layer_properties={}
         self.axis_layer_properties['_gl_antialias']='1'
@@ -1097,7 +1097,7 @@ class gvplot_3Ddata_cartesiangrid:
         self.pzmin=pzmin
         self.pzmax=pzmax
         self.plot_label=plot_label
-        
+
         # left/right/top/bottom border padding
         self.lborder=DEFAULT_EDGE_PADDING
         self.rborder=DEFAULT_EDGE_PADDING
@@ -1122,7 +1122,7 @@ class gvplot_3Ddata_cartesiangrid:
         # defaults
         self.label_layer_properties['_gv_ogrfs_point']=\
              'LABEL(c:#000000FF,f:"'+DEFAULT_FONT+'",t:{label})'
-        
+
         x0=self.pxmin+(self.lborder/5.0)*(self.pxmax-self.pxmin)
         xm=(self.pxmax+self.pxmin)/2.0+self.lborder-self.rborder
         xf=self.pxmax-(self.rborder/5.0)*(self.pxmax-self.pxmin)
@@ -1142,7 +1142,7 @@ class gvplot_3Ddata_cartesiangrid:
         ########################
         # Specific properties. #
         ########################
-        
+
         # Each min/max pair corresponds to
         # a continous range in the plot axis
         # NOTE: In the log axis case, these still
@@ -1155,7 +1155,7 @@ class gvplot_3Ddata_cartesiangrid:
         self.xmaxs=[]
         self.xloc=None   # Major xtic locations (data coordinates)
         self.xfmt="%g"   # Formatting string for tic labels
-        
+
         self.ymins=[]
         self.ymaxs=[]
         self.yloc=None   # Major ytic locations (data coordinates)
@@ -1165,7 +1165,7 @@ class gvplot_3Ddata_cartesiangrid:
         self.zmaxs=[]
         self.zloc=None   # Major ztic locations (data coordinates)
         self.zfmt="%g"
-        
+
         self.xaxistype=GVPLOT_AXISTYPE_LINEAR
         self.yaxistype=GVPLOT_AXISTYPE_LINEAR
         self.zaxistype=GVPLOT_AXISTYPE_LINEAR
@@ -1179,21 +1179,21 @@ class gvplot_3Ddata_cartesiangrid:
 
     def create_layers(self):
         """ Create layers """
-        
+
         ll=[]
         self.DataLayers=[]
         for idx in range(len(self.array_data)):
             self.DataLayers.append(CreateGridArrayDataLayer(self,idx))
         ll.extend(self.DataLayers)
-        
+
         self.AxisLayer=CreateAxisLayer(self)
         if ll is not None:
             ll.append(self.AxisLayer)
-            
+
         self.LabelLayer=CreateLabelLayer(self)
         if self.LabelLayer is not None:
             ll.append(self.LabelLayer)
-            
+
         return ll
 
     def get_layer(self,ltype=GVPLOT_DATA_LAYER,idx=0):
@@ -1235,21 +1235,21 @@ class gvplot_3Ddata_cartesiangrid:
             return self.LabelLayer
         else:
             raise RuntimeError,'create_layer: Invalid layer type'
-        
-            
+
+
 
     def get_layers(self):
         """ Return all layers that have been created, but don't
             create new ones.
         """
-            
+
         ll.extend(self.DataLayers)
         if self.AxisLayer is not None:
             ll.append(self.AxisLayer)
-        
+
         if self.LabelLayer is not None:
             ll.append(self.LabelLayer)
-        
+
         return ll
 
     def set_extents(self,xmin=None,xmax=None,xspc=None,nxtics=0,
@@ -1261,7 +1261,7 @@ class gvplot_3Ddata_cartesiangrid:
             an array of the same length, and vice versa (same for
             ymin/ymax).  Each xmin/xmax pair represents one continuous
             range of values to plot.
-            
+
             xmin- minimum in x direction (None, single value, or array)
             ymin- minimum in y direction (None, single value, or array)
             zmin- minimum in z direction (None, single value, or array)
@@ -1279,7 +1279,7 @@ class gvplot_3Ddata_cartesiangrid:
                   to 0.16, etc.; 0 if plot must not alter the values.
                   Defaults to 1.
             """
-        
+
         if len(self.array_data) > 0:
             if xmin is None:
                 xmin=self.array_data[0].xmin
@@ -1310,7 +1310,7 @@ class gvplot_3Ddata_cartesiangrid:
                 zmax=self.array_data[0].zmax
                 for item in self.array_data[1:]:
                     zmax=max([zmax,item.zmax])
-                    
+
             if nice == 1:
                 dxmin,dxmax,dxlocs,fmt=GetNiceMinMax(xmin,xmax,xspc,
                                                      self.xaxistype)
@@ -1318,14 +1318,14 @@ class gvplot_3Ddata_cartesiangrid:
                 self.xmaxs=dxmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-            
+
                 dymin,dymax,dylocs,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                      self.yaxistype)
                 self.ymins=dymin
                 self.ymaxs=dymax
                 self.ylocs=dylocs
                 self.yfmt=fmt
-                
+
                 dzmin,dzmax,dzlocs,fmt=GetNiceMinMax(zmin,zmax,zspc,
                                                      self.zaxistype)
                 self.zmins=dzmin
@@ -1345,34 +1345,34 @@ class gvplot_3Ddata_cartesiangrid:
                     self.xmaxs=xmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-                    
+
                 dymin,dymax,dyspc,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                     self.yaxistype)
                 if type(ymin) not in [type([]),type((1,))]:
                     self.ymins=[ymin]
                 else:
                     self.ymins=ymin
-                    
+
                 if type(ymax) not in [type([]),type((1,))]:
                     self.ymaxs=[ymax]
                 else:
                     self.ymaxs=ymax
-                    
+
                 self.ylocs=dylocs
                 self.yfmt=fmt
-                    
+
                 dzmin,dzmax,dzspc,fmt=GetNiceMinMax(zmin,zmax,zspc,
                                                     self.zaxistype)
                 if type(zmin) not in [type([]),type((1,))]:
                     self.zmins=[zmin]
                 else:
                     self.zmins=zmin
-                    
+
                 if type(zmax) not in [type([]),type((1,))]:
                     self.zmaxs=[zmax]
                 else:
                     self.zmaxs=zmax
-                    
+
                 self.zlocs=dzlocs
                 self.zfmt=fmt                
         else:
@@ -1388,14 +1388,14 @@ class gvplot_3Ddata_cartesiangrid:
                 self.xmaxs=dxmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-            
+
                 dymin,dymax,dylocs,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                      self.yaxistype)
                 self.ymins=dymin
                 self.ymaxs=dymax
                 self.ylocs=dylocs
                 self.yfmt=fmt
-            
+
                 dzmin,dzmax,dzlocs,fmt=GetNiceMinMax(zmin,zmax,zspc,
                                                      self.zaxistype)
                 self.zmins=dzmin
@@ -1410,7 +1410,7 @@ class gvplot_3Ddata_cartesiangrid:
                 self.xmaxs=xmax
                 self.xlocs=dxlocs
                 self.xfmt=fmt
-                    
+
                 dymin,dymax,dyspc,fmt=GetNiceMinMax(ymin,ymax,yspc,
                                                     self.yaxistype)
                 self.ymins=list(dymin)
@@ -1424,9 +1424,9 @@ class gvplot_3Ddata_cartesiangrid:
                 self.zmaxs=list(dzmax)
                 self.zlocs=list(dzlocs)
                 self.zfmt=fmt
-                                
+
         self.set_axis()
-        
+
     def set_axis(self):
         """ Set the default axis """
 
@@ -1449,7 +1449,7 @@ class gvplot_3Ddata_cartesiangrid:
         frontlocs=[]
         backlocs=[]
         ext=self.get_plot_extents(include_border=0)
-        
+
         for item in pxlocs:
             backlocs.append((item,ext[4]))
             frontlocs.append((item,ext[1]))
@@ -1459,7 +1459,7 @@ class gvplot_3Ddata_cartesiangrid:
         for item in pzlocs:
             bottomlocs.append((ext[2],item))
             toplocs.append((ext[5],item))
-    
+
         # TO DO: add minor tics    
         new_axis_data['topleft']=self.axis_data['topleft']
         new_axis_data['topleft'].set_data(toplocs,list(self.xlocs),self.xfmt,
@@ -1540,7 +1540,7 @@ class gvplot_3Ddata_cartesiangrid:
                                       (ext[3],ext[4],ext[2]),
                                       (ext[3],ext[4],ext[5]),
                                       ybreaks)
-        
+
         self.axis_data=new_axis_data
 
     #########################################################################
@@ -1561,19 +1561,19 @@ class gvplot_3Ddata_cartesiangrid:
         self.label_data['ylabel'][1]=ylabel
         self.label_data['zlabel'][1]=zlabel
         self.label_data['title'][1]=title
-    
+
     def set_plot_extents(self,pxmin,pxmax,pymin,pymax,pzmin,pzmax):
         """ Set/Reset the extents covered by this plot in the view.
             Update labels, axis, data info.
         """
-        
+
         oldpxmin=self.pxmin
         oldpxmax=self.pxmax
         oldpymin=self.pymin
         oldpymax=self.pymax
         oldpzmin=self.pzmin
         oldpzmax=self.pzmax
-        
+
         self.pxmin=pxmin
         self.pxmax=pxmax
         self.pymin=pymin
@@ -1607,7 +1607,7 @@ class gvplot_3Ddata_cartesiangrid:
                               self.axis_data[ckey].vtics[idx][2],
                               GVPLOT_AXISTYPE_LINEAR)
                 self.axis_data[ckey].vtics[idx]=(xnew,ynew,znew)
-                
+
             for idx in range(len(self.axis_data[key].tics)):
                 xnew=DataToPlot1D(pxmin,pxmax,oldpxmin,oldpxmax,
                               self.axis_data[ckey].tics[idx][0],
@@ -1631,7 +1631,7 @@ class gvplot_3Ddata_cartesiangrid:
                               self.axis_data[ckey].start[2],
                               GVPLOT_AXISTYPE_LINEAR)
                 self.axis_data[ckey].start=(xnew,ynew,znew)
-                
+
             if self.axis_data[ckey].end is not None:
                 xnew=DataToPlot1D(pxmin,pxmax,oldpxmin,oldpxmax,
                               self.axis_data[ckey].end[0],
@@ -1666,10 +1666,10 @@ class gvplot_3Ddata_cartesiangrid:
                         GVPLOT_AXISTYPE_LINEAR)
                     self.axis_data[ckey].breaks[idx]=((xnew1,ynew1,znew1),
                                                       (xnew2,ynew2,znew2))
-                
+
         if len(self.xmins) == 0:
             return
-        
+
         self.reset_axis()
 
     def get_extents(self):
@@ -1685,17 +1685,17 @@ class gvplot_3Ddata_cartesiangrid:
         if include_border == 1:
             return (self.pxmin,self.pymin,self.pzmin,self.pxmax,self.pymax,
                     self.pzmax)
-        
+
         dxmin=self.pxmin+(self.pxmax-self.pxmin)*self.lborder
         dxmax=self.pxmax-(self.pxmax-self.pxmin)*self.rborder
         dymin=self.pymin+(self.pymax-self.pymin)*self.fborder
         dymax=self.pymax-(self.pymax-self.pymin)*self.bkborder
         dzmin=self.pzmin+(self.pzmax-self.pzmin)*self.bborder
         dzmax=self.pzmax-(self.pzmax-self.pzmin)*self.tborder
-        
+
         return (dxmin,dymin,dzmin,dxmax,dymax,dzmax)
-        
-        
+
+
     def get_xyposition(self,x,y,z):
         """ Get the data position corresponding to GvViewPlot position x,y,z.
             x, y and z may be single values or same-size arrays.
@@ -1719,7 +1719,7 @@ class gvplot_3Ddata_cartesiangrid:
 
         if type(y) == type(Numeric.array([])):
             z=Numeric.ravel(z)
-            
+
         x,xok=PlotToData1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=PlotToData1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
         z,zok=PlotToData1D(dzmin,dzmax,self.zmins,self.zmaxs,z,self.zaxistype)
@@ -1759,7 +1759,7 @@ class gvplot_3Ddata_cartesiangrid:
 
         if type(y) == type(Numeric.array([])):
             z=Numeric.ravel(z)
-            
+
         x,xok=DataToPlot1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=DataToPlot1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
         z,zok=DataToPlot1D(dzmin,dzmax,self.zmins,self.zmaxs,z,self.zaxistype)
@@ -1784,7 +1784,7 @@ class gvplot_3Ddata_cartesiangrid:
 
             An error will be raised if there is no idx'th data array
             to plot.
-            
+
             Example properties:
             _area_fill_color='1.0 0.0 0.0 1.0'
             _area_edge_color='1.0'
@@ -1794,18 +1794,18 @@ class gvplot_3Ddata_cartesiangrid:
 
     def set_axislayer_properties(self,props):
         """ Set the display properties of the axis layer
-        
+
             Example properties:
             _line_color='1.0 0.0 0.0 1.0'
             _line_width='1.0'
             _gl_antialias='1' (turn on display antialiasing)
-            
+
         """
         self.axis_layer_properties=props
 
     def set_label_color(self,color):
         """ Set label layer color to color. """
-        
+
         import gvogrfs
         cstr2=gvogrfs.gv_to_ogr_color(color)
         if len(cstr2) < 9:
@@ -1824,7 +1824,7 @@ class gvplot_3Ddata_cartesiangrid:
                 ogrfs.remove_part('SYMBOL')
                 ogrfs.add_part(part)
             self.label_layer_properties['_gv_ogrfs_point']=ogrfs.unparse()
-             
+
     def set_axis_color(self,color):
         """ Set all axis and axis label colours to color.
             color is a tuple of 4 values, each between
@@ -1870,7 +1870,7 @@ class gvplot_3Ddata_cartesiangrid:
                     ogrfs.remove_part('SYMBOL')
                     ogrfs.add_part(part)
                 caxis.tics_properties['_gv_ogrfs']=ogrfs.unparse()
-  
+
 
     def set_axis_properties(self,key,lprops,vprops,tprops):
         """ Set the properties of the shapes forming the axis
@@ -1883,7 +1883,7 @@ class gvplot_3Ddata_cartesiangrid:
                 lprops- line properties (if different from layer default)
                 vprops- vtic properties
                 tprops- tic properties
-                
+
             Example properties: (defaults for left axis shown here)
             _gv_ogrfs='LABEL(c:#000000FF,'+\
             'f:"-adobe-helvetica-medium-r-*-*-15-*-*-*-*-*-*-*",
@@ -1894,11 +1894,11 @@ class gvplot_3Ddata_cartesiangrid:
                   in CreateAxisLayer, so the t:{label} portion
                   of this should be left alone.
         """
-           
+
         self.axis_data[key].line_properties=lprops
         self.axis_data[key].vtics_properties=vprops
         self.axis_data[key].tics_properties=tprops
-        
+
 
     def set_border_padding(self,top,bottom,left,right,front,back):
         """ Set border padding as a fraction of the plot
@@ -1945,10 +1945,10 @@ class gvplot_3Ddata_cartesiangrid:
                   with major tics but no labels, shown with major tics
                   and labels, shown with major tics and labels and minor
                   tics).
-                         
+
         """
         pass
-    
+
 
 class gvplot_layer_defaults:
     def __init__(self,label="",properties=None,interactive=0):
@@ -1963,7 +1963,7 @@ class gvplot_layer_defaults:
             self.properties['_line_width']='1'
             self.properties['_line_color']='1.0 0.0 0.0 1.0'
             self.properties['_gl_antialias']='1'
-            
+
         self.label=label
 
         # interactive: 1 if user should be able to edit
@@ -2009,15 +2009,15 @@ class gvplot_array_cartesian:
 
             self.xarr=Numeric.compress(okarr==1,xarr)
             self.yarr=Numeric.compress(okarr==1,yarr)
-        
+
             if zarr is not None:
                 self.zarr=Numeric.compress(okarr==1,zarr)
-        
+
             self.xmin=min(self.xarr)
             self.xmax=max(self.xarr)
             self.ymin=min(self.yarr)
             self.ymax=max(self.yarr)
-        
+
             if zarr is not None:
                 self.zmin=min(self.zarr)
                 self.zmax=max(self.zarr)
@@ -2038,7 +2038,7 @@ class gvplot_array_cartesian:
             if zarr is not None:
                 self.zmin=min(self.zarr[0])
                 self.zmax=max(self.zarr[0])
-                
+
             for idx in range(1,len(xarr)):
                 self.xmin=min(min(self.xarr[idx]),self.xmin)
                 self.xmax=max(max(self.xarr[idx]),self.xmax)
@@ -2047,7 +2047,7 @@ class gvplot_array_cartesian:
                 if zarr is not None:
                     self.zmin=min(min(self.zarr[idx]),self.zmin)
                     self.zmax=max(max(self.zarr[idx]),self.zmax)
-                
+
 
 
 class gvplot_grid_cartesian:
@@ -2066,12 +2066,12 @@ class gvplot_grid_cartesian:
             self.xarr=xarr
             self.yarr=yarr
             self.zarr=zarr
-        
+
             self.xmin=min(Numeric.ravel(self.xarr))
             self.xmax=max(Numeric.ravel(self.xarr))
             self.ymin=min(Numeric.ravel(self.yarr))
             self.ymax=max(Numeric.ravel(self.yarr))
-        
+
             if zarr is not None:
                 self.zmin=min(Numeric.ravel(self.zarr))
                 self.zmax=max(Numeric.ravel(self.zarr))
@@ -2079,12 +2079,12 @@ class gvplot_grid_cartesian:
                 self.zarr=None
                 self.zmin=None
                 self.zmax=None
-                
+
         elif type(xarr) == type([1,2]):
             self.xarr=xarr
             self.yarr=yarr
             self.zarr=zarr
- 
+
             self.xmin=min(Numeric.ravel(self.xarr[0]))
             self.xmax=max(Numeric.ravel(self.xarr[0]))
             self.ymin=min(Numeric.ravel(self.yarr[0]))
@@ -2092,7 +2092,7 @@ class gvplot_grid_cartesian:
             if zarr is not None:
                 self.zmin=min(Numeric.ravel(self.zarr[0]))
                 self.zmax=max(Numeric.ravel(self.zarr[0]))
-                
+
             for idx in range(1,len(xarr)):
                 self.xmin=min(min(Numeric.ravel(self.xarr[idx])),self.xmin)
                 self.xmax=max(max(Numeric.ravel(self.xarr[idx])),self.xmax)
@@ -2101,7 +2101,7 @@ class gvplot_grid_cartesian:
                 if zarr is not None:
                     self.zmin=min(Numeric.ravel(min(self.zarr[idx])),self.zmin)
                     self.zmax=max(Numeric.ravel(max(self.zarr[idx])),self.zmax)
-                
+
 
 
 class gvplot_axis:
@@ -2116,7 +2116,7 @@ class gvplot_axis:
 
         self.vtics_properties={}
         self.tics_properties={}
-        
+
         # Tic label/format defaults, except for label text
         # (determined by plotting functions).
         self.vtics_properties['_gv_ogrfs']='LABEL(c:#000000FF,'+\
@@ -2128,9 +2128,9 @@ class gvplot_axis:
         # Axis line properties (color, etc) if different from overall
         # axis layer default
         self.line_properties={}
-        
+
         # Properties calculated by plotting object
-        
+
         # major tics (bigger, may have values)
         self.vtics=[]   # xyz locations in view coords.
         self.vtics_labels=[] # text for labels
@@ -2168,10 +2168,10 @@ class gvplot_axis:
 
 def CreateAxisLayer(plot_data,name=None):
     """ Create Axis and lines (including tics and axis numbering) """
-    
+
     if name is None:
         name=plot_data.plot_label+' '+GVPLOT_AXIS_LAYER
-        
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes)
     for caxis in plot_data.axis_data.values():
@@ -2183,7 +2183,7 @@ def CreateAxisLayer(plot_data,name=None):
             shp=gview.GvShape(type=gview.GVSHAPE_LINE)
             shp.set_node(x0,y0,z0,0)
             shp.set_node(xf,yf,zf,1)
-            
+
             shapes.append(shp)
         else:
             last_x=x0
@@ -2199,10 +2199,10 @@ def CreateAxisLayer(plot_data,name=None):
                 last_y = y0 + btuple[1]*(yf-y0)
                 last_z = z0 + btuple[1]*(zf-z0)
                 shapes.append(shp)
-                
+
         if caxis.display_type == GVPLOT_AXIS_NOTICS:
             continue
-        
+
         for idx in range(len(caxis.vtics)):
             shp=gview.GvShape(type=gview.GVSHAPE_POINT)
             shp.set_node(caxis.vtics[idx][0],caxis.vtics[idx][1])
@@ -2213,10 +2213,10 @@ def CreateAxisLayer(plot_data,name=None):
                 shp.set_property(ckey,
                   caxis.vtics_properties[ckey])
             shapes.append(shp)
-            
+
         if caxis.display_type != GVPLOT_AXIS_VTICSLABELSTICS:
             continue
-        
+
         for idx in range(len(caxis.tics)):
             shp=gview.GvShape(type=gview.GVSHAPE_POINT)
             shp.set_node(caxis.tics[idx][0],caxis.tics[idx][1])
@@ -2230,20 +2230,20 @@ def CreateAxisLayer(plot_data,name=None):
 
     for ckey in plot_data.axis_layer_properties.keys():
         layer.set_property(ckey,plot_data.axis_layer_properties[ckey])
-        
+
     return layer
 
-        
+
 def Create2DBorderLayer(plot_data,name=None):
     """ Create the plot background. """
 
     if ((plot_data.show_inner_border == 0) and
         (plot_data.show_outer_border == 0)):
         return None
-    
+
     if name is None:
         name=plot_data.plot_label+' '+GVPLOT_BORDER_LAYER
-        
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes)
     inner=plot_data.get_plot_extents(include_border=0)
@@ -2284,10 +2284,10 @@ def Create2DBorderLayer(plot_data,name=None):
 
 def CreateLabelLayer(plot_data,name=None):
     """ Create annotation (label) layer. """
-    
+
     if name is None:
         name=plot_data.plot_label+' '+GVPLOT_LABEL_LAYER
-        
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes)
     for item in plot_data.label_data.values():
@@ -2314,14 +2314,14 @@ def Create2DLegendLayer(plot_data,name=None):
 
     if plot_data.show_legend == 0:
         return None
-    
+
     if name is None:
         name=plot_data.plot_label+' '+GVPLOT_LEGEND_LAYER
-            
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes)
     ext=plot_data.get_plot_extents(include_border=1)
-    
+
     xrng=ext[3]-ext[0]
     yrng=ext[4]-ext[1]
     x0 = plot_data.legend_location[0]*xrng+ext[0]
@@ -2333,14 +2333,14 @@ def Create2DLegendLayer(plot_data,name=None):
             color=item.properties['_line_color']
         except:
             continue
-        
+
         tmp=string.split(color)
         rgba=[]
         for tmp2 in tmp:
             rgba.append(float(tmp2))
 
         cstr=gvogrfs.gv_to_ogr_color(rgba)
-            
+
         if (item.label is not None) and (len(item.label) > 0):
             dshp=gview.GvShape(type=gview.GVSHAPE_POINT)
             dshp.set_node(x0,y0)
@@ -2348,7 +2348,7 @@ def Create2DLegendLayer(plot_data,name=None):
               ',t:"'+item.label+'",f:"'+DEFAULT_FONT+'")')
             shapes.append(dshp)
 
-            
+
         y0=y0-0.1*yrng                
         idx=idx+1
 
@@ -2361,7 +2361,7 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
         name- layer name (if set to None, the layer name
               will be 'Data: '+plot_data.array_layer_defaults.label)
     """
-   
+
     if index > len(plot_data.array_data)-1:
         raise RuntimeError,'Create Data Layer: invalid data index!'
 
@@ -2371,10 +2371,10 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
               plot_data.array_layer_defaults[index].label
         else:
             name=plot_data.plot_label+GVPLOT_DATA_LAYER+' '+str(index)
-            
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes) 
-    
+
     if type(plot_data.array_data[index].xarr) == type([]):
         xinlist=plot_data.array_data[index].xarr
         yinlist=plot_data.array_data[index].yarr
@@ -2383,10 +2383,10 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
         xinlist=[plot_data.array_data[index].xarr]
         yinlist=[plot_data.array_data[index].yarr]
         zinlist=[plot_data.array_data[index].zarr]
-        
+
     ext=plot_data.get_plot_extents(include_border=0)
     okinlist=[]
-    
+
     for idx in range(len(xinlist)):
         xarr,xok=DataToPlot1D(ext[0],ext[3],
                               plot_data.xmins,plot_data.xmaxs,
@@ -2399,7 +2399,7 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
                               plot_data.yaxistype)
 
         okarr=Numeric.where(yok == 0,0,xok)
-    
+
         zarr,zok=DataToPlot1D(ext[2],ext[5],
                               plot_data.zmins,plot_data.zmaxs,
                               zinlist[idx],
@@ -2442,13 +2442,13 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
                     #lshp.add_node(xarr[idx,idx2],yarr[idx,idx2],
                     #              zarr[idx,idx2])
                     #shapes.append(lshp)
-    
+
     for ckey in plot_data.array_layer_defaults[index].properties.keys():
         layer.set_property(ckey,
               plot_data.array_layer_defaults[index].properties[ckey])
 
     return layer
-            
+
 
 def CreateArrayDataLayer(plot_data,index,name=None):
     """ Create a data layer.
@@ -2457,7 +2457,7 @@ def CreateArrayDataLayer(plot_data,index,name=None):
         name- layer name (if set to None, the layer name
               will be 'Data: '+plot_data.array_layer_defaults.label)
     """
-   
+
     if index > len(plot_data.array_data)-1:
         raise RuntimeError,'Create Data Layer: invalid data index!'
 
@@ -2467,13 +2467,13 @@ def CreateArrayDataLayer(plot_data,index,name=None):
               plot_data.array_layer_defaults[index].label
         else:
             name=plot_data.plot_label+GVPLOT_DATA_LAYER+' '+str(index)
-            
+
     shapes=gview.GvShapes(name=name)
     layer=gview.GvShapesLayer(shapes=shapes) 
 
     ext=plot_data.get_plot_extents(include_border=0)
     okinlist=[]
-    
+
     if type(plot_data.array_data[index].xarr) == type([]):
         xinlist=plot_data.array_data[index].xarr
         yinlist=plot_data.array_data[index].yarr
@@ -2497,7 +2497,7 @@ def CreateArrayDataLayer(plot_data,index,name=None):
                               plot_data.yaxistype)
 
         okarr=Numeric.where(yok == 0,0,xok)
-    
+
         if plot_data.array_data[index].zarr is not None:
             zarr,zok=DataToPlot1D(ext[2],ext[5],
                                 plot_data.zmins,plot_data.zmaxs,
@@ -2525,10 +2525,10 @@ def CreateArrayDataLayer(plot_data,index,name=None):
         #            shapes.append(lshp)
         #            lshp=gview.GvShape(type=gview.GVSHAPE_LINE)
         #            last_valid=0
-              
+
     #if last_valid == 1:
     #    shapes.append(lshp)
-    
+
     for ckey in plot_data.array_layer_defaults[index].properties.keys():
         layer.set_property(ckey,
               plot_data.array_layer_defaults[index].properties[ckey])
@@ -2574,7 +2574,7 @@ class GvSimplePlot(gview.GvViewArea):
         self.bborder=bottom
         self.lborder=left
         self.rborder=right
-        
+
     def oplot(self, yarr=None, xarr=None, xmin=None,xmax=None,xspc=None,
               ymin=None, ymax=None, yspc=None,datalabel=None,
               color=(0.0,0.0,1.0,1.0),drawstyle='_', reset_extents=1,
@@ -2628,7 +2628,7 @@ class GvSimplePlot(gview.GvViewArea):
         elif dim != 1:
             raise ValueError,\
                   "data argument dimension or shape is not supported."
-    
+
         if xarr is None:
             xarr=Numeric.array(range(len(yarr)))
 
@@ -2659,13 +2659,13 @@ class GvSimplePlot(gview.GvViewArea):
         xsize=float(self.get_width())
         ysize=float(self.get_height())
         self.fit_extents(0.0,0.0,1.0,ysize/xsize)
-        
+
     def plot(self,yarr=None,xarr=None, xlabel=None, ylabel=None, xmin=None,
              xmax=None,xspc=None,ymin=None, ymax=None, yspc=None,
              title=None,datalabel=None,
              color=(1.0,0.0,0.0,1.0),drawstyle='_',interactive=0):
         """ Simple 2-D plot """
-        
+
         if yarr is None:
             print 'Usage: plot(yarr,[,xarr][, xlabel=text] [,ylabel=text]'
             print '                 [,xmin=n][, xmax=n][, xspc=n][, ymin=n]'
@@ -2729,7 +2729,7 @@ class GvSimplePlot(gview.GvViewArea):
                                   ymax=ymax,xspc=xspc,yspc=yspc)
 
         self.plots[0].set_labels(xlabel,ylabel,title)
-        
+
         if self.bgcolor == (0.0,0.0,0.0,1.0):
             self.plots[0].set_axis_color((1.0,1.0,1.0,1.0))
             self.plots[0].set_label_color((1.0,1.0,1.0,1.0))
@@ -2745,7 +2745,7 @@ class GvSimplePlot(gview.GvViewArea):
         xsize=float(self.get_width())
         ysize=float(self.get_height())
         self.fit_extents(0.0,0.0,1.0,ysize/xsize)
-        
+
     def plot3D(self,xarr,yarr,zarr):
         """ Simple 3-D plot """
         self.set_mode(gview.MODE_3D)
@@ -2764,10 +2764,10 @@ class GvSimplePlot(gview.GvViewArea):
         self.plots[0].add_data(xarr,yarr,zarr,'',props)
         self.plots[0].set_extents()
         #self.plots[0].set_labels(xlabel,ylabel,title)
-        
+
         self.plots[0].set_axis_color((0.0,0.0,0.0,1.0))
         self.plots[0].set_label_color((0.0,0.0,0.0,1.0))
-            
+
         ll=self.plots[0].create_layers()
         for item in ll:
             self.add_layer(item)
@@ -2783,12 +2783,12 @@ class GvSimplePlot(gview.GvViewArea):
         xsize=float(self.get_width())
         ysize=float(self.get_height())
         self.plot.set_plot_extents(0.0,0.0,1.0,ysize/xsize)
-        
+
         ll=self.plots[0].create_layers()
         for item in ll:
             self.add_layer(item)        
 
-        
+
     def begin_plot(self,xlabel=None,ylabel=None,title=None):
         """ Begin constructing a plot (use to construct a plot
             without displaying at each iteration).
@@ -2803,7 +2803,7 @@ class GvSimplePlot(gview.GvViewArea):
                                          self.lborder,self.rborder)
 
         self.plots[0].set_labels(xlabel,ylabel,title)
-        
+
         if self.bgcolor == (0.0,0.0,0.0,1.0):
             self.plots[0].set_axis_color((1.0,1.0,1.0,1.0))
             self.plots[0].set_label_color((1.0,1.0,1.0,1.0))
@@ -2822,14 +2822,14 @@ class GvSimplePlot(gview.GvViewArea):
         yrng=ext[4]-ext[1]
         xold=self.plots[plot_idx].label_data[label_key][0][0]
         yold=self.plots[plot_idx].label_data[label_key][0][1]
-        
+
         self.plots[plot_idx].label_data[label_key][0]=(xold+xytuple[0]*xrng,
                                                yold+xytuple[1]*yrng,
                                                0)
 
     def add_data(self, xarr=None, yarr=None,datalabel=None,
               color=(0.0,0.0,1.0,1.0),drawstyle='_', interactive=0):
-            
+
         try:
             dshape = Numeric.shape( xarr )
             dshape = Numeric.shape( yarr )
@@ -2846,7 +2846,7 @@ class GvSimplePlot(gview.GvViewArea):
         elif dim != 1:
             raise ValueError,\
                   "data argument dimension or shape is not supported."
-    
+
         if xarr is None:
             xarr=Numeric.array(range(len(yarr)))
 
@@ -2856,11 +2856,11 @@ class GvSimplePlot(gview.GvViewArea):
         props['_line_color']=cstr
         props['_gl_antialias']='1'
         self.plots[0].add_data(xarr,yarr,datalabel,props,interactive)
-                    
+
 
     def end_plot(self,xmin=None,xmax=None,ymin=None,ymax=None,
                  xtics=None,ytics=None,with_legend=0):
-        
+
         self.plots[0].set_extents(xmin=xmin,xmax=xmax,ymin=ymin,
                                   ymax=ymax)
         xspc=None
@@ -2881,7 +2881,7 @@ class GvSimplePlot(gview.GvViewArea):
                     min_diff=abs(xspc-nspc)
                     spc=nspc
             xspc=spc
-            
+
         if ytics is not None:
             # Currently this will only work for continuous
             # plots.
@@ -2898,13 +2898,13 @@ class GvSimplePlot(gview.GvViewArea):
                     min_diff=abs(yspc-nspc)
                     spc=nspc
             yspc=spc
-            
+
         self.plots[0].set_extents(xmin=xmin,xmax=xmax,ymin=ymin,
                                   ymax=ymax,xspc=xspc,yspc=yspc)
 
         if with_legend == 1:
             self.plots[0].set_legend()
-            
+
         ll=self.plots[0].create_layers()
         for item in ll:
             self.add_layer(item)
@@ -2921,7 +2921,7 @@ class GvSimplePlot(gview.GvViewArea):
                y- y value(s)
                plotidx- index of plot to use in conversion, if more than
                         one plot is present in the view area.
-                        
+
             x and y may be single values or same-length 1-D arrays.
 
             Output:
@@ -2937,13 +2937,13 @@ class GvSimplePlot(gview.GvViewArea):
     def get_plotposition(self,x,y,plotidx=0):
         """ Get the GvViewPlot position corresponding to data position x,y
             for plot plotidx.
-            
+
             Input:
                x- x value(s)
                y- y value(s)
                plotidx- index of plot to use in conversion, if more than
                         one plot is present in the view area.
-                        
+
             x and y may be single values or same-length 1-D arrays.
 
             Output:
@@ -2955,7 +2955,7 @@ class GvSimplePlot(gview.GvViewArea):
         x,y,okarr=self.plots[plotidx].get_plotposition(x,y)
 
         return (x,y,okarr)
-    
+
     def clear_layers(self):
         """ Remove all layers. """
 
@@ -2967,12 +2967,12 @@ class GvSimplePlot(gview.GvViewArea):
 
         for clayer in self.list_layers():
             self.remove_layer(clayer)
-            
+
         self.plots=[]
 
 
 class GvSimplePlotWindow(gtk.Window):
-    
+
     def __init__(self,bgcolor=(1.0,1.0,1.0,1.0)):
         gtk.Window.__init__(self)
         self.plotarea=GvSimplePlot(bgcolor=bgcolor)
@@ -3043,22 +3043,22 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
 
     # First check for length 1 case and do quick
     # transform and return if it is; otherwise, continue.
-        
+
     if len(dmins) == 1:
         # Only one continuous range
         if axistype == GVPLOT_AXISTYPE_LINEAR:
             ppos=((float(pmax)-float(pmin))/
                   (float(dmaxs[0])-float(dmins[0])))*\
                   (dpos-float(dmins[0]))+float(pmin)
-            
+
             okarr=Numeric.where(ppos >= pmin,1,0)
             okarr=Numeric.where(ppos <= pmax,okarr,0)            
-            
+
         elif axistype == GVPLOT_AXISTYPE_LOG:
             # Make sure logs don't choke
             okarr=Numeric.where(dpos > 0,1,0)
             dpos=Numeric.where(okarr == 0,1,dpos)
-            
+
             ppos=(((float(pmax)-float(pmin))/float(Numeric.log10(dmaxs[0])-
                                           Numeric.log10(dmins[0])))*\
                   (Numeric.log10(dpos)-Numeric.log10(dmins[0])))+pmin
@@ -3069,10 +3069,10 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
             okarr=okarr[0]
 
         return (ppos,okarr)
-            
+
     dmaxs=Numeric.array(dmaxs,Numeric.Float64)
     dmins=Numeric.array(dmins,Numeric.Float64)
-    
+
     if axistype == GVPLOT_AXISTYPE_LINEAR:    
         dwidtharr=Numeric.ravel(dmaxs-dmins)
         dwidth=Numeric.sum(dwidtharr)
@@ -3082,7 +3082,7 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
 
         ppos=Numeric.zeros((len(dpos),),Numeric.Float64)
         okarr=Numeric.zeros((len(dpos),),Numeric.Float64)
-        
+
         for idx in range(len(dmins)):
             sc=Numeric.where(dpos >= dmins[idx],1,0)
             sc=Numeric.where(dpos <= dmaxs[idx],1,sc)
@@ -3091,7 +3091,7 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
 
             ppos=ppos+(sc*(prng[idx]+((prng[idx+1]-prng[idx])*
                      (dpos-dmins[idx])/(dmaxs[idx+1]-dmins[idx]))))
-    
+
     elif axistype == GVPLOT_AXISTYPE_LOG:
         dmaxs=Numeric.log10(dmaxs)
         dmins=Numeric.log10(dmins)
@@ -3099,9 +3099,9 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
         # Make sure logs don't choke
         okarrmask=Numeric.where(dpos > 0,1,0)
         dpos=Numeric.where(okarrmask == 0,1,dpos)
-        
+
         dpos=Numeric.log10(dpos)
-        
+
         dwidtharr=Numeric.ravel(dmaxs-dmins)
         dwidth=Numeric.sum(dwidtharr)
         dcsum=Numeric.cumsum(dwidtharr)
@@ -3110,7 +3110,7 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
 
         ppos=Numeric.zeros((len(dpos),),Numeric.Float64)
         okarr=Numeric.zeros((len(dpos),),Numeric.Float64)
-        
+
         for idx in range(len(dmins)):
             sc=Numeric.where(dpos >= dmins[idx],1,0)
             sc=Numeric.where(dpos <= dmaxs[idx],1,sc)
@@ -3121,7 +3121,7 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
                      (dpos-dmins[idx])/(dmaxs[idx+1]-dmins[idx]))))
 
         okarr=okarr*okarrmask
-        
+
     if ptype not in [type(Numeric.array([])),type((1,)),type([])]:
         okarr=okarr[0]
 
@@ -3154,7 +3154,7 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
 
     okarr=Numeric.where(ppos >= pmin,1,0)
     okarr=Numeric.where(ppos <= pmax,okarr,0)
-     
+
     # First check for length 1 case and do quick
     # transform and return if it is; otherwise, continue.    
     if len(dmins) == 1:
@@ -3162,22 +3162,22 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
         if axistype == GVPLOT_AXISTYPE_LINEAR:
             dpos=((float(dmaxs[0]-dmins[0])/float(pmax-pmin))*\
                   (ppos-pmin))+dmins[0]
-            
+
         elif axistype == GVPLOT_AXISTYPE_LOG:
             dpos=Numeric.power(10,((((Numeric.log10(float(dmaxs[0]))-
                    Numeric.log10(float(dmins[0])))/
                   float(pmax-pmin))*(ppos-pmin))+
                   Numeric.log10(float(dmins[0]))))
-   
+
         if dtype not in [type(Numeric.array([])),type((1,)),type([])]:
             okarr=okarr[0]
 
         return (dpos,okarr)
-            
+
 
     dmaxs=Numeric.array(dmaxs,Numeric.Float64)
     dmins=Numeric.array(dmins,Numeric.Float64)
-    
+
     if axistype == GVPLOT_AXISTYPE_LINEAR:    
         dwidtharr=Numeric.ravel(dmaxs-dmins)
         dwidth=Numeric.sum(dwidtharr)
@@ -3197,7 +3197,7 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
             sc=sc.astype(Numeric.Float64)/2.0
             dpos=dpos+(sc*(dmins[idx]+((dmaxs[idx+1]-dmins[idx])*
                         (ppos-prng[idx])/(prng[idx+1]-prng[idx]))))
- 
+
     elif axistype == GVPLOT_AXISTYPE_LOG:
         dmaxs=Numeric.log10(dmaxs)
         dmins=Numeric.log10(dmins)
@@ -3219,7 +3219,7 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
             sc=sc.astype(Numeric.Float64)/2.0
             dpos=dpos+(sc*(dmins[idx]+((dmaxs[idx+1]-dmins[idx])*
                         (ppos-prng[idx])/(prng[idx+1]-prng[idx]))))
-            
+
         dpos=Numeric.power(10,dpos)
 
 
@@ -3240,7 +3240,7 @@ def MakeContiguousXY(xarr,yarr):
     ind=Numeric.argsort(lxarr)
     nxarr=Numeric.take(lxarr,ind)
     nyarr=Numeric.take(lyarr,ind)
-    
+
     return(nxarr,nyarr)
 
 def GetOutlierData(xarr,xmins,xmaxs,yarr,ymins,ymaxs,
@@ -3261,11 +3261,11 @@ def GetOutlierData(xarr,xmins,xmaxs,yarr,ymins,ymaxs,
         yarr=[yarr]
         if zarr is not None:
             zarr=[zarr]
-            
+
     if type(xmins) not in [type([]),type((1,))]:
         xmins=[xmins]
         xmaxs=[xmaxs]
-            
+
     if type(ymins) not in [type([]),type((1,))]:
         ymins=[ymins]
         ymaxs=[ymaxs]
@@ -3282,7 +3282,7 @@ def GetOutlierData(xarr,xmins,xmaxs,yarr,ymins,ymaxs,
         nzarr=[]
     else:
         nzarr=None
-        
+
     for idx in range(len(xarr)):
         tx=xarr[idx]
         ty=yarr[idx]
@@ -3322,11 +3322,11 @@ def GetAxisBreaks(mins,maxs,axis_type=GVPLOT_AXISTYPE_LINEAR,bwidth=0.1):
 
     maxs=Numeric.array(maxs)
     mins=Numeric.array(mins)
-    
+
     if axis_type == GVPLOT_AXISTYPE_LOG:
         maxs=Numeric.log10(maxs)
         mins=Numeric.log10(mins)
-        
+
     dwidtharr=Numeric.ravel(maxs-mins)
     dwidth=Numeric.sum(dwidtharr)
     dcsum=Numeric.cumsum(dwidtharr)
@@ -3357,7 +3357,7 @@ def GetNiceMinMax(mins,maxs,pref_spacing,axis_type=GVPLOT_AXISTYPE_LINEAR):
         mins=[mins]
     if type(maxs) not in [type([]),type((1,))]:
         maxs=[maxs]
-        
+
     if axis_type == GVPLOT_AXISTYPE_LINEAR:
         dmins=[]
         dmaxs=[]
@@ -3387,7 +3387,7 @@ def GetNiceLinearMinMax(minval,maxval,pref_spacing=None):
             maxval=1.0
             minval=-1.0
         rord=Numeric.log10(abs(maxval-minval))
-        
+
     nrord=rord % 1
 
     # format
@@ -3396,7 +3396,7 @@ def GetNiceLinearMinMax(minval,maxval,pref_spacing=None):
     else:
         prec=int(abs(rord))+2
         fmt="%."+str(prec)+"f"
-         
+
     if pref_spacing is None:
         if nrord < Numeric.log10(2):
             spc=0.2*pow(10,Numeric.floor(rord))
@@ -3418,9 +3418,9 @@ def GetNiceLinearMinMax(minval,maxval,pref_spacing=None):
     label_offsets=[]
     for label_val in Numeric.arange(new_min,new_max+spc/100.0,spc):
         label_offsets.append(label_val)
-        
+
     return (new_min,new_max,label_offsets,fmt)
-    
+
 
 class GvSimpleSettingsVBox(gtk.VBox,Signaler):
     """ Class to hold a number of plot-related settings.
@@ -3430,7 +3430,7 @@ class GvSimpleSettingsVBox(gtk.VBox,Signaler):
             include_list- tuple of which tables to include:
                           0- rescale table
                           1- Apply button
-                          
+
             withx,xminlabel,xmaxlabel,
             withy,yminlabel,ymaxlabel,
             withz,zminlabel,zmaxlabel- rescale table settings.
@@ -3477,7 +3477,7 @@ class GvSimpleSettingsVBox(gtk.VBox,Signaler):
             for idx2 in range(len(cplot.array_data)):
                 if cplot.array_layer_defaults[idx2].interactive == 1:
                     cplot.merge_data_from_plot(idx2)
-                    
+
         if self.rescale_table is not None:
             ext=self.rescale_table.get_settings()      
             self.plotarea.plots[self.plot_num].set_extents(xmin=ext[0],
@@ -3491,7 +3491,7 @@ class GvSimpleSettingsVBox(gtk.VBox,Signaler):
         self.plotarea.fit_extents(0.0,0.0,1.0,ysize/xsize)
         Signaler.notify(self, 'plot-updated')
 
-        
+
 class GvSimpleRescaleTable(gtk.Table):
     """ Class to provide a table for rescaling a GvSimplePlot.
         Inputs:
@@ -3539,7 +3539,7 @@ class GvSimpleRescaleTable(gtk.Table):
                 self.xmaxentry.set_text('')
             self.attach(self.xmaxentry,3,4,0,1)
             c_row=c_row+1
-            
+
         if withy == 1:
             self.attach(gtk.Label(yminlabel),0,1,c_row,c_row+1)
             self.yminentry=gtk.Entry()
@@ -3558,7 +3558,7 @@ class GvSimpleRescaleTable(gtk.Table):
                 self.ymaxentry.set_text('')
             self.attach(self.ymaxentry,3,4,c_row,c_row+1)
             c_row=c_row+1
-            
+
         if withz == 1:
             self.attach(gtk.Label(zminlabel),0,1,c_row,c_row+1)
             self.zminentry=gtk.Entry()
@@ -3608,7 +3608,7 @@ class GvSimpleRescaleTable(gtk.Table):
             zmax=float(self.zmaxentry.get_text())
         except:
             zmax=None
-            
+
         return (xmin,xmax,ymin,ymax,zmin,zmax)
 
 
@@ -3617,10 +3617,10 @@ class GvSimpleRescaleTable(gtk.Table):
             in the table entries.
             A value that is None, has its entry left blank.
         """
-        
+
         if xmin is not None and self.xminentry is not None:
             self.xminentry.set_text(str(xmin))
-            
+
         if xmax is not None and self.xmaxentry is not None:
             self.xmaxentry.set_text(str(xmax))
 
@@ -3637,7 +3637,7 @@ class GvSimpleRescaleTable(gtk.Table):
             self.zmaxentry.set_text(str(zmax))
 
         return
-            
+
 if __name__ == '__main__':
     yarr=Numeric.arange(20000,typecode='f')/1000.0
     yarr2=Numeric.arange(20000,typecode='f')/2000.0
@@ -3663,7 +3663,7 @@ if __name__ == '__main__':
     win3.plot(yarr,xmax=5000)
     win3.oplot(yarr2,color=(0.0,0.0,1.0,1.0),reset_extents=0)
     win3.oplot(yarr3,color=(0.0,1.0,0.0,1.0),reset_extents=0)
-    
+
     win4=GvSimplePlotWindow()
     win4.show()
     win4.plot(yarr,xmin=17010,xmax=19031)
@@ -3682,5 +3682,5 @@ if __name__ == '__main__':
     win5=GvSimplePlotWindow()
     win5.show()
     win5.plotarea.plot3D(xg,yg,zg)
-    
+
     gtk.main()

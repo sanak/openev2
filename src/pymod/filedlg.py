@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: filedlg.py,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+# $Id$
 #
 # Project:  CIET Map
 # Purpose:  Multi-purpose file selection dialog
@@ -62,7 +62,7 @@ Usage -- connect signals to FileDialog.ok_button and FileDialog.cancel_button
       -- FileDialog.get_directory() returns the directory
       -- FileDialog.set_filter() sets a filter for file name that limits the
          display of files in the file list.
-         
+
 Filter specifications
 
 A file filter is specified as a text string containing the filter name and 
@@ -85,7 +85,7 @@ class FilterSpec:
     """
     implements a single filter
     """
-    
+
     def __init__(self, filterspec):
         """
         Initialize the filter based on the spec string
@@ -95,11 +95,11 @@ class FilterSpec:
         if len(parts) != 2:
             gdal.Debug( "OpenEV", "an error occurred parsing the FilterSpec %s" % filterspec )
             pass
-        
-        
+
+
         self.name = parts[0].strip()
         filters = parts[1].split( "," )
-        
+
         self.filters = []
         for i in range(len(filters)):
             re_filter = string.replace(string.strip(filters[i]), "\\", "\\\\")
@@ -107,7 +107,7 @@ class FilterSpec:
             re_filter = string.replace(re_filter, "*", ".*?")
             re_comp = re.compile(re_filter, re.I)
             self.filters.append( re_comp )
-        
+
     def match(self, filename):
         """
         compare the filename to the filter spec and return None if not matched,
@@ -134,11 +134,11 @@ class FileDialog(gtk.Window, Signaler):
         self.filter = None #current filter
         self.filters = {} #active filter objects
         self.filter_keys = [] #ordered list of the names of the filters
-        
+
         self.file_selection = []
-        
+
         self.multiselect = multiselect
-                
+
         self.set_border_width(5)
         self.set_resizable(False)
         self.drives = None
@@ -158,7 +158,7 @@ class FileDialog(gtk.Window, Signaler):
             if cwd is None:
                 cwd = os.getcwd()
         self.cwd = cwd
-        
+
         #widgets
         vbox = gtk.VBox(spacing=5)
         if dialog_type == FILE_OPEN or dialog_type == DIRECTORY_SELECT:
@@ -201,7 +201,7 @@ class FileDialog(gtk.Window, Signaler):
         if dialog_type == FILE_SAVE:
             self.txt_filename = gtk.Entry()
             widget = self.txt_filename            
-        
+
         elif dialog_type == FILE_OPEN:
             combo = gtk.Combo()
             combo.set_value_in_list(False, False)
@@ -212,7 +212,7 @@ class FileDialog(gtk.Window, Signaler):
                 combo.set_popdown_strings( rfl )
             self.txt_filename = combo.entry
             widget = combo
-            
+
         if widget is not None:
             table = gtk.Table(rows=2, columns=2)
             lbl = gtk.Label(nls.get('filedlg-label-file-name', 'File Name:'))
@@ -248,7 +248,7 @@ class FileDialog(gtk.Window, Signaler):
 
         self.add(vbox)
         self.show_all()
-        
+
         #make modal
         self.set_modal(True)
 
@@ -267,7 +267,7 @@ class FileDialog(gtk.Window, Signaler):
         self.ok_button.connect('clicked', self.quit)
         self.cancel_button.connect('clicked', self.quit)
         self.publish('quit')
-        
+
         self.add_events(gtk.gdk.KEY_PRESS_MASK)
         self.connect('key-press-event', self.key_press_cb)
 
@@ -280,7 +280,7 @@ class FileDialog(gtk.Window, Signaler):
         #focus on cmdline and disable further processing of this signal
         self.txt_filename.grab_focus()    
         return False
-        
+
     def update_cwd(self, *args):
         #gview.set_preference('working-directory', self.cwd)
         pass
@@ -331,7 +331,7 @@ class FileDialog(gtk.Window, Signaler):
                 if len(self.file_selection) > 0:
                     self.file_selection = []
                     self.refresh_directory()
-            
+
         elif event.type == gtk.gdk.FOCUS_CHANGE:
             if os.path.isdir(entry.get_text()):
                 self.cwd = entry.get_text()
@@ -358,7 +358,7 @@ class FileDialog(gtk.Window, Signaler):
             self.list_files.clear()
         self.list_directory.freeze()
         self.list_directory.clear()
-        
+
         drive, path = os.path.splitdrive( self.cwd )
         if path != '\\':
             self.list_directory.append([os.pardir])
@@ -389,7 +389,7 @@ class FileDialog(gtk.Window, Signaler):
         """called when the user selects a file in the file list"""
         if event.type == gtk.gdk._2BUTTON_PRESS:
             self.ok_button.clicked()
-                        
+
     def file_selected_cb(self, widget, row, col, event, *args):
         """handle the user selecting a row"""
         try:
@@ -405,7 +405,7 @@ class FileDialog(gtk.Window, Signaler):
             self.update_filename_box()
         except:
             pass            
-            
+
     def update_filename_box( self ):
         """update the contents of the filename box"""
         filenames = ""
@@ -449,7 +449,7 @@ class FileDialog(gtk.Window, Signaler):
 
     def set_filter(self, filter):
         """programmatically set the filename filter"""
-        
+
         self.filters = {}
         self.filter_keys = []
         self.filter = None
@@ -471,7 +471,7 @@ class FileDialog(gtk.Window, Signaler):
             self.cmb_filter.append_text(f)
         self.cmb_filter.set_active(0)
         self.filter = self.filters[self.filter_keys[self.cmb_filter.get_active()]]
-    
+
     def set_filename(self, filename):
         """set the filename"""
         self.txt_filename.set_text(filename)
@@ -488,14 +488,14 @@ class FileDialog(gtk.Window, Signaler):
         elif self.dialog_type == FILE_SAVE:
             filename = self.txt_filename.get_text()
         return os.path.join(self.get_directory(), filename)
-        
+
     def get_filenames(self, *args):
         """return all the filenames as a list"""
         filenames = []
         for row in self.file_selection:
             filename = self.list_files.get_text( row, 0 )
             filenames.append( os.path.join(self.get_directory(), filename) )
-            
+
         return filenames
 
     def get_directory(self, *args):

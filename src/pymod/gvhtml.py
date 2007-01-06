@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvhtml.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Methods for displaying HTML documentation.
@@ -56,7 +56,7 @@ def SetBrowseCommand(command):
     global html_browse_command
     html_browse_command = command
     gview.set_preference('html_browser', command)
-    
+
 
 def LaunchHTML( page_name ):
     """Display indicated HTML page.
@@ -67,12 +67,12 @@ def LaunchHTML( page_name ):
     if not os.path.isabs(page_name) and page_name[:5] != 'http:':
         page_name = os.path.abspath( \
             os.path.join(gview.home_dir,'html',page_name) )
-        
+
     global html_browse_command
 
     if page_name[:5] != 'http:':
         page_name = 'file://'+page_name
-    
+
     if html_browse_command == '':
         html_browse_command = GetBrowseCommand()
 
@@ -82,9 +82,9 @@ def LaunchHTML( page_name ):
             webbrowser.open(page_name)
         except:    
             _gv.gv_launch_url( page_name )
-            
+
         return
-    
+
     if html_browse_command == '' or html_browse_command is None:
         try:
             import webbrowser
@@ -99,11 +99,11 @@ def LaunchHTML( page_name ):
         full_command = html_browse_command + ' ' + page_name + ' &'
 
     os.system( full_command )
-    
+
 def f1_help_cb( item, event, topic, *args ):
     if (event.keyval == gtk.keysyms.F1) and not (event.state & gtk.gdk.CONTROL_MASK):
         LaunchHTML( topic )
-        
+
 def set_help_topic( object, topic ):
     """Set a help topic for a widget.
 
@@ -112,7 +112,7 @@ def set_help_topic( object, topic ):
 
     topic -- topic name, such as 'edittools.html', suitable for use
     with the LaunchHTML() function."""
-    
+
     object.connect( "key_press_event", f1_help_cb, topic )
 
 html_browse_command = ''

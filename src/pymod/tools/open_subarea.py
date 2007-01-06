@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: open_subarea.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Interactive tool to perform calculations on pair of images.
@@ -26,7 +26,7 @@
 # Free Software Foundation, Inc., 59 Temple Place - Suite 330,
 # Boston, MA 02111-1307, USA.
 ###############################################################################
- 
+
 import gtk
 import gview, gdal, gdalconst, gvutils
 import gviewapp
@@ -55,7 +55,7 @@ def CoordFrame(name,f_names,visible):
             entry.show()
             table.attach(entry,2*j+1,2*j+2,i,i+1)
 	    k = k + 1
-	    
+
     return [frame, list_entries, visible]
 
 def SetInitialCoord(dict_item, coords_list):
@@ -70,7 +70,7 @@ def PixelCoordToGeocoord(x,y,geotransform):
     px += geotransform[1] * x + geotransform[2] * y
     py += geotransform[4] * x + geotransform[5] * y
     return (px, py)
-    
+
 def GeocoordToPixelCoord(px,py,geotransform):
     s = px - geotransform[0]
     t = py - geotransform[3]
@@ -78,7 +78,7 @@ def GeocoordToPixelCoord(px,py,geotransform):
     x = (s * geotransform[5] - geotransform[2] * t) / det
     y = (t * geotransform[1] - geotransform[4] * s) / det
     return (x, y)
-    
+
 def GetProjRect(pixcoords,geotransform):    
     (ulx,uly) = PixelCoordToGeocoord(pixcoords[1],pixcoords[0],geotransform)
     (lrx,lry) = PixelCoordToGeocoord(pixcoords[3],pixcoords[2],geotransform)
@@ -113,34 +113,34 @@ def ProjRectToPixelRect(proj_rect,geotransform):
     (lx,ty) = GeocoordToPixelCoord(proj_rect[0],proj_rect[1],geotransform)
     (rx,by) = GeocoordToPixelCoord(proj_rect[2],proj_rect[3],geotransform)
     return (ty, lx, by-ty, rx-lx)
-    
+
 def EmptyGeotransform(gt):
     if gt[0] != 0 or gt[1] != 1 or gt[2] != 0:
         return False
     if gt[3] != 0 or gt[4] != 0 or gt[5] != 1:
         return False;
     return True
-    
+
 class OpenSubArea(gviewapp.Tool_GViewApp):
     def __init__(self, app = None):
 	gviewapp.Tool_GViewApp.__init__(self,app)
 	self.init_menu()
-   
+
     def init_menu(self):
         self.menu_entries.set_entry("File/Open Subarea...",4,self.launch_dialog)
-    
+
     def file_selection_ok(self,*args):
 	self.source_name = self.o_s_d.get_filename()
 	self.o_s_d.hide()
-	
+
 	rast = gdal.OpenShared(self.source_name, gdalconst.GA_ReadOnly)
 	self.input_rast = rast
-	
+
 	self.pixsubarea = [0,0,rast.RasterYSize,rast.RasterXSize]
 	SetInitialCoord(self.frame_dict['pixcoord'],self.pixsubarea)
-	
+
 	self.geotransform = rast.GetGeoTransform()
-	
+
 	if EmptyGeotransform(self.geotransform):
 	    self.coord_system.set_history(0)
 	    self.update_gui()
@@ -148,10 +148,10 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
 	else:
 	    self.projsubarea = GetProjRect(self.pixsubarea,self.geotransform)
 	    SetInitialCoord(self.frame_dict['geocoord'],self.projsubarea) 
-	
+
 	    self.geogsubarea = GetGeogrRect(rast,self.projsubarea)
 	    SetInitialCoord(self.frame_dict['geodetic'],self.geogsubarea) 
-	
+
 	self.band_list = []
 	for i in range(rast.RasterCount):
 	    item = ["Band " + str(i), "Yes"]
@@ -167,7 +167,7 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
         else:
             self.band_grid.hide()
  	self.dialog.show()
-	    
+
     def launch_dialog(self,*args):
 	self.band_num_list = []
 	self.init_dialog()
@@ -175,10 +175,10 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
         self.o_s_d.ok_button.connect("clicked",self.file_selection_ok) 
         self.o_s_d.cancel_button.connect("clicked",lambda x: self.o_s_d.hide())
    	self.o_s_d.show()
-    	
+
     def open_subarea_cb(self,*args):
  	self.vrt_options = vrtutils.VRTCreationOptions(len(self.band_list))
- 
+
 	if self.geocoding == 1:
 	    # get data from pixel-frame and transform lat/long
 	    # to proj and to pixels	 	
@@ -206,7 +206,7 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
  	    sline = int(self.frame_dict['pixcoord'][1][0].get_text())
  	    npix = int(self.frame_dict['pixcoord'][1][3].get_text())
  	    nlines = int(self.frame_dict['pixcoord'][1][2].get_text())
- 	
+
 	if spix < 0:
 	    spix = 0
 	elif spix >  self.pixsubarea[3]:
@@ -221,16 +221,16 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
 	    npix = self.pixsubarea[3] - spix
 	if sline + nlines > self.pixsubarea[2]:
 	    nlines = self.pixsubarea[2] - sline
-	
+
  	self.vrt_options.set_src_window((spix,sline,npix,nlines),self.band_num_list)
  	self.vrt_options.set_dst_window((0,0,npix,nlines))
- 	
+
         vrt_tree=vrtutils.serializeDataset(self.input_rast,self.vrt_options,self.band_num_list)
         vrt_lines=gdal.SerializeXMLTree(vrt_tree)
         vrtdataset=gdal.Open(vrt_lines)
         gview.app.open_gdal_dataset(vrtdataset)
         self.close()
-    	    	
+
     def update_gui(self,*args):
 	for item in self.frame_dict.keys():
 	    self.frame_dict[item][2] = False
@@ -246,23 +246,23 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
         for item in self.frame_dict.keys():
             if self.frame_dict[item][2]: 
               self.frame_dict[item][0].show()
-      
+
     def init_dialog(self):
 	self.dialog = gtk.Window()
         self.dialog.set_title('Open Subarea')
         self.dialog.set_border_width(10)   
-        
+
         mainshell = gtk.VBox(spacing=5)
         self.dialog.add(mainshell)
 	mainshell.show()
-	
+
 	self.geocoding = 0
 	coord_system_list = ["Pixels", "Geodetic (Lat/Long)", "Georeferenced"]
 	self.coord_system = \
 	       gvutils.GvOptionMenu(coord_system_list,self.update_gui)
 	mainshell.pack_start(self.coord_system)
 	self.coord_system.show()
-	
+
 	self.frame_dict = {}
 	pix_fields_names = \
 	    ('Start Line','Start Pixel','Num of Lines','Num of Pixels')
@@ -281,11 +281,11 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
 	self.frame_dict['geocoord'] = \
 	    CoordFrame('Georeferenced Coordinates', proj_fields_names, False)
 	mainshell.pack_start(self.frame_dict['geocoord'][0], expand=False)
-	
+
 	self.band_grid = pgugrid.pguGrid(config=(2,0,1,1,4,0,0,0))
 	self.band_grid.subscribe("cell-selection-changed",self.band_selected_cb)
 	mainshell.pack_start(self.band_grid,expand=True)
-	
+
 	button_box = gtk.HBox(spacing = 10)
 	mainshell.pack_start(button_box, expand=False)
 	button_box.show()
@@ -293,7 +293,7 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
  	button_box.pack_start(btOK)
  	btOK.connect("clicked",self.open_subarea_cb)
  	btOK.show()
- 	
+
 	btCancel = gtk.Button('Cancel')
  	button_box.pack_start(btCancel)
 	btCancel.connect("clicked", self.close)
@@ -305,11 +305,11 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
         for item in self.frame_dict.keys():
             if self.frame_dict[item][2]: 
               self.frame_dict[item][0].show()
-    
+
         for item in self.frame_dict.keys():
             if self.frame_dict[item][2]: 
               self.frame_dict[item][0].show()
- 
+
     def band_selected_cb(self,widget,cell):
         row = cell[0][0]
         if self.band_list[row][1] == "NO":
@@ -322,6 +322,6 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
 
     def close(self,*args):
         self.dialog.destroy()
-    
+
 
 TOOL_LIST = ['OpenSubArea']

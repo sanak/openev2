@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: gvshell.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Extra intrinsics for OpenEV PyShell environment.  Used from
@@ -35,25 +35,25 @@ def display(array, prototype_name = None):
     import Numeric
     if len(Numeric.shape(array)) == 1:
         array=Numeric.reshape(array,(1,Numeric.shape(array)[0]))
-        
+
     array_name = gdalnumeric.GetArrayFilename(array)
     ds = gview.manager.get_dataset( array_name )
     if prototype_name is not None:
         prototype_ds = gdal.Open( prototype_name )
         gdalnumeric.CopyDatasetInfo( prototype_ds, ds )
-            
+
     gview.app.file_open_by_name( array_name )
 
 ###############################################################################
 # Utility to get ROI marked with tool from array
 def get_roi(num_array):
     roi = gview.app.toolbar.get_roi()
-    
+
     x1 = int(roi[0])
     y1 = int(roi[1])
     x2 = int(roi[0] + roi[2]) + 1
     y2 = int(roi[1] + roi[3]) + 1
-    
+
     return num_array[...,y1:y2,x1:x2]
 
 ###############################################################################
@@ -90,7 +90,7 @@ def local_vars_list( var_list = None, typestrings=None ):
                     where var is a variable of the type
                     to search for).
     """
-    
+
     import Numeric
     img_type = type(Numeric.array((1,2)))
 
@@ -120,10 +120,10 @@ def local_vars_list( var_list = None, typestrings=None ):
                     shape_str = ') '
                 else:
                     shape_str = 'x' + shape_str
-                    
+
                 shape_str = str(dim) + shape_str
             shape_str = ' (' + shape_str
-                
+
             try:
                 txtlist.append(varname+ shape_str+ type_dict[var.typecode()])
             except:

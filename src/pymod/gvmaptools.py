@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 ##############################################################################
-# $Id: gvmaptools.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Grid layers, north arrows, etc.
@@ -69,10 +69,10 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
         font="-adobe-helvetica-medium-r-normal-*-8-*-*-*-p-*-iso10646-1"
         #font="-misc-fixed-medium-r-*-*-9-*-*-*-*-*-*-*"
 
-    
+
     lxoff=(max_x-min_x)*xoff  # horizontal label placement
     lyoff=(max_y-min_y)*yoff # vertical label placement
-   
+
     hspc=(max_x-min_x)/x_divisions
     vspc=(max_y-min_y)/y_divisions
 
@@ -85,7 +85,7 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
         pshp.set_node(hval,min_y+lyoff)
         pshp.set_property('position',"%.1f" % hval)
         shps.append(pshp)
-                          
+
     for vval in Numeric.arange(min_y,max_y+vspc/100.0,vspc):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
         nshp.set_node(min_x,vval,0,0)
@@ -100,7 +100,7 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
     if len(cstr) < 9:
         cstr=cstr+"FF"
     clstr=str(color[0])+' '+str(color[1])+' '+str(color[2])+' '+str(color[3])
-    
+
     layer=gview.GvShapesLayer(shps)
     layer.set_property('_line_color',clstr)
     layer.set_property('_point_color',clstr)
@@ -110,10 +110,10 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{position},f:"'+font+'",c:'+cstr+')')
     layer.set_read_only(True)    
-    
+
     return layer
 
-    
+
 def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
                         color=(0.5,1.0,0.5,1.0),xoff=-0.14,yoff=1.04,
                         label_type=None,shapes_name="Grid"):
@@ -128,7 +128,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
         color- start color for the grid
         label_type- not used yet; might be later for formatting.
         shapes_name- name to give the shapes forming the layer.
-        
+
     """
 
     shps=gview.GvShapes(name=shapes_name)
@@ -142,15 +142,15 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
         #font="-urw-helvetica-medium-r-normal-*-9-*-*-*-p-*-iso8859-2"
         font="-adobe-helvetica-medium-r-normal-*-8-*-*-*-p-*-iso10646-1"
         #font="-misc-fixed-medium-r-*-*-9-*-*-*-*-*-*-*"
-     
-    
+
+
     # Round to nearest integer space
     max_x=min_x+Numeric.floor((max_x-min_x)/x_spacing)*x_spacing
     max_y=min_y+Numeric.floor((max_y-min_y)/y_spacing)*y_spacing
 
     lxoff=(max_x-min_x)*xoff  # horizontal label placement
     lyoff=(max_y-min_y)*yoff # vertical label placement
-    
+
     for hval in Numeric.arange(min_x,
                                max_x+x_spacing/100.0,
                                x_spacing):
@@ -162,7 +162,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
         pshp.set_node(hval,min_y+lyoff)
         pshp.set_property('position',"%d" % int(hval+0.5))
         shps.append(pshp)
-                
+
     for vval in Numeric.arange(min_y,
                                max_y+y_spacing/100.0,
                                y_spacing):
@@ -179,7 +179,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
     if len(cstr) < 9:
         cstr=cstr+"FF"
     clstr=str(color[0])+' '+str(color[1])+' '+str(color[2])+' '+str(color[3])
-    
+
     layer=gview.GvShapesLayer(shps)
     layer.set_property('_line_color',clstr)
     layer.set_property('_point_color',clstr)
@@ -189,7 +189,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{position},f:"'+font+'",c:'+cstr+')')
     layer.set_read_only(True)    
-    
+
     return layer
 
 
@@ -208,7 +208,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
               of max_x-min_x.  Offset is relative to min_x.
         yoff- vertical offset of horizontal labels, as a fraction
               of max_y-min_y.  Offset is relative to min_y.
-              
+
         color- start color for the grid
         label_type- not used yet; might be later for formatting.
 
@@ -240,7 +240,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
 
     lxoff=(max_x-min_x)*xoff  # horizontal label placement
     lyoff=(max_y-min_y)*yoff # vertical label placement
-    
+
     for hval in Numeric.arange(min_x,
                                max_x+x_spacing/100.0,
                                x_spacing):
@@ -253,7 +253,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
         hstr=GetLatLongString(hval,'longitude')
         pshp.set_property('position',hstr)
         shps.append(pshp)
-        
+
     for vval in Numeric.arange(min_y,
                                max_y+y_spacing/100.0,
                                y_spacing):
@@ -271,7 +271,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
     if len(cstr) < 9:
         cstr=cstr+"FF"
     clstr=str(color[0])+' '+str(color[1])+' '+str(color[2])+' '+str(color[3])
-    
+
     layer=gview.GvShapesLayer(shps)
     layer.set_property('_line_color',clstr)
     layer.set_property('_point_color',clstr)
@@ -310,17 +310,17 @@ def CreateNorthSymbol(ntype=GVNORTHSYM1,color1=(0.0,0.0,0.0,1.0),
         sm=gview.GvSymbolManager()
     else:
         sm=symbol_manager
-        
+
     cstr1=gvogrfs.gv_to_ogr_color(color1)
     if len(cstr1) < 9:
         cstr1=cstr1+"FF"
-        
+
     cstr2=gvogrfs.gv_to_ogr_color(color2)
     if len(cstr2) < 9:
         cstr2=cstr2+"FF"
 
     sstr=string.replace(str(scale),'.','_')
-    
+
     refname=ntype+cstr1[1:]+cstr2[1:]+sstr
     if ntype==GVNORTHSYM1:   
         shape=gview.GvShape(type=gview.GVSHAPE_AREA)
@@ -359,7 +359,7 @@ def CreateNorthSymbols(color1=(0.0,0.0,0.0,1.0),color2=(1.0,1.0,1.0,1.0),
         refnames.append(rname)
 
     return (refnames,sm)
-        
+
 
 def SimpleNorthLayer(xoffset,yoffset,ntype=GVNORTHSYM1,
                         color1=(0.0,0.0,0.0,1.0),
@@ -384,17 +384,17 @@ def SimpleNorthLayer(xoffset,yoffset,ntype=GVNORTHSYM1,
             shapes_name- name to give the shapes that form
                          the north arrow.
     """
-    
+
     shps=gview.GvShapes(name=shapes_name)
     gview.undo_register( shps )
-    
+
     nshp=gview.GvShape(type=gview.GVSHAPE_POINT)
     nshp.set_node(xoffset,yoffset)
 
     cstr1=gvogrfs.gv_to_ogr_color(color1)
     if len(cstr1) < 9:
         cstr1=cstr1+"FF"
-        
+
     refname,sm=CreateNorthSymbol(ntype,color1,color2,scale)
     dxstr=str(-1.5*scale)
     dystr=str(-15.0*scale)
@@ -403,12 +403,12 @@ def SimpleNorthLayer(xoffset,yoffset,ntype=GVNORTHSYM1,
                       'LABEL(c:'+cstr1+',t:"N",dx:'+dxstr+\
                       ',dy:'+dystr+')' )
     shps.append(nshp)
-    
+
     layer=gview.GvShapesLayer(shps)
     # Set antialias property so that lines look nice
     # when rotated.
     layer.set_property('_gl_antialias','1')
-    
+
     return layer
 
 #############################################################
@@ -448,7 +448,7 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
             shapes_name- name to give the shapes that form
                          the scalebar.
     """
-    
+
     shps=gview.GvShapes(name=shapes_name)
     gview.undo_register( shps )
     shps.add_field('label','string',20)
@@ -468,7 +468,7 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
            ' '+str(color1[3])
     cstr2=str(color2[0])+' '+str(color2[1])+' '+str(color2[2])+\
            ' '+str(color2[3])
-    
+
     if stype == GVSCALE1:
         # Rectangle with alternating filled/unfilled
         # sections.
@@ -497,11 +497,11 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
         ly=hbr*stheta+lbr*ctheta + yoffset
         ux=uxbr*ctheta + xoffset
         uy=uxbr*stheta + yoffset
-        
+
         # LATER: once shape collections are working, use them instead
         # so that entire scale bar can be selected and shifted as
         # a whole rather than separate shapes...
-        
+
         #shp=gview.GvShape(type=gview.GVSHAPE_COLLECTION)
         #shp.set_property('_gv_ogrfs_point',
         #               'LABEL(t:{label},f:"%s",c:#000000FF)' % font)
@@ -519,22 +519,22 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
             else:
                 nshp.set_property('_gv_color',cstr1)
                 nshp.set_property('_gv_fill_color',cstr1)
-                
+
             shps.append(nshp)
-      
+
         for idx in range(len(lx)):      
             if labels[idx] is not None:
                 lshp=gview.GvShape(type=gview.GVSHAPE_POINT)
                 lshp.set_node(lx[idx],ly[idx])
                 lshp.set_property('label',labels[idx])
                 shps.append(lshp)
-                
+
         if units_label is not None:
             lshp=gview.GvShape(type=gview.GVSHAPE_POINT)
             lshp.set_node(ux,uy)
             lshp.set_property('label',units_label)
             shps.append(lshp)
-            
+
     layer=gview.GvShapesLayer(shps)
     # Set antialias property so that lines look nice
     # when rotated.
@@ -542,7 +542,7 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
     cstr3=gvogrfs.gv_to_ogr_color(color1)
     if len(cstr3) < 9:
         cstr3=cstr3+"FF"
-        
+
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{label},f:"%s",c:%s)' % (font,cstr3))
     return layer
@@ -552,7 +552,7 @@ def GetScaleBlocks(width):
         values.
         Input:
             width- geocoded width
-            
+
         Output:
             values- geocoded values at divisions (array)
             labels- labels for divisions
@@ -560,7 +560,7 @@ def GetScaleBlocks(width):
 
     rord=Numeric.log10(abs(width)/2.0)
     nrord=rord % 1
-        
+
     if nrord < Numeric.log10(2):
         spc=0.2*pow(10,Numeric.floor(rord))
         smallspc=spc
@@ -582,7 +582,7 @@ def GetScaleBlocks(width):
         labels=['0',None,None,None,"%g" % (smallspc*4)]
     else:
         labels=['0',None,None,None,None,"%g" % (smallspc*5)]
-        
+
     temp_max=newspc[len(newspc)-1]
     start=temp_max
     for temp in Numeric.arange(start,width-bigspc/2,bigspc):
@@ -595,7 +595,7 @@ def GetScaleBlocks(width):
     #    labels.append(None)
     #    temp_max=temp_max+smallspc 
     #    newspc.append(temp_max)       
-                              
+
     return (Numeric.array(newspc,Numeric.Float32),labels)
 
 
@@ -672,7 +672,7 @@ def GetLatLongString(ddvalue,lltype='latitude'):
         returns: lat/long string
     """
     import Numeric
-    
+
     deg=int(abs(ddvalue))
     min=int((abs(ddvalue)-deg)*60)
     sec=int((abs(ddvalue)-deg-(float(min)/60.0))*3600.0)
@@ -716,7 +716,7 @@ def GetLatLongSpacings(min_ddvalue,max_ddvalue,approx_divs):
     secspc=float("%.1f" % (sdiff*3600.0/approx_divs))
     if secspc > (sdiff*3600.0/approx_divs):
         secspc=secspc-0.1
-        
+
     return (degspc,minspc,secspc)
 
 def GetAlphabeticGridString(index):
@@ -742,5 +742,5 @@ def GetAlphabeticGridString(index):
             str=str+alphabet[0]
         else:    
             str=str+alphabet[rint-1]
-        
+
     return str

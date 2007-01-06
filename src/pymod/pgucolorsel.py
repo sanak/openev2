@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgucolorsel.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  Python Gtk Utility Widgets
 # Purpose:  Embeddable color selector.
@@ -96,19 +96,19 @@ class ColorControl(gtk.HBox):
             item.connect('activate', self.set_color_cb, value)
             item.show()
             menu.append(item)
-        
+
         item = gtk.RadioMenuItem(item,'Custom')
         item.connect('activate', self.launch_mixer_cb)
         item.show()
         menu.append(item)
-        
+
         item = gtk.RadioMenuItem(item,'Mixer')
         item.connect('activate', self.launch_mixer_cb)
         item.show()
         menu.append(item)
 
         self.om.set_history(0)
-        
+
         self.pack_start(self.swatch, expand=False)
         self.pack_start(self.om)
 
@@ -142,32 +142,32 @@ class ColorControl(gtk.HBox):
 
     def mixer_delete(self, widget, args):
         self.mixer = None
-        
+
     def mixer_cancel(self, args):
         self.mixer.hide()
         self.mixer.destroy()
         self.mixer = None
-        
+
     def mixer_ok_cb(self, args):
         rgb = self.mixer.colorsel.get_current_color()
         alpha = self.mixer.colorsel.get_current_alpha()
         self.set_color((rgb.red / 65535.0, rgb.green / 65535.0,
                         rgb.blue / 65535.0, alpha / 65535.0))
-        
+
     def set_color(self, new_color):
         if len(new_color) == 3:
             new_color = (new_color[0],new_color[1],new_color[2],1.0)
-        
+
         if new_color[0] > 1 or new_color[1] > 1 \
            or new_color[2] > 1 or new_color[3] > 1:
             new_color = (new_color[0] / 255.0,
                          new_color[1] / 255.0,
                          new_color[2] / 255.0,
                          new_color[3] / 255.0)
-            
+
         if new_color == self.current_color:
             return
-        
+
         self.current_color = new_color
         self.swatch.set_colour(self.current_color)
         self.invoke_callback()
@@ -186,10 +186,10 @@ class ColorControl(gtk.HBox):
     def set_color_from_string(self, new_color):
         if new_color is None:
             return
-        
+
         red, green, blue, alpha = split(new_color,' ')
         self.set_color((atof(red), atof(green), atof(blue), atof(alpha)))
-        
+
     def invoke_callback(self):
         if self.callback == None:
             return

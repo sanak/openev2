@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ###############################################################################
-# $Id: gvlabeledit.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Label Edit Tool.
@@ -269,7 +269,7 @@ class GvLabelEdit(gtk.Window):
 
         self.view = gview.app.view_manager.get_active_view()
         self.new_label()
-        
+
         # TEMP
         return False
 

@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 ###############################################################################
-# $Id: pgugrid.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  General purpose grid widget.
@@ -90,30 +90,30 @@ class _column_info:
         a single column in the pgugrid.
 
         Members:
-        
+
           member- Reference to the source being displayed:
                   SRC_NUMERIC- data column
                   SRC_SHAPES- property name
                   SRC_SHAPESLAYER- property name
                   SRC_LISTLIST- index within sub list
                   SRC_LISTOBJ- variable name within object
-        
+
           title- Column display title.
-                 
+
           type- type of value: 'string','integer','float', or 'complex'.
-        
+
           format- a string to indicate how values should be
                   displayed in the column.  Format string also
                   determines text justification (left, right,
                   or center) within the cell
-        
+
           editable- editable status of the column.  Indicates
                     whether or not the values in the column
                     can be changed other than row addition/
                     deletion.
                     0- not editable
                     1- editable
-        
+
           Note: The editability of a given cell is determined by
                 the intersection of the column and row editability
                 parameters.  Add/delete is determined entirely
@@ -132,17 +132,17 @@ class _column_info:
                     5- rows can be changed or deleted, but not added (101)
                     6- rows can be changed or added, but not deleted (110)
                     7- rows can be changed and added/deleted (111)        
-                   
-        
+
+
           nodata- string to display if no data is available
-        
+
           width- width of the column
 
           start_x- x location of top left corner of column header
 
           justification- text justification in the column: 0
                          for right, 1 for left, 2 for center.
-                         
+
           title_justification- text justification of column title: 0
                          for right, 1 for left, 2 for center.
 
@@ -159,10 +159,10 @@ class _column_info:
           entry_chars- number of characters to allow user to type
                        (only relevant if column is editable).  90
                        by default.
-                             
-                         
 
-          
+
+
+
     """
     def __init__(self,member,title,type,format=None,editable=0,
                  nodata='',width=0,start_x=0,justification=0,
@@ -184,7 +184,7 @@ class _column_info:
         self.force_width=force_width
         self.force_width_chars=force_width_chars
         self.entry_chars=entry_chars
-        
+
 
 
 # Configurable events that grid can respond to
@@ -214,7 +214,7 @@ _row_select=[(),\
            ('select-single-row','unselect-single-row','toggle-single-row',\
             'toggle-block-rows','toggle-multiple-rows','select-block-rows',
             'select-multiple-rows')]
- 
+
 _cell_select=[(),\
                   ('select-single-cell','unselect-single-cell',\
                    'toggle-single-cell'),\
@@ -230,7 +230,7 @@ _column_select=[(),
                   'toggle-multiple-columns','select-block-columns',
                   'select-multiple-columns')]
 
-    
+
 class _selection_info:
     """Selection behaviour parameters:
 
@@ -283,13 +283,13 @@ class _selection_info:
 
         if row_cell not in [0,1,2,3]:
             raise AttributeError,'row_cell must be 0, 1, 2, or 3'
-        
+
         if column_cell not in [0,1,2,3]:
             raise AttributeError,'column_cell must be 0, 1, 2, or 3'
 
         if row_column not in [0,1]:
             raise AttributeError,'row_column must be 0 or 1'
-        
+
         self.row=row_selection
         self.cell=cell_selection
         self.column=column_selection
@@ -340,42 +340,42 @@ class _pgugrid_options:
                0 - 0 - 0 - 0 - 0 - 0 - 0 - 0
                            1   4
                            2
-                           
+
                1 - 0 - 0 - 0 - 0 - 0 - 0 - 0 
                    1       1   4   1          
                    2       2       2
-                                                          
+
                2 - 0 - 0 - 0 - 0 - 0 - 0 - 0 
                        1   1   4               
                        2   2
-                                                                
+
                3 - 0 - 0 - 0 - 0 - 0 - 0 - 0 
                    1   1   1   4   1           
                    2   2   2       2
-                
+
 
                0 - 1 - 0 - 1 - 0 - 3 - 0 - 0
                1               4   
                2          
                3
-               
+
                0 - 2 - 0 - 2 - 0 - 3 - 0 - 0
                1               4   
                2          
                3
-              
+
 
     Parameters:
 
     [0]: Row/Column titles
-    
+
          0- no row or column titles
          1- row titles only
          2- column titles only
          3- row and column titles
 
     [1]: Row selection mode
-    
+
          0- rows may not be selected
 
          If row titles are present:
@@ -383,7 +383,7 @@ class _pgugrid_options:
              2- multiple rows may be selected
 
     [2]: Column selection mode
-    
+
          0- columns may not be selected
 
          If column titles are present:
@@ -391,13 +391,13 @@ class _pgugrid_options:
              2- multiple columns may be selected
 
     [3]: Cell selection mode
-    
+
          0- cells may not be selected
          1- cells may be singly selected
          2- cells may be multiply selected
 
     [4]: Row editability
-    
+
          0- rows are not editable (000)
          1- rows can be deleted, but not added/changed (001)
          2- rows can be added, but not deleted/changed (010)
@@ -412,7 +412,7 @@ class _pgugrid_options:
 
 
     [5]: Row/Cell cross selection behaviour
-    
+
          0- rows and cells may not remain simultaneously selected
          1- rows and cells can remain selected if the selected cell
             is in the selected row
@@ -426,7 +426,7 @@ class _pgugrid_options:
             SELECTED IF THE EDITING PARAMETER IS TURNED OFF.
 
     [6]: Column/Cell cross selection behaviour
-    
+
          0- columns and cells may not remain simultaneously selected
          1- columns and cells can remain selected if the selected cell
             is in the selected column
@@ -438,7 +438,7 @@ class _pgugrid_options:
             a column is selected, all cells in that column are selected).
 
     [7]: Row/Column cross selection behaviour
-    
+
          0- rows and columns may not remain simultaneously selected
          1- rows and columns may be simultaneously selected
 
@@ -457,7 +457,7 @@ class _pgugrid_options:
          4,5,...: For configurations where row and/or column selection
               is enabled, unselection using a second click is disabled
               (it just triggers selection again).
-         
+
          Variant parameter= (column sorting off)*1 +
                             (start editing on single left click)*2 +
                             (second click unselects)*4
@@ -465,7 +465,7 @@ class _pgugrid_options:
     Input parameters: configuration
 
     Valid options for configuration:
-    
+
        - click events:
 
            Row selection (if enabled): NOTE: REQUIRES THAT ROW TITLES
@@ -486,23 +486,23 @@ class _pgugrid_options:
 
            Cell selection (if enabled):
                if self.config[5] is 3:
-               
+
                    control right click on cell- If the source is a
                        shapes layer, translate the view to that row and
                        add that row to the current selection if possible
                        (clear other selections if only single selection
                        is enabled).
-                   
+
                if self.config[5] is not 3 or self.config[4] is in [4,5,6,7]:
-               
+
                single left click a cell- select a cell.  Press escape or
                                           select another cell to unselect.
-                                          
+
                if self.config[5] is 3 and self.config[4] is not in
                [4,5,6,7]:
                    single left click a cell- toggle a cell's selection.
 
-                   
+
            Column selection (if enabled): NOTE: REQUIRES THAT COLUMN TITLES
                                                 BE PRESENT!
 
@@ -513,9 +513,9 @@ class _pgugrid_options:
 
                control left click on column title-
                    multiple nonconsecutive column selection               
-                                    
+
            Cell editing (if enabled):
-           
+
                left clicking a cell twice in a row-
                    Start cell editing.
                    Pressing Enter or Tab, or selecting
@@ -530,17 +530,17 @@ class _pgugrid_options:
                    Escape will exit editing mode, clear
                    the cell selection, and cancel the
                    changes.
-  
+
            Other behaviours:
                alt left click on table- if the source is SRC_SHAPESLAYER,
                                         recenter the view on the selected
                                         shape.
-               
+
                single right click on column title- sort by the values in
                                                       that column (reverse at
                                                       each click)
 
-                                    
+
                arrow keys: (NOT IMPLEMENTED YET)
                up/down:
                - if a single row is selected, move the selected row up/down
@@ -548,7 +548,7 @@ class _pgugrid_options:
                  and select the next cell.  If the cell is being edited,
                  store the changes before unselecting and moving on, and
                  select the next cell for editing as well.
-                 
+
                right/left:
                - if a cell is selected, unselect the cell, move right/left,
                  and select the next cell.
@@ -589,16 +589,16 @@ class _pgugrid_options:
                          cells
 
               2          no effect on cells        no effect on rows
-              
+
               3          unselect all selected     unselect that row
                          cells in that row         if no selected cells
                                                    remain in the row
-                                                   
+
 
     """
-    
+
     def __init__(self,configuration=None):
-        
+
         # Set defaults where user has not specified anything
         cfg_defaults=(2,2,0,0,0,2,0,0,0)
         if configuration is None:
@@ -614,9 +614,9 @@ class _pgugrid_options:
                     cfg.append(configuration[idx])
 
             configuration=tuple(cfg)
-                
+
         self.config=configuration
-        
+
         # Check configuration
         _ranges=[]
         _ranges.append([0,1,2,3])
@@ -633,7 +633,7 @@ class _pgugrid_options:
 
         _invalid=[(0,None,1,None,None,None,None,None),
                   (0,None,2,None,None,None,None,None)]
-        
+
         for idx in range(len(_ranges)):
             if self.config[idx] not in _ranges[idx]:
                 txt="_pgugrid_options: invalid configuration specification"+\
@@ -656,29 +656,29 @@ class _pgugrid_options:
                     if item is not None:
                         txt=txt+_names[idx]+": "+str(self.config[idx])+"\n"
                         raise AttributeError,txt
-        
+
         self.events={}
         self._allowed_events=[]
 
         for item in _cell_clickevents:
             self._allowed_events.append(item)
-            
+
         for item in _cell_keyevents:
             self._allowed_events.append(item)
 
         # row title type: only used if row titles are shown
         # Should be 'grid' to show grid row, 'source' to show
         # underlying source index.
-        
+
         self.row_title_type = 'grid'
-        
+
         if self.config[0] in [1,3]:
             self.show_row_titles=1
             for item in _row_clickevents:
                 self._allowed_events.append(item)
         else:
             self.show_row_titles=0
-            
+
         if self.config[0] in [2,3]:
             self.show_column_titles=1
             for item in _column_clickevents:
@@ -699,7 +699,7 @@ class _pgugrid_options:
         if type not in ['grid','source']:
             raise AttributeError,"_pgugrid_options: row title type must be "+\
                                  "either 'grid' or 'source'"
-        
+
         self.row_title_type = type
 
     def _set_selection_info(self):
@@ -724,7 +724,7 @@ class _pgugrid_options:
             leftover = leftover - 4
         else:
             par2 = 0
-            
+
         if (leftover >= 2):
             par1 = 1
             leftover = leftover - 2
@@ -734,7 +734,7 @@ class _pgugrid_options:
         par0 = leftover
 
         return (par0, par1, par2)
-            
+
     def _set_event_mapping(self):
         """Map events onto behaviours."""
 
@@ -762,13 +762,13 @@ class _pgugrid_options:
                 else:
                     self.events['row-shift-left']='toggle-block-rows'
                     self.events['row-ctrl-left']='toggle-multiple-rows'
-                    
+
         # column sorting and selection
         if ((self.show_column_titles == 1) and
             (vopts[0] == 0)):
             self.events['column-right']='toggle-sort-by-column'
             self.events['column-double-right']='toggle-sort-by-column'
-            
+
             if self.selection_info.column > 0:
                 if vopts[2] == 1:
                     self.events['column-left']='select-single-column'
@@ -776,7 +776,7 @@ class _pgugrid_options:
                 else:
                     self.events['column-left']='toggle-single-column'
                     self.events['column-double-left']='toggle-single-column'
-                
+
             if self.selection_info.column > 1:
                 if vopts[2] == 1:
                     self.events['column-shift-left']='select-block-columns'
@@ -811,16 +811,16 @@ class _pgugrid_options:
                         # Note: cell editing function needs to check that
                         # column is editable before altering anything.
                         self.events['cell-left']='start-cell-edit'
-                    
+
             if self.selection_info.cell > 1:
                 self.events['cell-shift-left']='toggle-block-cells'
                 self.events['cell-ctrl-left']='toggle-multiple-cells'
-                
+
 
         # The remaining code in this function is used to
         # validate a new configuration.
         # It can be commented out for run-time.
-        
+
         # get allowable selection actions
         allowed=self.selection_info.get_allowed_actions()
 
@@ -829,7 +829,7 @@ class _pgugrid_options:
                         'toggle-sort-by-column'])
 
         allowed.extend(['translate-view-to-row'])
-        
+
         # edit-related actions
         if self.config[4] in [4,5,6,7]:
             allowed.extend(['start-cell-edit'])
@@ -859,7 +859,7 @@ class pguGrid(gtk.HBox,Signaler):
                         See _pgugrid_options class
                         documentation for more.
         """
-                          
+
         # both super classes have notify methods which conflict
         # we need the gvsignaler's one
         #gtk.Table.__init__(self,rows=2,cols=3)
@@ -868,11 +868,11 @@ class pguGrid(gtk.HBox,Signaler):
         self.vshell = gtk.VBox()
         self.vshell.set_spacing(0)
         self.pack_start(self.vshell)
-        
-        
+
+
         self.opts=_pgugrid_options(config)
         self._ColumnDefs=[]
-        
+
         # GUI setup
 
         # default style
@@ -885,7 +885,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.draw_row_lines = 2
         self.draw_col_lines = 2
-        
+
         #fonts for drawing titles and cells put here
         self.title_font = None
         self.cell_font = None
@@ -900,15 +900,15 @@ class pguGrid(gtk.HBox,Signaler):
         self.row_height = 0
         self.column_title_height=0
         self.row_title_width = 0
-            
+
         # padding between lines and text in cells
         # (included in column width/row heights)
         self.pad=4 
-    
+
         # Build GUI
         self.hadj = gtk.Adjustment()
         self.vadj = gtk.Adjustment()
-        
+
         self._hscroll = gtk.HScrollbar(self.hadj)
         self._vscroll = gtk.VScrollbar(self.vadj)
         self.hsframe = gtk.Frame()
@@ -921,20 +921,20 @@ class pguGrid(gtk.HBox,Signaler):
         self.vscroll_shown=1
         self.hscroll_policy = 0
         self.vscroll_policy = 0
-        
+
         self._area = gtk.DrawingArea()
         self._pixmap = None
-        
+
         #this mask also seems to enable scrolling???
         evt_mask = gtk.gdk.BUTTON_PRESS_MASK | gtk.gdk.BUTTON_RELEASE_MASK | \
                    gtk.gdk.KEY_RELEASE_MASK | \
                    gtk.gdk.FOCUS_CHANGE_MASK | gtk.gdk.EXPOSURE_MASK 
         self._area.set_events( evt_mask )
         self._area.set_flags( gtk.CAN_FOCUS | gtk.HAS_GRAB )
-        
+
         #flag to recalculate the adjustments
         self.bCalcAdjustments = True
-        
+
         #set to true if changing some value that would end up causing multiple
         #expose events or an endless loop even.
         self.updating = False
@@ -947,7 +947,7 @@ class pguGrid(gtk.HBox,Signaler):
         self._layout=gtk.Layout()
         self._layout.put(self._area,0,0)
         self._layout.show_all()
-        
+
         #self.attach( frm, 0, 1, 0, 1,
         #                    xoptions=gtk.FILL, yoptions=gtk.FILL )
         self.vshell.pack_start(self._layout,expand=True)
@@ -965,7 +965,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.editing_cell=None
 
-        
+
         dw=300
         dh=400
         self.set_size_request(dw,dh)
@@ -983,10 +983,10 @@ class pguGrid(gtk.HBox,Signaler):
         # new styles can't actually be added until expose.
         # Use this to store info up until then
         self.styles_to_add=None
-        
+
         # Initialize parameters relating to source displayed in grid
         self._initialize_settings()
-        
+
         # signals: Note that the right-click (button 3) event
         # is a special case used internally to select cells for
         # editing.
@@ -1005,7 +1005,7 @@ class pguGrid(gtk.HBox,Signaler):
         # (-1 if title clicked)
         self.publish('clicked')
 
-        
+
         self._area.connect( 'expose-event', self.expose )
         self._area.connect( 'configure-event', self.configure )
         self._area.connect( 'button-press-event', self.click )
@@ -1035,14 +1035,14 @@ class pguGrid(gtk.HBox,Signaler):
                 self.row_title_width=0
         else:
             self.row_title_width=0
-            
+
         self.expose()
 
 
     def set_empty_message(self,msg):
         """ Set the message to display when there is no data. """
         self.empty_msg=msg
- 
+
     def set_source(self,source,view=None,subset=None,members=None,titles=None,
                    editables=None,formats=None,types=None,nodata=None,
                    justify=None,title_justify=None,force_width=None,
@@ -1076,7 +1076,7 @@ class pguGrid(gtk.HBox,Signaler):
 
                 expose- whether or not to expose the grid immediately (1
                         to expose, 0 not to).  Defaults to 0.
-                        
+
                 redefine_columns- set to 0 if column definitions should not
                                   change (if it is 0, then members, titles,
                                   etc. will be ignored).  If this is set to
@@ -1084,15 +1084,15 @@ class pguGrid(gtk.HBox,Signaler):
                                   responsibility to ensure that the columns
                                   are still valid for the new source.
                                   Defaults to 1.
-                        
-                        
+
+
         """
         if self.src is not None:
             self.clear()
 
         self.subset=subset
         self.bCalcAdjustments = True
-        
+
         if ((source is None) or
             ((type(source) == type((1,))) and (len(source) == 0))):
             print "here1"
@@ -1113,7 +1113,7 @@ class pguGrid(gtk.HBox,Signaler):
                 # of columns so titles are displayed
                 self.g_columns=len(self._ColumnDefs)
                 self._update_column_widths(expose=0)
-                
+
             if expose == 1:
                 self.expose()
             return
@@ -1133,14 +1133,14 @@ class pguGrid(gtk.HBox,Signaler):
                 # of columns so titles are displayed
                 self.g_columns=len(self._ColumnDefs)
                 self._update_column_widths(expose=0)
-                
+
             if expose == 1:
                 self.expose()
             return
 
         if type(source) == type((1,)):
             source=list(source)
-            
+
         if type(source) == type(Numeric.ones((4,4))):
             shp=Numeric.shape(source)
             if len(shp) == 1:
@@ -1176,7 +1176,7 @@ class pguGrid(gtk.HBox,Signaler):
             try:
                 self.src=source.get_parent()
                 self.src_type=SRC_SHAPESLAYER
-                
+
                 self.source_changed_id=self.src.connect('changed',
                                                     self.refresh)
                 self.layer=source
@@ -1188,12 +1188,12 @@ class pguGrid(gtk.HBox,Signaler):
                                         self.layer_subselection_cb)
                 self.layer_teardown_id = \
                 self.layer.connect('teardown',self.clear_and_expose)
-                    
+
                 if view is None:
                     txt='pgugrid: if source is a shapeslayer, a viewarea\n'
                     txt=txt+'must be supplied.'
                     raise AttributeError,txt
-                
+
                 self.view=view
             except:
                 txt='pgugrid: source must be one of:\n'
@@ -1203,14 +1203,14 @@ class pguGrid(gtk.HBox,Signaler):
                 txt=txt+'d) GvShapes object\n'
                 txt=txt+'e) GvShapesLayer object\n'
                 raise AttributeError,txt
-                
+
 
         if ((view is not None) and (self.src_type != SRC_SHAPESLAYER)):
             txt='pgugrid: view updates are only supported for\n'
             txt=txt+'the shapeslayer source datatype.'
             raise AttributeError,txt
 
-            
+
         self._generate_row_indices()
 
         if redefine_columns == 1:
@@ -1220,8 +1220,8 @@ class pguGrid(gtk.HBox,Signaler):
                                 expose=expose)
         else:
             self._update_column_widths(expose=expose)
-                
-            
+
+
         if self.src_type == SRC_SHAPESLAYER:
             # Make sure grid is initialized
             # to proper selection settings
@@ -1322,14 +1322,14 @@ class pguGrid(gtk.HBox,Signaler):
         self.editing_cell=cell
         self.reset_startrow(cell[0])
         self.reset_startcolumn(cell[1])
-        
+
         # Make sure only currently edited cell is selected
         if ((len(self.selected_cells) == 0) or
             (len(self.selected_cells) > 1) or
             (self.selected_cells[0][0] != cell[0]) or
             (self.selected_cells[0][1] != cell[1])):
             self.select_cell(cell,clearfirst=1,expose=1)
-            
+
         cwidth=self._ColumnDefs[cell[1]].width
         self.editbox.set_size_request(cwidth,self.row_height)
         self.editbox.set_max_length(self._ColumnDefs[cell[1]].entry_chars)
@@ -1342,9 +1342,9 @@ class pguGrid(gtk.HBox,Signaler):
               ((self.src2row[cell[0]]-self.start_row)*(self.row_height+1))
         if self.opts.show_row_titles == 1:
             locy=locy+1
-   
+
         self._layout.move(self.editbox,locx,locy)
- 
+
     def cancel_cell_edit(self):
         """ Cancel the current cell edit, not saving changes. """
         self.editing_cell=None
@@ -1357,7 +1357,7 @@ class pguGrid(gtk.HBox,Signaler):
             # TO DO: type checking (probably in set datastr itself though)
             self._set_datastr(self.editing_cell[0],self.editing_cell[1],newval)
             Signaler.notify(self, 'cell-changed',tuple(self.editing_cell))
-            
+
             self.editing_cell=None
             self._layout.move(self.editbox,5000,5000)
 
@@ -1377,7 +1377,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.last_click_column=None
         self.last_click_button=None
         # End of hack
-            
+
         if self.editing_cell is None:
             return 
 
@@ -1407,7 +1407,7 @@ class pguGrid(gtk.HBox,Signaler):
                 self.start_cell_edit(next_cell)
             else:
                 self.unselect_all_cells()
-                
+
             # This next line avoids the next tab
             # being treated as part of the text
             # on alternate tabs (ie. jumping
@@ -1415,7 +1415,7 @@ class pguGrid(gtk.HBox,Signaler):
             # rather than resetting the
             # editable cell
             self._area.grab_focus()
-            
+
         elif event.keyval == gtk.keysyms.Escape:
             self.cancel_cell_edit()
             self.unselect_all_cells()
@@ -1443,7 +1443,7 @@ class pguGrid(gtk.HBox,Signaler):
                 rows=self.get_selected_row_indices()
                 if len(rows) > 0:
                     self.delete_rows(rows)
-        
+
     def _generate_row_indices(self):
 
         """ Create row index mappings.
@@ -1463,7 +1463,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if self.src_type in [SRC_NONE,SRC_LISTUNDEF]:
             return
-            
+
         if self.src_type == SRC_NUMERIC:
             # Numeric arrays don't have rows of None
             if self.subset is None:
@@ -1478,7 +1478,7 @@ class pguGrid(gtk.HBox,Signaler):
                         self.row2src.append(idx)
                     else:
                         self.src2row.append(-1)
-                        
+
         else:
             if self.subset is None:
                 grididx=0
@@ -1526,7 +1526,7 @@ class pguGrid(gtk.HBox,Signaler):
         # If a sort column has been specified, do sorting
         if self.sort_column != -1:
             self.sort_by_column()
-            
+
         if self.last_selected_row is not None:
             self.reset_startrow(self.last_selected_row)
 
@@ -1589,9 +1589,9 @@ class pguGrid(gtk.HBox,Signaler):
             if ((self.row_style_index is None) or
                 (len(self.row_style_index) != self.s_rows)):
                 self.row_style_index=Numeric.zeros((self.s_rows,))
-                
+
         # Below: if row title styles are set, add code here:
-                       
+
         self.bCalcAdjustments=True
 
     def add_style(self,style_or_tuple):
@@ -1623,7 +1623,7 @@ class pguGrid(gtk.HBox,Signaler):
             idx=len(self.style_list)
             if self.styles_to_add is None:
                 self.styles_to_add=[]
-                
+
             self.styles_to_add.append((idx,style_or_tuple))
             self.style_list.append(None)
             return idx
@@ -1638,7 +1638,7 @@ class pguGrid(gtk.HBox,Signaler):
             # use existing style for defaults if it is
             # present
             style = self.style_list[cidx]
-            
+
         nstyle=style.copy()
         for idx in range(max(len(ctuple),6)):
             item=ctuple[idx]
@@ -1661,7 +1661,7 @@ class pguGrid(gtk.HBox,Signaler):
                 elif (idx == 5) and (style.fg_gc[gtk.STATE_INSENSITIVE] is not None):
                     nstyle.fg_gc[gtk.STATE_INSENSITIVE] = \
                                  style.fg_gc[gtk.STATE_INSENSITIVE]
-                    
+
                 continue
 
             if idx == 0:
@@ -1699,7 +1699,7 @@ class pguGrid(gtk.HBox,Signaler):
         new_color=cmap.alloc_color(color_tuple[0],color_tuple[1],color_tuple[2])
         if ref_gc is None:
             ref_gc=self.get_style().white_gc
-            
+
         ngc=self.window.new_gc(foreground=new_color,
         #                             background=new_color)
             background=new_color,font=self.get_style().get_font(), fill=ref_gc.fill,
@@ -1710,7 +1710,7 @@ class pguGrid(gtk.HBox,Signaler):
 	    line_width=ref_gc.line_width, line_style=ref_gc.line_style,
             cap_style=ref_gc.cap_style,
 	    join_style=ref_gc.join_style)
-        
+
         return ngc
 
     def set_line_drawing(self,rlines=2, clines=2, expose=1):
@@ -1719,18 +1719,18 @@ class pguGrid(gtk.HBox,Signaler):
                 rlines- 0 for no lines between rows
                         1 for lines between row titles
                         2 for lines under whole rows
-            
+
                 clines- 0 for no lines between columns
                         1 for lines between column titles
                         2 for lines under whole columns
-                
-                
+
+
         """
         self.draw_row_lines = rlines
         self.draw_col_lines = clines
         if expose == 1:
             self.expose()
-    
+
     def set_default_style(self,tuple):
         """ Set the default style:  a tuple consisting of
             (bg_gc_normal,fg_gc_normal,bg_gc_selected,fg_gc_selected,
@@ -1743,7 +1743,7 @@ class pguGrid(gtk.HBox,Signaler):
         """
         self.default_style_reset_flag = 1
         self.default_style = tuple
-    
+
     def set_default_row_title_style(self,tuple):
         """ Set the default row title style:  a tuple consisting of
             (bg_gc_normal,fg_gc_normal,bg_gc_selected,fg_gc_selected,
@@ -1775,7 +1775,7 @@ class pguGrid(gtk.HBox,Signaler):
             of three integers.
         """
         self.set_default_style((None,None,ctuple,None,None,None))
-        
+
     def set_row_style(self,row_index,style_index):
         """ Assign a style index to a row. row_index
             is either a single integer index or a list
@@ -1823,8 +1823,8 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             self.column_style_index[column_index]=style_index
 
-            
-    
+
+
     def set_row_title_type(self,type,expose=1):
         """Define whether row titles should reflect grid
            row number, or underlying source index.
@@ -1836,10 +1836,10 @@ class pguGrid(gtk.HBox,Signaler):
                        to 1.
         """
         self.opts.set_row_title_type(type)
-        
+
         if expose == 1:
             self.expose()
-            
+
     def define_columns(self,members=None,titles=None,editables=None,
                        formats=None,types=None,nodata=None,
                        justify=None,title_justify=None,
@@ -1949,7 +1949,7 @@ class pguGrid(gtk.HBox,Signaler):
             force_width_chars=list(force_width_chars)
         if type(entry_chars) == type((1,)):
             entry_chars=list(entry_chars)
-        
+
         startx=self.row_title_width+1
         if self.opts.show_row_titles == 1:
             startx=startx+1
@@ -2005,7 +2005,7 @@ class pguGrid(gtk.HBox,Signaler):
                         ci_titles.append(mem)
                     else:
                         ci_titles.append('Column 0')
-                        
+
         elif type(titles) == type(''):
             for idx in ci_mems:
                 ci_titles.append(titles)
@@ -2024,10 +2024,10 @@ class pguGrid(gtk.HBox,Signaler):
                 editopts=1
             else:
                 editopts=0
-                
+
             for idx in ci_mems:
                 ci_edit.append(editopts)
-                    
+
         elif editables in [0,1]:
             for idx in ci_mems:
                 ci_edit.append(editables)
@@ -2039,7 +2039,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: editables must be either '+\
                                'None, 0, 1, or a list.'
-                
+
 
         ci_fmts=[]
         if formats is None:
@@ -2053,13 +2053,13 @@ class pguGrid(gtk.HBox,Signaler):
                     elif item[1] == 'float':
                         schema_fmts[item[0]]="%"+str(item[2])+"."+\
                                               str(item[3])+"f"
-                        
+
                 for idx in ci_mems:
                     if schema_fmts.has_key(idx):
                         ci_fmts.append(schema_fmts[idx])
                     else:
                         ci_fmts.append(None)
-                        
+
             else:
                 for idx in ci_mems:
                     ci_fmts.append(None)
@@ -2096,7 +2096,7 @@ class pguGrid(gtk.HBox,Signaler):
 
                 for mem in ci_mems:
                     ci_types.append(ctype)
-                    
+
             elif self.src_type in [SRC_SHAPES,SRC_SHAPESLAYER]:
                 schema=self.src.get_schema()
                 sd={}
@@ -2108,7 +2108,7 @@ class pguGrid(gtk.HBox,Signaler):
                         ci_types.append(sd[mem])
                     else:
                         ci_types.append('string')
-                        
+
             elif self.src_type == SRC_LISTLIST:
                 for idx in ci_mems:
                     if type(self.src[0][idx]) == type(1.2):
@@ -2120,7 +2120,7 @@ class pguGrid(gtk.HBox,Signaler):
                     else:
                         ctype='string'
                     ci_types.append(ctype)
-                    
+
             elif self.src_type == SRC_LISTOBJ:
                 if ci_mems[0] is None:
                     if type(self.src[0]) == type(''):
@@ -2145,7 +2145,7 @@ class pguGrid(gtk.HBox,Signaler):
             elif self.src_type in [SRC_NONE,SRC_LISTUNDEF]:
                 for mem in ci_mems:
                     ci_types.append(None)
-                    
+
         elif type(types) == type(''):
             for idx in ci_mems:
                 ci_types.append(types)
@@ -2191,7 +2191,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: justify must be either '+\
                                'None, a string, or a list.'
-            
+
 
         ci_tjust=[]
         if title_justify is None:
@@ -2208,7 +2208,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: title_justify must be '+\
                                'either None, a string, or a list.'
-              
+
         ci_fwidth=[]
         if force_width is None:
             for idx in ci_mems:
@@ -2224,7 +2224,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: force_width must be '+\
                                'either None, a string, or a list.'
-              
+
         ci_fwidthc=[]
         if force_width_chars is None:
             for idx in ci_mems:
@@ -2240,7 +2240,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: force_width_chars must be '+\
                                'either None, a string, or a list.'
-     
+
         ci_entryc=[]
         if entry_chars is None:
             for idx in ci_mems:
@@ -2256,7 +2256,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             raise RuntimeError,'define_columns: entry_chars must be '+\
                                'either None, a string, or a list.'
-                
+
         style = self.get_style()
 
         if self.title_font is None:
@@ -2265,7 +2265,7 @@ class pguGrid(gtk.HBox,Signaler):
             except:
                 ##traceback.print_exc()
                 self.title_font = style.get_font()
-                
+
             if self.opts.show_column_titles == 1:    
                 self.column_title_height = self.title_font.ascent + 2*self.pad
             else:
@@ -2287,7 +2287,7 @@ class pguGrid(gtk.HBox,Signaler):
                 ##traceback.print_exc()
                 self.cell_font = style.get_font()
             self.row_height = self.cell_font.ascent + 2*self.pad
-                
+
         for idx in range(len(ci_mems)):
             cwidth=30
             cnew=_column_info(ci_mems[idx],ci_titles[idx],ci_types[idx],
@@ -2308,7 +2308,7 @@ class pguGrid(gtk.HBox,Signaler):
                                  self.cell_font.string_width('W'))*
                          self._ColumnDefs[idx].force_width_chars) + 2*self.pad
                     self._ColumnDefs[idx].force_width = cwidth
-                    
+
             else:
                 cwidth=self.title_font.string_width(self._ColumnDefs[idx].title)+\
                     2*self.pad
@@ -2342,14 +2342,14 @@ class pguGrid(gtk.HBox,Signaler):
         #self.columntitle_style_index=Numeric.ones((self.g_columns,))
 
         self.bCalcAdjustments = True
-        
+
         if expose == 1:
             self.expose()
 
 
     def _update_column_widths(self,expose=1):
         """ Update column widths for new source with same column defs. """
-                
+
         style = self.get_style()
 
         if self.title_font is None:
@@ -2358,7 +2358,7 @@ class pguGrid(gtk.HBox,Signaler):
             except:
                 ##traceback.print_exc()
                 self.title_font = style.get_font()
-                
+
             if self.opts.show_column_titles == 1:    
                 self.column_title_height = self.title_font.ascent + 2*self.pad
             else:
@@ -2380,7 +2380,7 @@ class pguGrid(gtk.HBox,Signaler):
                 ##traceback.print_exc()
                 self.cell_font = style.get_font()
             self.row_height = self.cell_font.ascent + 2*self.pad
-                        
+
         cwidth=30
         startx=self.row_title_width+1
         if self.opts.show_row_titles == 1:
@@ -2413,7 +2413,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.bCalcAdjustments = True  
         if expose == 1:
             self.expose()
-            
+
     def _get_datastr(self,row,column):
         """ Get the underlying source data in cell row,column as a string. """
         cdata=self._get_data(row,column)
@@ -2421,7 +2421,7 @@ class pguGrid(gtk.HBox,Signaler):
         if cdata is None:
             cdata=self._ColumnDefs[column].nodata
             return cdata
-        
+
         if self._ColumnDefs[column].format in ['',None]:
             return str(cdata)
         else:
@@ -2437,19 +2437,19 @@ class pguGrid(gtk.HBox,Signaler):
                     self._ColumnDefs[column].member)
             else:
                 return None
-            
+
             if datastr is None:
                 return None
-            
+
             if self._ColumnDefs[column].type == 'float':
                 data=float(datastr)
             elif self._ColumnDefs[column].type == 'integer':
                 data=int(datastr)
             else:
                 data=datastr
-                
+
             return data
-        
+
         elif self.src_type == SRC_SHAPESLAYER:
             if self.src[row] is not None:
                 datastr = self.src[row].get_property(
@@ -2459,22 +2459,22 @@ class pguGrid(gtk.HBox,Signaler):
 
             if datastr is None:
                 return None
-            
+
             if self._ColumnDefs[column].type == 'float':
                 data=float(datastr)
             elif self._ColumnDefs[column].type == 'integer':
                 data=int(datastr)
             else:
                 data=datastr
-                
+
             return data
-        
+
         elif self.src_type == SRC_LISTLIST:
             if self.src[row] is not None:
                 datastr= self.src[row][self._ColumnDefs[column].member]
             else:
                 return None
-            
+
             if self._ColumnDefs[column].type == 'float':
                 data=float(datastr)
             elif self._ColumnDefs[column].type == 'integer':
@@ -2483,16 +2483,16 @@ class pguGrid(gtk.HBox,Signaler):
                 data=complex(datastr)
             else:
                 data=datastr
-                
+
             return data
-        
+
         elif self.src_type == SRC_LISTOBJ:
             if self._ColumnDefs[column].member is None:
                 datastr=self.src[row]
             else:
                 datastr = eval('self.src[row].'+
                                self._ColumnDefs[column].member)
-                
+
             if self._ColumnDefs[column].type == 'float':
                 data=float(datastr)
             elif self._ColumnDefs[column].type == 'integer':
@@ -2501,7 +2501,7 @@ class pguGrid(gtk.HBox,Signaler):
                 data=complex(datastr)
             else:
                 data=datastr
-                
+
             return data
 
     def get_cell_data(self,row,column):
@@ -2512,7 +2512,7 @@ class pguGrid(gtk.HBox,Signaler):
         """ Get the source data in cell (source) row,(grid) column
             as a string. """
         return self._get_datastr(row,column)
-    
+
     def set_cell_data(self,row,column,value):
         """ Set the source data in cell (source) row, (grid) column. """
         return self._set_data(row,column,value)
@@ -2520,12 +2520,12 @@ class pguGrid(gtk.HBox,Signaler):
     def set_cell_data_string(self,row,column,value):
         """ Set the source data string in cell (source) row,(grid) column. """
         return self._set_datastr(row,column,value)
-    
+
     def _set_datastr(self,row,column,value):
         """ Set the source data in cell row,column to value.
             Note that value is entered as a string that
             must be converted to the required type."""
-        
+
         if self._ColumnDefs[column].type == 'string':
             nvalue=value
         elif self._ColumnDefs[column].type == 'integer':
@@ -2539,10 +2539,10 @@ class pguGrid(gtk.HBox,Signaler):
                 # an error
                 if len(value) == 0:
                     return
-                
+
                 gvutils.error('Invalid data entry.  Integer required.')
                 return
-            
+
         elif self._ColumnDefs[column].type == 'float':
             try:
                 nvalue=float(value)
@@ -2550,10 +2550,10 @@ class pguGrid(gtk.HBox,Signaler):
                 ##traceback.print_exc()
                 if len(value) == 0:
                     return
-                
+
                 gvutils.error('Invalid data entry.  Float required.')
                 return
-            
+
         elif self._ColumnDefs[column].type == 'complex':
             try:
                 nvalue=complex(value)
@@ -2561,10 +2561,10 @@ class pguGrid(gtk.HBox,Signaler):
                 print traceback.print_exc()
                 if len(value) == 0:
                     return
-                
+
                 gvutils.error('Invalid data entry.  Complex required.')
                 return
-            
+
         self._set_data(row,column,nvalue)
 
     def _set_data(self,row,column,value):
@@ -2591,7 +2591,7 @@ class pguGrid(gtk.HBox,Signaler):
                 s2=None
                 if s1 == '':
                     return
-                
+
             if s1 != s2:
                 # The copying is necessary for undo to work properly
                 shape=self.src[row].copy()
@@ -2611,7 +2611,7 @@ class pguGrid(gtk.HBox,Signaler):
                 s2=None
                 if s1 == '':
                     return
-                
+
             if s1 != s2:
                 shape=self.src[row].copy()
                 shape.set_property(self._ColumnDefs[column].member,
@@ -2626,7 +2626,7 @@ class pguGrid(gtk.HBox,Signaler):
                 self.src[row]=value
             else:
                 setattr(self.src[row],self._ColumnDefs[column].member,value)
-        
+
 
     def translate_view_to_row(self,row):
         """ If source is a shapeslayer, translate the view
@@ -2634,7 +2634,7 @@ class pguGrid(gtk.HBox,Signaler):
             that row if it isn't already selected and selection
             is enabled.
         """
-        
+
         if self.view is not None:
             if row > (len(self.src)-1):
                 raise RuntimeError,'translate_row_to_view: tried to '+\
@@ -2669,12 +2669,12 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(row_list) == 0:
             return
-        
+
         self.bCalcAdjustments=True
-        
+
         if self.src_type in [SRC_SHAPES,SRC_SHAPESLAYER]:
             self.src.delete_shapes(row_list)
-            
+
         elif self.src_type in [SRC_LISTLIST,SRC_LISTOBJ]:
             # sort the row list in descending order so that
             # deleting one row won't alter the indices
@@ -2685,9 +2685,9 @@ class pguGrid(gtk.HBox,Signaler):
             for item in row_list:
                 self.src.pop(item)
                 rstyle_index.pop(item)
-                
+
             self.row_style_index=Numeric.array(rstyle_index)
-                
+
             self.refresh()
         else:
             row_list.sort()
@@ -2701,26 +2701,26 @@ class pguGrid(gtk.HBox,Signaler):
                              self.src[first_row+rm_rows:item,:]
                 first_row=item-rm_rows
                 rm_rows=rm_rows+1
-                
+
             newarr[first_row:newrows,:]=self.src[first_row+rm_rows:]
-            
+
             # Update row style list (colours)
             row_list.reverse()
             rstyle_index=list(self.row_style_index)
-            
+
             for item in row_list:
                 rstyle_index.pop(item)
-                
+
             self.row_style_index=Numeric.array(rstyle_index)
-            
+
             self.src=newarr
             self.refresh()
 
         Signaler.notify(self, 'rows-deleted',row_list)
-    
+
     def select_rows(self,row_list,clearfirst=0,expose=1):
         """ Trigger row selection in the grid.
-          
+
           Parameters:
               row_list- list of integers corresponding
                         to source (not grid or subset) index
@@ -2757,31 +2757,31 @@ class pguGrid(gtk.HBox,Signaler):
             self._select_rows(row_list)
 
         self._flags['selecting-rows']=0
-        
+
         if expose == 1:
 
             nlist=self._rows_updated()
-            
+
             if len(row_list) > 0:
                 self.reset_startrow(row_list[len(row_list)-1])
-                
+
             self.expose()
-            
+
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-            
+
         return 1
-               
+
 
     def unselect_rows(self,row_list,clearfirst=0,expose=1):
         """ Trigger row selection in the grid.
-          
+
           Parameters:
               row_list- list of integers corresponding
                         to source (not grid or subset) index
@@ -2816,29 +2816,29 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             if clearfirst == 1:
                 self._select_all_rows()
-                
+
             self._unselect_rows(row_list)
 
         self._flags['selecting-rows']=0
 
         if len(row_list) > 0:
             self.last_toggled_row=row_list[len(row_list)-1]
-            
+
         if expose == 1: 
 
             nlist=self._rows_updated()
-                     	    
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-            
+
         return 1
 
     def select_row(self,row,clearfirst=0,expose=1):
@@ -2858,7 +2858,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.select_row(row,0,expose)
         else:
             self.unselect_row(row,0,expose)
-            
+
     def toggle_rows(self,row_list,expose=1):
         """Toggle multiple rows."""
 
@@ -2873,25 +2873,25 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(unselect) > 0:
             self.unselect_rows(unselect,0,0)
-            
+
         if len(select) > 0:
             self.select_rows(select,0,0)
-            
+
         if expose == 1:
 
             nlist=self._rows_updated()
-            
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                
+
     def toggle_block_rows(self,end_row,expose=1):
         """Toggle a block of rows between self.last_toggled_row
            and end_row.
@@ -2906,7 +2906,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if self.last_toggled_row is None:
             return
-        
+
         g1=self.src2row[self.last_toggled_row]
         g2=self.src2row[end_row]
         if g1 < g2:
@@ -2920,22 +2920,22 @@ class pguGrid(gtk.HBox,Signaler):
             self.last_selected_row=end_row
 
         if expose == 1:
-            
+
             nlist=self._rows_updated()
-            
+
             self.reset_startrow(end_row)
-            
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                
+
     def select_block_rows(self,end_row,expose=1):
         """Select a block of rows between self.last_toggled_row
            and end_row.
@@ -2950,7 +2950,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if self.last_toggled_row is None:
             return
-        
+
         g1=self.src2row[self.last_toggled_row]
         g2=self.src2row[end_row]
         if g1 < g2:
@@ -2963,22 +2963,22 @@ class pguGrid(gtk.HBox,Signaler):
         self.last_selected_row=end_row
 
         if expose == 1:
-            
+
             nlist=self._rows_updated()
-            
+
             self.reset_startrow(end_row)
-            
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                           
+
     def select_all_rows(self,expose=1):
         """Select all rows (updates internal matrices,
            triggers layer selection if relevant,
@@ -2988,33 +2988,33 @@ class pguGrid(gtk.HBox,Signaler):
         # TO DO: ADD CODE TO CHECK PGUGRID OPTIONS
         # AND MAKE SURE NO ILLEGAL SELECTION
         # IS PERMITTED (RAISE ERROR IF IT TRIES)
-        
+
         self._flags['selecting-rows']=1
         if self.src_type == SRC_SHAPESLAYER:
             self.layer.select_all()
         else:
             self._select_all_rows()
-            
+
         self._flags['selecting-rows']=0
 
         self.last_toggled_row=None
         self.last_selected_row=None
-        
+
         if expose == 1:
 
             nlist=self._rows_updated()
-            
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                
+
     def unselect_all_rows(self,expose=1):
         """Unselect all rows (updates internal matrices,
            triggers layer selection if relevant,
@@ -3026,27 +3026,27 @@ class pguGrid(gtk.HBox,Signaler):
             self.layer.clear_selection()
         else:
             self._unselect_all_rows()
-            
+
         self._flags['selecting-rows']=0
 
         self.last_toggled_row=None
         self.last_selected_row=None
-        
+
         if expose == 1:
-            
+
             nlist=self._rows_updated()
-            
+
             self.expose()
 
             if self.src_type == SRC_SHAPESLAYER:
                 self.layer.display_change()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                
+
     def _select_all_rows(self):
         """ Update internal selection matrices. """
         if self.row_selectstate is None:
@@ -3054,7 +3054,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.row_selectstate[:] = 1
         self.selected_rows=range(len(self.row_selectstate))
-        
+
         # check for cross-selection
         if self.opts.selection_info.row_cell == 0:
             if len(self.selected_cells) > 0:
@@ -3076,9 +3076,9 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.row_selectstate[:] = 0
         self.selected_rows=[]
-        
+
         return 1
-    
+
     def _select_rows(self,row_list):
         """ Helper function for select_rows.  Updates
             the selection matrices internally.  
@@ -3095,11 +3095,11 @@ class pguGrid(gtk.HBox,Signaler):
                     self.row_selectstate[row]=1
                     self.selected_rows.append(row)
 
-            
+
         if len(row_list) > 0:
             self.last_selected_row=row_list[len(row_list)-1]
             self.last_toggled_row=row_list[len(row_list)-1]
-        
+
             # check for cross-selection
             if self.opts.selection_info.row_cell == 0:
                 if len(self.selected_cells) > 0:
@@ -3120,9 +3120,9 @@ class pguGrid(gtk.HBox,Signaler):
                 if len(self.selected_columns) > 0:
                     self.unselect_all_columns(expose=0)
                     Signaler.notify(self, 'column-selection-changed',())
-        
+
         return 1
-     
+
     def _unselect_rows(self,row_list):
         """ Helper function for unselect_rows.  Updates
             the selection matrices internally.  
@@ -3138,25 +3138,25 @@ class pguGrid(gtk.HBox,Signaler):
                 if self.row_selectstate[row] == 1:
                     self.row_selectstate[row]=0
                     self.selected_rows.remove(row)
-                
+
         return 1
 
     def select_column(self,column,clearfirst=0,expose=1):
         """Select a single column."""
-        
+
         rval = self.select_columns([column],clearfirst,expose)
         return rval
 
     def select_columns(self,column_list,clearfirst=0,expose=1):
         """Select multiple columns."""
-        
+
         if self.column_selectstate is None:
             # No source is set
             return 0
 
         if clearfirst == 1:
             self.unselect_all_columns(expose=0)
-            
+
         for column in column_list:
             if (len(self.column_selectstate) <= column):
                 raise RuntimeError,'pgugrid: tried to select nonexistent '+\
@@ -3167,27 +3167,27 @@ class pguGrid(gtk.HBox,Signaler):
             if column not in self.selected_columns:
                 self.selected_columns.append(column)
 
-            
+
         if len(column_list) > 0:
             self.last_selected_column=column_list[len(column_list)-1]
             self.last_toggled_column=column_list[len(column_list)-1]
-        
+
 
         if expose == 1:
 
             nlist=self._columns_updated()
-                    
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
 
         return 1
-    
+
     def select_all_columns(self,expose=1):
         """Select all columns."""
 
@@ -3199,16 +3199,16 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.last_toggled_column=None
         self.last_selected_column=None
-        
+
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
@@ -3217,21 +3217,21 @@ class pguGrid(gtk.HBox,Signaler):
 
     def unselect_column(self,column,clearfirst=0,expose=1):
         """Unselect a single column."""
-        
+
         rval = self.unselect_columns([column],clearfirst,expose)
         return rval
-        
+
 
     def unselect_columns(self,column_list,clearfirst=0,expose=1):
         """Unselect multiple columns."""
-        
+
         if self.column_selectstate is None:
             # No source is set
             return 0
 
         if clearfirst == 1:
             self.select_all_columns(expose=0)
-            
+
         for column in column_list:
             if (len(self.column_selectstate) <= column):
                 raise RuntimeError,'pgugrid: tried to select nonexistent '+\
@@ -3244,16 +3244,16 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(column_list) > 0:
             self.last_toggled_column=column_list[len(column_list)-1]
-            
+
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
@@ -3271,22 +3271,22 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.last_toggled_column=None
         self.last_selected_column=None
-        
+
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
 
         return 1
-        
+
 
     def toggle_column(self,column,expose=1):
         """Toggle a single column."""
@@ -3295,7 +3295,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.select_column(column,0,expose)
         else:
             self.unselect_column(column,0,expose)
-                    
+
 
     def toggle_columns(self,column_list,expose=1):
         """Toggle multiple columns."""
@@ -3311,23 +3311,23 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(unselect) > 0:
             self.unselect_columns(unselect,0,0)
-            
+
         if len(select) > 0:
             self.select_columns(select,0,0)
-            
+
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                    
+
 
     def toggle_block_columns(self,end_column,expose=1):
         """Toggle a block of columns between self.last_toggled_column
@@ -3357,16 +3357,16 @@ class pguGrid(gtk.HBox,Signaler):
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-            
+
 
     def select_block_columns(self,end_column,expose=1):
         """Select a block of columns between self.last_toggled_column
@@ -3395,27 +3395,27 @@ class pguGrid(gtk.HBox,Signaler):
         if expose == 1:
 
             nlist = self._columns_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'column-selection-changed',
                         tuple(self.selected_columns))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-      
+
     def select_cell(self,cell,clearfirst=0,expose=1):
         """Select a single cell."""
         rval = self.select_cells([cell],clearfirst,expose=expose)
         return rval
-        
+
 
     def select_cells(self,cell_list,clearfirst=0,expose=1):
         """Select multiple cells.  cell_list is a list of
            (source row, grid column) tuples.
         """
-        
+
         if self.cell_selectstate is None:
             # No source is set
             return 0
@@ -3433,26 +3433,26 @@ class pguGrid(gtk.HBox,Signaler):
                     self.cell_selectstate[cell[0],cell[1]]=1
                     self.selected_cells.append(cell)
 
-            
+
         if len(cell_list) > 0:
             self.last_selected_cell=cell_list[len(cell_list)-1]
             self.last_toggled_cell=cell_list[len(cell_list)-1]
 
-                
+
         if expose == 1:
             nlist=self._cells_updated()
-                      
+
             self.expose()
 
             Signaler.notify(self, 'cell-selection-changed',
                         tuple(self.selected_cells))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
 
         return 1
-            
+
 
     def select_all_cells(self,expose=1):
         """Select all cells.
@@ -3470,7 +3470,7 @@ class pguGrid(gtk.HBox,Signaler):
         # is).  This also applies to row and column
         # selection.  May want to revisit later.  
         self.selected_cells = []
-        
+
         for i in range(self.cell_selectstate.shape[0]):
             for j in range(self.cell_selectstate.shape[1]):
                 self.selected_cells.append((i,j))
@@ -3478,43 +3478,43 @@ class pguGrid(gtk.HBox,Signaler):
 
         self.last_toggled_cell=None
         self.last_selected_cell=None
-        
+
         if expose == 1:
 
             nlist=self._cells_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'cell-selection-changed',
                         tuple(self.selected_cells))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                    
+
 
         return 1
-        
+
 
     def unselect_cell(self,cell,clearfirst=0,expose=1):
         """Unselect a single cell."""
-        
+
         rval = self.unselect_cells([cell],clearfirst,expose)
         return rval
-        
+
 
     def unselect_cells(self,cell_list,clearfirst=0,expose=1):
         """Unselect multiple cells.  cell_list is a list of
            (source row, grid column) tuples.
         """
-        
+
         if self.cell_selectstate is None:
             # No source is set
             return 0
 
         if clearfirst == 1:
             self.select_all_cells(expose=0)
-            
+
         for cell in cell_list:
             if ((self.cell_selectstate.shape[0] <= cell[0]) or
                 (self.cell_selectstate.shape[1] <= cell[1])):
@@ -3533,18 +3533,18 @@ class pguGrid(gtk.HBox,Signaler):
         if expose == 1:
 
             nlist = self._cells_updated()
-            
+
             self.expose()
 
             Signaler.notify(self, 'cell-selection-changed',
                         tuple(self.selected_cells))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
 
         return 1
-                    
+
 
     def unselect_all_cells(self,expose=1):
         """Unselect all cells."""
@@ -3559,20 +3559,20 @@ class pguGrid(gtk.HBox,Signaler):
         self.last_selected_cell=None
 
         if expose == 1:
-            
+
             nlist=self._cells_updated()
 
             self.expose()
 
             Signaler.notify(self, 'cell-selection-changed',
                         tuple(self.selected_cells))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
 
         return 1
-                
+
 
     def toggle_cell(self,cell,expose=1):
         """Toggle a single cell."""
@@ -3581,7 +3581,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.select_cell(cell,0,expose)
         else:
             self.unselect_cell(cell,0,expose)
-         
+
 
     def toggle_cells(self,cell_list,expose=1):
         """Toggle multiple cells."""
@@ -3597,24 +3597,24 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(unselect) > 0:
             self.unselect_cells(unselect,0,0)
-            
+
         if len(select) > 0:
             self.select_cells(select,0,0)
-            
+
         if expose == 1:
 
             nlist = self._cells_updated()     
-                                                
+
             self.expose()
 
             Signaler.notify(self, 'cell-selection-changed',
                         tuple(self.selected_cells))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
-                    
-        
+
+
 
     def toggle_block_cells(self,end_cell,expose=1):
         """Toggle a block of cells between self.last_toggled_cell
@@ -3631,7 +3631,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if self.last_toggled_cell is None:
             return
-        
+
         g1=self.src2row[self.last_toggled_cell[0]]
         g2=self.src2row[end_cell[0]]
         if g1 < g2:
@@ -3652,7 +3652,7 @@ class pguGrid(gtk.HBox,Signaler):
                     tlist.append(ncell)
 
         self.toggle_cells(tlist,expose=expose)
-        
+
         self.last_toggled_cell=end_cell
         if self.cell_selectstate[end_cell[0],end_cell[1]] == 1:
             self.last_selected_cell=end_cell
@@ -3664,7 +3664,7 @@ class pguGrid(gtk.HBox,Signaler):
             Returns notifications that should be sent out
             after expose event.
         """
-        
+
         notifylist=[]
         if len(self.selected_cells) > 0:
             if self.opts.selection_info.row_cell == 0:
@@ -3702,20 +3702,20 @@ class pguGrid(gtk.HBox,Signaler):
                 ulist=list(Numeric.compress(unselect > -1, unselect))
                 if len(ulist) > 0:
                     self.unselect_rows(ulist,expose=0)
-                    
+
                 select=Numeric.where(
                     self.row_selectstate*2+rstate == 1,
                     Numeric.arange(self.s_rows),-1)
                 slist=list(Numeric.compress(select > -1, select))
                 if len(slist) > 0:
                     self.select_rows(slist,expose=0)
-                    
+
                 if ((len(ulist) > 0) or (len(slist) > 0)): 
                     if self.src_type == SRC_SHAPESLAYER:
                         self.layer.display_change()   
                     notifylist.append(('row-selection-changed',
                                 tuple(self.selected_rows)))
-                
+
             if self.opts.selection_info.column_cell == 0:
                 if len(self.selected_columns) > 0:
                     self.unselect_all_columns(expose=0)
@@ -3741,7 +3741,7 @@ class pguGrid(gtk.HBox,Signaler):
                 ulist=list(Numeric.compress(unselect > -1, unselect))
                 if len(ulist) > 0:
                     self.unselect_columns(ulist,expose=0)
-                    
+
                 select=Numeric.where(
                     self.column_selectstate*2+cstate == 1,
                     Numeric.arange(self.g_columns),-1)
@@ -3760,7 +3760,7 @@ class pguGrid(gtk.HBox,Signaler):
                     if self.src_type == SRC_SHAPESLAYER:
                         self.layer.display_change()
                     notifylist.append(('row-selection-changed',()))
-                    
+
             if self.opts.selection_info.column_cell == 3:
                 if len(self.selected_columns) > 0:
                     self.unselect_all_columns(expose=0)
@@ -3785,7 +3785,7 @@ class pguGrid(gtk.HBox,Signaler):
             # No columns are defined yet, so
             # there must be no column/cell selections
             return notifylist
-        
+
         if len(self.selected_rows) > 0:
             if self.opts.selection_info.row_cell == 0:
                 if len(self.selected_cells) > 0:
@@ -3797,49 +3797,49 @@ class pguGrid(gtk.HBox,Signaler):
                 # in selected rows
                 rvec=Numeric.repeat(Numeric.reshape(self.row_selectstate,
                              (self.s_rows,1)),self.g_columns,1)
-                                 
+
                 unselect=Numeric.reshape(Numeric.where(
                     self.cell_selectstate > rvec,1,0),
                     (self.s_rows*self.g_columns,))
                 cind=Numeric.indices((self.s_rows,self.g_columns))
                 rarr=Numeric.reshape(cind[0],(self.s_rows*self.g_columns,))
                 carr=Numeric.reshape(cind[1],(self.s_rows*self.g_columns,))
-                
+
                 rcarr=Numeric.compress(unselect > 0,rarr)
                 ccarr=Numeric.compress(unselect > 0,carr)
                 uarr=Numeric.zeros((rcarr.shape[0],2))
                 uarr[:,0]=rcarr
                 uarr[:,1]=ccarr
-                
+
                 ulist=map(tuple,uarr)
                 if len(ulist) > 0:
                     self.unselect_cells(ulist,expose=0)
                     notifylist.append(('cell-selection-changed',
                                 tuple(self.selected_cells)))
-                    
+
             elif self.opts.selection_info.row_cell == 3:
                 # unselect any selected cells that aren't contained
                 # in selected rows.  Force selection of first cell
                 # in any row that doesn't contain any selected cells
                 # (ensures that row can be unselected again through
                 # grid in shapeslayer case if no row titles are shown)
-                
+
                 rvec=Numeric.repeat(Numeric.reshape(self.row_selectstate,
                              (self.s_rows,1)),self.g_columns,1)
-                                 
+
                 unselect=Numeric.reshape(Numeric.where(
                     self.cell_selectstate > rvec,1,0),
                     (self.s_rows*self.g_columns,))
                 cind=Numeric.indices((self.s_rows,self.g_columns))
                 urarr=Numeric.reshape(cind[0],(self.s_rows*self.g_columns,))
                 ucarr=Numeric.reshape(cind[1],(self.s_rows*self.g_columns,))
-                
+
                 urcarr=Numeric.compress(unselect > 0,urarr)
                 uccarr=Numeric.compress(unselect > 0,ucarr)
                 uarr=Numeric.zeros((urcarr.shape[0],2))
                 uarr[:,0]=urcarr
                 uarr[:,1]=uccarr
-                
+
                 ulist=map(tuple,uarr)
                 if len(ulist) > 0:
                     self.unselect_cells(ulist,expose=0) 
@@ -3855,11 +3855,11 @@ class pguGrid(gtk.HBox,Signaler):
                 slist=map(tuple,sarr)
                 if len(slist) > 0:
                     self.select_cells(slist,expose=0)
-                
+
                 if (len(ulist) > 0) or (len(slist) > 0):                    
                     notifylist.append(('cell-selection-changed',
                                 tuple(self.selected_cells)))
-                    
+
             if self.opts.selection_info.row_column == 0:
                 if len(self.selected_columns) > 0:
                     self.unselect_all_columns(expose=0)
@@ -3877,9 +3877,9 @@ class pguGrid(gtk.HBox,Signaler):
         if (self.editing_cell is not None):
             self.cancel_cell_edit()
             self.unselect_all_cells()
-           
+
         return notifylist
-                    
+
 
     def _columns_updated(self):
         """ Internal function called when column selection has
@@ -3902,26 +3902,26 @@ class pguGrid(gtk.HBox,Signaler):
                     rvec=Numeric.repeat(Numeric.reshape(
                              self.column_selectstate,
                              (1,self.g_columns)),self.s_rows,0)
-                                 
+
                     unselect=Numeric.reshape(Numeric.where(
                         self.cell_selectstate > rvec,1,0),
                         (self.s_rows*self.g_columns,))
                     cind=Numeric.indices((self.s_rows,self.g_columns))
                     rarr=Numeric.reshape(cind[0],(self.s_rows*self.g_columns,))
                     carr=Numeric.reshape(cind[1],(self.s_rows*self.g_columns,))
-                
+
                     rcarr=Numeric.compress(unselect > 0,rarr)
                     ccarr=Numeric.compress(unselect > 0,carr)
                     uarr=Numeric.zeros((rcarr.shape[0],2))
                     uarr[:,0]=rcarr
                     uarr[:,1]=ccarr
-                
+
                     ulist=map(tuple,uarr)
                     if len(ulist) > 0:
                         self.unselect_cells(ulist,expose=0)
                         notifylist.append(('cell-selection-changed',
                                 tuple(self.selected_cells)))
-                    
+
             elif self.opts.selection_info.column_cell == 3:
                 # unselect any selected cells that aren't contained
                 # in selected columns.  Force selection of first cell
@@ -3933,7 +3933,7 @@ class pguGrid(gtk.HBox,Signaler):
                     rvec=Numeric.repeat(Numeric.reshape(
                              self.column_selectstate,
                              (1,self.g_columns)),self.s_rows,0)
-                                 
+
                     unselect=Numeric.reshape(Numeric.where(
                         self.cell_selectstate > rvec,1,0),
                         (self.s_rows*self.g_columns,))
@@ -3942,13 +3942,13 @@ class pguGrid(gtk.HBox,Signaler):
                                           (self.s_rows*self.g_columns,))
                     ucarr=Numeric.reshape(cind[1],
                                           (self.s_rows*self.g_columns,))
-                
+
                     urcarr=Numeric.compress(unselect > 0,urarr)
                     uccarr=Numeric.compress(unselect > 0,ucarr)
                     uarr=Numeric.zeros((urcarr.shape[0],2))
                     uarr[:,0]=urcarr
                     uarr[:,1]=uccarr
-                
+
                     ulist=map(tuple,uarr)
                     if len(ulist) > 0:
                         self.unselect_cells(ulist,expose=0)
@@ -3964,11 +3964,11 @@ class pguGrid(gtk.HBox,Signaler):
                     slist=map(tuple,sarr)
                     if len(slist) > 0:
                         self.select_cells(slist,expose=0)
-                
+
                     if (len(ulist) > 0) or (len(slist) > 0):           
                         notifylist.append(('cell-selection-changed',
                                 tuple(self.selected_cells)))
-                    
+
             if self.opts.selection_info.row_column == 0:
                 if len(self.selected_rows) > 0:
                     self.unselect_all_rows(expose=0)
@@ -3992,7 +3992,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         return notifylist
 
-                                           
+
     def _update_column_width(self,column,cell_width):
         """Reset a column's width, and update other
            columns' start positions accordingly.
@@ -4002,7 +4002,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         startx=self._ColumnDefs[column].start_x +\
                self._ColumnDefs[column].width + 1
-        
+
         for idx in range(column+1,self.g_columns):
             self._ColumnDefs[idx].start_x=startx
             startx=startx+self._ColumnDefs[idx].width+1
@@ -4017,25 +4017,25 @@ class pguGrid(gtk.HBox,Signaler):
         """
         if not (self.flags() & gtk.REALIZED):
             return
-        
+
         c_row = self.src2row[row]
         if c_row < 0:
             # requested row is either None, or is not
             # part of the currently displayed subset.
             return
-        
+
         win = self._area.window
         width, height = win.get_size()
 
         base_height = height
         column_title_height = self.column_title_height
-        
+
         # The extra 1's account for the 1-pixel wide lines drawn
         # between cells.
         data_height = base_height - column_title_height -1
         if self.opts.show_column_titles == 1:
             data_height=data_height - 1
-            
+
         disp_rows = int(data_height / ( self.row_height + 1 )) + 1
         first_row = self.start_row
         last_row = first_row + disp_rows - 1
@@ -4065,20 +4065,20 @@ class pguGrid(gtk.HBox,Signaler):
         """
         if not (self.flags() & gtk.REALIZED):
             return
-        
-        
+
+
         win = self._area.window
         width, height = win.get_size()
-        
+
         base_width = width
         row_title_width = self.row_title_width
-        
+
         # The extra 1's account for the 1-pixel wide lines drawn
         # between cells.
         data_width = base_width - row_title_width -1
         if self.opts.show_row_titles == 1:
             data_width=data_width - 1
-            
+
         cstartx = self._ColumnDefs[self.start_column].start_x
         cendx=cstartx+data_width
 
@@ -4090,7 +4090,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         nstartx=self._ColumnDefs[ccolumn].start_x
         nendx=nstartx+self._ColumnDefs[ccolumn].width
-        
+
         if ((nstartx >= cstartx) and (nendx < cendx)):
             return
 
@@ -4099,7 +4099,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.hadj.set_value(ccolumn)
         self.hadj.value_changed()
 
-                        
+
     def click( self, widget, event ):
         """ User has clicked on the widget.
         """
@@ -4133,14 +4133,14 @@ class pguGrid(gtk.HBox,Signaler):
             current = 1
             if self.opts.show_row_titles == 1:
                 current = self.row_title_width+2
-                
+
             for i in range(self.start_column,len(self.column_widths)):
                 current = current + self.column_widths[i] + 1
                 if event.x < current:
                     gColumn = i
                     break
-            
-        
+
+
         #
         # Determine the row.  If its -1 then they clicked a 'title'.  If it
         # is None then they clicked off the bottom edge.
@@ -4157,10 +4157,10 @@ class pguGrid(gtk.HBox,Signaler):
             current=1
             if self.opts.show_column_titles == 1:
                 current = self.column_title_height+2
-                
+
             row = self.start_row+\
                   int(Numeric.floor((event.y-current) /(self.row_height + 1)))
-                      
+
             if row < self.g_rows:
                 gRow = row
 
@@ -4174,7 +4174,7 @@ class pguGrid(gtk.HBox,Signaler):
             sRow=self.row2src[gRow]
         else:
             sRow = -1
-            
+
         clickstr=None
         clickarg=None
 
@@ -4188,7 +4188,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.last_click_row=None
             self.last_click_column=None
             self.last_click_button=None
-            
+
             if event.button == 1:
                 if gRow == -1:
                     # A column header was clicked
@@ -4211,13 +4211,13 @@ class pguGrid(gtk.HBox,Signaler):
                 else:
                     clickstr='cell-shift-right'
                     clickarg=(sRow,gColumn)
-                    
+
         elif (event.state & gtk.gdk.CONTROL_MASK):
             self.last_click_cell=None
             self.last_click_row=None
             self.last_click_column=None
             self.last_click_button=None
-            
+
             if event.button == 1:
                 if gRow == -1:
                     # A column header was clicked
@@ -4314,7 +4314,7 @@ class pguGrid(gtk.HBox,Signaler):
                         clickarg=(sRow,gColumn)
                         self.last_click_cell=(sRow,gColumn)                
 
-    
+
         if ((clickstr is not None) and
             (self.opts.events.has_key(clickstr))):
             # click event is recognized, and current
@@ -4340,7 +4340,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.select_row(clickarg[0],clearfirst=1,expose=1)
         elif clickfunc == 'unselect-single-row':
             # Unselect the current row (and only that row)
@@ -4348,7 +4348,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.unselect_row(clickarg[0],clearfirst=0,expose=1)
         elif clickfunc == 'toggle-single-row':
             # Toggle a single row, making sure all other rows
@@ -4357,13 +4357,13 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             if self.row_selectstate[clickarg[0]] == 1:
                 self.unselect_all_rows()
             else:
                 self.unselect_all_rows(expose=0)
                 self.select_row(clickarg[0])
-                       
+
         elif clickfunc == 'toggle-block-rows':
             # Toggle a block of rows between the last selected
             # row and the current one.
@@ -4371,7 +4371,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.toggle_block_rows(clickarg[0],expose=1)             
         elif clickfunc == 'toggle-multiple-rows':
             # Toggle a single row without affecting other rows
@@ -4379,9 +4379,9 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.toggle_row(clickarg[0],expose=1)
-                       
+
         elif clickfunc == 'select-block-rows':
             # Select a block of rows between the last selected
             # row and the current one.
@@ -4389,7 +4389,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.select_block_rows(clickarg[0],expose=1)             
         elif clickfunc == 'select-multiple-rows':
             # Select a single row without affecting other rows
@@ -4397,7 +4397,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.select_row(clickarg[0],expose=1)
         elif clickfunc == 'select-single-column':
             # Select a single column at a time, clearing all
@@ -4406,7 +4406,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.select_column(clickarg[0],clearfirst=1,expose=1)
         elif clickfunc == 'unselect-single-column':
             # Unselect the current column
@@ -4414,7 +4414,7 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.unselect_column(clickarg[0],clearfirst=0,expose=1)
         elif clickfunc == 'toggle-single-column':
             # Toggle a single column, making sure all other columns
@@ -4423,13 +4423,13 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             if self.column_selectstate[clickarg[0]] == 1:
                 self.unselect_all_columns()
             else:
                 self.unselect_all_columns(expose=0)
                 self.select_column(clickarg[0])
-            
+
         elif clickfunc == 'toggle-block-columns':
             # Toggle a block of columns between the last selected
             # column and the current one.
@@ -4437,18 +4437,18 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.toggle_block_columns(clickarg[0],expose=1)             
-            
+
         elif clickfunc == 'toggle-multiple-columns':
             # Toggle a single column without affecting other columns
             if clickstr in _row_clickevents:
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.toggle_column(clickarg[0],expose=1)
-            
+
         elif clickfunc == 'select-block-columns':
             # Select a block of columns between the last selected
             # column and the current one.
@@ -4456,18 +4456,18 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.select_block_columns(clickarg[0],expose=1)             
-            
+
         elif clickfunc == 'select-multiple-columns':
             # Toggle a single column without affecting other columns
             if clickstr in _row_clickevents:
                 txt='pgugrid: column cannot be selected in response\n'
                 txt=txt+'         to a row click event'
                 raise RuntimeError,txt
-            
+
             self.select_column(clickarg[0],expose=1)
-            
+
         elif clickfunc == 'select-single-cell':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
@@ -4475,35 +4475,35 @@ class pguGrid(gtk.HBox,Signaler):
                 raise RuntimeError,txt
 
             self.select_cell(clickarg,clearfirst=1,expose=1)
-            
+
         elif clickfunc == 'unselect-single-cell':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
                 txt=txt+'          to a row or column click event.'
                 raise RuntimeError,txt
-            
+
             self.unselect_cell(clickarg,clearfirst=0,expose=1)
-            
+
         elif clickfunc == 'toggle-single-cell':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
                 txt=txt+'          to a row or column click event.'
                 raise RuntimeError,txt
-            
+
             if self.cell_selectstate[clickarg[0],clickarg[1]] == 1:
                 self.unselect_all_cells()
             else:
                 self.unselect_all_cells(expose=0)
                 self.select_cell(clickarg)
-             
+
         elif clickfunc == 'toggle-block-cells':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
                 txt=txt+'          to a row or column click event.'
                 raise RuntimeError,txt
-            
+
             self.toggle_block_cells(clickarg,expose=1)
-            
+
         elif clickfunc == 'toggle-multiple-cells':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
@@ -4511,14 +4511,14 @@ class pguGrid(gtk.HBox,Signaler):
                 raise RuntimeError,txt
 
             self.toggle_cell(clickarg,expose=1)
-            
+
         elif clickfunc == 'start-cell-edit':
             if clickstr not in _cell_clickevents:
                 txt='pgugrid: cell cannot be selected in response\n'
                 txt=txt+'          to a row or column click event.'
                 raise RuntimeError,txt
             self.start_cell_edit(clickarg)
-            
+
         elif clickfunc == 'sort-by-column':
             # Sort by column (ascending)
             if clickstr in _row_clickevents:
@@ -4531,7 +4531,7 @@ class pguGrid(gtk.HBox,Signaler):
                 self.sort_by_column(clickarg[0],expose=1)
             else: 
                 self.sort_by_column(clickarg[1],expose=1)
-                
+
         elif clickfunc == 'reverse-sort-by-column':
             # Sort by column (descending)
             if clickstr in _row_clickevents:
@@ -4571,20 +4571,20 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='pgugrid: row cannot be selected in response\n'
                 txt=txt+'         to a column click event'
                 raise RuntimeError,txt
-            
+
             self.translate_view_to_row(clickarg[0])
-            
+
         else:
             raise '_perform_click_action: unrecognized click function'
 
-        
+
     def changed( self, widget ):
         """Track changes to the scrollbars and record the 
         """
         self.start_row = int(self.vadj.value)
         self.start_column = int(self.hadj.value)
         self.expose()
-        
+
     def refresh( self, *args ):
         """ Refresh grid from source (use if source has been
             internally or externally changed).
@@ -4593,23 +4593,23 @@ class pguGrid(gtk.HBox,Signaler):
         if self.editing_cell is not None:
             self.cancel_cell_edit()
             self.unselect_all_cells(expose=0)
-        
+
         if self.src_type == SRC_LISTUNDEF:
             if len(self.src) == 0:
                 self.expose()
                 return
-            
+
             if type(self.src[0]) == type([]):
                 self.src_type=SRC_LISTLIST
             elif type(self.src[0]) == type((1,)):
                 self.src_type=SRC_LISTLIST
             else:
                 self.src_type=SRC_LISTOBJ
-                
+
         self._generate_row_indices()
-  
+
         self.expose()
-        
+
 
     def resize_to_default(self,max_width=400,max_height=300):
         """ Resize to the default size calculated by
@@ -4632,7 +4632,7 @@ class pguGrid(gtk.HBox,Signaler):
             return
 
         srow=self.selected_rows[len(self.selected_rows)-1]
-        
+
         if srow not in self.row2src:
             # selected row is not in the display.  do nothing.
             return
@@ -4653,7 +4653,7 @@ class pguGrid(gtk.HBox,Signaler):
         if type(grid_row) in [type([]),type(())]:
             if len(grid_row) == 0:
                 return ()
-            
+
             garr=Numeric.array(grid_row)
             mask=Numeric.where(garr >= len(self.row2src),
                                -1,
@@ -4691,7 +4691,7 @@ class pguGrid(gtk.HBox,Signaler):
             garr=Numeric.where(mask>0,Numeric.take(self.src2row,list(sarr)),
                                mask)
             garr=Numeric.maximum(garr,-1)
-                               
+
             return tuple(garr)
         else:
             if (src_row > -1) and (src_row < len(self.src2row)):
@@ -4733,12 +4733,12 @@ class pguGrid(gtk.HBox,Signaler):
             force_widths.append(item.force_width)
             force_width_chars.append(item.force_width_chars)
             entry_chars.append(item.entry_chars)
-            
+
         return (members,titles,editables,formats,types,nodatas,
                 justifys,title_justifys,widths,start_xs,force_widths,
                 force_width_chars, entry_chars)
 
-        
+
     def get_default_size(self,max_width=400,max_height=300):
         """ Calculate a sensible size to allocate for the grid.
             If size is greater than max_width x max_height,
@@ -4748,7 +4748,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if len(self._ColumnDefs) == 0:
             return (max_width,max_height)
-        
+
         # offsets account for scrollbars and finite line width
         if self.vscroll_shown == 1:
             cwidth=self._ColumnDefs[self.g_columns-1].start_x+\
@@ -4756,19 +4756,19 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             cwidth=self._ColumnDefs[self.g_columns-1].start_x+\
                    self._ColumnDefs[self.g_columns-1].width+2
-            
+
         idx=self.g_columns-1
         while ((cwidth > max_width) and (idx > 0)):
             cwidth=cwidth-self._ColumnDefs[idx].width-1
             idx=idx-1
-        
+
         cwidth=min([cwidth,max_width])
 
         if self.hscroll_shown == 1: 
             cheight=(self.row_height+1)*len(self.row2src)+20
         else:
             cheight=(self.row_height+1)*len(self.row2src)+2
-            
+
         if self.opts.show_column_titles == 1:
             cheight=cheight+self.column_title_height+1
 
@@ -4777,7 +4777,7 @@ class pguGrid(gtk.HBox,Signaler):
              Numeric.ceil(float((cheight-max_height))/(self.row_height+1)))))
 
         return (cwidth,cheight)
-        
+
     def expose( self, *args ):
         """Draw the widget
         """
@@ -4786,7 +4786,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         if self._flags['frozen'] == 1:
             return
-        
+
         #
         # create a memory pixmap to render into
         #
@@ -4796,14 +4796,14 @@ class pguGrid(gtk.HBox,Signaler):
         except:
             print traceback.print_exc()
             return
-        
+
         pix = self._pixmap
-        
+
         #
         # prefetch the style
         #
         style = self.get_style()
-            
+
         if self.style_list[0] is None:
             # Start by creating default styles.  Note that before,
             # gtk.STATE_PRELIGHT was used to indicate selected cells,
@@ -4812,10 +4812,10 @@ class pguGrid(gtk.HBox,Signaler):
             # convention.
             cellstyle=style.copy()
             cellstyle.bg_gc[gtk.STATE_NORMAL]=style.white_gc
-        
+
             cellstyle.bg_gc[gtk.STATE_SELECTED]=style.bg_gc[gtk.STATE_PRELIGHT]
             self.style_list[0]=cellstyle
-            
+
             # row titles
             titlestyle=style.copy()
             titlestyle.bg_gc[gtk.STATE_NORMAL]=style.bg_gc[gtk.STATE_NORMAL]
@@ -4844,7 +4844,7 @@ class pguGrid(gtk.HBox,Signaler):
         if self.styles_to_add is not None:
             for item in self.styles_to_add:
                 self._add_style(item[0],item[1])
-                
+
             self.styles_to_add=None
 
         # Note on drawing order:
@@ -4862,7 +4862,7 @@ class pguGrid(gtk.HBox,Signaler):
         #       - For each cell in the column, draw the background
         #         rectangle, then the text.
         #
-        
+
         #
         # clear the pixmap
         #
@@ -4892,15 +4892,15 @@ class pguGrid(gtk.HBox,Signaler):
 
             if self.bCalcAdjustments:
                 self.calc_adjustments()
-                
+
             return False
-   
-        
+
+
         #
         # track changes in column width because of wide columns
         #
         bResetAdj = False
-        
+
         #
         # calculate the number of rows to draw
         #
@@ -4909,7 +4909,7 @@ class pguGrid(gtk.HBox,Signaler):
         data_height = base_height - column_title_height - 1
         if self.opts.show_column_titles == 1:
             data_height=data_height-1
-            
+
         disp_rows = int(Numeric.floor(
             data_height / ( self.row_height + 1 ))) + 1
 
@@ -4918,7 +4918,7 @@ class pguGrid(gtk.HBox,Signaler):
         if last_row > self.g_rows-1:
             last_row = self.g_rows-1
             disp_rows=last_row-first_row+1
-  
+
         first_column = self.start_column
         last_column = self.g_columns
 
@@ -4929,11 +4929,11 @@ class pguGrid(gtk.HBox,Signaler):
                        self.column_title_height
             rt_offset=self.column_title_height + self.row_height + 1 - \
                       self.pad
-            
+
             if self.opts.show_column_titles == 1:
                 rt_height = rt_height + 1
                 rt_offset = rt_offset + 1
-   
+
             #print "1: draw_rectangle"
             pix.draw_rectangle(self.style_list[1].bg_gc[gtk.STATE_NORMAL],
                                True,0,0,
@@ -4951,23 +4951,23 @@ class pguGrid(gtk.HBox,Signaler):
                     pix.draw_text(self.title_font,
                                   style.fg_gc[gtk.STATE_NORMAL],
                                   self.pad,rt_offset,str(c_row))
-  
+
                 rt_offset = rt_offset + self.row_height + 1
-                          
-            
+
+
         #
         # starting x for the the first column (far left line)
         #
         x = self.row_title_width
         if self.opts.show_row_titles == 1:
             x = x+1
-        
+
 
         #
         # loop through a column at a time
         #
         row_is_selected=[]
-        
+
         rstyles=[]   # Draw styles
         cstyles=[]
         cjust=[]   # Column justification
@@ -4978,7 +4978,7 @@ class pguGrid(gtk.HBox,Signaler):
             #
             if x > width:
                 continue
-            
+
             cells=[]            
             # Info on whether or not shapes are selected (1 if selected)
             cell_is_selected = []
@@ -4994,7 +4994,7 @@ class pguGrid(gtk.HBox,Signaler):
                     continue
 
 		txt=self._get_datastr(idx,i)
-                
+
                 if txt is None:
                     txt = ""
 
@@ -5005,15 +5005,15 @@ class pguGrid(gtk.HBox,Signaler):
                 else:
                     cell_width = self.cell_font.string_width( txt ) + 2*self.pad
                     real_cell_width = cell_width
-                    
+
                 cells.append( (txt, real_cell_width) )
                 cell_is_selected.append(
                     self.cell_selectstate[idx,i])
-                
+
                 if i == first_column:
                     row_is_selected.append(self.row_selectstate[idx])
                     rstyles.append(self.style_list[self.row_style_index[idx]])
-   
+
                 if cell_width > self.column_widths[i]:
                     bResetAdj = True
                     self.column_widths[i] = cell_width
@@ -5032,12 +5032,12 @@ class pguGrid(gtk.HBox,Signaler):
                 title_width = self.title_font.string_width(
                         self._ColumnDefs[i].title ) + 2*self.pad
                 real_title_width = title_width
-                
+
             if title_width > self.column_widths[i]:
                 bResetAdj=True
                 self.column_widths[i]=title_width
                 self._update_column_width(i,title_width)
-            
+
             #
             # draw the 'button'
             #
@@ -5064,7 +5064,7 @@ class pguGrid(gtk.HBox,Signaler):
                 else:
                     tx = x + ( ( self.column_widths[i] -
                                  real_title_width ) / 2 )
-                    
+
                 #print '3: draw_text'
                 pix.draw_text( self.title_font, 
                                style.fg_gc[gtk.STATE_NORMAL], 
@@ -5073,12 +5073,12 @@ class pguGrid(gtk.HBox,Signaler):
                                self._ColumnDefs[i].title )
 
                 y = y+self.column_title_height + 1
-                
+
             #
             # draw the horizontal line below the title
             #
 
-            
+
             for j in range( len(cells) ): 
                 if cell_is_selected[j]:  
                     #print "3: draw_rectangle"
@@ -5112,7 +5112,7 @@ class pguGrid(gtk.HBox,Signaler):
                                        y, 
                                        self.column_widths[i]+1,
                                        self.row_height+1)  
-                    
+
                 y = y + self.row_height + 1
 
                 if cjust[i-first_column] == 0:
@@ -5127,13 +5127,13 @@ class pguGrid(gtk.HBox,Signaler):
                               style.fg_gc[gtk.STATE_NORMAL], 
                               cx+self.pad, y-self.pad, cells[j][0])
 
-                              
+
             #
             # where does the line go
             #
             ly = y - 1
             lx = x + self.column_widths[i] + 1
-  
+
             #
             #advance to next column
             #
@@ -5187,7 +5187,7 @@ class pguGrid(gtk.HBox,Signaler):
 
         for i in range(first_row, last_row+1):
             gheight = gheight + self.row_height + 1
-        
+
         if dlcase in [2,4,5,6,7,8]:
             # lines left, right, top, bottom
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
@@ -5216,13 +5216,13 @@ class pguGrid(gtk.HBox,Signaler):
                               self.column_title_height+1,
                               gwidth,self.column_title_height+1)
                 roffset = self.row_title_width + 1
-                
+
             for i in range( first_column, last_column):
                 pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                               roffset,0,
                               roffset,self.column_title_height+1)
                 roffset = roffset + self.column_widths[i] + 1
-                
+
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                           roffset,0,
                           roffset,self.column_title_height+1)
@@ -5244,13 +5244,13 @@ class pguGrid(gtk.HBox,Signaler):
                               self.column_title_height+1,
                               self.row_title_width+1,gheight)
                 coffset = self.column_title_height + 1
-                
+
             for i in range( first_row, last_row+1):
                 pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                               0,coffset,
                               self.row_title_width+1,coffset)
                 coffset = coffset + self.row_height + 1
-                
+
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                           0,coffset,
                           self.row_title_width+1,coffset)
@@ -5261,24 +5261,24 @@ class pguGrid(gtk.HBox,Signaler):
                 roffset = 0
             else:
                 roffset = self.row_title_width + 1
-                
+
             for i in range( first_column, last_column):
                 pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                               roffset,0,
                               roffset,gheight)
                 roffset = roffset + self.column_widths[i] + 1
-                
+
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                           roffset,0,
                           roffset,gheight)
-                
+
         if dlcase in [6,7,8]:
             # lines between rows
             if self.opts.show_column_titles == 0:
                 coffset = 0
             else:
                 coffset = self.column_title_height + 1
-                
+
             for i in range( first_row, last_row+1):
                 pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                               0,coffset,
@@ -5287,8 +5287,8 @@ class pguGrid(gtk.HBox,Signaler):
             pix.draw_line(style.fg_gc[gtk.STATE_INSENSITIVE],
                           0,coffset,
                           gwidth,coffset)
-                
-            
+
+
         #draw the backing pixmap onto the screen
         win.draw_drawable(style.white_gc, self._pixmap, 0, 0, 0, 0, 
                                width, height )
@@ -5316,7 +5316,7 @@ class pguGrid(gtk.HBox,Signaler):
                     locy=locy+1
 
                 self._layout.move(self.editbox,locx,locy)
-            
+
         if bResetAdj or self.bCalcAdjustments:
             self.calc_adjustments()
 
@@ -5338,7 +5338,7 @@ class pguGrid(gtk.HBox,Signaler):
             nheight=nsizetuple[3]-18
         else:    
             nheight=nsizetuple[3]
-            
+
         self._area.set_size_request(nwidth,nheight)
 
     def configure( self, widget, event, *args ):
@@ -5353,7 +5353,7 @@ class pguGrid(gtk.HBox,Signaler):
         a_win = self._area.window
         w,h = a_win.get_size()
         self._pixmap = gtk.gdk.Pixmap( a_win, w, h)
-        
+
         style = self.get_style()
 
         if self.title_font is None:
@@ -5366,7 +5366,7 @@ class pguGrid(gtk.HBox,Signaler):
                 self.column_title_height = self.title_font.ascent + 2*self.pad
             else:
                 self.column_title_height = 0
-            
+
 
             if self.opts.show_row_titles == 1:
                 if (self.src is not None):
@@ -5376,7 +5376,7 @@ class pguGrid(gtk.HBox,Signaler):
                     self.row_title_width=0
             else:
                 self.row_title_width=0
-            
+
         if self.cell_font is None:
             try:
                 self.cell_font = gtk.load_font( self.cell_font_spec )
@@ -5386,7 +5386,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.row_height = self.cell_font.ascent + 2*self.pad
 
         self.bCalcAdjustments=True
-      
+
     def calc_adjustments( self ):
         """Recalculate the adjustment settings
         """
@@ -5397,13 +5397,13 @@ class pguGrid(gtk.HBox,Signaler):
         self.updating = True
         #horizontal min/max are 0 and max line length - page size
         hpos = self.hadj.value
-        
+
         h_min = 0
-        
+
         # Extra 1's account for 1-pixel wide lines between cells;
         w,h = self._area.window.get_size()
         win_width = w - 1 - self.row_title_width
-        
+
         if self.opts.show_row_titles == 1:
             win_width = win_width - 1
 
@@ -5422,24 +5422,24 @@ class pguGrid(gtk.HBox,Signaler):
                 (needed_clicks < self.g_columns-1)):
                 needed_clicks=needed_clicks+1
 
-            
+
         h_max=needed_clicks+1
 
         self.hadj.set_all( hpos, h_min, h_max, 1, 1, 1 )
         self.hadj.changed()
-      
+
         vpos = self.vadj.value
         v_min = 0
         cells_height = h - \
                      self.column_title_height - 1
-                                
+
         if self.opts.show_column_titles == 1:
             cells_height=cells_height - 1
 
         rows = Numeric.floor(float(cells_height) / (self.row_height+1))
-        
+
         v_max=self.g_rows
-            
+
         v_max = max( 0, v_max - rows ) + 1
 
         self.vadj.set_all( vpos, v_min, v_max, 1, 1, 1)
@@ -5458,7 +5458,7 @@ class pguGrid(gtk.HBox,Signaler):
             elif (needed_clicks != 0) and (self.hscroll_shown != 1):
                 self.hsframe.show()
                 self.hscroll_shown = 1
-      
+
         if (self.vscroll_policy == 0) and (self.vscroll_shown != 1):
             self.vsframe.show()
             self.vscroll_shown = 1
@@ -5472,21 +5472,21 @@ class pguGrid(gtk.HBox,Signaler):
             elif (v_max - v_min > 1) and (self.vscroll_shown != 1):
                 self.vsframe.show()
                 self.vscroll_shown = 1 
-            
+
         self.bCalcAdjustments = False
         self.updating = False
 
     def set_scroll_policy(self, hpolicy, vpolicy, expose=1):
         """ Set the policy for showing horizontal
             and vertical scrollbars.
-            
+
             Inputs:
                 hpolicy- integer
                 vpolicy- integer
                 expose- whether or not to immediately
                         redraw the grid (0 to not redraw,
                         1 to redraw- defaults to 1)
-                        
+
             Policy values: 0- always
                            1- automatic
                            2- never
@@ -5498,7 +5498,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.bCalcAdjustments = True
         if expose == 1:
             self.expose()
-        
+
     def clear(self,*args):
         """ Clear all grid settings, disconnect from
             source signals.
@@ -5542,9 +5542,9 @@ class pguGrid(gtk.HBox,Signaler):
         self.start_column = 0
 
         self.last_row = 0
-        
+
         self.column_widths = []
-        
+
         #flag to recalculate the adjustments
         self.bCalcAdjustments = True
 
@@ -5608,7 +5608,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.last_click_row=None
         self.last_click_column=None
         self.last_click_button=None
-        
+
         #set to true if changing some value that would end up causing multiple
         #expose events or an endless loop even.
         self.updating = False
@@ -5616,7 +5616,7 @@ class pguGrid(gtk.HBox,Signaler):
         # to empty values
         self.src=None
         self.src_type=SRC_NONE
-        
+
         # Indices to map from source index to
         # grid row index, and vice versa.
         # -2 is in src2row to indicate that
@@ -5664,7 +5664,7 @@ class pguGrid(gtk.HBox,Signaler):
         #self.columntitle_style_index=None
 
         self.editing_cell=None
-        
+
     def layer_subselection_cb(self,layer,*ignored):
         # When a selection changes, a the selected list is changed, 
         # then the selection-changed signal is sent out, then
@@ -5683,7 +5683,7 @@ class pguGrid(gtk.HBox,Signaler):
             # when an invalid area is drawn.
             # Return if this is the case.
             return
-        
+
         if subselection != -1:
             self.last_selected_row=subselection
             self.last_toggled_row=subselection
@@ -5719,9 +5719,9 @@ class pguGrid(gtk.HBox,Signaler):
         self._select_rows(shps)
 
         if self._flags['selecting-rows'] == 0:
-            
+
             nlist=self._rows_updated()
-                    
+
             if (len(shps) == 0) or (len(nlist) > 0):
                 # If no shapes are selected, layer_subselection_cb
                 # won't be called, so layer_selection_cb should do
@@ -5729,7 +5729,7 @@ class pguGrid(gtk.HBox,Signaler):
                 self.expose()
 
             Signaler.notify(self, 'row-selection-changed',tuple(self.selected_rows))
-            
+
             if len(nlist) > 0:
                 for item in nlist:
                     Signaler.notify(self, item[0],item[1])
@@ -5743,7 +5743,7 @@ class pguGrid(gtk.HBox,Signaler):
         if self.layer_subselection_changed_id is not None:
             self.src.handler_block(self.layer_subselection_changed_id)
         self._flags['frozen']=1
-        
+
     def thaw(self,expose=1):
         """ Thaw and expose if desired. """
         if self.source_changed_id is not None:
@@ -5757,12 +5757,12 @@ class pguGrid(gtk.HBox,Signaler):
 
         if expose == 1:
             self.expose()
-                    
+
     def sort_by_column( self, column=None,reverse=None,expose=1 ):
         """ Sort the grid rows according to the
             values in one of the columns.
         """
-        
+
         if ((self.src is None) or (len(self.src) < 1)):
             return
 
@@ -5771,12 +5771,12 @@ class pguGrid(gtk.HBox,Signaler):
             column=self.sort_column
         else:
             self.sort_column=column
-            
+
         if reverse is None:
             reverse=self.sort_reverse
         else:
             self.sort_reverse=reverse
-          
+
         if column > len(self._ColumnDefs):
             txt='pgugrid: attempted to sort by nonexistent column '+str(column)
             raise RuntimeError,txt
@@ -5790,7 +5790,7 @@ class pguGrid(gtk.HBox,Signaler):
         else:
             for s_row in self.row2src:
                 ind_list.append((self._get_data(s_row,self.sort_column),s_row))
-            
+
         ind_list.sort()
         if self.sort_reverse == 1:
             ind_list.reverse()
@@ -5799,14 +5799,14 @@ class pguGrid(gtk.HBox,Signaler):
             self.row2src[idx]=ind_list[idx][1]
             self.src2row[ind_list[idx][1]]=idx
 
-            
+
         if expose == 1:
             if self.last_selected_row is not None:
                 self.reset_startrow(self.last_selected_row)
-            
+
             self.expose()
 
-          
+
 class pguGridWin(gtk.Window):
     def __init__(self,title,selection_mode=1,source=None,config=None):
         """ selection mode: 0 for no row selection, 1
@@ -5814,7 +5814,7 @@ class pguGridWin(gtk.Window):
 
             source: source to initialize grid with
         """
-        
+
         gtk.Window.__init__(self)
         self.set_title(title)
         if config is None:
@@ -5824,26 +5824,26 @@ class pguGridWin(gtk.Window):
                 config=(2,1,0,0,0,0,0,0)
             else:
                 config=(2,2,0,0,0,0,0,0)
-            
+
         self.grid=pguGrid(config)
         self.add(self.grid)
-        
+
         self.set_resizable(True)
         if source is not None:
             self.set_source(source)
-            
+
         self.show_all()
         if source is not None:
             self.grid.resize_to_default(800,600)
-            
-            
+
+
     def set_source(self,src,view=None):
         self.grid.set_source(src,view)
 
     def set_subset(self,indices):
         self.grid.set_subset(indices)
 
-                  
+
 class pguTestGridWin(gtk.Window):
     def __init__(self,title,config=None,source=None):
         gtk.Window.__init__(self)
@@ -5852,13 +5852,13 @@ class pguTestGridWin(gtk.Window):
             config=(2,1,0,1,0,1,0,0)
         self.grid=pguGrid(config)
         self.add(self.grid)
-        
+
         self.set_resizable(True)
         if source is not None:
             self.set_source(source)
             self.grid.resize_to_default()
             self.show_all()
-            
+
 
     def set_source(self,src,view=None):
         self.grid.set_source(src,view)
@@ -5867,7 +5867,7 @@ class pguTestGridWin(gtk.Window):
 
     def set_subset(self,indices):
         self.grid.set_subset(indices)
-        
+
 
 class _test_listobj:
     def __init__(self,strmem,intmem,floatmem,cplxmem):
@@ -5879,7 +5879,7 @@ class _test_listobj:
 
     def dummy_function(self):
         pass
-        
+
 def test9():
 
     with_def=1  # set to 1 to test with define_columns
@@ -5902,7 +5902,7 @@ def test9():
     else:
         shpfile=None
         config_list.append(None)
-        
+
     cfg=tuple(config_list)
 
     if len(sys.argv) == 11:
@@ -5941,7 +5941,7 @@ def test1b():
     else:
         shpfile=None
         config_list.append(None)
-        
+
     cfg=tuple(config_list)
 
     if len(sys.argv) == 11:
@@ -5958,7 +5958,7 @@ def test1b():
         shps2[idx].set_node(5,3)
         shps2[idx].set_property('prop1',str(p1[idx]))
         shps2[idx].set_property('prop2',str(p2[idx]))
- 
+
     win4 = pguTestGridWin('Test grid 1b: shps without schema, '+cfgstr,
                           config=cfg,source=shps2)
     if with_def == 1:
@@ -6000,7 +6000,7 @@ def test():
     else:
         shpfile=None
         config_list.append(None)
-        
+
     cfg=tuple(config_list)
 
     if len(sys.argv) == 11:
@@ -6034,7 +6034,7 @@ def test():
                             justify=[0,1,2],title_justify=[0,1,2])
         print 'Test grid 1 column titles: right, left, center'
         print 'Test grid 1 columns      : right, left, center'
-        
+
     idx=win.grid.add_style(((65000,0,0),None,(65000,30000,30000),None,None,None))
     idx2=win.grid.add_style(((0,0,65000),None,(30000,30000,65000),None,None,None))
     win.grid.set_row_style([1,2,3,4,5],idx)
@@ -6042,7 +6042,7 @@ def test():
     win.grid.set_default_style(((65000,65000,0),None,(0,65000,65000),None,None,None))
     win.connect( 'delete-event', gtk.main_quit )
     win.move(20,20)
-    
+
     win2=pguTestGridWin('Test grid 2: Numpy, '+cfgstr,config=cfg)
     numpy=Numeric.array([[1,2,3,4,5,6,7,8,9,0,1,2],[2,3,4,5,6,6,7,8,9,0,1,2],
                          [6,5,4,3,2,6,7,8,9,0,1,2],[1,3,5,7,9,6,7,8,9,0,1,2]])
@@ -6062,7 +6062,7 @@ def test():
                             justify=1,title_justify=0,force_width=90)
         print 'Test grid 2 column titles: all right'
         print 'Test grid 2 columns      : all left'
-        
+
 
     win2.move(400,20)
     idx=win2.grid.add_style(((65000,0,65000),None,(65000,30000,65000),None,None,None))
@@ -6075,7 +6075,7 @@ def test():
               [4,'hola',3.2],[5,'guten tag',1.4]]
 
     win2.grid.set_scroll_policy(1,1)
-    
+
     win3 = pguTestGridWin('Test grid 3: list of lists '+cfgstr,config=cfg)
     if with_def == 1:    
         win3.grid.define_columns(members=[1,0,2,1],
@@ -6087,7 +6087,7 @@ def test():
 
     win3.set_source(listlist)
     win3.move(800,20)
-    
+
     shps2=gview.GvShapes()
     for idx in range(5):
         shps2.append(gview.GvShape())
@@ -6134,7 +6134,7 @@ def test():
         win3.grid.resize_to_default()
         win4.grid.resize_to_default()
         win5.grid.resize_to_default()
-    
+
     # If shapefile specified
     print 'shpfile: ',shpfile
     if shpfile is not None:
@@ -6190,10 +6190,10 @@ def test():
         win10.grid.resize_to_default()
         win11.grid.resize_to_default()
         win12.grid.resize_to_default()
-    
-    
+
+
     gtk.main()
-    
+
 
 if __name__ == '__main__':
     test()

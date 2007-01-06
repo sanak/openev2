@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: nls.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  NLS localisation module
@@ -175,12 +175,12 @@ def get(key, default):
 def set( key, value ):
     """
     add a value to the locale
-    
+
     key - the key to add
     value - the value to add
     """
     global _locale
     if _locale is None:
         return
-        
+
     _locale[key] = value

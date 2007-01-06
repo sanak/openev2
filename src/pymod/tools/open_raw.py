@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: open_raw.py,v 1.1.1.1 2005/04/18 16:38:36 uid1026 Exp $
+# $Id$
 #
 # Project:  OpenEV
 # Purpose:  Interactive tool to open raw image files.
@@ -58,7 +58,7 @@ import vrtutils
 import pgufilesel
 
 class OpenRaw(gviewapp.Tool_GViewApp):
-    
+
     def __init__(self,app=None):
 	self.wins = {}
         gviewapp.Tool_GViewApp.__init__(self,app)
@@ -197,7 +197,7 @@ class OpenRawDialog(gtk.Window):
         # so that the tool can pick up which formats support header-only output
         # (sort of like the datatypes and creation options are currently set as
         # metadata items in the drivers).
-        
+
         sbox = gtk.HBox(spacing=10)
         label=gtk.Label('Output Header Format:')
         label.set_alignment(0,0.5)
@@ -229,7 +229,7 @@ class OpenRawDialog(gtk.Window):
         save_btn = gtk.Button("Save")
         save_btn.connect("clicked", self.import_cb,'Save')
 	box3.pack_start(save_btn)
-                
+
         close_btn = gtk.Button("Close")
         close_btn.connect("clicked", self.close)
         box3.pack_start(close_btn)
@@ -249,7 +249,7 @@ class OpenRawDialog(gtk.Window):
 	    recent_dir = gview.get_preference('recent_directory')
 	else:
 	    recent_dir = None
-            
+
         filename=pgufilesel.GetFileName(title="Open raw image file",
                                         default_filename=recent_dir)
         if filename is None:
@@ -263,7 +263,7 @@ class OpenRawDialog(gtk.Window):
 	if filename is '':
 	    gvutils.error('You should select a raw file to load!')
 	    return
-        
+
 	if not os.path.isfile(filename):
 	    gvutils.error('Unable to load '+ filename)
 	    return
@@ -289,7 +289,7 @@ class OpenRawDialog(gtk.Window):
         byteorder = ['LSB','MSB'][self.swap_menu.get_history()]
 
         vrtdsc = vrtutils.VRTDatasetConstructor(width,height)
-        
+
         if interleaving == 'Pixel':
             pixoff = datasize*bands
             lineoff = pixoff*width
@@ -297,7 +297,7 @@ class OpenRawDialog(gtk.Window):
                 imoff = image_offset + idx*datasize
                 vrtdsc.AddRawBand(filename, dtype, byteorder,
                                  imoff, pixoff, lineoff)
-                
+
         elif interleaving == 'Line':
             pixoff=datasize
             lineoff=datasize*width*bands
@@ -305,7 +305,7 @@ class OpenRawDialog(gtk.Window):
                 imoff = image_offset + idx*lineoff
                 vrtdsc.AddRawBand(filename, dtype, byteorder,
                                  imoff, pixoff, lineoff)
-            
+
         else:
             pixoff=datasize
             lineoff=datasize*width
@@ -315,8 +315,8 @@ class OpenRawDialog(gtk.Window):
                                  imoff, pixoff, lineoff)
 
         return vrtdsc.GetVRTLines()
-        
-        
+
+
     def create_header(self,filename):
         fmt=self.format_list[self.format_menu.get_history()]
         dtype=self.type_list[self.type_menu.get_history()]
@@ -325,13 +325,13 @@ class OpenRawDialog(gtk.Window):
         if dtype not in tlist:
             gvutils.error(fmt+' format does not support '+dtype+' data type!')
             return
-        
+
         if fmt == 'PAux':
             self.create_paux_header(filename,dtype)
         else:
             fname,ext = os.path.splitext(filename)
             vrtname = fname+'.vrt'
-                
+
             fname=pgufilesel.GetFileName(title="Select VRT Save Name",
                                          default_filename=vrtname)
             if fname is None:
@@ -389,7 +389,7 @@ class OpenRawDialog(gtk.Window):
 		image_offset.append(header + datasize * width * i)
 	else:
 	    raise 'Unsupported interleaving type!'
-	
+
 	aux_swap_list = ['Swapped', 'Unswapped']
 	swap = aux_swap_list[self.swap_menu.get_history()]
 
@@ -427,12 +427,12 @@ class OpenRawDialog(gtk.Window):
 	    gdal.GetDataTypeByName(self.type_list[self.type_menu.get_history()])
 	numtype = gdalnumeric.GDALTypeCodeToNumericTypeCode(gdaltype)
 	depth = gdal.GetDataTypeSize(gdaltype) / 8
-	
+
 	filename = self.open_entry.get_text()
         if os.path.isfile(filename) == 0:
             gvutils.error('Input file '+filename+' does not exist!')
             return
-        
+
 	filesize = os.stat(filename)[ST_SIZE]
 	if filesize < header:
 	    gvutils.error('Specified header size larger then file size!')
@@ -474,7 +474,7 @@ class OpenRawDialog(gtk.Window):
                         # catch 0 division errors
                         gvutils.error('Unable to guess image geometry!')
                         return
-                    
+
 		    if tmp > cor_coef:
 			cor_coef = tmp
 			width = w
@@ -483,6 +483,6 @@ class OpenRawDialog(gtk.Window):
 
 	self.width_entry.set_text(str(width))
 	self.height_entry.set_text(str(height))
-	
+
 TOOL_LIST = ['OpenRaw']
 
