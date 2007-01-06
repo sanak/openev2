@@ -83,7 +83,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
         self.dialog.set_title('Available Image Formats')
         self.dialog.set_size_request(300,500)
         self.dialog.set_border_width(10) 
-        self.dialog.set_policy(False, True, True)
+        self.dialog.set_resizable(True)
         self.tooltips=gtk.Tooltips()
         self.button_dict={}
         # main shell 

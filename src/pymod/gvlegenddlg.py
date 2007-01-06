@@ -79,7 +79,7 @@ class GvLegendDialog(gtk.Window):
         self.resize_count = 0
         
         self.set_title('Legend: Empty')
-        self.set_policy(True,True,False)
+        self.set_resizable(True)
         self.set_size_request(300, 300)
         self.viewarea = gview.GvViewArea()
         back_color = gview.get_preference('legend-background-color')

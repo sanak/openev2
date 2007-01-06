@@ -178,7 +178,7 @@ class CalculatorDialog(gtk.Window):
 	    
 	gtk.Window.__init__(self)
 	self.set_title('Image Calculator')
-	self.set_policy(False, True, True)
+	self.set_resizable(True)
 	
 	try:
 	    self.create_gui()
@@ -547,7 +547,7 @@ class RCalculatorDialog(gtk.Window):
 	    		
 	gtk.Window.__init__(self)
 	self.set_title('Image Calculator')
-	self.set_policy(False, True, True)
+	self.set_resizable(True)
 	self.text_pos = 0
 	self.tooltips = gtk.Tooltips()
     	self.expression = ""

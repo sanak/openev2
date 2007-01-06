@@ -614,7 +614,7 @@ class GvGraphWindow(gtk.Window):
         self.xsize = raster.get_dataset().RasterXSize
         self.ysize = raster.get_dataset().RasterYSize
 
-        self.set_policy(True,True,False)
+        self.set_resizable(True)
         # self.set_size_request(self.xsize, self.ysize)
         self.viewarea = gview.GvViewArea()
         self.viewarea.add_layer( self.rlayer )

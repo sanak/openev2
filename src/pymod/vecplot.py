@@ -2977,7 +2977,7 @@ class GvSimplePlotWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.plotarea=GvSimplePlot(bgcolor=bgcolor)
         #self.plotarea.fit_extents(0.0,0.0,1.0,0.84)
-        self.set_policy(True,True,True)
+        self.set_resizable(True)
         shell = gtk.VBox(spacing=0)
         self.add(shell)
         self.set_size_request(650,545)

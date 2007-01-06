@@ -5828,7 +5828,7 @@ class pguGridWin(gtk.Window):
         self.grid=pguGrid(config)
         self.add(self.grid)
         
-        self.set_policy(True,True,True)
+        self.set_resizable(True)
         if source is not None:
             self.set_source(source)
             
@@ -5853,7 +5853,7 @@ class pguTestGridWin(gtk.Window):
         self.grid=pguGrid(config)
         self.add(self.grid)
         
-        self.set_policy(True,True,True)
+        self.set_resizable(True)
         if source is not None:
             self.set_source(source)
             self.grid.resize_to_default()

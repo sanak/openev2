@@ -71,7 +71,7 @@ class DatasetComposeDialog(gtk.Window):
     def __init__(self,app=None):
         gtk.Window.__init__(self)
         self.set_title('Compose Dataset')
-        self.set_policy(False, True, True)
+        self.set_resizable(True)
         self.set_border_width(10)
         self.shell=gtk.VBox(spacing=spc)
         self.add(self.shell)

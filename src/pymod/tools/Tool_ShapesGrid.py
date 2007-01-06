@@ -48,7 +48,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.dialog = gtk.Window()
         self.dialog.set_title('Tabular Shapes Attribute Grid Demo')
         self.dialog.set_default_size(300,400)
-        self.dialog.set_policy(False, True, True)
+        self.dialog.set_resizable(True)
 
         shell = gtk.VBox(spacing=5)
         shell.set_border_width(10)

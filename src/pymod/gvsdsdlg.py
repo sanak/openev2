@@ -36,7 +36,7 @@ class GvSDSDlg(gtk.Window):
         self.set_title('SubDataset Selection')
         self.set_size_request(400, 300)
         self.set_border_width(3)
-        self.set_policy(True,True,False)
+        self.set_resizable(True)
         self.connect('delete-event',self.close)
         shell = gtk.VBox(spacing=3)
         self.add(shell)

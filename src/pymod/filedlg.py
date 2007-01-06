@@ -140,7 +140,7 @@ class FileDialog(gtk.Window, Signaler):
         self.multiselect = multiselect
                 
         self.set_border_width(5)
-        self.set_policy(False, False, True)
+        self.set_resizable(False)
         self.drives = None
 
         if title == None:

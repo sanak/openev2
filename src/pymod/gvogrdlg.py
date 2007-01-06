@@ -37,7 +37,7 @@ class GvOGRDlg(gtk.Window):
         self.set_title('Vector Layer Selection')
         self.set_size_request(500, 500)
         self.set_border_width(3)
-        self.set_policy(True,True,False)
+        self.set_resizable(True)
         self.connect('delete-event',self.close)
         shell = gtk.VBox(homogeneous=False,spacing=3)
         self.add(shell)

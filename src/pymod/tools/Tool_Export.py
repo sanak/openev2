@@ -154,7 +154,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.dialog.set_border_width(10)
         self.tips=gtk.Tooltips()
         #self.dialog.set_default_size(500,400)
-        self.dialog.set_policy(False, True, True)
+        self.dialog.set_resizable(True)
 
         # main shell 
         mainshell = gtk.HBox(spacing=1, homogeneous=False)

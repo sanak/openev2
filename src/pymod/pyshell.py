@@ -1108,7 +1108,7 @@ class Shell(gtk.Window):
             totalheight=totalheight + 250
             
         self.set_size_request(width, totalheight)
-        self.set_policy(False, True, True)
+        self.set_resizable(True)
     
         # Text properties GTK2 Port PENDING...
         #style = text.get_style()
