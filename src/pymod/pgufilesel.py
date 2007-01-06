@@ -172,7 +172,7 @@ class pguFileSelection(_gtk.FileSelection):
         self.cancel_button.connect("clicked", self.cancel_cb)
         self.connect("delete_event", self.cancel_cb)
         self.ret = None
-        self.set_modal(_gtk.TRUE)
+        self.set_modal(True)
 
     def ok_cb(self, *args):
         self.ret = self.get_filename()

@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import gvclassification
 from gvogrfs import gv_to_ogr_color
@@ -76,11 +75,11 @@ class GvLegendDialog(gtk.Window):
         self.layer = None
         self.teardown_id = None
         self.changed_id = None
-        self.resizing = FALSE
+        self.resizing = False
         self.resize_count = 0
         
         self.set_title('Legend: Empty')
-        self.set_policy(TRUE,TRUE,FALSE)
+        self.set_policy(True,True,False)
         self.set_size_request(300, 300)
         self.viewarea = gview.GvViewArea()
         back_color = gview.get_preference('legend-background-color')
@@ -236,7 +235,7 @@ class GvLegendDialog(gtk.Window):
         total_width = max(title_width, samp_width)
         total_height = title_height + samp_height
 
-        self.resizing = TRUE
+        self.resizing = True
 
         w, h = self.window.get_size()
         if (w < total_width) or \
@@ -245,7 +244,7 @@ class GvLegendDialog(gtk.Window):
             if self.resize_count < 2:
                 self.set_size_request(total_width, total_height)
 
-        self.resizing = FALSE
+        self.resizing = False
 
         for idx in range(len(lines)):
             line = lines[idx]

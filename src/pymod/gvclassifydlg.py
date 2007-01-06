@@ -172,7 +172,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.ranges = []
         self.labels = []
         self.reclassdlg = None
-        self.updating = FALSE
+        self.updating = False
         items = load_ramp_config_file()
         self.ramp = None
         if classification is None:
@@ -208,7 +208,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.update_property_list()
         
         save_box.pack_start(self.property_list)
-        vbox.pack_start(save_box, expand=gtk.FALSE)
+        vbox.pack_start(save_box, expand=False)
 
         #classification frame
         class_frame = gtk.Frame()
@@ -220,10 +220,10 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.title_txt.set_text(self.classification.get_title())
         self.title_txt.connect('changed', self.title_changed_cb)
 
-        title_box.pack_start(title_lbl, expand=gtk.FALSE)
+        title_box.pack_start(title_lbl, expand=False)
         title_box.pack_start(self.title_txt)
 
-        frame_box.pack_start(title_box, expand=gtk.FALSE)
+        frame_box.pack_start(title_box, expand=False)
         frame_box.set_border_width(5)
 
         #classification list
@@ -247,7 +247,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         ar_box.pack_start(add_btn)
         ar_box.pack_start(classify_btn)
         ar_box.pack_start(reset_btn)
-        vbox.pack_start(ar_box, expand=gtk.FALSE)
+        vbox.pack_start(ar_box, expand=False)
 
         #Color Ramp choices
         ramp_table=gtk.Table(rows=2, columns=2)
@@ -261,7 +261,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.ramp_menu.show()
         ramp_item=gtk.MenuItem()
         ramp_item.add(gtk.HSeparator())
-        ramp_item.set_sensitive(gtk.FALSE)
+        ramp_item.set_sensitive(False)
         self.ramp_menu.append(ramp_item)
         for n in items:
             ramp_item = gtk.MenuItem()
@@ -270,14 +270,14 @@ class GvClassificationDlg(gtk.Window, Signaler):
             if issubclass(n.__class__, ColorRamp):
                 ramp_item.connect('activate', self.ramp_cb, n)
             else:
-                ramp_item.set_sensitive(gtk.FALSE)
+                ramp_item.set_sensitive(False)
             self.ramp_menu.append(ramp_item)
         ramp_opt.set_menu(self.ramp_menu)
         ramp_opt.show()
         ramp_opt.set_history(0)
         ramp_table.attach(ramp_opt, 1, 2, 0, 1)
         ramp_table.show_all()
-        vbox.pack_start(ramp_table, expand=gtk.FALSE)
+        vbox.pack_start(ramp_table, expand=False)
         #buttons
         button_box = gtk.HButtonBox()
         #button_box.set_layout_default(gtk.BUTTONBOX_START)
@@ -287,10 +287,10 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.apply_button.connect('clicked', self.apply_cb)
         self.cancel_button = gtk.Button('Cancel')
         self.cancel_button.connect('clicked', self.cancel_cb)
-        button_box.pack_start(self.ok_button, expand=gtk.FALSE)
-        button_box.pack_start(self.apply_button, expand=gtk.FALSE)
-        button_box.pack_start(self.cancel_button, expand=gtk.FALSE)
-        vbox.pack_start(button_box, expand=gtk.FALSE)
+        button_box.pack_start(self.ok_button, expand=False)
+        button_box.pack_start(self.apply_button, expand=False)
+        button_box.pack_start(self.cancel_button, expand=False)
+        vbox.pack_start(button_box, expand=False)
         vbox.show_all()
         self.add(vbox)
 
@@ -307,7 +307,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.destroy()
         if self.reclassdlg is not None:
             self.reclassdlg.destroy()
-        return gtk.TRUE
+        return True
 
     def ok_cb(self, *args):
         """Close the dialog and notify listeners and the raster that the
@@ -388,7 +388,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
             adj = gtk.Adjustment( value=scale, lower=0.0, upper=100.0, 
                                      step_incr=0.11, page_incr=1.0, page_size=1.0 )
             scale_spin = gtk.SpinButton(adj)
-            scale_spin.set_editable( TRUE )
+            scale_spin.set_editable( True )
             adj.connect( 'value-changed', self.scale_change, class_id )
             self.scale_spinners.insert( class_id, scale_spin )
         else:
@@ -413,7 +413,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         self.class_list.show_all()
 
     def add_classification_item(self, clr, sym, scl, rng, lbl, 
-                                delete_button=gtk.TRUE):
+                                delete_button=True):
         """add a single row to the classification list.  Optionally add a delete 
         button that will delete that row from the classification.
         """
@@ -428,18 +428,18 @@ class GvClassificationDlg(gtk.Window, Signaler):
             scl.set_size_request(70, -1)
         rng.set_size_request(130, -1)
         lbl.set_size_request(130, -1)
-        class_box.pack_start(clr, expand=gtk.FALSE, fill=gtk.FALSE)
+        class_box.pack_start(clr, expand=False, fill=False)
         if sym is not None:
-            class_box.pack_start(sym, expand=gtk.FALSE, fill=gtk.FALSE)
+            class_box.pack_start(sym, expand=False, fill=False)
         if scl is not None:
-            class_box.pack_start(scl, expand=gtk.FALSE, fill=gtk.FALSE)
-        class_box.pack_start(rng, expand=gtk.FALSE, fill=gtk.FALSE)
-        class_box.pack_start(lbl, expand=gtk.FALSE, fill=gtk.FALSE)
+            class_box.pack_start(scl, expand=False, fill=False)
+        class_box.pack_start(rng, expand=False, fill=False)
+        class_box.pack_start(lbl, expand=False, fill=False)
         if delete_button:
             del_btn = gtk.Button('x')
             del_btn.set_size_request( 45, -1 )
             del_btn.connect('clicked', self.delete_item, class_item)
-            class_box.pack_start(del_btn, expand=gtk.FALSE, fill=gtk.FALSE)
+            class_box.pack_start(del_btn, expand=False, fill=False)
         class_box.add( gtk.Label( '' ) )
         class_item.add(class_box)
         class_item.show()
@@ -487,7 +487,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         lbl_frm.add(gtk.Label('Label'))
         lbl_frm.set_shadow_type(gtk.SHADOW_OUT)
         self.add_classification_item(clr_frm, sym_frm, scale_frm, rng_frm, 
-                                     lbl_frm, gtk.FALSE)
+                                     lbl_frm, False)
 
         #for each class, create an entry in the list
         for n in range(cls.count):
@@ -543,7 +543,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         """Handle the user changing a range value.  This requires validation"""
         print 'range_changed_cb'
         #if self.updating: return
-        self.updating = TRUE
+        self.updating = True
         range_txt = strip(widget.get_text()) #remove whitespace
         vals = split(range_txt, '-')
         if range_txt == '':
@@ -649,7 +649,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         print 'new is ', calc_name            
         self.classification.set_range(num, low, hi)
         self.labels[num].set_text( calc_name )
-        self.updating = FALSE
+        self.updating = False
 
     def label_changed_cb(self, widget, num):
         """Handle the user changing the label."""
@@ -694,7 +694,7 @@ class GvClassificationDlg(gtk.Window, Signaler):
         if os.path.exists( filename ):
             warning_pix = os.path.join(gview.home_dir, 'pics', 'warning.xpm' )
             win = gvutils._MessageBox( "Do you wish to overwrite the existing file?",
-                                       ( 'Yes', 'No', ), warning_pix, modal=TRUE)
+                                       ( 'Yes', 'No', ), warning_pix, modal=True)
             win.set_title( 'File Exists' )
             win.show()
             gtk.main()
@@ -795,7 +795,7 @@ class GvReclassifyDlg(gtk.Window):
         #main vertical box
         vbox = gtk.VBox(spacing=6)
         type_box = gtk.HBox(spacing=6)
-        type_box.pack_start(gtk.Label('Type:'), expand=gtk.FALSE)
+        type_box.pack_start(gtk.Label('Type:'), expand=False)
         opt_menu = gtk.OptionMenu()
         type_menu = gtk.Menu()
         
@@ -811,16 +811,16 @@ class GvReclassifyDlg(gtk.Window):
         opt_menu.set_history( classify_type )
         opt_menu.resize_children()
         type_box.pack_start(opt_menu)
-        vbox.pack_start(type_box, expand=gtk.FALSE)
+        vbox.pack_start(type_box, expand=False)
         #Number of classes
         classes_box = gtk.HBox(spacing=6)
         classes_box.pack_start(gtk.Label('Number of classes:'))
         adj = gtk.Adjustment(5, 2, 80, 1, 5, 5)
         self.spinner = gtk.SpinButton(adj)
-        self.spinner.set_snap_to_ticks(gtk.TRUE)
+        self.spinner.set_snap_to_ticks(True)
         self.spinner.set_digits(0)
         classes_box.pack_start(self.spinner)
-        vbox.pack_start(classes_box, expand=gtk.FALSE)
+        vbox.pack_start(classes_box, expand=False)
         #add the ok and cancel buttons
         button_box = gtk.HButtonBox()
         ok_button = gtk.Button("OK")
@@ -829,7 +829,7 @@ class GvReclassifyDlg(gtk.Window):
         cancel_button.connect('clicked', self.cancel_cb, cb_data)
         button_box.pack_start(ok_button)
         button_box.pack_start(cancel_button)
-        vbox.pack_start(button_box, expand=gtk.FALSE)
+        vbox.pack_start(button_box, expand=False)
         vbox.show_all()
         self.add(vbox)
         ok_button.set_flags(gtk.CAN_DEFAULT)

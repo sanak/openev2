@@ -71,7 +71,7 @@ class DatasetComposeDialog(gtk.Window):
     def __init__(self,app=None):
         gtk.Window.__init__(self)
         self.set_title('Compose Dataset')
-        self.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+        self.set_policy(False, True, True)
         self.set_border_width(10)
         self.shell=gtk.VBox(spacing=spc)
         self.add(self.shell)
@@ -95,19 +95,19 @@ class DatasetComposeDialog(gtk.Window):
         self.adv_notebook.append_page(self.geo_frame,
                                       gtk.Label('Geocoding')) 
 
-        echbox=gtk.HBox(spacing=5,homogeneous=gtk.FALSE)
+        echbox=gtk.HBox(spacing=5,homogeneous=False)
         echbox.set_border_width(3)
-        self.shell.pack_end(echbox,gtk.FALSE,gtk.FALSE,0)
+        self.shell.pack_end(echbox,False,False,0)
         self.show_list.append(echbox)
                               
         self.button_dict['Close']=gtk.Button('Close')
-        echbox.pack_end(self.button_dict['Close'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['Close'],expand=True)
         self.button_dict['Save']=gtk.Button('Save VRT')
-        echbox.pack_end(self.button_dict['Save'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['Save'],expand=True)
         self.button_dict['New']=gtk.Button('New View')
-        echbox.pack_end(self.button_dict['New'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['New'],expand=True)
         self.button_dict['Current']=gtk.Button('Current View')
-        echbox.pack_end(self.button_dict['Current'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['Current'],expand=True)
 
         self.tips.set_tip(self.button_dict['Close'],
                           'Exit the Compose Dataset tool')
@@ -262,11 +262,11 @@ class GeocodingFrame(gtk.VBox):
         self.frames['Default'].add(vbox)
         self.default_scrolled_text = gtk.TextView(gtk.TextBuffer())
         self.default_scrolled_text.set_wrap_mode(gtk.WRAP_NONE)
-        self.default_scrolled_text.set_editable(gtk.FALSE)
+        self.default_scrolled_text.set_editable(False)
         self.default_scrolled_win = gtk.ScrolledWindow()
         self.default_scrolled_win.set_size_request(200,200)
         self.default_scrolled_win.add( self.default_scrolled_text)
-        vbox.pack_start(self.default_scrolled_win,expand=gtk.TRUE)
+        vbox.pack_start(self.default_scrolled_win,expand=True)
         self.frames['Default'].show_all()
         
         self.pack_start(self.frames['Default'])
@@ -291,25 +291,25 @@ class GeocodingFrame(gtk.VBox):
         vbox.pack_start(hbox)
         self.add_gcp_button=gtk.Button('  Add GCP  ')
         self.add_gcp_button.connect('clicked',self.add_gcp_cb)
-        hbox.pack_start(self.add_gcp_button, expand=gtk.FALSE)
+        hbox.pack_start(self.add_gcp_button, expand=False)
         self.tips.set_tip(self.add_gcp_button,'Add a new GCP')
         self.load_gcp_button=gtk.Button('Load GCPs')
         self.tips.set_tip(self.load_gcp_button,
            'Clear existing GCPs and load '+
            'new ones from a text file')
         self.load_gcp_button.connect('clicked',self.load_gcps_cb)
-        hbox.pack_start(self.load_gcp_button, expand=gtk.FALSE)
+        hbox.pack_start(self.load_gcp_button, expand=False)
         self.copy_gcp_button=gtk.Button('Copy GCPs')
         self.copy_gcp_button.connect('clicked',self.copy_gcps_cb)
         self.tips.set_tip(self.copy_gcp_button,
             'Clear existing GCPs and copy new '+
             'ones from another GDAL dataset')
-        hbox.pack_start(self.copy_gcp_button, expand=gtk.FALSE)
+        hbox.pack_start(self.copy_gcp_button, expand=False)
         self.clear_gcp_button=gtk.Button('Clear GCPs')
         self.clear_gcp_button.connect('clicked',self.clear_gcps)
         self.tips.set_tip(self.clear_gcp_button,
             'Clear all GCPs')
-        hbox.pack_start(self.clear_gcp_button, expand=gtk.FALSE)
+        hbox.pack_start(self.clear_gcp_button, expand=False)
         self.gcpprjbox=ProjectionBox(self.tips)
         vbox.pack_start(self.gcpprjbox)
         self.frames['GCPs'].show_all()
@@ -634,15 +634,15 @@ class editprjwin(gtk.Window):
         vbox=gtk.VBox()
         self.add(vbox)
         self.text=gtk.TextView(gtk.TextBuffer())
-        self.text.set_editable(gtk.TRUE)
+        self.text.set_editable(True)
         self.text.get_buffer().set_text(wkt)
         vbox.pack_start(self.text)
         hbox=gtk.HBox()
-        vbox.pack_start(hbox,expand=gtk.FALSE)
+        vbox.pack_start(hbox,expand=False)
         self.cancel_button=gtk.Button('  Cancel  ')
         self.ok_button=gtk.Button('     OK     ')
-        hbox.pack_end(self.cancel_button,expand=gtk.FALSE)
-        hbox.pack_end(self.ok_button,expand=gtk.FALSE)
+        hbox.pack_end(self.cancel_button,expand=False)
+        hbox.pack_end(self.ok_button,expand=False)
         
         self.cancel_button.connect('clicked', self.quit)
         self.ok_button.connect('clicked', self.ok_cb)
@@ -713,7 +713,7 @@ class GCPFileDialog(gtk.FileSelection):
 
 class ProjectionBox(gtk.Table):
     def __init__(self,tips):
-        gtk.Table.__init__(self,rows=2,columns=7,homogeneous=gtk.FALSE)
+        gtk.Table.__init__(self,rows=2,columns=7,homogeneous=False)
         self.set_row_spacings(spc)
         self.set_col_spacings(spc)
         self.set_col_spacing(2,3*spc)
@@ -885,7 +885,7 @@ class InputFrame(gvsignaler.Signaler):
         srcvbox=gtk.VBox(spacing=spc)
         label=gtk.Label('Input:')
         label.set_alignment(0,0.5)
-        srcvbox.pack_start(label,expand=gtk.FALSE)
+        srcvbox.pack_start(label,expand=False)
         hbox1.pack_start(srcvbox)
 	source_win = gtk.ScrolledWindow()
 	source_win.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -918,7 +918,7 @@ class InputFrame(gvsignaler.Signaler):
                 curband=fname + '.band[' + str(i) + ']'
                 dict[gtk.ListItem(curband)] = (ds,i,curband)
                 
-            if srctoggle.get_active() == gtk.TRUE:
+            if srctoggle.get_active() == True:
                 slist=vrtutils.GetSimilarFiles(fname)
                 for nname in slist:
                     ds = gdal.OpenShared(nname)
@@ -946,7 +946,7 @@ class InputFrame(gvsignaler.Signaler):
 
         # source control buttons
         srcbbox=gtk.HBox(spacing=spc)
-        srcvbox.pack_start(srcbbox,expand=gtk.FALSE)
+        srcvbox.pack_start(srcbbox,expand=False)
         load_btn=gtk.Button("Load File")
         self.tips.set_tip(load_btn,'Add bands from a file to the input list')
         srcbbox.pack_start(load_btn)
@@ -962,13 +962,13 @@ class InputFrame(gvsignaler.Signaler):
         srctoggle=gtk.CheckButton("Include Similar")
         self.tips.set_tip(srctoggle,'Include bands from same-size files '+
                           'in the same directory when using Load File.')
-        srcbbox.pack_start(srctoggle,expand=gtk.FALSE)
-        srctoggle.set_active(gtk.TRUE)
+        srcbbox.pack_start(srctoggle,expand=False)
+        srctoggle.set_active(True)
         
         # destination
 	btn_box = gtk.VBox(spacing=10)
 	btn_box.set_border_width(10)
-	hbox1.pack_start(btn_box,expand=gtk.FALSE)
+	hbox1.pack_start(btn_box,expand=False)
 	btn_box.show()
 
 	def dest_add(_button,*args):
@@ -1027,14 +1027,14 @@ class InputFrame(gvsignaler.Signaler):
 	add_btn = gtk.Button("Add->")
         add_btn.connect("clicked", dest_add)
         # The label below just makes things align more nicely (adds space)
-        btn_box.pack_start(gtk.Label(''),expand=gtk.FALSE)
-	btn_box.pack_start(add_btn,expand=gtk.FALSE)
+        btn_box.pack_start(gtk.Label(''),expand=False)
+	btn_box.pack_start(add_btn,expand=False)
 
 
         destvbox=gtk.VBox(spacing=spc)
         label=gtk.Label('Output:')
         label.set_alignment(0,0.5)
-        destvbox.pack_start(label,expand=gtk.FALSE)
+        destvbox.pack_start(label,expand=False)
 	dest_win = gtk.ScrolledWindow()
 	dest_win.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
 	dest_win.set_size_request(300,200)
@@ -1042,7 +1042,7 @@ class InputFrame(gvsignaler.Signaler):
 
         hbox1.pack_start(destvbox)
         destbbox=gtk.HBox(spacing=spc)
-        destvbox.pack_start(destbbox,expand=gtk.FALSE)
+        destvbox.pack_start(destbbox,expand=False)
 
         pix = gtk.gdk.pixmap_colormap_create_from_xpm(None,
             gtk.gdk.colormap_get_system(), None,
@@ -1052,7 +1052,7 @@ class InputFrame(gvsignaler.Signaler):
 	del_btn = gtk.Button()
         del_btn.add(im)
         del_btn.connect("clicked", dest_del)
-	destbbox.pack_start(del_btn,expand=gtk.FALSE)
+	destbbox.pack_start(del_btn,expand=False)
 
         pix = gtk.gdk.pixmap_colormap_create_from_xpm(None,
             gtk.gdk.colormap_get_system(), None,
@@ -1062,7 +1062,7 @@ class InputFrame(gvsignaler.Signaler):
         r_btn = gtk.Button()
         r_btn.add(im)
         r_btn.connect("clicked", dest_raise)
-	destbbox.pack_start(r_btn,expand=gtk.FALSE)
+	destbbox.pack_start(r_btn,expand=False)
         
         pix = gtk.gdk.pixmap_colormap_create_from_xpm(None,
             gtk.gdk.colormap_get_system(), None,
@@ -1072,7 +1072,7 @@ class InputFrame(gvsignaler.Signaler):
         l_btn = gtk.Button()
         l_btn.add(im)
         l_btn.connect("clicked", dest_lower)
-	destbbox.pack_start(l_btn,expand=gtk.FALSE)
+	destbbox.pack_start(l_btn,expand=False)
         
 	self.dest_list = gtk.List()
 	self.dest_list.set_selection_mode(gtk.SELECTION_BROWSE)

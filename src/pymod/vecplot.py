@@ -2977,7 +2977,7 @@ class GvSimplePlotWindow(gtk.Window):
         gtk.Window.__init__(self)
         self.plotarea=GvSimplePlot(bgcolor=bgcolor)
         #self.plotarea.fit_extents(0.0,0.0,1.0,0.84)
-        self.set_policy(gtk.TRUE,gtk.TRUE,gtk.TRUE)
+        self.set_policy(True,True,True)
         shell = gtk.VBox(spacing=0)
         self.add(shell)
         self.set_size_request(650,545)
@@ -2988,7 +2988,7 @@ class GvSimplePlotWindow(gtk.Window):
         menuf.add_entries([
                  ('File/Print', None, self.print_cb)])
 
-        shell.pack_start(self.menuf, expand=gtk.FALSE)
+        shell.pack_start(self.menuf, expand=False)
 
         shell.pack_start( self.plotarea )
 
@@ -3462,7 +3462,7 @@ class GvSimpleSettingsVBox(gtk.VBox,Signaler):
                 self.pack_start(self.rescale_table)
             elif item == 1:
                 self.apply_button=gtk.Button(applylabel)
-                self.pack_start(self.apply_button,expand=gtk.FALSE)
+                self.pack_start(self.apply_button,expand=False)
 
         if self.apply_button is not None:
             self.apply_button.connect("clicked",self.apply_cb)
@@ -3524,7 +3524,7 @@ class GvSimpleRescaleTable(gtk.Table):
         if withx == 1:
             self.attach(gtk.Label(xminlabel),0,1,0,1)
             self.xminentry=gtk.Entry()
-            self.xminentry.set_editable(gtk.TRUE)
+            self.xminentry.set_editable(True)
             if xmin is not None:
                 self.xminentry.set_text(str(xmin))
             else:
@@ -3532,7 +3532,7 @@ class GvSimpleRescaleTable(gtk.Table):
             self.attach(self.xminentry,1,2,0,1)
             self.attach(gtk.Label(xmaxlabel),2,3,0,1)
             self.xmaxentry=gtk.Entry()
-            self.xmaxentry.set_editable(gtk.TRUE)
+            self.xmaxentry.set_editable(True)
             if xmax is not None:
                 self.xmaxentry.set_text(str(xmax))
             else:
@@ -3543,7 +3543,7 @@ class GvSimpleRescaleTable(gtk.Table):
         if withy == 1:
             self.attach(gtk.Label(yminlabel),0,1,c_row,c_row+1)
             self.yminentry=gtk.Entry()
-            self.yminentry.set_editable(gtk.TRUE)
+            self.yminentry.set_editable(True)
             if ymin is not None:
                 self.yminentry.set_text(str(ymin))
             else:
@@ -3551,7 +3551,7 @@ class GvSimpleRescaleTable(gtk.Table):
             self.attach(self.yminentry,1,2,c_row,c_row+1)
             self.attach(gtk.Label(ymaxlabel),2,3,c_row,c_row+1)
             self.ymaxentry=gtk.Entry()
-            self.ymaxentry.set_editable(gtk.TRUE)
+            self.ymaxentry.set_editable(True)
             if ymax is not None:
                 self.ymaxentry.set_text(str(ymax))
             else:
@@ -3562,7 +3562,7 @@ class GvSimpleRescaleTable(gtk.Table):
         if withz == 1:
             self.attach(gtk.Label(zminlabel),0,1,c_row,c_row+1)
             self.zminentry=gtk.Entry()
-            self.zminentry.set_editable(gtk.TRUE)
+            self.zminentry.set_editable(True)
             if zmin is not None:
                 self.zminentry.set_text(str(zmin))
             else:
@@ -3570,7 +3570,7 @@ class GvSimpleRescaleTable(gtk.Table):
             self.attach(self.zminentry,1,2,c_row,c_row+1)
             self.attach(gtk.Label(zmaxlabel),2,3,c_row,c_row+1)
             self.zmaxentry=gtk.Entry()
-            self.zmaxentry.set_editable(gtk.TRUE)
+            self.zmaxentry.set_editable(True)
             if zmax is not None:
                 self.zmaxentry.set_text(str(zmax))
             else:

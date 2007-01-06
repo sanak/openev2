@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gobject
 import gview
 import os.path
@@ -58,7 +57,7 @@ class LayerDlg(gtk.Window,Signaler):
         self.set_title('Layers')
         self.set_size_request(250, 500)
         self.set_border_width(3)
-        self.set_resizable(TRUE)
+        self.set_resizable(True)
         self.connect('delete-event',self.close)
         shell = gtk.VBox(spacing=3)
         self.add(shell)
@@ -66,8 +65,8 @@ class LayerDlg(gtk.Window,Signaler):
 
         # View chooser menu
         hbox = gtk.HBox(spacing=3)
-        shell.pack_start(hbox, expand=FALSE)
-        hbox.pack_start(gtk.Label('View:'), expand=FALSE, padding=3)
+        shell.pack_start(hbox, expand=False)
+        hbox.pack_start(gtk.Label('View:'), expand=False, padding=3)
         viewopt = gtk.OptionMenu()
         hbox.pack_start(viewopt)
         viewmenu = gtk.Menu()
@@ -77,11 +76,11 @@ class LayerDlg(gtk.Window,Signaler):
         # Note: GTK2 PORT - Thumbnails in tree view not tested
         if gview.get_preference('layer_thumbnail') is None \
            or gview.get_preference('layer_thumbnail') == 'off':
-            self.thumbnail = FALSE
+            self.thumbnail = False
         else:
-            self.thumbnail = TRUE
+            self.thumbnail = True
 
-        self.updating = FALSE
+        self.updating = False
 
         #
         # Layer list model
@@ -112,7 +111,7 @@ class LayerDlg(gtk.Window,Signaler):
                 ('lower.xpm', 'Lower layer', self.lower_layer),
                 ('delete.xpm','Delete layer', self.delete_layer))
         butbox = gtk.HBox(spacing=1)
-        shell.pack_start(butbox, expand=FALSE)
+        shell.pack_start(butbox, expand=False)
         for opt in opts:
             but = gtk.Button()
             butbox.pack_start(but)
@@ -253,7 +252,7 @@ class LayerDlg(gtk.Window,Signaler):
     def update_layers(self,*args):
         if not self.flags() & gtk.REALIZED: return
 
-        self.updating = TRUE
+        self.updating = True
         
         lst = self.list_store
         view = self.views[self.selected_view]
@@ -295,7 +294,7 @@ class LayerDlg(gtk.Window,Signaler):
             selection = self.tree_view.get_selection()
             selection.select_path((active_row,))
 
-        self.updating = FALSE
+        self.updating = False
 
     def realize(self, widget):
         if self.selected_view:

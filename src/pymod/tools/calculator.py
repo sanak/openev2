@@ -88,12 +88,12 @@ def get_list_of_layers_as_menu():
 	    
 #########################################################################
 def layer_is_raster(layer):
-    """returns gtk.TRUE if layer is raster and gtk.FALSE if else"""
+    """returns True if layer is raster and False if else"""
     try:
         layer.get_nodata(0)
-        return gtk.TRUE
+        return True
     except:
-        return gtk.FALSE
+        return False
 
 #########################################################################
 def get_filename_from_vrtdataset(vrt_dataset_name):
@@ -178,7 +178,7 @@ class CalculatorDialog(gtk.Window):
 	    
 	gtk.Window.__init__(self)
 	self.set_title('Image Calculator')
-	self.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+	self.set_policy(False, True, True)
 	
 	try:
 	    self.create_gui()
@@ -189,7 +189,7 @@ class CalculatorDialog(gtk.Window):
 	
     def close(self,*args):
 	self.destroy()
-	return gtk.TRUE
+	return True
 
     def create_gui(self):
 	self.dict_of_bands = get_list_of_bands_as_dict()
@@ -206,12 +206,12 @@ class CalculatorDialog(gtk.Window):
 #### OPERATIONS ####################################################
 	box_op = gtk.HBox(spacing=10)
 	box1.set_border_width(10)
-	box1.pack_start(box_op, expand=gtk.FALSE)
+	box1.pack_start(box_op, expand=False)
 	box_op.show()
 	
 	op_label  = gtk.Label('Operation:')
 	op_label.set_alignment(0, 0.5)
-	box_op.pack_start(op_label, expand=gtk.FALSE)
+	box_op.pack_start(op_label, expand=False)
 
 #	The item <operations_dict> is the dictionary, that contains 
 #	the list of calculator operation names as keys and the set 
@@ -234,11 +234,11 @@ class CalculatorDialog(gtk.Window):
 
 ### COEFFICIENTS ######################################################
 	self.box_coeffs = gtk.HBox(spacing = 10)
-        box1.pack_start(self.box_coeffs, expand=gtk.FALSE)
+        box1.pack_start(self.box_coeffs, expand=False)
         self.box_coeffs.show()
 
 	self.box_coeff_a = gtk.HBox(spacing = 5)
-        self.box_coeffs.pack_start(self.box_coeff_a, expand=gtk.FALSE)
+        self.box_coeffs.pack_start(self.box_coeff_a, expand=False)
         self.box_coeff_a.show()
 
 	a_label = gtk.Label('A =')
@@ -248,11 +248,11 @@ class CalculatorDialog(gtk.Window):
 	self.a_const = gtk.Entry()
 	self.a_const.set_size_request(80,30)
 	self.a_const.set_text('1')
-        self.box_coeff_a.pack_start(self.a_const, expand=gtk.FALSE)
+        self.box_coeff_a.pack_start(self.a_const, expand=False)
         self.a_const.show()
 	
 	self.box_coeff_b = gtk.HBox(spacing = 5)
-        self.box_coeffs.pack_start(self.box_coeff_b, expand=gtk.FALSE)
+        self.box_coeffs.pack_start(self.box_coeff_b, expand=False)
         self.box_coeff_b.show()
 
 	b_label = gtk.Label('B =')
@@ -262,11 +262,11 @@ class CalculatorDialog(gtk.Window):
 	self.b_const = gtk.Entry()
 	self.b_const.set_size_request(80,30)
 	self.b_const.set_text('1')
-        self.box_coeff_b.pack_start(self.b_const, expand=gtk.FALSE)
+        self.box_coeff_b.pack_start(self.b_const, expand=False)
         self.b_const.show()
 	
 	self.box_coeff_c = gtk.HBox(spacing = 5)
-        self.box_coeffs.pack_start(self.box_coeff_c, expand=gtk.FALSE)
+        self.box_coeffs.pack_start(self.box_coeff_c, expand=False)
         self.box_coeff_c.show()
 
 	c_label = gtk.Label('C =')
@@ -276,7 +276,7 @@ class CalculatorDialog(gtk.Window):
 	self.c_const = gtk.Entry()
 	self.c_const.set_size_request(80,30)
 	self.c_const.set_text('1')
-        self.box_coeff_c.pack_start(self.c_const, expand=gtk.FALSE)
+        self.box_coeff_c.pack_start(self.c_const, expand=False)
         self.c_const.show()
 
 	self.coeffs_vis = [self.box_coeff_a,self.box_coeff_b,self.box_coeff_c]
@@ -284,7 +284,7 @@ class CalculatorDialog(gtk.Window):
 ### source1 #############################################################	
 	frame1 = gtk.Frame("Select Image Bands To Compute")
 	frame1.show()
-        box1.pack_start(frame1, expand=gtk.FALSE)
+        box1.pack_start(frame1, expand=False)
 	
 	box2 = gtk.VBox(spacing=10)
         box2.set_border_width(10)
@@ -293,12 +293,12 @@ class CalculatorDialog(gtk.Window):
 	
 	
 	box_s1 = gtk.HBox(spacing=10)
-        box2.pack_start(box_s1, expand=gtk.FALSE)
+        box2.pack_start(box_s1, expand=False)
 	box_s1.show()
 
 	source1_label = gtk.Label('Source 1  < X >:')
 	source1_label.set_alignment(0, 0.5)
-	box_s1.pack_start(source1_label,expand=gtk.FALSE)
+	box_s1.pack_start(source1_label,expand=False)
 	
 	self.s1_list = gvutils.GvOptionMenu(self.list_of_bands)
 	box_s1.pack_start(self.s1_list)
@@ -306,12 +306,12 @@ class CalculatorDialog(gtk.Window):
 	
 ##  source2 ##############################################################
         box_s2 = gtk.HBox(spacing=10)
-        box2.pack_start(box_s2, expand=gtk.FALSE)
+        box2.pack_start(box_s2, expand=False)
         box_s2.show()
 
 	source2_label = gtk.Label('Source 2  < Y >:')
 	source2_label.set_alignment(0, 0.5)
-	box_s2.pack_start(source2_label,expand=gtk.FALSE)
+	box_s2.pack_start(source2_label,expand=False)
 	
 	self.s2_list = gvutils.GvOptionMenu(self.list_of_bands)
 	box_s2.pack_start(self.s2_list)
@@ -319,12 +319,12 @@ class CalculatorDialog(gtk.Window):
 	
 #####OUT TYPES#########################################################
 	box_types = gtk.HBox(spacing=10)
-	box2.pack_start(box_types, expand=gtk.FALSE)
+	box2.pack_start(box_types, expand=False)
 	box_types.show()
 
 	types_label  = gtk.Label('Image data type:')
 	types_label.set_alignment(0, 0.5)
-	box_types.pack_start(types_label, expand=gtk.FALSE)
+	box_types.pack_start(types_label, expand=False)
 	
 	self.types_list = []
 	i = GDT_Byte
@@ -344,7 +344,7 @@ class CalculatorDialog(gtk.Window):
 	
 #### BUTTONS ###########################################################
         box_buttons = gtk.HBox(spacing=15)
-        box1.pack_start(box_buttons, expand=gtk.FALSE)
+        box1.pack_start(box_buttons, expand=False)
         box_buttons.show()
 
         self.ok_btn = gtk.Button("Ok")
@@ -355,7 +355,7 @@ class CalculatorDialog(gtk.Window):
         self.cancel_btn.connect("clicked", self.close)
         box_buttons.pack_start(self.cancel_btn)
 	
-        return gtk.TRUE
+        return True
 
 #########################################################################
 #########################################################################	
@@ -415,7 +415,7 @@ class CalculatorDialog(gtk.Window):
 	    self.numtype = gdalnumeric.GDALTypeCodeToNumericTypeCode(type)
 	    if self.numtype == None:
 		gvutils.error("Error! Type " + self.numtype + " is not supported!")
-		return gtk.FALSE 
+		return False 
 	    
 	    proto_ds = self.dict_of_bands[b1_name][1].get_parent().get_dataset()
 	    op_func = self.operations_dict[self.op][1]
@@ -424,13 +424,13 @@ class CalculatorDialog(gtk.Window):
 		op_func(s1=b1,s2=b2,a=a,b=b,c=c)
 	    except:
 		gvutils.error("Try to change coefficients.")
-		return gtk.FALSE
+		return False
 	    res_ds = gdalnumeric.OpenArray(self.out_buf,proto_ds)
 	    gview.app.open_gdal_dataset(res_ds)
 	    self.close()
 	else:
 	    gvutils.error("Source1 and Source2 have to differ!")
-	    return gtk.FALSE
+	    return False
 
 #########################################################################
     def add_bands(self,s1,s2,a,b,c):
@@ -547,7 +547,7 @@ class RCalculatorDialog(gtk.Window):
 	    		
 	gtk.Window.__init__(self)
 	self.set_title('Image Calculator')
-	self.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+	self.set_policy(False, True, True)
 	self.text_pos = 0
 	self.tooltips = gtk.Tooltips()
     	self.expression = ""
@@ -561,7 +561,7 @@ class RCalculatorDialog(gtk.Window):
 	
     def close(self,*args):
 	self.destroy()
-	return gtk.TRUE
+	return True
 
 ######################################################################
     def bit_operations_group(self,funcbox):
@@ -570,7 +570,7 @@ class RCalculatorDialog(gtk.Window):
 	self.bfunc_table.set_border_width(5)
 	self.bfunc_table.set_row_spacings(5)
 	self.bfunc_table.set_col_spacings(5)
-	funcbox.pack_start(self.bfunc_table, expand=gtk.FALSE)
+	funcbox.pack_start(self.bfunc_table, expand=False)
 	
 	btn = gtk.Button("AND")
 	btn.connect("clicked",self.fbutton_pressed,"AND()")
@@ -604,7 +604,7 @@ class RCalculatorDialog(gtk.Window):
 	self.mfunc_table.set_border_width(5)
 	self.mfunc_table.set_row_spacings(5)
 	self.mfunc_table.set_col_spacings(5)
-	funcbox.pack_start(self.mfunc_table, expand=gtk.FALSE)
+	funcbox.pack_start(self.mfunc_table, expand=False)
 
 	btn = gtk.Button("log")
 	btn.connect("clicked",self.fbutton_pressed,"log()")
@@ -646,7 +646,7 @@ class RCalculatorDialog(gtk.Window):
 	self.tfunc_table.set_border_width(5)
 	self.tfunc_table.set_row_spacings(5)
 	self.tfunc_table.set_col_spacings(5)
-	funcbox.pack_start(self.tfunc_table, expand=gtk.FALSE)
+	funcbox.pack_start(self.tfunc_table, expand=False)
 
 	btn = gtk.Button("sin")
 	btn.connect("clicked",self.fbutton_pressed,"sin()")
@@ -689,7 +689,7 @@ class RCalculatorDialog(gtk.Window):
 	self.sfunc_table.set_border_width(5)
 	self.sfunc_table.set_row_spacings(5)
 	self.sfunc_table.set_col_spacings(5)
-	funcbox.pack_start(self.sfunc_table, expand=gtk.FALSE)
+	funcbox.pack_start(self.sfunc_table, expand=False)
 
 	btn = gtk.Button("NDVI")
 	btn.connect("clicked",self.fbutton_pressed,"NDVI()")
@@ -737,7 +737,7 @@ class RCalculatorDialog(gtk.Window):
 
 	fg_list = ["Mathematics","Bit Operations","Trigionometry","Special"]
 	self.fun_group_list = gvutils.GvOptionMenu(fg_list,self.group_changed)
-	funcbox.pack_start(self.fun_group_list, expand=gtk.FALSE)
+	funcbox.pack_start(self.fun_group_list, expand=False)
 	
 
 	self.mathematics_group(funcbox)
@@ -854,7 +854,7 @@ class RCalculatorDialog(gtk.Window):
 ### source list #############################################################	
 	frame1 = gtk.Frame("Select Image Bands To Compute")
 	frame1.show()
-        box1.pack_start(frame1, expand=gtk.FALSE)
+        box1.pack_start(frame1, expand=False)
 	
 	box2r = gtk.VBox(spacing=10)
         box2r.set_border_width(10)
@@ -874,7 +874,7 @@ class RCalculatorDialog(gtk.Window):
 
 	types_label = gtk.Label('Image Data Type:')
 	types_label.set_alignment(0, 0.5)
-	box_types.pack_start(types_label, expand=gtk.FALSE)
+	box_types.pack_start(types_label, expand=False)
 	
 	self.types_list = []
 	i = GDT_Byte
@@ -891,7 +891,7 @@ class RCalculatorDialog(gtk.Window):
 	box1.pack_start(self.switch_new_view)
 	self.switch_new_view.show()
 	
-        return gtk.TRUE
+        return True
 
 #########################################################################	
     def expression_edit_cb(self,*args):
@@ -979,7 +979,7 @@ class RCalculatorDialog(gtk.Window):
 	numtype = gdalnumeric.GDALTypeCodeToNumericTypeCode(type)
 	if numtype == None:
 	    gvutils.error("Error! Type " + numtype + " is not supported!")
-	    return gtk.FALSE 
+	    return False 
 
 	fun_names_dict = {}
 	fun_names_dict["max"] = ("maximum",2)
@@ -1013,7 +1013,7 @@ class RCalculatorDialog(gtk.Window):
 	    exec test_exp
 	except:
 	    gvutils.error("Illegal expression!")
-	    return gtk.FALSE
+	    return False
 
 	if self.switch_new_view.get_active():
 	    gview.app.new_view()
@@ -1035,7 +1035,7 @@ class RCalculatorDialog(gtk.Window):
 		exec ex_exp
 	    except:    
 		gvutils.error("ZeroDivide?")
-		return gtk.FALSE
+		return False
 	    self.out_buf[y, 0:] = clip_result(numtype, rb).astype(numtype)
 	
 	res_ds = gdalnumeric.OpenArray(self.out_buf,proto_ds)

@@ -25,16 +25,15 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 
 class PGUProgressDialog(gtk.Dialog):
-    def __init__(self, title = 'Progress', cancel = FALSE ):
+    def __init__(self, title = 'Progress', cancel = False ):
         gtk.Dialog.__init__(self)
         self.set_title( title )
         self.min = 0.0
         self.max = 1.0
         self.message = "complete"
-        self.cancelled = FALSE
+        self.cancelled = False
 
         vbox = gtk.VBox(spacing=5)
         vbox.set_border_width(10)
@@ -42,7 +41,7 @@ class PGUProgressDialog(gtk.Dialog):
         
         label = gtk.Label(" 0% "+self.message)
         label.set_alignment(0, 0.5)
-        vbox.pack_start(label, expand=TRUE)
+        vbox.pack_start(label, expand=True)
         self.label = label
         
         pbar = gtk.ProgressBar()
@@ -59,10 +58,10 @@ class PGUProgressDialog(gtk.Dialog):
         self.show_all()
 
     def CancelCB( self, *args ):
-        self.cancelled = TRUE
+        self.cancelled = True
 
     def Reset(self):
-        self.cancelled = FALSE
+        self.cancelled = False
 
     def SetRange( self, min, max ):
         self.min = min
@@ -82,7 +81,7 @@ class PGUProgressDialog(gtk.Dialog):
         
         self.pbar.update( complete )
         while gtk.events_pending():
-            gtk.main_iteration(FALSE)
+            gtk.main_iteration(False)
 
         if self.cancelled:
             return 0

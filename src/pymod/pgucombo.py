@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 from gtk.keysyms import *
 from gtk.gdk import *
 
@@ -59,7 +58,7 @@ class pguCombo(pygtkextra.GtkComboBox):
         self.list.set_selection_mode( gtk.SELECTION_SINGLE )
         
         self.entry = gtk.Entry()
-        self.entry.set_editable( gtk.FALSE )
+        self.entry.set_editable( False )
         
         #fix up the style of the entry
         #style = self.entry.get_style().copy()
@@ -138,18 +137,18 @@ class pguCombo(pygtkextra.GtkComboBox):
         if item >= 0 and item < len(self.items):
             self.current_item = item
             self.entry.set_text( self.items[self.current_item] )
-            return TRUE
+            return True
         else:
-            return FALSE
+            return False
     def select_string( self, string = "" ):
         """Cause an item to be selected by a string value
         """
         try:
             idx = self.items.index( string )
             self.select_item( idx )
-            return TRUE
+            return True
         except:
-            return FALSE
+            return False
 
     ############################################################################
     #

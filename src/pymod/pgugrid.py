@@ -66,7 +66,6 @@
 import sys
 import traceback
 import gtk
-from gtk import TRUE, FALSE
 from gtk.keysyms import *
 from gtk.gdk import *
 from gvsignaler import Signaler
@@ -934,11 +933,11 @@ class pguGrid(gtk.HBox,Signaler):
         self._area.set_flags( gtk.CAN_FOCUS | gtk.HAS_GRAB )
         
         #flag to recalculate the adjustments
-        self.bCalcAdjustments = gtk.TRUE
+        self.bCalcAdjustments = True
         
         #set to true if changing some value that would end up causing multiple
         #expose events or an endless loop even.
-        self.updating = gtk.FALSE
+        self.updating = False
 
         #frm = gtk.Frame()
         #frm.set_shadow_type(gtk.SHADOW_ETCHED_OUT)
@@ -951,9 +950,9 @@ class pguGrid(gtk.HBox,Signaler):
         
         #self.attach( frm, 0, 1, 0, 1,
         #                    xoptions=gtk.FILL, yoptions=gtk.FILL )
-        self.vshell.pack_start(self._layout,expand=gtk.TRUE)
-        self.vshell.pack_start(self.hsframe,expand=gtk.FALSE)
-        self.pack_start(self.vsframe,expand=gtk.FALSE)
+        self.vshell.pack_start(self._layout,expand=True)
+        self.vshell.pack_start(self.hsframe,expand=False)
+        self.pack_start(self.vsframe,expand=False)
         #self.attach( self._layout, 0, 1, 0, 1,
         #                    xoptions=gtk.FILL, yoptions=gtk.FILL )
         #self.attach( self._vscroll, 1, 2, 0, 1, xoptions=gtk.SHRINK)
@@ -1092,7 +1091,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.clear()
 
         self.subset=subset
-        self.bCalcAdjustments = gtk.TRUE
+        self.bCalcAdjustments = True
         
         if ((source is None) or
             ((type(source) == type((1,))) and (len(source) == 0))):
@@ -1593,7 +1592,7 @@ class pguGrid(gtk.HBox,Signaler):
                 
         # Below: if row title styles are set, add code here:
                        
-        self.bCalcAdjustments=gtk.TRUE
+        self.bCalcAdjustments=True
 
     def add_style(self,style_or_tuple):
         """ Add a style to the list of styles available to
@@ -2342,7 +2341,7 @@ class pguGrid(gtk.HBox,Signaler):
         # Below: not used yet, but will be later
         #self.columntitle_style_index=Numeric.ones((self.g_columns,))
 
-        self.bCalcAdjustments = gtk.TRUE
+        self.bCalcAdjustments = True
         
         if expose == 1:
             self.expose()
@@ -2411,7 +2410,7 @@ class pguGrid(gtk.HBox,Signaler):
             self._ColumnDefs[idx].start_x=startx
             startx=startx+cwidth+1
 
-        self.bCalcAdjustments = gtk.TRUE  
+        self.bCalcAdjustments = True  
         if expose == 1:
             self.expose()
             
@@ -2671,7 +2670,7 @@ class pguGrid(gtk.HBox,Signaler):
         if len(row_list) == 0:
             return
         
-        self.bCalcAdjustments=gtk.TRUE
+        self.bCalcAdjustments=True
         
         if self.src_type in [SRC_SHAPES,SRC_SHAPESLAYER]:
             self.src.delete_shapes(row_list)
@@ -4869,9 +4868,9 @@ class pguGrid(gtk.HBox,Signaler):
         #
         #print "8: draw_rectangle"
         #gtk.draw_rectangle( pix, self.style_list[0].bg_gc[gtk.STATE_NORMAL],
-        #                    gtk.TRUE, 0, 0, width, height )
+        #                    True, 0, 0, width, height )
         pix.draw_rectangle( self.style_list[0].bg_gc[gtk.STATE_NORMAL],
-                            gtk.TRUE, 0, 0, width, height )
+                            True, 0, 0, width, height )
 
         #print 'exposing...'
         #print 'pix: ',self._pixmap
@@ -4894,13 +4893,13 @@ class pguGrid(gtk.HBox,Signaler):
             if self.bCalcAdjustments:
                 self.calc_adjustments()
                 
-            return gtk.FALSE
+            return False
    
         
         #
         # track changes in column width because of wide columns
         #
-        bResetAdj = gtk.FALSE
+        bResetAdj = False
         
         #
         # calculate the number of rows to draw
@@ -4937,7 +4936,7 @@ class pguGrid(gtk.HBox,Signaler):
    
             #print "1: draw_rectangle"
             pix.draw_rectangle(self.style_list[1].bg_gc[gtk.STATE_NORMAL],
-                               gtk.TRUE,0,0,
+                               True,0,0,
                                self.row_title_width+1,
                                rt_height+1)
 
@@ -5016,7 +5015,7 @@ class pguGrid(gtk.HBox,Signaler):
                     rstyles.append(self.style_list[self.row_style_index[idx]])
    
                 if cell_width > self.column_widths[i]:
-                    bResetAdj = gtk.TRUE
+                    bResetAdj = True
                     self.column_widths[i] = cell_width
                     self._update_column_width(i,cell_width)
 
@@ -5035,7 +5034,7 @@ class pguGrid(gtk.HBox,Signaler):
                 real_title_width = title_width
                 
             if title_width > self.column_widths[i]:
-                bResetAdj=gtk.TRUE
+                bResetAdj=True
                 self.column_widths[i]=title_width
                 self._update_column_width(i,title_width)
             
@@ -5053,7 +5052,7 @@ class pguGrid(gtk.HBox,Signaler):
             if self.opts.show_column_titles == 1:
                 #print "2: draw_rectangle"
                 pix.draw_rectangle( self.style_list[2].bg_gc[gtk.STATE_NORMAL],
-                                    gtk.TRUE, bx, by, bw, bh)
+                                    True, bx, by, bw, bh)
 
                 #
                 # draw the title
@@ -5084,7 +5083,7 @@ class pguGrid(gtk.HBox,Signaler):
                 if cell_is_selected[j]:  
                     #print "3: draw_rectangle"
                    pix.draw_rectangle( rstyles[j].bg_gc[gtk.STATE_SELECTED],
-                                       gtk.TRUE, 
+                                       True, 
                                        x, 
                                        y, 
                                        self.column_widths[i]+1,
@@ -5092,7 +5091,7 @@ class pguGrid(gtk.HBox,Signaler):
                 elif self.column_selectstate[i]:
                     #print "4: draw_rectangle"
                    pix.draw_rectangle( cstyles[i-first_column].bg_gc[gtk.STATE_SELECTED],
-                                       gtk.TRUE, 
+                                       True, 
                                        x, 
                                        y, 
                                        self.column_widths[i]+1,
@@ -5100,7 +5099,7 @@ class pguGrid(gtk.HBox,Signaler):
                 elif row_is_selected[j]:
                     #print "5: draw_rectangle"
                    pix.draw_rectangle( rstyles[j].bg_gc[gtk.STATE_SELECTED],
-                                       gtk.TRUE, 
+                                       True, 
                                        x, 
                                        y, 
                                        self.column_widths[i]+1,
@@ -5108,7 +5107,7 @@ class pguGrid(gtk.HBox,Signaler):
                 else:
                     #print "6: draw_rectangle"
                    pix.draw_rectangle( rstyles[j].bg_gc[gtk.STATE_NORMAL],
-                                       gtk.TRUE, 
+                                       True, 
                                        x, 
                                        y, 
                                        self.column_widths[i]+1,
@@ -5144,7 +5143,7 @@ class pguGrid(gtk.HBox,Signaler):
         # were any text over-runs:
         #print "7: draw_rectangle"
         pix.draw_rectangle( self.style_list[0].bg_gc[gtk.STATE_NORMAL],
-                            gtk.TRUE, 
+                            True, 
                             x+1, 
                             0, 
                             width-x-1,
@@ -5322,7 +5321,7 @@ class pguGrid(gtk.HBox,Signaler):
             self.calc_adjustments()
 
 
-        return gtk.FALSE
+        return False
 
     def size_allocate(self,*args):
         """Track changes in table size and pass them on to
@@ -5386,16 +5385,16 @@ class pguGrid(gtk.HBox,Signaler):
                 self.cell_font = style.get_font()
             self.row_height = self.cell_font.ascent + 2*self.pad
 
-        self.bCalcAdjustments=gtk.TRUE
+        self.bCalcAdjustments=True
       
     def calc_adjustments( self ):
         """Recalculate the adjustment settings
         """
         if not (self.flags() & gtk.REALIZED):
-            self.bCalcAdjustments = gtk.TRUE
+            self.bCalcAdjustments = True
             return
 
-        self.updating = gtk.TRUE
+        self.updating = True
         #horizontal min/max are 0 and max line length - page size
         hpos = self.hadj.value
         
@@ -5474,8 +5473,8 @@ class pguGrid(gtk.HBox,Signaler):
                 self.vsframe.show()
                 self.vscroll_shown = 1 
             
-        self.bCalcAdjustments = gtk.FALSE
-        self.updating = gtk.FALSE
+        self.bCalcAdjustments = False
+        self.updating = False
 
     def set_scroll_policy(self, hpolicy, vpolicy, expose=1):
         """ Set the policy for showing horizontal
@@ -5496,7 +5495,7 @@ class pguGrid(gtk.HBox,Signaler):
         """
         self.hscroll_policy = hpolicy
         self.vscroll_policy = vpolicy
-        self.bCalcAdjustments = gtk.TRUE
+        self.bCalcAdjustments = True
         if expose == 1:
             self.expose()
         
@@ -5547,7 +5546,7 @@ class pguGrid(gtk.HBox,Signaler):
         self.column_widths = []
         
         #flag to recalculate the adjustments
-        self.bCalcAdjustments = gtk.TRUE
+        self.bCalcAdjustments = True
 
         # Lists of currently selected rows,
         # columns, cells.  Selection state
@@ -5612,7 +5611,7 @@ class pguGrid(gtk.HBox,Signaler):
         
         #set to true if changing some value that would end up causing multiple
         #expose events or an endless loop even.
-        self.updating = gtk.FALSE
+        self.updating = False
         # Define source parameters; initialize them
         # to empty values
         self.src=None
@@ -5829,7 +5828,7 @@ class pguGridWin(gtk.Window):
         self.grid=pguGrid(config)
         self.add(self.grid)
         
-        self.set_policy(gtk.TRUE,gtk.TRUE,gtk.TRUE)
+        self.set_policy(True,True,True)
         if source is not None:
             self.set_source(source)
             
@@ -5854,7 +5853,7 @@ class pguTestGridWin(gtk.Window):
         self.grid=pguGrid(config)
         self.add(self.grid)
         
-        self.set_policy(gtk.TRUE,gtk.TRUE,gtk.TRUE)
+        self.set_policy(True,True,True)
         if source is not None:
             self.set_source(source)
             self.grid.resize_to_default()

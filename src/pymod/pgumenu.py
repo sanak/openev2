@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 from gtk.gdk import *
 import string
 import os
@@ -101,13 +100,13 @@ class pguMenuFactory(gtk.Widget):
             img_name = label[7:end]
             hbox = gtk.HBox(spacing=2)
             try:
-                hbox.pack_start(self.create_pixmap(img_name), expand=FALSE)
+                hbox.pack_start(self.create_pixmap(img_name), expand=False)
             except:
                 print 'Unable to load menu pixmap: ' + img_name
         
             lbl = gtk.Label(label[end+1:])
             lbl.set_justify(gtk.JUSTIFY_LEFT)
-            hbox.pack_start(lbl, expand=FALSE)
+            hbox.pack_start(lbl, expand=False)
             item = gtk.MenuItem()
             item.add(hbox)
             item.show_all()
@@ -123,10 +122,10 @@ class pguMenuFactory(gtk.Widget):
                 hbox = gtk.HBox()
                 spc = gtk.Label('')
                 spc.set_size_request(22,18)
-                hbox.pack_start(spc, expand=FALSE)
+                hbox.pack_start(spc, expand=False)
                 lbl = gtk.Label(label)
                 lbl.set_justify(gtk.JUSTIFY_LEFT)
-                hbox.pack_start(lbl, expand=FALSE)
+                hbox.pack_start(lbl, expand=False)
                 item = gtk.MenuItem()
                 item.add(hbox)
         if label != '<nothing>':
@@ -165,7 +164,7 @@ class pguMenuFactory(gtk.Widget):
         """
         key = 0
         mods = 0
-        done = FALSE
+        done = False
         while not done:
             if accelerator[:7] == '<shift>':
                 mods = mods | gtk.gdk.SHIFT_MASK
@@ -180,7 +179,7 @@ class pguMenuFactory(gtk.Widget):
                 mods = mods | gtk.gdk.CONTROL_MASK
                 accelerator = accelerator[9:]
             else:
-                done = TRUE
+                done = True
                 key = ord(accelerator[0])
         return key, mods
 
@@ -236,7 +235,7 @@ class pguToggleMenuItem( gtk.MenuItem ):
         hbox = gtk.HBox( spacing = 2 )
         self.tb = pgutogglebutton.pguToggleButton( )
         self.tb.connect( 'toggled', self.toggled_cb)
-        hbox.pack_start( self.tb, expand=FALSE )
+        hbox.pack_start( self.tb, expand=False )
         
         evt_box = gtk.EventBox()
         evt_box.connect( 'button-release-event', self.toggle_it )

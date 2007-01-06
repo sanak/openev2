@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import os.path
 import gvhtml
@@ -37,7 +36,7 @@ class GvSDSDlg(gtk.Window):
         self.set_title('SubDataset Selection')
         self.set_size_request(400, 300)
         self.set_border_width(3)
-        self.set_policy(TRUE,TRUE,FALSE)
+        self.set_policy(True,True,False)
         self.connect('delete-event',self.close)
         shell = gtk.VBox(spacing=3)
         self.add(shell)
@@ -65,10 +64,10 @@ class GvSDSDlg(gtk.Window):
         apply_button.connect('clicked', self.close)
         cancel_button = gtk.Button('Help')
         cancel_button.connect('clicked', self.help_cb)
-        button_box.pack_start(ok_button, expand=FALSE)
-        button_box.pack_start(apply_button, expand=FALSE)
-        button_box.pack_start(cancel_button, expand=FALSE)
-        shell.pack_start(button_box,expand=FALSE)
+        button_box.pack_start(ok_button, expand=False)
+        button_box.pack_start(apply_button, expand=False)
+        button_box.pack_start(cancel_button, expand=False)
+        shell.pack_start(button_box,expand=False)
 
         self.connect('realize', self.realize)
 
@@ -97,7 +96,7 @@ class GvSDSDlg(gtk.Window):
     
     def close(self,*args):
         self.hide()
-        return TRUE
+        return True
 
     def accept(self,*args):
         for i in range(len(self.sds_sel)):

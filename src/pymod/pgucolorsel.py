@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 from string import *
 import pgu
 from pgucolourswatch import ColourSwatch
@@ -110,7 +109,7 @@ class ColorControl(gtk.HBox):
 
         self.om.set_history(0)
         
-        self.pack_start(self.swatch, expand=FALSE)
+        self.pack_start(self.swatch, expand=False)
         self.pack_start(self.om)
 
     def launch_mixer_cb(self,item):

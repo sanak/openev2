@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 from string import *
 from gvsignaler import *
 import os.path
@@ -50,10 +49,10 @@ class GvSelBrowser(gtk.VBox):
         self.tooltips = gtk.Tooltips()
 
         hbox = gtk.HBox(spacing=3)
-        self.pack_start(hbox,expand=FALSE)
+        self.pack_start(hbox,expand=False)
         self.hbox = hbox
 
-        hbox.pack_start(gtk.Label('Shape:'),expand=FALSE)
+        hbox.pack_start(gtk.Label('Shape:'),expand=False)
 
         self.oid_tb = gtk.Entry()
         self.oid_tb.set_max_length(7)
@@ -69,7 +68,7 @@ class GvSelBrowser(gtk.VBox):
         left_button.add(im)
         self.tooltips.set_tip(left_button,'Cycle Selection Down')
         left_button.connect('clicked', self.cycle_down)
-        hbox.pack_start(left_button,expand=FALSE)
+        hbox.pack_start(left_button,expand=False)
 
         self.n_of_n_label = gtk.Label('XXXX of XXXX')
         hbox.pack_start(self.n_of_n_label)
@@ -80,13 +79,13 @@ class GvSelBrowser(gtk.VBox):
         right_button.add(im)
         self.tooltips.set_tip(left_button,'Cycle Selection Up')
         right_button.connect('clicked', self.cycle_up)
-        hbox.pack_start(right_button, expand=FALSE)
+        hbox.pack_start(right_button, expand=False)
 
         hbox = gtk.HBox(spacing=3)
         self.pack_start(hbox)
         self.layer_label = gtk.Label('XXXXXXXXXXXXXXXXXXXXXXXXXXX')
         self.layer_label.set_justify( gtk.JUSTIFY_LEFT )
-        hbox.pack_start(self.layer_label, expand=FALSE)
+        hbox.pack_start(self.layer_label, expand=False)
 
         self.connect('unrealize', self.close)
         

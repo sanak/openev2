@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import string
 import gvselbrowser
@@ -37,7 +36,7 @@ import gvogrfsgui
 import pgufont
 import traceback
 
-def launch(interactive=FALSE):
+def launch(interactive=False):
     try:
         gview.gvlabeledit.window.raise_()
     except:
@@ -48,7 +47,7 @@ def launch(interactive=FALSE):
 
 class GvLabelEdit(gtk.Window):
 
-    def __init__(self, interactive=FALSE, default_ogrfs = None):
+    def __init__(self, interactive=False, default_ogrfs = None):
         gtk.Window.__init__(self)
         self.set_title('Label Edit Tool')
         gview.app.sel_manager.subscribe( 'active-layer-changed',
@@ -121,10 +120,10 @@ class GvLabelEdit(gtk.Window):
         #######################################################################
         # Create a control box for the text related widgets.
         self.text_frame = gtk.Frame('Text Style')
-        box1.pack_start(self.text_frame,expand=FALSE)
+        box1.pack_start(self.text_frame,expand=False)
 
-        self.label_style = gvogrfsgui.GvLabelStyle(text_entry = TRUE,
-                                                   label_field = FALSE,
+        self.label_style = gvogrfsgui.GvLabelStyle(text_entry = True,
+                                                   label_field = False,
                                                    interactive = self.interactive)
         self.label_style.subscribe('ogrfs-changed', self.label_ogrfs_cb)
         self.label_style.subscribe('apply-text-to-field', self.text_apply_cb)
@@ -215,10 +214,10 @@ class GvLabelEdit(gtk.Window):
 
         if shape_obj is None:
             # add stuff to grey out interface.
-            self.label_style.set_sensitive(FALSE)
+            self.label_style.set_sensitive(False)
             return
         else:
-            self.label_style.set_sensitive(TRUE)
+            self.label_style.set_sensitive(True)
 
         try:
             ogrfs = shape_obj._gv_ogrfs

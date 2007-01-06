@@ -1721,8 +1721,8 @@ class VRTDatasetXMLUtil(VRTDatasetConstructor):
         @param color_table - GDAL color table to modify
         @param index - Integer index of new color to add
         @param entry - (red, green, blue) tuple for new color entry
-        @param bHueOnly - TRUE to set color gradient based on HSV hue difference
-        between colors, FALSE to compute gradient between RGB colors.
+        @param bHueOnly - True to set color gradient based on HSV hue difference
+        between colors, False to compute gradient between RGB colors.
         """
 
         # Get last entry from table

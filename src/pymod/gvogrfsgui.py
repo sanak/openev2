@@ -26,7 +26,7 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE, SHRINK
+from gtk import SHRINK
 from string import *
 from gvsignaler import *
 import gvutils
@@ -67,8 +67,8 @@ ogrfs_symbol_names = ['cross', 'x',
 class GvLabelStyle(gtk.VBox, Signaler):
 
     ###########################################################################
-    def __init__(self, spacing=10, text_entry=FALSE, layer=None,
-                 label_field = TRUE, enable_offsets=FALSE, interactive=FALSE):
+    def __init__(self, spacing=10, text_entry=False, layer=None,
+                 label_field = True, enable_offsets=False, interactive=False):
         gtk.VBox.__init__(self,spacing=spacing)
 
         self.ogrfs_obj = None
@@ -193,7 +193,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
                     xoptions=SHRINK, yoptions=SHRINK)
             spin_adjust = gtk.Adjustment(value=0.0, lower=-20.0, upper=20.0, step_incr=1.0)
             self.x_offset = gtk.SpinButton(spin_adjust)
-            self.x_offset.set_editable(TRUE)
+            self.x_offset.set_editable(True)
             self.x_offset.set_digits(1)
             self.x_offset.set_size_request(75, 0)
             self.x_offset.connect('changed', self.label_change_cb)
@@ -205,7 +205,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
                     xoptions=SHRINK, yoptions=SHRINK)
             spin_adjust = gtk.Adjustment(value=0.0, lower=-20.0, upper=20.0, step_incr=1.0)
             self.y_offset = gtk.SpinButton(spin_adjust)
-            self.y_offset.set_editable(TRUE)
+            self.y_offset.set_editable(True)
             self.y_offset.set_digits(1)
             self.y_offset.set_size_request(75, 0)
             self.y_offset.connect('changed', self.label_change_cb)
@@ -216,7 +216,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
     ###########################################################################
     def gui_update(self, *args):
 
-        self.updating = TRUE
+        self.updating = True
 
         # Update the field list.
         fnlist = [ 'disabled' ]
@@ -299,7 +299,7 @@ class GvLabelStyle(gtk.VBox, Signaler):
                 #update the widgets
 
 
-        self.updating = FALSE
+        self.updating = False
 
     ###########################################################################
     # Handle updates to the raw text.  Normally we just turn this over to
@@ -445,7 +445,7 @@ class GvSymbolStyle(gtk.VBox, Signaler):
         gtk.VBox.__init__(self, spacing=spacing)
         self.create_gui()
 
-        self.updating = FALSE
+        self.updating = False
         self.publish('ogrfs-changed')
         self.set_ogrfs(ogrfs_obj, layer)
 
@@ -490,7 +490,7 @@ class GvSymbolStyle(gtk.VBox, Signaler):
         spin_adjust = gtk.Adjustment(value=1.0, lower=0.2,
                         upper=4.0, step_incr=0.1)
         self.symbol_size = gtk.SpinButton(spin_adjust)
-        self.symbol_size.set_editable(TRUE)
+        self.symbol_size.set_editable(True)
         self.symbol_size.set_digits(1)
         self.symbol_size.set_size_request(75, 0)
         self.symbol_size.connect('changed', self.scale_change)
@@ -507,7 +507,7 @@ class GvSymbolStyle(gtk.VBox, Signaler):
         if self.updating:
             return
 
-        self.updating = TRUE
+        self.updating = True
 
         sym = int(self.ogrfs_obj.parms['id'].value[8:9])
         color = gvogrfs.ogr_to_gv_color(self.ogrfs_obj.parms['c'].value)
@@ -524,7 +524,7 @@ class GvSymbolStyle(gtk.VBox, Signaler):
         self.symbol_color.set_color(color)
         self.symbol_size.set_value(scale)
 
-        self.updating = FALSE
+        self.updating = False
 
     def set_ogrfs(self, ogrfs_obj, layer = None):
         """

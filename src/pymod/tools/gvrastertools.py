@@ -33,8 +33,6 @@ import string
 import gvsignaler
 import toolexample
 
-FALSE = gtk.FALSE
-TRUE = gtk.TRUE
 import gview,gvutils
 
 
@@ -150,7 +148,7 @@ class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
         self.frame_dict['histogram_frame'].add(self.viewarea)
 
         self.main_panel.pack_start(self.frame_dict['histogram_frame'],
-                                   gtk.TRUE,gtk.TRUE,0)   
+                                   True,True,0)   
 
     def set_entry_sensitivities(self,bool_val):
         self.entry_dict['start_line'].set_sensitive(bool_val)
@@ -160,18 +158,18 @@ class Histogram_ToolDlg(toolexample.General_ROIToolDlg):
 
     def activate_toggled(self,*args):
         if self.button_dict['Activate'].get_active():
-            self.set_entry_sensitivities(gtk.TRUE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.TRUE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.TRUE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.TRUE)
+            self.set_entry_sensitivities(True)
+            self.button_dict['Auto Update'].set_sensitive(True)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Analyze'].set_sensitive(True)
+            self.button_dict['Set Tool'].set_sensitive(True)
             ##### this is a Signaler event: self.notify('re-activated')
         else:
-            self.set_entry_sensitivities(gtk.FALSE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.FALSE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.FALSE)
+            self.set_entry_sensitivities(False)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Auto Update'].set_sensitive(False)
+            self.button_dict['Analyze'].set_sensitive(False)
+            self.button_dict['Set Tool'].set_sensitive(False)
        
     def get_histview( self, histogram, min, max,set_ymin=None,set_ymax=None ):
 

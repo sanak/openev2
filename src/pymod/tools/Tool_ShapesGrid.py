@@ -48,7 +48,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.dialog = gtk.Window()
         self.dialog.set_title('Tabular Shapes Attribute Grid Demo')
         self.dialog.set_default_size(300,400)
-        self.dialog.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+        self.dialog.set_policy(False, True, True)
 
         shell = gtk.VBox(spacing=5)
         shell.set_border_width(10)
@@ -57,23 +57,23 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.pgugrid=pgugrid.pguGrid(config=(3,2,0,2,4,2,0,0,2))
 
 
-        shell.pack_start(self.pgugrid,expand=gtk.TRUE)
+        shell.pack_start(self.pgugrid,expand=True)
 
         hbox=gtk.HBox(spacing=5)
         shell.pack_start(hbox)
         self.column_button=gtk.CheckButton("Schema properties only")
         self.column_button.connect("toggled",self.refresh_columns)
-        self.column_button.set_active(gtk.TRUE)
+        self.column_button.set_active(True)
         hbox.pack_start(self.column_button)
         
         rbutton = gtk.Button("Refresh columns")
         rbutton.connect("clicked", self.refresh_columns)
-        hbox.pack_start(rbutton,expand=gtk.FALSE)
+        hbox.pack_start(rbutton,expand=False)
         
         
         button = gtk.Button("close")
         button.connect("clicked", self.close)
-        shell.pack_start(button,expand=gtk.FALSE)
+        shell.pack_start(button,expand=False)
         button.show()
         
         shell.show_all()
@@ -157,7 +157,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
             (event.state & gtk.GDK.CONTROL_MASK)) and (not
             (event.state & gtk.GDK.SHIFT_MASK))):
 
-            if self.column_button.get_active() == gtk.TRUE:
+            if self.column_button.get_active() == True:
                 self.cell_popup_menu[0].popup(None,None,None,event.button,
                                       event.time)
             else:
@@ -175,7 +175,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         if self.shapes is not None:
             cc=self.pgugrid.get_current_columns()
             if len(cc[0]) == 0:
-                if self.column_button.get_active() == gtk.TRUE:
+                if self.column_button.get_active() == True:
                     self.cell_popup_menu[0].popup(None,None,None,event.button,
                                           event.time)
                 else:
@@ -285,7 +285,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
             else:
                 fdict[item[0]]="%"+str(item[2])+"s"
 
-        if self.column_button.get_active() == gtk.FALSE:
+        if self.column_button.get_active() == False:
             for shp in self.shapes:
                 klist.extend(shp.get_properties().keys())
 
@@ -373,7 +373,7 @@ class ShapesGridTool(gviewapp.Tool_GViewApp):
         self.active=0
         self.layer_teardown_cb()
         self.dialog.hide()
-        return gtk.TRUE
+        return True
     
 
     def layer_update(self,*args):
@@ -483,14 +483,14 @@ class SchemaDialog(gtk.Window):
         nf_frame.add(box3)
         self.new_field_name_entry =  gtk.Entry(10)
         self.new_field_name_entry.set_text('')
-        self.new_field_name_entry.set_editable(gtk.TRUE) 
+        self.new_field_name_entry.set_editable(True) 
         self.new_field_width_entry =  gtk.Entry(2)
         self.new_field_width_entry.set_text('20')
-        self.new_field_width_entry.set_editable(gtk.TRUE)        
+        self.new_field_width_entry.set_editable(True)        
         self.new_field_precision_entry =  gtk.Entry(2)
         self.new_field_precision_entry.set_text('0')
-        self.new_field_precision_entry.set_editable(gtk.FALSE)
-        self.new_field_precision_entry.set_sensitive(gtk.FALSE)
+        self.new_field_precision_entry.set_editable(False)
+        self.new_field_precision_entry.set_sensitive(False)
         
         self.new_field_types = ('string','integer','float')
         self.new_field_type_menu = gvutils.GvOptionMenu(self.new_field_types, self.new_field_precision_cb)
@@ -596,12 +596,12 @@ class SchemaDialog(gtk.Window):
         if self.new_field_types[self.new_field_type_menu.get_history()] ==\
                'float':
             # precision is only relevant for float
-            self.new_field_precision_entry.set_editable(gtk.TRUE)
-            self.new_field_precision_entry.set_sensitive(gtk.TRUE)
+            self.new_field_precision_entry.set_editable(True)
+            self.new_field_precision_entry.set_sensitive(True)
         else:
             self.new_field_precision_entry.set_text('0')
-            self.new_field_precision_entry.set_editable(gtk.FALSE)
-            self.new_field_precision_entry.set_sensitive(gtk.FALSE)
+            self.new_field_precision_entry.set_editable(False)
+            self.new_field_precision_entry.set_sensitive(False)
             
         
 

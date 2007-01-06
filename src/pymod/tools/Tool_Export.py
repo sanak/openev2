@@ -62,7 +62,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         for item in self.show_list:
             item.show()
 
-        if self.button_dict['Mode'].get_active() == gtk.TRUE:
+        if self.button_dict['Mode'].get_active() == True:
             for item in self.adv_show_list:
                 item.show()
         else:
@@ -79,7 +79,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.roichanged_id=self.app.toolbar.roi_tool.connect('roi-changed',self.refresh_roiinfo)
 
     def set_roitool(self, *args):
-        self.app.toolbar.roi_button.set_active(gtk.TRUE)
+        self.app.toolbar.roi_button.set_active(True)
 
     def refresh_cb(self,*args):
         self.refresh_fileinfo()
@@ -154,17 +154,17 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.dialog.set_border_width(10)
         self.tips=gtk.Tooltips()
         #self.dialog.set_default_size(500,400)
-        self.dialog.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+        self.dialog.set_policy(False, True, True)
 
         # main shell 
-        mainshell = gtk.HBox(spacing=1, homogeneous=gtk.FALSE)
+        mainshell = gtk.HBox(spacing=1, homogeneous=False)
         self.dialog.add(mainshell)
         self.show_list=[]
         self.adv_show_list=[]            # advanced show list
         self.show_list.append(mainshell)
 
         #navigation shell
-        navshell = gtk.VBox(spacing=1, homogeneous=gtk.FALSE)
+        navshell = gtk.VBox(spacing=1, homogeneous=False)
         mainshell.pack_start(navshell)
         self.show_list.append(navshell)
 
@@ -181,8 +181,8 @@ class GDALTool(gviewapp.Tool_GViewApp):
         bopt_frame=gtk.Frame('Basic Options')
         self.frame_dict['Basic Options']=bopt_frame
         self.show_list.append(bopt_frame)
-        navshell.pack_start(bopt_frame,gtk.FALSE,gtk.FALSE,0)
-        bopt_table=gtk.Table(2,4,gtk.FALSE)
+        navshell.pack_start(bopt_frame,False,False,0)
+        bopt_table=gtk.Table(2,4,False)
         bopt_table.set_border_width(5)
         bopt_table.set_row_spacings(5)
         bopt_table.set_col_spacings(5)
@@ -241,8 +241,8 @@ class GDALTool(gviewapp.Tool_GViewApp):
         iopt_frame=gtk.Frame('Interactive Options')
         self.frame_dict['Interactive Options']=iopt_frame
         self.adv_show_list.append(iopt_frame)
-        navshell.pack_start(iopt_frame,gtk.FALSE,gtk.FALSE,0)
-        iopt_table=gtk.Table(3,3,gtk.FALSE)
+        navshell.pack_start(iopt_frame,False,False,0)
+        iopt_table=gtk.Table(3,3,False)
         iopt_table.set_border_width(5)
         iopt_table.set_row_spacings(5)
         iopt_table.set_col_spacings(5)
@@ -273,13 +273,13 @@ class GDALTool(gviewapp.Tool_GViewApp):
         self.frame_dict['Other_Advanced']=gtk.Frame('')
         self.frame_dict['Other_Advanced'].set_shadow_type(gtk.SHADOW_NONE)
         self.adv_show_list.append(self.frame_dict['Other_Advanced'])
-        oadvbox=gtk.VBox(spacing=5,homogeneous=gtk.FALSE)
+        oadvbox=gtk.VBox(spacing=5,homogeneous=False)
         oadvbox.set_border_width(5)
         self.adv_show_list.append(oadvbox)
         
         self.frame_dict['Other_Advanced'].add(oadvbox)
 
-        otable=gtk.Table(2,3,gtk.FALSE)
+        otable=gtk.Table(2,3,False)
         otable.set_row_spacings(5)
         otable.set_col_spacings(5)
         self.adv_show_list.append(otable)
@@ -313,14 +313,14 @@ class GDALTool(gviewapp.Tool_GViewApp):
         otable.attach(self.geocoding_menu,1,2,1,2)
         self.adv_show_list.append(self.geocoding_menu)
 
-        opthbox=gtk.HBox(spacing=5,homogeneous=gtk.FALSE)
+        opthbox=gtk.HBox(spacing=5,homogeneous=False)
         self.adv_show_list.append(opthbox)
         oadvbox.pack_start(opthbox)
         optlabel=gtk.Label('Create Options:')
         optlabel.set_alignment(0,0.5)
         self.adv_show_list.append(optlabel)
         self.optentry=gtk.Entry()
-        self.optentry.set_editable(editable=gtk.TRUE)
+        self.optentry.set_editable(editable=True)
         self.optentry.set_size_request(400,25)
         self.optentry.set_text('')
         self.adv_show_list.append(self.optentry)
@@ -328,17 +328,17 @@ class GDALTool(gviewapp.Tool_GViewApp):
         opthbox.pack_start(self.optentry)
         
         navshell.pack_start(self.frame_dict['Other_Advanced'],
-                            gtk.FALSE,gtk.FALSE,0)
+                            False,False,0)
         
-        echbox=gtk.HBox(spacing=5,homogeneous=gtk.FALSE)
+        echbox=gtk.HBox(spacing=5,homogeneous=False)
         echbox.set_border_width(3)
-        navshell.pack_end(echbox,gtk.FALSE,gtk.FALSE,0)
+        navshell.pack_end(echbox,False,False,0)
         self.show_list.append(echbox)
         self.button_dict['Close']=gtk.Button('Close')
-        echbox.pack_end(self.button_dict['Close'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['Close'],expand=True)
         self.show_list.append(self.button_dict['Close'])
         self.button_dict['Export']=gtk.Button('Export')
-        echbox.pack_end(self.button_dict['Export'],expand=gtk.TRUE)
+        echbox.pack_end(self.button_dict['Export'],expand=True)
         self.show_list.append(self.button_dict['Export'])
 
         self.button_dict['Format_help'].connect('clicked',
@@ -354,9 +354,9 @@ class GDALTool(gviewapp.Tool_GViewApp):
                                               self.ip_window_toggled_cb)
         self.button_dict['Mode'].connect('toggled',self.mode_toggled_cb)
 
-        self.button_dict['IP_window'].set_active(gtk.FALSE)
-        self.button_dict['Mode'].set_active(gtk.FALSE)
-        self.frame_dict['IP_window'].set_entry_sensitivities(gtk.FALSE)
+        self.button_dict['IP_window'].set_active(False)
+        self.button_dict['Mode'].set_active(False)
+        self.frame_dict['IP_window'].set_entry_sensitivities(False)
 
         
         # Trap window close event
@@ -383,10 +383,10 @@ class GDALTool(gviewapp.Tool_GViewApp):
 
     def ip_window_toggled_cb(self,*args):
         if self.button_dict['IP_window'].get_active():
-            self.frame_dict['IP_window'].set_entry_sensitivities(gtk.TRUE)
+            self.frame_dict['IP_window'].set_entry_sensitivities(True)
             self.set_roitool()
         else:
-            self.frame_dict['IP_window'].set_entry_sensitivities(gtk.FALSE)
+            self.frame_dict['IP_window'].set_entry_sensitivities(False)
             
     def format_help_cb(self,*args):
         opformat=self.format_list[self.format_menu.get_history()]
@@ -468,7 +468,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                     return
                 
                 progress = pguprogress.PGUProgressDialog( 'Building overviews...',
-                                                  cancel = gtk.TRUE )
+                                                  cancel = True )
                 if ovrs is 'Nearest':
                     outds.BuildOverviews( "nearest",
                                        callback = progress.ProgressCB )
@@ -617,7 +617,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             copts=[]
     
         progress = pguprogress.PGUProgressDialog( 'Export to '+opfile,
-                                                  cancel = gtk.TRUE )
+                                                  cancel = True )
         progress.SetDefaultMessage("translated")
 
         outdataset=driver.CreateCopy(opfile,vrtdataset,
@@ -650,7 +650,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             self.roichanged_id=None
             
         self.dialog.hide()
-        return gtk.TRUE
+        return True
 
 #-----------------------------------------------------------------
 # GUI STUFF
@@ -662,7 +662,7 @@ class DataWindowFrame:
         self.show_list=[]
         self.show_list.append(self.frame)
         
-        patch_table = gtk.Table(2,4,gtk.FALSE)
+        patch_table = gtk.Table(2,4,False)
         self.show_list.append(patch_table)
         self.frame.add(patch_table)
 
@@ -677,7 +677,7 @@ class DataWindowFrame:
         self.entry_dict={}
 
         self.entry_dict['start_line'] = gtk.Entry()
-        self.entry_dict['start_line'].set_editable(gtk.TRUE)
+        self.entry_dict['start_line'].set_editable(True)
         self.entry_dict['start_line'].set_size_request(90, 25)
         self.entry_dict['start_line'].set_text('0')
         patch_table.attach(self.entry_dict['start_line'], 1,2, 0,1)
@@ -687,7 +687,7 @@ class DataWindowFrame:
         patch_table.attach(label2, 2,3,0, 1)
 
         self.entry_dict['start_pix'] = gtk.Entry()
-        self.entry_dict['start_pix'].set_editable(gtk.TRUE)
+        self.entry_dict['start_pix'].set_editable(True)
         self.entry_dict['start_pix'].set_size_request(90, 25)
         self.entry_dict['start_pix'].set_text('0')
         patch_table.attach(self.entry_dict['start_pix'], 3,4, 0,1)
@@ -697,7 +697,7 @@ class DataWindowFrame:
         patch_table.attach(label3, 0,1, 1, 2)
 
         self.entry_dict['num_lines'] = gtk.Entry()
-        self.entry_dict['num_lines'].set_editable(gtk.TRUE)
+        self.entry_dict['num_lines'].set_editable(True)
         self.entry_dict['num_lines'].set_size_request(90, 25)
         self.entry_dict['num_lines'].set_text('1')
         patch_table.attach(self.entry_dict['num_lines'], 1,2, 1,2)
@@ -707,7 +707,7 @@ class DataWindowFrame:
         patch_table.attach(label4, 2,3,1, 2)
 
         self.entry_dict['num_pix'] = gtk.Entry()
-        self.entry_dict['num_pix'].set_editable(gtk.TRUE)
+        self.entry_dict['num_pix'].set_editable(True)
         self.entry_dict['num_pix'].set_size_request(90, 25)
         self.entry_dict['num_pix'].set_text('1')
         patch_table.attach(self.entry_dict['num_pix'], 3,4, 1,2)
@@ -721,7 +721,7 @@ class DataWindowFrame:
         self.show_list.append(self.entry_dict['num_lines'])
         self.show_list.append(self.entry_dict['num_pix'])
         
-        parent_box.pack_start(self.frame,gtk.FALSE,gtk.FALSE,0)
+        parent_box.pack_start(self.frame,False,False,0)
 
 
     def update(self,roi_info):

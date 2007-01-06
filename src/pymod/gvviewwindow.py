@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from gtk import FALSE, TRUE
 from gtk.gdk import *
 from gtk.keysyms import *
 import gtkmissing
@@ -109,7 +108,7 @@ class GvViewWindow(gtk.Window):
         self.add(shell)
         self.pref_dialog = None
         self.position3D_dialog = None
-        self.set_resizable(TRUE)
+        self.set_resizable(True)
         self.zoom = 0.0
         self.zoom_flag = 'yes' # see set_zoom_factor_cb()
         self.zoom_factor = None
@@ -120,13 +119,13 @@ class GvViewWindow(gtk.Window):
         # Menu bar
         if show_menu > 0:
             self.create_menubar(menufile)
-            shell.pack_start(self.menuf, expand=FALSE)
+            shell.pack_start(self.menuf, expand=False)
         else:
             self.menuf = None
 
         if show_icons > 0:
             self.create_iconbar(iconfile)
-            shell.pack_start(self.iconbar,expand=FALSE)
+            shell.pack_start(self.iconbar,expand=False)
         else:
             self.iconbar = None        
 
@@ -151,17 +150,17 @@ class GvViewWindow(gtk.Window):
             self.scrolled_window = gtk.ScrolledWindow()
             self.set_size_request(size[0], size[1] + 60)
             self.scrolled_window.add(self.viewarea)
-            shell.pack_start(self.scrolled_window, expand=TRUE)
+            shell.pack_start(self.scrolled_window, expand=True)
         else:
             self.viewarea.size(size)
             self.scrolled_window = None
-            shell.pack_start(self.viewarea, expand=TRUE)
+            shell.pack_start(self.viewarea, expand=True)
 
         if show_tracker:
             statusbar = gtk.HBox()
-            shell.pack_start(statusbar, expand=FALSE)
+            shell.pack_start(statusbar, expand=False)
             label = gtk.Label()
-            statusbar.pack_start(label, expand=FALSE, padding=3)
+            statusbar.pack_start(label, expand=False, padding=3)
             tracker = gview.GvTrackTool(label)
             tracker.activate(self.viewarea)
             self.tracker = tracker
@@ -286,7 +285,7 @@ class GvViewWindow(gtk.Window):
     def aboutcb(self, *args):
         window = gtk.Window()
         window.set_title('About OpenEV')
-        vbox = gtk.VBox(homogeneous=FALSE,spacing=15)
+        vbox = gtk.VBox(homogeneous=False,spacing=15)
         window.add(vbox)
 
         im = gtk.Image()
@@ -294,7 +293,7 @@ class GvViewWindow(gtk.Window):
                                                          'openev.xpm'))
         vbox.pack_start(im)
         # Contributors
-        contrib = gtk.VBox(homogeneous=FALSE,spacing=3)
+        contrib = gtk.VBox(homogeneous=False,spacing=3)
         contrib.pack_start(gtk.Label('Contributors:'))
         contrib.pack_start(gtk.Label('Frank Warmerdam (warmerdam@pobox.com),'))
         contrib.pack_start(gtk.Label('Gillian Walter (gillian.walter@atlantis-scientific.com),'))
@@ -307,7 +306,7 @@ class GvViewWindow(gtk.Window):
         vbox.pack_start(contrib)
 
         # Funded By
-        funding = gtk.VBox(homogeneous=FALSE,spacing=3)
+        funding = gtk.VBox(homogeneous=False,spacing=3)
         funding.pack_start(gtk.Label('Funding provided by:'))
 
         im = gtk.Image()
@@ -348,10 +347,10 @@ class GvViewWindow(gtk.Window):
     def close(self, *args):
         # first check for non-standard close settings
         if self.close_flag == 1:
-            return TRUE
+            return True
         elif self.close_flag == 2:
             self.hide()
-            return TRUE
+            return True
         elif self.close_flag == 3:
             # Added this case for running from within ipython.  We want
             # to be able to kill all windows and regenerate them when
@@ -359,7 +358,7 @@ class GvViewWindow(gtk.Window):
             if self.menuf is not None:
                 self.app.unsubscribe('rfl-change',self.show_rfl)
             self.destroy()
-            return TRUE
+            return True
 
         
         # what else do we need to do?
@@ -368,19 +367,19 @@ class GvViewWindow(gtk.Window):
                 if self.menuf is not None:
                     self.app.unsubscribe('rfl-change',self.show_rfl)
                 # request_quit() sends out the order for the view
-                # to be shut.  The destroy() and return FALSE are
+                # to be shut.  The destroy() and return False are
                 # redundant and sometimes result in errors (project
                 # files).
                 #self.destroy()
-                #return FALSE
-                return TRUE
+                #return False
+                return True
             else:
-                return TRUE
+                return True
         else:
             if self.menuf is not None:
                 self.app.unsubscribe('rfl-change',self.show_rfl)
             self.destroy()
-            return TRUE
+            return True
 
     def hide_entry(self,entrystr='File/Exit'):
         """Hide a menu entry (can be temporary)
@@ -440,16 +439,16 @@ class GvViewWindow(gtk.Window):
         window = gtk.Window()
         window.set_title('Go To...')
         window.set_border_width(10)
-        vbox = gtk.VBox(homogeneous=FALSE,spacing=15)
+        vbox = gtk.VBox(homogeneous=False,spacing=15)
         window.add(vbox)
 
         # Make this a selection menu - doesn't work, yet!
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=gtk.FALSE)
-        box.pack_start(gtk.Label('Coordinate System:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Coordinate System:'),expand=False)
         self.coord_system_om = gvutils.GvOptionMenu(('Row/Col','Native'),
                                                     self.set_coord_system)
-        box.pack_start(self.coord_system_om,expand=FALSE)
+        box.pack_start(self.coord_system_om,expand=False)
         
         # Get current position in view native projection
         #   - changing Option Menu updates this in entry fields
@@ -458,26 +457,26 @@ class GvViewWindow(gtk.Window):
         
         # X Position
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=gtk.FALSE)
-        box.pack_start(gtk.Label('X Position:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('X Position:'),expand=False)
         x_pos_entry = gtk.Entry()
         x_pos_entry.set_max_length(14)
         x_pos_entry.set_text(str(-current_pos[0]))
-        box.pack_start(x_pos_entry,expand=FALSE)
+        box.pack_start(x_pos_entry,expand=False)
 
         # Y Position
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=gtk.FALSE)
-        box.pack_start(gtk.Label('Y Position:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Y Position:'),expand=False)
         y_pos_entry = gtk.Entry()
         y_pos_entry.set_max_length(14)
         y_pos_entry.set_text(str(-current_pos[1]))
-        box.pack_start(y_pos_entry,expand=FALSE)
+        box.pack_start(y_pos_entry,expand=False)
 
         # Button to move
         goto_button = gtk.Button('Go To...')
         goto_button.connect('clicked', self.goto_location )
-        vbox.pack_start(goto_button,expand=FALSE)
+        vbox.pack_start(goto_button,expand=False)
 
         self.x_pos_entry = x_pos_entry
         self.y_pos_entry = y_pos_entry
@@ -600,13 +599,13 @@ class GvViewWindow(gtk.Window):
 
         hDS = ogr.Open( filename )
         if hDS is None:
-            return FALSE
+            return False
 
         self.app.add_to_rfl(filename)
         
         dlg = gvogrdlg.GvOGRDlg(hDS, self )
 
-        return TRUE
+        return True
     
     def file_open_ogr_by_layer(self, layer):
 
@@ -614,7 +613,7 @@ class GvViewWindow(gtk.Window):
 
         raw_data = _gv.gv_shapes_from_ogr_layer( layer )
         if raw_data is None:
-            return FALSE
+            return False
 
         shape_data = gview.GvShapes(_obj=raw_data)
         if shape_data is None:
@@ -630,7 +629,7 @@ class GvViewWindow(gtk.Window):
             # I am not sure how to blow away the GvShapes properly.
             pass
                 
-        return TRUE
+        return True
 
     def file_import_cb(self, *args):
         self.make_active()
@@ -658,14 +657,14 @@ class GvViewWindow(gtk.Window):
             newfile = newbase+"_"+str(i)+".tif"
 
         progress = pguprogress.PGUProgressDialog( 'Import to '+newfile,
-                                                  cancel = TRUE )
+                                                  cancel = True )
         progress.SetDefaultMessage( "translated" )
 
         old_cache_max = gdal.GetCacheMax()
         if old_cache_max < 20000000:
             gdal.SetCacheMax( 20000000 )
         
-        new_dataset = geotiff.CreateCopy( newfile, dataset, FALSE,
+        new_dataset = geotiff.CreateCopy( newfile, dataset, False,
                                           ['TILED=YES',],
                                           callback = progress.ProgressCB )
         dataset = None
@@ -975,7 +974,7 @@ class GvViewWindow(gtk.Window):
         for cmd in self.icon_cmds:
             exec cmd
             
-        gview.manager.set_busy(TRUE)
+        gview.manager.set_busy(True)
 
     def old_icon_cmds(self):
         icon_cmds=[]
@@ -1407,7 +1406,7 @@ class GvViewWindow(gtk.Window):
         layer = self.viewarea.active_layer()
 
         if self.zoom_factor is None:
-            return gtk.FALSE 
+            return False 
 
         try:
             # Check if zoom factor changed
@@ -1439,7 +1438,7 @@ class GvViewWindow(gtk.Window):
         self.viewarea.grab_focus()
 
         # Return false to continue propogation of the view-state-changed signal
-        return gtk.FALSE   
+        return False   
 
         
     def pyshell(self, *args):
@@ -1457,10 +1456,10 @@ class GvViewWindow(gtk.Window):
         dialog = gtk.Window()
         dialog.set_title('Open 3D')
         dialog.set_border_width(10)
-        dialog.set_resizable(FALSE)
+        dialog.set_resizable(False)
         gvhtml.set_help_topic( dialog, 'open3d.html' )
         
-        box = gtk.VBox(homogeneous=FALSE, spacing=5)
+        box = gtk.VBox(homogeneous=False, spacing=5)
         dialog.add(box)
         self.file_dialog_3D = dialog
         
@@ -1483,7 +1482,7 @@ class GvViewWindow(gtk.Window):
         for zsChild in zsChildren : zsChild.reparent(box)
 
         # Mesh LOD and Height Scale
-        mesh_opts = gtk.HBox(homogeneous=FALSE, spacing=5)
+        mesh_opts = gtk.HBox(homogeneous=False, spacing=5)
         lod_label =  gtk.Label('Mesh Level of Detail')
         spin_adjust = gtk.Adjustment(value=3, lower=0, upper=8, step_incr=1)
         self.lod_spin_button = gtk.SpinButton(spin_adjust, climb_rate=1, digits=0)
@@ -1501,32 +1500,32 @@ class GvViewWindow(gtk.Window):
         box.pack_start(mesh_opts)
 
         # DEM height clamping options
-        min_clamp_opts = gtk.HBox(homogeneous=TRUE,spacing=5)
+        min_clamp_opts = gtk.HBox(homogeneous=True,spacing=5)
         self.min_heightclamp_entry = gtk.Entry()
         self.min_heightclamp_entry.set_max_length(10)
         self.min_heightclamp_entry.set_text('0.0')
         min_clamp_label = gtk.Label('Minimum Height:')
         self.min_heightclamp_toggle = gtk.CheckButton('Clamp Minimum Height')
-        self.min_heightclamp_toggle.set_active(gtk.FALSE)
+        self.min_heightclamp_toggle.set_active(False)
         min_clamp_opts.pack_start(self.min_heightclamp_toggle)
         min_clamp_opts.pack_start(min_clamp_label)
         min_clamp_opts.pack_start(self.min_heightclamp_entry)
         box.pack_start(min_clamp_opts)
 
-        max_clamp_opts = gtk.HBox(homogeneous=TRUE,spacing=5)
+        max_clamp_opts = gtk.HBox(homogeneous=True,spacing=5)
         self.max_heightclamp_entry = gtk.Entry()
         self.max_heightclamp_entry.set_max_length(10)
         self.max_heightclamp_entry.set_text('100000.0')
         max_clamp_label = gtk.Label('Maximum Height:')
         self.max_heightclamp_toggle = gtk.CheckButton('Clamp Maximum Height')
-        self.max_heightclamp_toggle.set_active(gtk.FALSE)
+        self.max_heightclamp_toggle.set_active(False)
         max_clamp_opts.pack_start(self.max_heightclamp_toggle)
         max_clamp_opts.pack_start(max_clamp_label)
         max_clamp_opts.pack_start(self.max_heightclamp_entry)
         box.pack_start(max_clamp_opts)
 
         # Okay/Cancel Buttons
-        buttons = gtk.HBox(homogeneous=FALSE, spacing=5)
+        buttons = gtk.HBox(homogeneous=False, spacing=5)
         okay = gtk.Button('OK')
         okay.set_size_request(64, 32)
         okay.connect('clicked', self.perform_3D_request)
@@ -1539,10 +1538,10 @@ class GvViewWindow(gtk.Window):
         help.set_size_request(64, 32)
         help.connect('clicked', self.helpcb, 'open3d.html')
 
-        buttons.pack_end(help, expand=FALSE)
-        buttons.pack_end(cancel, expand=FALSE)
-        buttons.pack_end(okay, expand=FALSE)
-        box.pack_start(buttons, expand=FALSE)
+        buttons.pack_end(help, expand=False)
+        buttons.pack_end(cancel, expand=False)
+        buttons.pack_end(okay, expand=False)
+        box.pack_start(buttons, expand=False)
 
         # Show everything but unused fileselection buttons
         dialog.show_all()
@@ -1559,12 +1558,12 @@ class GvViewWindow(gtk.Window):
         mesh_lod = self.lod_spin_button.get_value_as_int()
         hscale = float(self.scale_value.get_text())
 
-        if (self.min_heightclamp_toggle.get_active() == gtk.TRUE):
+        if (self.min_heightclamp_toggle.get_active() == True):
             min_clamp = float(self.min_heightclamp_entry.get_text())
         else:
             min_clamp = None
 
-        if (self.max_heightclamp_toggle.get_active() == gtk.TRUE):
+        if (self.max_heightclamp_toggle.get_active() == True):
             max_clamp = float(self.max_heightclamp_entry.get_text())
         else:
             max_clamp = None
@@ -1581,7 +1580,7 @@ class GvViewWindow(gtk.Window):
                        min_clamp = None, max_clamp = None ):
 
         self.make_active()
-        gview.manager.set_busy(TRUE)
+        gview.manager.set_busy(True)
 
         # Fill default parameters.
         if drape_filename is None:

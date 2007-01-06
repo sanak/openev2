@@ -27,7 +27,6 @@
 ###############################################################################
 
 import gtk; _gtk = gtk; del gtk
-from gtk import TRUE, FALSE
 from gtk.gdk import *
 import string
 import pgu
@@ -89,13 +88,13 @@ pgu.gtk_register('GvOptionMenu',GvOptionMenu)
 #
 class _MessageBox(_gtk.Dialog):
         def __init__(self, message="", buttons=(), pixmap=None,
-                     modal=TRUE):
+                     modal=True):
                 _gtk.Dialog.__init__(self)
                 self.connect("destroy", self.quit)
                 self.connect("delete_event", self.quit)
                 self.set_modal(modal)
                 if modal:
-                    self.set_modal(_gtk.TRUE)
+                    self.set_modal(True)
                 hbox = _gtk.HBox(spacing=5)
                 hbox.set_border_width(5)
                 self.vbox.pack_start(hbox)
@@ -104,7 +103,7 @@ class _MessageBox(_gtk.Dialog):
                         self.realize()
                         pm = _gtk.Image()
                         pm.set_from_file(pixmap)
-                        hbox.pack_start(pm, expand=FALSE)
+                        hbox.pack_start(pm, expand=False)
                         pm.show()
                 label = _gtk.Label(message)
                 label.set_justify( _gtk.JUSTIFY_LEFT )
@@ -135,7 +134,7 @@ def warning( text ):
     import os.path
     
     warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
-    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=FALSE )
+    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=False )
     win.set_title('Warning')
     win.show()
     return
@@ -145,7 +144,7 @@ def error( text ):
     import os.path
     
     warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
-    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=TRUE )
+    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=True )
     win.set_title('ERROR')
     win.show()
     _gtk.main()
@@ -213,7 +212,7 @@ class GvMenuFactory(_gtk.MenuBar):
             apply(item.connect, ("activate", callback) + args)
         # right justify the help menu automatically
         if string.lower(label) == 'help' and parentmenu == self:
-            item.set_right_justified(TRUE)
+            item.set_right_justified(True)
         parentmenu.append(item)
         self.__items[path] = item
         return item
@@ -231,7 +230,7 @@ class GvMenuFactory(_gtk.MenuBar):
     def parse_accelerator(self, accelerator):
         key = 0
         mods = 0
-        done = FALSE
+        done = False
         while not done:
             if accelerator[:7] == '<shift>':
                 mods = mods | _gtk.gdk.SHIFT_MASK
@@ -246,7 +245,7 @@ class GvMenuFactory(_gtk.MenuBar):
                 mods = mods | _gtk.gdk.CONTROL_MASK
                 accelerator = accelerator[9:]
             else:
-                done = TRUE
+                done = True
                 key = ord(accelerator[0])
         return key, mods
     def remove_entry(self, path):
@@ -789,7 +788,7 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
 # GvDataFilesFrame- function to create data file frame and entries
 #-----------------------------------------------------------------
 class GvDataFilesFrame(_gtk.Frame):
-    def __init__(self,title='',sel_list=('Input','Output'),editable=TRUE):
+    def __init__(self,title='',sel_list=('Input','Output'),editable=True):
         _gtk.Frame.__init__(self)
         self.set_label(title)
         self.channels=sel_list
@@ -800,7 +799,7 @@ class GvDataFilesFrame(_gtk.Frame):
         self.entry_dict = {}
 
         #  File options
-        file_table = _gtk.Table(len(self.channels),5,FALSE)
+        file_table = _gtk.Table(len(self.channels),5,False)
         file_table.set_row_spacings(3)
         file_table.set_col_spacings(3)
         self.table = file_table
@@ -820,7 +819,7 @@ class GvDataFilesFrame(_gtk.Frame):
             self.show_list.append(self.entry_dict[ch])
             self.set_dsfile('',ch)
             file_table.attach(self.entry_dict[ch], 1,5, idx,idx+1)
-            if editable == TRUE:
+            if editable == True:
                 self.entry_dict[ch].connect('leave-notify-event',self.update_ds)
                 
 
@@ -902,7 +901,7 @@ class GvEntryFrame(_gtk.Frame):
         # Note: the extra one column is because on windows,
         # creating a gtk table with N columns sometimes only shows
         # N-1 columns???
-        self.table = _gtk.Table(table_rows,cols*2+1,FALSE)
+        self.table = _gtk.Table(table_rows,cols*2+1,False)
         self.table.set_col_spacings(3)
         self.table.set_row_spacings(3)
         self.add(self.table)
@@ -918,7 +917,7 @@ class GvEntryFrame(_gtk.Frame):
                         self.table.attach(label,cidx,cidx+1,ridx,ridx+1)
                         self.entries[item2] = _gtk.Entry()
                         self.entries[item2].set_max_length(30)
-                        self.entries[item2].set_editable(TRUE)
+                        self.entries[item2].set_editable(True)
                         cidx = cidx+1
                         self.table.attach(self.entries[item2],
                                           cidx,cidx+1,ridx,ridx+1)
@@ -929,7 +928,7 @@ class GvEntryFrame(_gtk.Frame):
                     self.table.attach(label,0,1,ridx,ridx+1)
                     self.entries[item] = _gtk.Entry()
                     self.entries[item].set_max_length(30)
-                    self.entries[item].set_editable(TRUE)
+                    self.entries[item].set_editable(True)
                     self.table.attach(self.entries[item],
                                       1,2,ridx,ridx+1)
                 ridx=ridx+1
@@ -949,7 +948,7 @@ class GvEntryFrame(_gtk.Frame):
                         if wtype2 is None:
                             self.entries[item2] = _gtk.Entry()
                             self.entries[item2].set_max_length(30)
-                            self.entries[item2].set_editable(TRUE)
+                            self.entries[item2].set_editable(True)
                         else:
                             self.entries[item2] = GvOptionMenu(wtype2)
                             self.entries[item2].set_history(0)
@@ -966,7 +965,7 @@ class GvEntryFrame(_gtk.Frame):
                     if wtype is None:
                         self.entries[item] = _gtk.Entry()
                         self.entries[item].set_max_length(30)
-                        self.entries[item].set_editable(TRUE)
+                        self.entries[item].set_editable(True)
                     else:
                         self.entries[item] = GvOptionMenu(wtype)
                         self.entries[item].set_history(0)

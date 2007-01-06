@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 from string import *
 
 from gvconst import *
@@ -57,7 +56,7 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
         gtk.Window.__init__(self)
         self.set_title('GView')
         self.layer = layer
-        self.updating = FALSE
+        self.updating = False
 
         gvhtml.set_help_topic( self, "gvpquerypropdlg.html" )
         
@@ -78,8 +77,8 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
 
         # Create Color control.
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Color:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Color:'),expand=False)
         self.point_color = \
                  pgucolorsel.ColorControl('Point Color',
                                           self.color_cb,'_point_color')
@@ -87,32 +86,32 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
 
         # Point size
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Point Size:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Point Size:'),expand=False)
         self.point_size = gtk.Combo()
         self.point_size.set_popdown_strings(
             ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '15', '20') )
         self.point_size.entry.connect('changed', self.point_size_cb)
-        box.pack_start(self.point_size,expand=FALSE)
+        box.pack_start(self.point_size,expand=False)
 
         # Coordinate
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Coordinate:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Coordinate:'),expand=False)
 
         self.coord_om = gvutils.GvOptionMenu(
             ('Off','Raster Pixel/Line','Georeferenced','Geodetic (lat/long)'),
             self.set_coordinate_mode)
-        box.pack_start(self.coord_om,expand=FALSE)
+        box.pack_start(self.coord_om,expand=False)
 
         # Raster Value
         box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Pixel Value:'),expand=FALSE)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Pixel Value:'),expand=False)
 
         self.pixel_mode_om = \
             gvutils.GvOptionMenu(('On','Off'), self.set_pixel_mode)
-        box.pack_start(self.pixel_mode_om,expand=FALSE)
+        box.pack_start(self.pixel_mode_om,expand=False)
 
         self.update_gui()
         
@@ -127,10 +126,10 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
         #    return
         #
         
-        if self.layer is None or self.updating == TRUE:
+        if self.layer is None or self.updating == True:
             return
 
-        self.updating = TRUE
+        self.updating = True
         
         # Layer name.
         self.layer_name.set_text( self.layer.get_name() )
@@ -172,7 +171,7 @@ class GvPQueryPropDialog(gvvectorpropdlg.GvVectorPropDialog):
         else:
             self.pixel_mode_om.set_history(1)
 
-        self.updating = FALSE
+        self.updating = False
 
     # Dialog closed, remove references to python object
     def close( self, widget, args ):

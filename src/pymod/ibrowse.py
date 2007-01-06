@@ -3,7 +3,6 @@
 import gviewapp
 import gview
 import gtk
-from gtk import FALSE, TRUE
 from gtk.keysyms import *
 import sys
 import random

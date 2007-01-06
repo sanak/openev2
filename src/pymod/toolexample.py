@@ -12,8 +12,6 @@ import Numeric
 import string
 from gvsignaler import Signaler
 
-FALSE = gtk.FALSE
-TRUE = gtk.TRUE
 import gview,gvutils
 
 
@@ -108,7 +106,7 @@ class GeneralPOITool(gviewapp.Tool_GViewApp):
             return
 
     def set_poitool(self, *args):
-        self.app.toolbar.poi_button.set_active(gtk.TRUE)
+        self.app.toolbar.poi_button.set_active(True)
 
     def analyze_cb(self,*args):
         line = self.RP_ToolDlg.entry_dict['line'].get_text()
@@ -200,7 +198,7 @@ class GeneralROITool(gviewapp.Tool_GViewApp):
             return
 
     def set_roitool(self, *args):
-        self.app.toolbar.roi_button.set_active(gtk.TRUE)
+        self.app.toolbar.roi_button.set_active(True)
 
     def analyze_cb(self,*args):
         line = self.RP_ToolDlg.entry_dict['start_line'].get_text()
@@ -243,9 +241,9 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
         self.button_dict['Set Tool'].connect('clicked',self.set_tool_cb)
 
         # Set default sensitivities
-        self.button_dict['Auto Update'].set_active(gtk.FALSE)
-        self.button_dict['Analyze'].set_sensitive(gtk.TRUE)
-        self.button_dict['Activate'].set_active(gtk.FALSE)
+        self.button_dict['Auto Update'].set_active(False)
+        self.button_dict['Analyze'].set_sensitive(True)
+        self.button_dict['Activate'].set_active(False)
 
         self.connect('delete-event',self.close) 
 
@@ -279,9 +277,9 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
         self.frame_dict['base_frame1'] = gtk.Frame()
         self.show_list.append(self.frame_dict['base_frame1'])
 
-        hbox1 = gtk.HBox(gtk.TRUE,5)
+        hbox1 = gtk.HBox(True,5)
         self.show_list.append(hbox1)
-        hbox1.pack_end(self.button_dict['Analyze'],gtk.TRUE,gtk.TRUE,0)
+        hbox1.pack_end(self.button_dict['Analyze'],True,True,0)
         self.frame_dict['base_frame1'].add(hbox1)
 
         # second frame- will contain roi or poi info
@@ -292,18 +290,18 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
         self.frame_dict['base_frame3'] = gtk.Frame();
         self.show_list.append(self.frame_dict['base_frame3'])
 
-        hbox3 = gtk.HBox(gtk.TRUE,5)
+        hbox3 = gtk.HBox(True,5)
         self.show_list.append(hbox3)
-        hbox3.pack_start(self.button_dict['Activate'],gtk.TRUE,gtk.TRUE,0)
-        hbox3.pack_start(self.button_dict['Auto Update'],gtk.TRUE,gtk.TRUE,0)
-        hbox3.pack_start(self.button_dict['Set Tool'],gtk.TRUE,gtk.TRUE,0)
+        hbox3.pack_start(self.button_dict['Activate'],True,True,0)
+        hbox3.pack_start(self.button_dict['Auto Update'],True,True,0)
+        hbox3.pack_start(self.button_dict['Set Tool'],True,True,0)
         self.frame_dict['base_frame3'].add(hbox3)
 
         # Top level panel...
-        self.main_panel = gtk.VBox(gtk.FALSE,5)
-        self.main_panel.pack_start(self.frame_dict['base_frame1'],gtk.FALSE,gtk.FALSE,0)
-        self.main_panel.pack_start(self.frame_dict['base_frame2'],gtk.FALSE,gtk.FALSE,0)
-        self.main_panel.pack_end(self.frame_dict['base_frame3'],gtk.FALSE,gtk.FALSE,0)
+        self.main_panel = gtk.VBox(False,5)
+        self.main_panel.pack_start(self.frame_dict['base_frame1'],False,False,0)
+        self.main_panel.pack_start(self.frame_dict['base_frame2'],False,False,0)
+        self.main_panel.pack_end(self.frame_dict['base_frame3'],False,False,0)
         self.add(self.main_panel)
         self.show_list.append(self.main_panel)
  
@@ -315,26 +313,26 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
 
     def activate_toggled(self,*args):
         if self.button_dict['Activate'].get_active():
-            self.set_entry_sensitivities(gtk.TRUE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.TRUE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.TRUE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.TRUE)
+            self.set_entry_sensitivities(True)
+            self.button_dict['Auto Update'].set_sensitive(True)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Analyze'].set_sensitive(True)
+            self.button_dict['Set Tool'].set_sensitive(True)
             Signaler.notify(self, 're-activated')
         else:
-            self.set_entry_sensitivities(gtk.FALSE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.FALSE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.FALSE)
+            self.set_entry_sensitivities(False)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Auto Update'].set_sensitive(False)
+            self.button_dict['Analyze'].set_sensitive(False)
+            self.button_dict['Set Tool'].set_sensitive(False)
 
 
     def auto_update_toggled(self,*args):
         # If auto-update is on, analyze button should not be sensitive
         if self.button_dict['Auto Update'].get_active():
-            self.button_dict['Analyze'].set_sensitive(gtk.FALSE)
+            self.button_dict['Analyze'].set_sensitive(False)
         else:
-            self.button_dict['Analyze'].set_sensitive(gtk.TRUE)
+            self.button_dict['Analyze'].set_sensitive(True)
 
     def set_tool_cb(self,*args):
         pass
@@ -344,25 +342,25 @@ class General_ROIPOIToolDlg(gtk.Window,Signaler):
 
     def is_active(self):
         if self.button_dict['Activate'].get_active():
-            return gtk.TRUE
+            return True
         else:
-            return gtk.FALSE
+            return False
 
     def make_active(self):
         self.set_tool_cb()
-        self.button_dict['Activate'].set_active(gtk.TRUE)
+        self.button_dict['Activate'].set_active(True)
 
     def is_auto_updating(self):
         if self.button_dict['Auto Update'].get_active():
-            return gtk.TRUE
+            return True
         else:
-            return gtk.FALSE
+            return False
 
     def close(self,*args):
         # If tool is closed, user probably wants to be rid of it...
-        self.button_dict['Activate'].set_active(gtk.FALSE)
+        self.button_dict['Activate'].set_active(False)
         self.hide()
-        return TRUE
+        return True
 
 
 class General_ROIToolDlg(General_ROIPOIToolDlg):
@@ -378,7 +376,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         # By now, main panel, basic frames, buttons have been created
         # Middle frame (region display) must be filled in.
 
-        patch_table = gtk.Table(2,4,FALSE)
+        patch_table = gtk.Table(2,4,False)
         self.show_list.append(patch_table)
         self.frame_dict['base_frame2'].add(patch_table)
 
@@ -391,7 +389,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label1, 0,1, 0, 1)
 
         self.entry_dict['start_line'] = gtk.Entry()
-        self.entry_dict['start_line'].set_editable(gtk.FALSE)
+        self.entry_dict['start_line'].set_editable(False)
         self.entry_dict['start_line'].set_size_request(90, 25)
         self.entry_dict['start_line'].set_text('1')
         patch_table.attach(self.entry_dict['start_line'], 1,2, 0,1)
@@ -401,7 +399,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label2, 2,3,0, 1)
 
         self.entry_dict['start_pix'] = gtk.Entry()
-        self.entry_dict['start_pix'].set_editable(gtk.FALSE)
+        self.entry_dict['start_pix'].set_editable(False)
         self.entry_dict['start_pix'].set_size_request(90, 25)
         self.entry_dict['start_pix'].set_text('1')
         patch_table.attach(self.entry_dict['start_pix'], 3,4, 0,1)
@@ -411,7 +409,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label3, 0,1, 1, 2)
 
         self.entry_dict['num_lines'] = gtk.Entry()
-        self.entry_dict['num_lines'].set_editable(gtk.FALSE)
+        self.entry_dict['num_lines'].set_editable(False)
         self.entry_dict['num_lines'].set_size_request(90, 25)
         self.entry_dict['num_lines'].set_text('1')
         patch_table.attach(self.entry_dict['num_lines'], 1,2, 1,2)
@@ -421,7 +419,7 @@ class General_ROIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label4, 2,3,1, 2)
 
         self.entry_dict['num_pix'] = gtk.Entry()
-        self.entry_dict['num_pix'].set_editable(gtk.FALSE)
+        self.entry_dict['num_pix'].set_editable(False)
         self.entry_dict['num_pix'].set_size_request(90, 25)
         self.entry_dict['num_pix'].set_text('1')
         patch_table.attach(self.entry_dict['num_pix'], 3,4, 1,2)
@@ -473,7 +471,7 @@ class General_POIToolDlg(General_ROIPOIToolDlg):
         # By now, main panel, basic frames, buttons have been created
         # Middle frame (region display) must be filled in.
 
-        patch_table = gtk.Table(1,4,FALSE)
+        patch_table = gtk.Table(1,4,False)
         self.show_list.append(patch_table)
         self.frame_dict['base_frame2'].add(patch_table)
 
@@ -486,7 +484,7 @@ class General_POIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label1, 0,1, 0, 1)
 
         self.entry_dict['line'] = gtk.Entry()
-        self.entry_dict['line'].set_editable(gtk.FALSE)
+        self.entry_dict['line'].set_editable(False)
         self.entry_dict['line'].set_size_request(90, 25)
         self.entry_dict['line'].set_text('1')
         patch_table.attach(self.entry_dict['line'], 1,2, 0,1)
@@ -496,7 +494,7 @@ class General_POIToolDlg(General_ROIPOIToolDlg):
         patch_table.attach(label2, 2,3,0, 1)
 
         self.entry_dict['pixel'] = gtk.Entry()
-        self.entry_dict['pixel'].set_editable(gtk.FALSE)
+        self.entry_dict['pixel'].set_editable(False)
         self.entry_dict['pixel'].set_size_request(90, 25)
         self.entry_dict['pixel'].set_text('1')
         patch_table.attach(self.entry_dict['pixel'], 3,4, 0,1)
@@ -605,17 +603,17 @@ class Pixel_ToolDlg(General_POIToolDlg):
 
         pixel_scroll = gtk.ScrolledWindow()
         self.show_list.append(pixel_scroll)
-        pixel_vbox.pack_start(pixel_scroll,expand = gtk.TRUE)
+        pixel_vbox.pack_start(pixel_scroll,expand = True)
 
         text_buff = gtk.TextBuffer();
         self.entry_dict['pixel_info_text_buffer'] = text_buff;
         text_view = gtk.TextView(text_buff);
         text_view.set_wrap_mode(gtk.WRAP_NONE)
-        text_view.set_editable(gtk.FALSE)
+        text_view.set_editable(False)
         self.show_list.append(text_view)
         pixel_scroll.add(text_view)
         self.entry_dict['pixel_info_text_view'] = text_view;
-        self.main_panel.pack_start(self.frame_dict['pixel_info_frame'],gtk.TRUE,gtk.TRUE,0)        
+        self.main_panel.pack_start(self.frame_dict['pixel_info_frame'],True,True,0)        
 
     def update_pixelinfo_text(self,text):
 	self.entry_dict['pixel_info_text_buffer'].set_text(text);
@@ -654,7 +652,7 @@ class Stats_Tool(GeneralROITool):
 
     def update_roi_view(self,*args):
         # Shouldn't get here if inactive anyway, but just in case...
-        if (self.RP_ToolDlg.is_active() == gtk.FALSE):
+        if (self.RP_ToolDlg.is_active() == False):
             return
 
         # Update view based on new frame values
@@ -750,7 +748,7 @@ class Stats_Tool(GeneralROITool):
         text = self.basic_region_analysis(cview,clayer) 
 
         self.RP_ToolDlg.update_regioninfo_text(text)
-        if (self.RP_ToolDlg.button_dict['Log To File'].get_active() == gtk.TRUE):
+        if (self.RP_ToolDlg.button_dict['Log To File'].get_active() == True):
             log_filename = self.RP_ToolDlg.entry_dict['log_file'].get_text()
             if (len(log_filename) < 2):
                 gvutils.error('Log file not set!')
@@ -867,12 +865,12 @@ class Stats_ToolDlg(General_ROIToolDlg):
 
         pixel_scroll = gtk.ScrolledWindow()
         self.show_list.append(pixel_scroll)
-        pixel_vbox.pack_start(pixel_scroll,expand = gtk.TRUE)
+        pixel_vbox.pack_start(pixel_scroll,expand = True)
 
         self.entry_dict['region_info_text'] = gtk.Text(gtk.TextBuffer())
         self.show_list.append(self.entry_dict['region_info_text'])
         self.entry_dict['region_info_text'].set_wrap_mode(gtk.WRAP_NONE)
-        self.entry_dict['region_info_text'].set_editable(gtk.FALSE)
+        self.entry_dict['region_info_text'].set_editable(False)
         pixel_scroll.add(self.entry_dict['region_info_text'])
         self.entry_dict['region_info_text'].set_text('')
 
@@ -881,7 +879,7 @@ class Stats_ToolDlg(General_ROIToolDlg):
         self.frame_dict['log_frame']=gtk.Frame()
         self.show_list.append(self.frame_dict['log_frame'])
 
-        log_table = gtk.Table(2,4,gtk.FALSE)
+        log_table = gtk.Table(2,4,False)
         self.show_list.append(log_table)
         self.frame_dict['log_frame'].add(log_table)
         
@@ -902,21 +900,21 @@ class Stats_ToolDlg(General_ROIToolDlg):
         log_table.attach(log_label, 0,1, 1, 2)
 
         self.entry_dict['log_file'] = gtk.Entry()
-        self.entry_dict['log_file'].set_editable(gtk.TRUE)
+        self.entry_dict['log_file'].set_editable(True)
         self.entry_dict['log_file'].set_size_request(400,25)
         self.entry_dict['log_file'].set_text('')
         log_table.attach(self.entry_dict['log_file'], 1,4, 1,2)
 
-        self.main_panel.pack_start(self.frame_dict['region_info_frame'],gtk.TRUE,gtk.TRUE,0)   
-        self.main_panel.pack_start(self.frame_dict['log_frame'],gtk.FALSE,gtk.FALSE,0)      
+        self.main_panel.pack_start(self.frame_dict['region_info_frame'],True,True,0)   
+        self.main_panel.pack_start(self.frame_dict['log_frame'],False,False,0)      
 
         # Customized connections
         self.button_dict['Select Log'].connect('clicked',self.select_log_cb)
 
         # Set default sensitivities for customized tool
-        self.button_dict['Log To File'].set_active(gtk.FALSE)
-        self.button_dict['Log To File'].set_sensitive(gtk.TRUE)
-        self.button_dict['Select Log'].set_sensitive(gtk.TRUE)
+        self.button_dict['Log To File'].set_active(False)
+        self.button_dict['Log To File'].set_sensitive(True)
+        self.button_dict['Select Log'].set_sensitive(True)
 
     def update_regioninfo_text(self,text):
         self.entry_dict['region_info_text'].set_text(text)
@@ -940,23 +938,23 @@ class Stats_ToolDlg(General_ROIToolDlg):
 
     def activate_toggled(self,*args):
         if self.button_dict['Activate'].get_active():
-            self.set_entry_sensitivities(gtk.TRUE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.TRUE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.TRUE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.TRUE)
-            self.button_dict['Log To File'].set_sensitive(gtk.TRUE)
-            self.button_dict['Log To File'].set_active(gtk.FALSE)
-            self.button_dict['Select Log'].set_sensitive(gtk.TRUE)
+            self.set_entry_sensitivities(True)
+            self.button_dict['Auto Update'].set_sensitive(True)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Analyze'].set_sensitive(True)
+            self.button_dict['Set Tool'].set_sensitive(True)
+            self.button_dict['Log To File'].set_sensitive(True)
+            self.button_dict['Log To File'].set_active(False)
+            self.button_dict['Select Log'].set_sensitive(True)
             Signaler.notify(self, 're-activated')
         else:
-            self.set_entry_sensitivities(gtk.FALSE)
-            self.button_dict['Auto Update'].set_active(gtk.FALSE)
-            self.button_dict['Auto Update'].set_sensitive(gtk.FALSE)
-            self.button_dict['Analyze'].set_sensitive(gtk.FALSE)
-            self.button_dict['Set Tool'].set_sensitive(gtk.FALSE)
-            self.button_dict['Log To File'].set_sensitive(gtk.FALSE)
-            self.button_dict['Log To File'].set_active(gtk.FALSE)
-            self.button_dict['Select Log'].set_sensitive(gtk.FALSE)
+            self.set_entry_sensitivities(False)
+            self.button_dict['Auto Update'].set_active(False)
+            self.button_dict['Auto Update'].set_sensitive(False)
+            self.button_dict['Analyze'].set_sensitive(False)
+            self.button_dict['Set Tool'].set_sensitive(False)
+            self.button_dict['Log To File'].set_sensitive(False)
+            self.button_dict['Log To File'].set_active(False)
+            self.button_dict['Select Log'].set_sensitive(False)
        
 

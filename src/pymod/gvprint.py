@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 
 from gvconst import *
 import gview
@@ -347,7 +346,7 @@ class GvPrintDialog(gtk.Window):
                                           self.output.get_history())
             if err == 0:
                 gdal.GetDriverByName('PNG').CreateCopy(self.file.get_text(),
-                                                   gdal.Open('_temp.tif'),TRUE)
+                                                   gdal.Open('_temp.tif'),True)
             os.unlink( '_temp.tif' )
         elif self.driver.get_history() == DR_WINPRINT:
             self.view.print_to_windriver( width, height, ulx, uly, lrx, lry,
@@ -362,7 +361,7 @@ class GvPrintDialog(gtk.Window):
                     os.rename('_temp2.tif','_temp.tif')
                 
                 gdal.GetDriverByName('GIF').CreateCopy(self.file.get_text(),
-                                                  gdal.Open('_temp.tif'),TRUE)
+                                                  gdal.Open('_temp.tif'),True)
             os.unlink( '_temp.tif' )
 
         if err != 0:
@@ -384,7 +383,7 @@ class GvPrintDialog(gtk.Window):
             
         self.destroy()
         
-        return TRUE
+        return True
         
 
 if __name__ == '__main__':

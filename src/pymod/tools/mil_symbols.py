@@ -71,7 +71,7 @@ class RenderTest(gtk.Window):
     def close(self, *args):
         self.hide()
         self.visibility_flag = 0
-        return gtk.TRUE
+        return True
 
     def create_gui(self):
         box1 = gtk.VBox()
@@ -79,15 +79,15 @@ class RenderTest(gtk.Window):
         box1.show()
 
         text_view = gtk.TextView(gtk.TextBuffer())
-        text_view.set_editable(gtk.FALSE)
+        text_view.set_editable(False)
         text_view.set_size_request(400,150)
         text_view.set_wrap_mode(gtk.WRAP_NONE)
         text_view.show()
         self.text_view = text_view
-        box1.pack_start(text_view, expand=gtk.TRUE)
+        box1.pack_start(text_view, expand=True)
 
         box2 = gtk.HBox()
-        box1.pack_start(box2, expand=gtk.FALSE)
+        box1.pack_start(box2, expand=False)
         box2.show()
 
         self.prev_btn = gtk.Button("<--- Previous")

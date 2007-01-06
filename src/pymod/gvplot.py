@@ -614,7 +614,7 @@ class GvGraphWindow(gtk.Window):
         self.xsize = raster.get_dataset().RasterXSize
         self.ysize = raster.get_dataset().RasterYSize
 
-        self.set_policy(gtk.TRUE,gtk.TRUE,gtk.FALSE)
+        self.set_policy(True,True,False)
         # self.set_size_request(self.xsize, self.ysize)
         self.viewarea = gview.GvViewArea()
         self.viewarea.add_layer( self.rlayer )
@@ -628,7 +628,7 @@ class GvGraphWindow(gtk.Window):
         menuf.add_entries([
                  ('File/Print', None, self.print_cb)])
 
-        shell.pack_start(menuf, expand=gtk.FALSE)
+        shell.pack_start(menuf, expand=False)
 
         shell.pack_start( self.viewarea )
 

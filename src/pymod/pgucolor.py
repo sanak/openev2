@@ -31,7 +31,6 @@ MAX_COLOR = 65535
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *
-from gtk import TRUE, FALSE
 from gvsignaler import Signaler
 import _gv
 from gtkmissing import GtkColorWell
@@ -85,15 +84,15 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
 
     def configure_event(self, *args):
         #is this required?
-        return gtk.FALSE
+        return False
 
     def expose_event(self, *args):
         #get the window and graphic context
         win = self.window
         w,h = win.get_size()
-        win.draw_rectangle(self.get_style().black_gc, gtk.FALSE, 0, 0, w-1, h-1)
-        win.draw_rectangle(self.gc, gtk.TRUE, 1, 1, w-2, h-2)
-        return gtk.FALSE
+        win.draw_rectangle(self.get_style().black_gc, False, 0, 0, w-1, h-1)
+        win.draw_rectangle(self.gc, True, 1, 1, w-2, h-2)
+        return False
 
     def set_color(self, color=(0,0,0,0)):
         self.color = color
@@ -115,7 +114,7 @@ class ColorButton(gtk.ColorButton):
     Class ColorButton extends gtk.ColorButton
     """
 
-    def __init__(self, color=(0,0,0,0), title='', use_alpha=TRUE, continuous=FALSE, _obj=None, colormap=None):
+    def __init__(self, color=(0,0,0,0), title='', use_alpha=True, continuous=False, _obj=None, colormap=None):
         if colormap is None:
             raise ValueError, "Must provide a colormap"
         gtk.ColorButton.__init__(self)
@@ -161,7 +160,7 @@ class ColorDialog(gtk.Window):
         self.connect('delete-event', self.user_cancel_cb)
         #add the color selection widget
         self.colorsel = gtk.ColorSelection()
-        self.colorsel.set_opacity(gtk.TRUE)
+        self.colorsel.set_opacity(True)
         vbox.pack_start(self.colorsel)
         #add the ok and cancel buttons
         button_box = gtk.HButtonBox()
@@ -171,7 +170,7 @@ class ColorDialog(gtk.Window):
         cancel_button.connect('clicked', self.cancel_cb, cb_data)
         button_box.pack_start(ok_button)
         button_box.pack_start(cancel_button)
-        vbox.pack_start(button_box, expand=gtk.FALSE)
+        vbox.pack_start(button_box, expand=False)
         vbox.show_all()
         ok_button.set_flags(gtk.CAN_DEFAULT)
         ok_button.grab_default()
@@ -279,15 +278,15 @@ class ColorRamp(gtk.Frame, Signaler):
             return
 
         #insert false entries at 0 and 1 if necessary
-        bLow = gtk.FALSE
-        bHi = gtk.FALSE
+        bLow = False
+        bHi = False
 
         if self.colors[0][0] <> 0.0:
             self.add_color(self.colors[0][1], 0.0)
-            bLow = gtk.TRUE
+            bLow = True
         if self.colors[len(self.colors) - 1][0] <> 1.0:
             self.add_color(self.colors[len(self.colors)-1][1], 1.0)
-            bHi = gtk.TRUE
+            bHi = True
         
         if ncolors > 1:
             for i in range(ncolors):
@@ -367,10 +366,10 @@ class ColorGradientSwatch(ColorSwatch):
             self.gc.foreground = self.cm.alloc_color(int(color[0] * MAX_COLOR),
                                                int(color[1] * MAX_COLOR),
                                                int(color[2] * MAX_COLOR))
-            win.draw_rectangle(self.gc, gtk.TRUE, i, 0, bar_width, self.height)
+            win.draw_rectangle(self.gc, True, i, 0, bar_width, self.height)
             i = i + bar_width
-        win.draw_rectangle(self.get_style().black_gc, gtk.FALSE, 0, 0, self.width-1, self.height-1)
-        return gtk.FALSE
+        win.draw_rectangle(self.get_style().black_gc, False, 0, 0, self.width-1, self.height-1)
+        return False
 
 
 def test_cb(num, color):

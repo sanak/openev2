@@ -27,7 +27,6 @@
 ###############################################################################
 import os
 import gtk
-from gtk import TRUE, FALSE
 from gtk.gdk import *
 from gtk.keysyms import *
 from gvsignaler import Signaler
@@ -141,7 +140,7 @@ class FileDialog(gtk.Window, Signaler):
         self.multiselect = multiselect
                 
         self.set_border_width(5)
-        self.set_policy(gtk.FALSE, gtk.FALSE, gtk.TRUE)
+        self.set_policy(False, False, True)
         self.drives = None
 
         if title == None:
@@ -169,9 +168,9 @@ class FileDialog(gtk.Window, Signaler):
         self.opt_menu = gtk.OptionMenu()
         self.opt_menu.set_menu(gtk.Menu())
         hbox = gtk.HBox()
-        hbox.pack_start(lbl, expand=gtk.FALSE)
+        hbox.pack_start(lbl, expand=False)
         hbox.pack_start(self.opt_menu)
-        vbox.pack_start(hbox, expand = gtk.FALSE)
+        vbox.pack_start(hbox, expand = False)
 
         self.list_directory = gtk.CList()
         scr_directories = gtk.ScrolledWindow()
@@ -205,7 +204,7 @@ class FileDialog(gtk.Window, Signaler):
         
         elif dialog_type == FILE_OPEN:
             combo = gtk.Combo()
-            combo.set_value_in_list(gtk.FALSE, gtk.FALSE)
+            combo.set_value_in_list(False, False)
             combo.disable_activate()
             if app is not None:
                 rfl = app.get_rfl()
@@ -228,7 +227,7 @@ class FileDialog(gtk.Window, Signaler):
             self.cmb_filter.connect('changed', self.filter_cb)
             table.attach(lbl, 0, 1, 1, 2)
             table.attach(self.cmb_filter, 1, 2, 1, 2)
-            vbox.pack_start(table, expand=gtk.FALSE)
+            vbox.pack_start(table, expand=False)
 
         if dialog_type == FILE_SAVE:
             self.ok_button = gtk.Button(nls.get('filedlg-button-ok', 'OK'))
@@ -245,23 +244,23 @@ class FileDialog(gtk.Window, Signaler):
         btn_box = gtk.HButtonBox()
         btn_box.pack_start(self.ok_button)
         btn_box.pack_start(self.cancel_button)
-        vbox.pack_start(btn_box, expand=gtk.FALSE)
+        vbox.pack_start(btn_box, expand=False)
 
         self.add(vbox)
         self.show_all()
         
         #make modal
-        self.set_modal(gtk.TRUE)
+        self.set_modal(True)
 
 
         self.ok_button.set_flags(gtk.CAN_DEFAULT)
         self.ok_button.grab_default()
 
         self.set_size_request(400, 400)
-        self.menu_update = gtk.FALSE
+        self.menu_update = False
 
         while gtk.events_pending():
-            gtk.main_iteration(FALSE)
+            gtk.main_iteration(False)
 
         self.refresh_directory()
         self.connect('delete-event', self.quit)
@@ -280,7 +279,7 @@ class FileDialog(gtk.Window, Signaler):
         """
         #focus on cmdline and disable further processing of this signal
         self.txt_filename.grab_focus()    
-        return FALSE
+        return False
         
     def update_cwd(self, *args):
         #gview.set_preference('working-directory', self.cwd)
@@ -289,12 +288,12 @@ class FileDialog(gtk.Window, Signaler):
     def remove_grab(self, widget, *args):
         if widget == self.ok_button:
             self.result = 'ok'
-        self.set_modal(gtk.FALSE)
+        self.set_modal(False)
 
     def refresh_directory(self, *args):
         """refresh the directory menu and cause a rebuild of the
         file/directory lists"""
-        self.menu_update = gtk.TRUE
+        self.menu_update = True
         self.opt_menu.remove_menu()
         paths = []
         drive, head = os.path.splitdrive(self.cwd)
@@ -314,7 +313,7 @@ class FileDialog(gtk.Window, Signaler):
         self.opt_menu.set_menu(menu)
         self.opt_menu.set_history(len(paths))
         self.refresh_files()
-        self.menu_update = gtk.FALSE
+        self.menu_update = False
 
     def map_path_cb(self, entry, event):
         """user has entered a value into txt_filename.  If it maps to
@@ -525,7 +524,7 @@ class FileDialog(gtk.Window, Signaler):
         self.remove_grab(None)
         self.hide()
         Signaler.notify(self, 'quit')
-        return gtk.FALSE
+        return False
 
 if __name__ == '__main__':
     dlg = FileDialog(title='Testing', dialog_type=FILE_OPEN)

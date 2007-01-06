@@ -28,7 +28,6 @@ MAX_COMMAND_PATHS = 15
 MAX_MODULE_PATHS = 15
 
 import gtk
-from gtk import TRUE, FALSE
 from gtk.gdk import *
 from gtk.keysyms import *
 import code, string, sys, os
@@ -371,7 +370,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
                 if sys.exc_info()[1] is None: 
                     txt = txt + '\n  Description: '+ 'Undefined\n'
                 
-                else:		
+                else:       
                     txt = txt + '\n  Description: '+str(sys.exc_info()[1]) + '\n'
                 
                 if len(exc_info) > 2:
@@ -934,11 +933,11 @@ class Shell(gtk.Window):
         # panel for menu, messages, icons, command line
         if (guicmds[2] is not None):
             pane1=gtk.VPaned()
-            vbox = gtk.VBox(homogeneous=FALSE,spacing=2)
+            vbox = gtk.VBox(homogeneous=False,spacing=2)
             self.add(pane1)
             pane1.add1(vbox)
         else:
-            vbox=gtk.VBox(homogeneous=FALSE,spacing=2)
+            vbox=gtk.VBox(homogeneous=False,spacing=2)
             self.add(vbox)
 
         self.standalone = standalone
@@ -993,7 +992,7 @@ class Shell(gtk.Window):
                 exec cmd
             
             self.add_accel_group(menuf.accelerator)
-            vbox.pack_start(menuf,expand=FALSE)
+            vbox.pack_start(menuf,expand=False)
         else:
             self.menuf = None
 
@@ -1003,24 +1002,24 @@ class Shell(gtk.Window):
             for cmd in guicmds[1]:
                 exec cmd
             
-            vbox.pack_start(self.iconbar,expand=FALSE)
+            vbox.pack_start(self.iconbar,expand=False)
         else:
             self.iconbar = None
             
-        top_console = gtk.HBox(homogeneous=FALSE, spacing=2)
-        vbox.pack_start(top_console, expand=TRUE)
+        top_console = gtk.HBox(homogeneous=False, spacing=2)
+        vbox.pack_start(top_console, expand=True)
 
 
         # GTK2 Port...
         #text = gtk.Text()
-        #text.set_editable(FALSE)
-        #top_console.pack_start(text, expand=TRUE)
-	text_buff = gtk.TextBuffer()
+        #text.set_editable(False)
+        #top_console.pack_start(text, expand=True)
+    text_buff = gtk.TextBuffer()
         text_window = ScrollableTextView(text_buff)
         text_view = text_window._textview
-        text_view.set_editable(gtk.FALSE)
+        text_view.set_editable(False)
         text_view.set_wrap_mode(gtk.WRAP_WORD)
-        top_console.pack_start(text_window, expand=TRUE)
+        top_console.pack_start(text_window, expand=True)
 
         # Scrollbars
         
@@ -1031,22 +1030,22 @@ class Shell(gtk.Window):
         #adj.upper = 1.0
         #adj.value = .0
         #text_view.set_focus_vadjustment(adj)
-        #top_console.pack_start(scroll, expand=FALSE)
+        #top_console.pack_start(scroll, expand=False)
 
         #Horizontal separator bar
-        vbox.pack_start(gtk.HSeparator(), expand=FALSE)
+        vbox.pack_start(gtk.HSeparator(), expand=False)
 
         # Prompt Text Area
         # GTK2 Port...
         #prompt = gtk.Text()
         #prompt.set_size_request(550, 50)
-        #prompt.set_editable(TRUE)
-        #vbox.pack_start(prompt, expand=FALSE)
-	prompt_buff = gtk.TextBuffer()
-	prompt_view = gtk.TextView(prompt_buff)
-	prompt_view.set_size_request(550, 50)
-        prompt_view.set_editable(TRUE)
-        vbox.pack_start(prompt_view, expand=FALSE)
+        #prompt.set_editable(True)
+        #vbox.pack_start(prompt, expand=False)
+    prompt_buff = gtk.TextBuffer()
+    prompt_view = gtk.TextView(prompt_buff)
+    prompt_view.set_size_request(550, 50)
+        prompt_view.set_editable(True)
+        vbox.pack_start(prompt_view, expand=False)
 
         prompt_view.grab_focus()
 
@@ -1056,10 +1055,10 @@ class Shell(gtk.Window):
             #Horizontal separator bar
             hlabel = gtk.Label('Command History')
             hlabel.set_justify(gtk.JUSTIFY_LEFT)
-            #vbox2.pack_start(gtk.HSeparator(), expand=FALSE)
+            #vbox2.pack_start(gtk.HSeparator(), expand=False)
             histhbox=gtk.HBox()
-            vbox2.pack_start(histhbox,expand=FALSE,fill=FALSE)
-            histhbox.pack_start(hlabel,expand=FALSE,fill=FALSE)
+            vbox2.pack_start(histhbox,expand=False,fill=False)
+            histhbox.pack_start(hlabel,expand=False,fill=False)
             # History list
             histbox = gtk.ScrolledWindow()
             vbox2.pack_start(histbox)
@@ -1085,17 +1084,17 @@ class Shell(gtk.Window):
             # vbox2 is only created if the history area is created
             # (paned window is only necessary in that case currently).
             if guicmds[2] is not None:
-                vbox2.pack_start(gtk.HSeparator(), expand=FALSE)
+                vbox2.pack_start(gtk.HSeparator(), expand=False)
             else:
-                vbox.pack_start(gtk.HSeparator(), expand=FALSE)
+                vbox.pack_start(gtk.HSeparator(), expand=False)
             self.status_bar = gtk.Statusbar()            
             self.status_bar.progress_bar = gtk.ProgressBar()
             self.status_bar.shell_context = self.status_bar.get_context_id('shell')
-            self.status_bar.pack_start(self.status_bar.progress_bar, expand=FALSE)
+            self.status_bar.pack_start(self.status_bar.progress_bar, expand=False)
             if guicmds[2] is not None:
-                vbox2.pack_start(self.status_bar, expand=FALSE)
+                vbox2.pack_start(self.status_bar, expand=False)
             else:
-                vbox.pack_start(self.status_bar, expand=FALSE)                
+                vbox.pack_start(self.status_bar, expand=False)                
         else:
             self.status_bar = None
 
@@ -1109,7 +1108,7 @@ class Shell(gtk.Window):
             totalheight=totalheight + 250
             
         self.set_size_request(width, totalheight)
-        self.set_policy(FALSE, TRUE, TRUE)
+        self.set_policy(False, True, True)
     
         # Text properties GTK2 Port PENDING...
         #style = text.get_style()
@@ -1174,7 +1173,7 @@ class Shell(gtk.Window):
                      (gtk.STOCK_YES, gtk.RESPONSE_YES,
                       gtk.STOCK_NO, gtk.RESPONSE_NO))
         label = gtk.Label('Are you sure you want to exit OpenEV Command Shell?')
-        dialog.vbox.pack_start(label, TRUE, TRUE, 0)
+        dialog.vbox.pack_start(label, True, True, 0)
         label.show()
 
         response = dialog.run();
@@ -1184,7 +1183,7 @@ class Shell(gtk.Window):
             gview.save_preferences() # save path preferences           
             gview.app.quit()
 
-        return TRUE
+        return True
 
     def show_progress(self,percent,msg=None):
         if self.status_bar is None:
@@ -1227,7 +1226,7 @@ class Shell(gtk.Window):
             if self.history_list is not None:
                 self.history_list.unselect_all()
 
-            return TRUE
+            return True
             
         # Watch for Ctrl-D
         elif (event.keyval in (ord('d'), ord('D'))) \
@@ -1264,7 +1263,7 @@ class Shell(gtk.Window):
                     if self.history_pos < self.history_list.rows:
                         self.history_list.select_row(self.history_pos,0)
 
-            return TRUE
+            return True
 
         # Down Arrow - forward in history list
         elif event.keyval == gtk.keysyms.Down:
@@ -1284,7 +1283,7 @@ class Shell(gtk.Window):
                 self.history_pos = None
                 if self.history_list is not None:
                     self.history_list.unselect_all()
-            return TRUE
+            return True
 
 
         # Make sure we don't delete the prompt
@@ -1299,7 +1298,7 @@ class Shell(gtk.Window):
             self.prompt_buff.place_cursor(insert_iter)
 
 
-        return FALSE
+        return False
         
     def list_clicked(self, lst, event):
         if self.history_list is None:
@@ -1327,7 +1326,7 @@ class Shell(gtk.Window):
             # Line dealt with in some way - reset prompt
             self.prompt_buff.set_text('>>> ');
             i = self.prompt_buff.get_iter_at_offset(4)
-            m = self.prompt_buff.create_mark('prompt0', i, gtk.TRUE)
+            m = self.prompt_buff.create_mark('prompt0', i, True)
            ## self.prompt_buff.place_cursor(4);
             #self.prompt.delete_text(0, -1)
             #self.prompt.insert(self.font, self.fg, self.bg, '>>> ')
@@ -1356,7 +1355,7 @@ class Shell(gtk.Window):
     def hide_dialog_cb(self,*args):
         dialog = args[0]
         dialog.hide()
-        return TRUE
+        return True
 
     def pref_gui_cb(self):
         if self.path_dlg is None:
@@ -1369,7 +1368,7 @@ class Shell(gtk.Window):
 
             path_keys = ['MODULE PATHS','COMMAND PATHS']
             nrows = len(self.preferences.keys())+1
-            wtable = gtk.Table(nrows,2,FALSE)
+            wtable = gtk.Table(nrows,2,False)
             wtable.set_row_spacings(5)
             wtable.set_col_spacings(5)
             wtable.set_border_width(5)
@@ -1385,7 +1384,7 @@ class Shell(gtk.Window):
                 # replace the path string with
                 # an entry object
                 self.preferences[path_keys[idx]] = centry
-                centry.set_editable(TRUE)
+                centry.set_editable(True)
                 centry.set_size_request(280, 25)
                 centry.set_text(startpath)
                 wtable.attach(centry, 1,2, idx,idx+1)
@@ -1986,16 +1985,16 @@ class PyshellHelpDialog(gtk.Window):
         pixel_scroll.set_size_request(496,250)
         vbox.add2(pixel_scroll)
 
-	self.help_buff = gtk.TextBuffer()
-	self.help_view = gtk.TextView(self.help_buff)
-	self.help_view.set_wrap_mode(gtk.WRAP_CHAR)
-        self.help_view.set_editable(FALSE)
+    self.help_buff = gtk.TextBuffer()
+    self.help_view = gtk.TextView(self.help_buff)
+    self.help_view.set_wrap_mode(gtk.WRAP_CHAR)
+        self.help_view.set_editable(False)
         pixel_scroll.add(self.help_view)
 
         # self.help_text = gtk.Text()
-        # self.help_text.set_line_wrap(FALSE)
-        # self.help_text.set_word_wrap(FALSE)
-        # self.help_text.set_editable(FALSE)
+        # self.help_text.set_line_wrap(False)
+        # self.help_text.set_word_wrap(False)
+        # self.help_text.set_editable(False)
         # pixel_scroll.add(self.help_text)
         # self.help_text.insert_defaults('')
 

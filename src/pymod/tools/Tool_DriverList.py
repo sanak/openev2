@@ -83,25 +83,25 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
         self.dialog.set_title('Available Image Formats')
         self.dialog.set_size_request(300,500)
         self.dialog.set_border_width(10) 
-        self.dialog.set_policy(gtk.FALSE, gtk.TRUE, gtk.TRUE)
+        self.dialog.set_policy(False, True, True)
         self.tooltips=gtk.Tooltips()
         self.button_dict={}
         # main shell 
-        mainshell = gtk.VBox(spacing=1, homogeneous=gtk.FALSE)
+        mainshell = gtk.VBox(spacing=1, homogeneous=False)
         self.dialog.add(mainshell)
         self.show_list=[]
         self.show_list.append(mainshell)
 
         #frame1=gtk.Frame('Supported')
         #self.show_list.append(frame1)
-        #mainshell.pack_start(frame1,expand=gtk.FALSE)
+        #mainshell.pack_start(frame1,expand=False)
         #num_s=len(self.supported_list)
         #if num_s > 0:
         #    s_table = gtk.Table(num_s,3)
         #    row=0            
         #    for fmt_list in self.supported_list:
         #        clabel=gtk.Entry()
-        #        clabel.set_editable(gtk.FALSE)
+        #        clabel.set_editable(False)
         #        clabel.set_text(fmt_list[0])
         #        self.show_list.append(clabel)
         #        self._make_tooltip(clabel,fmt_list)
@@ -127,7 +127,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
             row=0
             for fmt_list in self.unsupported_list:
                 clabel=gtk.Entry()
-                clabel.set_editable(gtk.FALSE)
+                clabel.set_editable(False)
                 clabel.set_text(fmt_list[0])
                 self.show_list.append(clabel)
                 self._make_tooltip(clabel,fmt_list)
@@ -141,7 +141,7 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
             self.show_list.append(us_table)
         self.button_dict['close']=gtk.Button('Close')
         self.button_dict['close'].connect('clicked',self.close)
-        mainshell.pack_start(self.button_dict['close'],expand=gtk.FALSE)
+        mainshell.pack_start(self.button_dict['close'],expand=False)
         self.show_list.append(self.button_dict['close'])
         self.dialog.connect('delete-event',self.close)
         for item in self.show_list:
@@ -165,6 +165,6 @@ class ToolDriverList(gviewapp.Tool_GViewApp):
         
     def close(self,*args):
         self.dialog.hide()
-        return gtk.TRUE
+        return True
 
 TOOL_LIST=['ToolDriverList']

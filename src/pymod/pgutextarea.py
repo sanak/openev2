@@ -86,7 +86,7 @@ class pguTextArea( gtk.Table ):
         self.start_line = 0
         self.start_col = 0
         self.freeze_count = 0
-        self.updating = gtk.FALSE
+        self.updating = False
         
         frm = gtk.Frame()
         frm.set_shadow_type( gtk.SHADOW_ETCHED_OUT )
@@ -170,7 +170,7 @@ class pguTextArea( gtk.Table ):
         if self.freeze_count > 0:
             return
             
-        self.updating = gtk.TRUE
+        self.updating = True
         geom = self._area.get_allocation()
         #horizontal min/max are 0 and max line length - page size
         hpos = self.hadj.value
@@ -191,7 +191,7 @@ class pguTextArea( gtk.Table ):
         vmax = max( 1, len(self.contents) )
         self.vadj.set_all( vpos, 0, vmax, 1, vstep, vpage )
         self.vadj.changed()
-        self.updating = gtk.FALSE
+        self.updating = False
         
     def expose( self, *args ):
         """Draw the widget
@@ -207,9 +207,9 @@ class pguTextArea( gtk.Table ):
         geom = self._area.get_allocation()
         pix = gtk.create_pixmap( self._area.window, geom[2], geom[3] )    
         style = self.get_style()
-        gtk.draw_rectangle(pix, style.white_gc, gtk.TRUE, 0, 0, 
+        gtk.draw_rectangle(pix, style.white_gc, True, 0, 0, 
                                   geom[2], geom[3])
-        gtk.draw_rectangle(pix, style.black_gc, gtk.FALSE, 0, 0, 
+        gtk.draw_rectangle(pix, style.black_gc, False, 0, 0, 
                                   geom[2], geom[3])
         font = self.get_style().font
         
@@ -223,7 +223,7 @@ class pguTextArea( gtk.Table ):
         
         self._area.draw_pixmap(style.white_gc, pix, 0, 0, 0, 0, geom[2]-1, geom[3]-1 )
 
-        return gtk.FALSE
+        return False
            
     def configure( self, widget, event, *args ):
         """Track changes in width, height
@@ -266,8 +266,8 @@ class TestText( gtk.Window ):
         self.button.connect( "clicked", self.insert_text )
         
         vbox.pack_start( self.text )
-        vbox.pack_start( self.entry, expand=gtk.FALSE )
-        vbox.pack_start( self.button, expand=gtk.FALSE )
+        vbox.pack_start( self.entry, expand=False )
+        vbox.pack_start( self.button, expand=False )
         self.add(vbox)
         self.show_all()
         

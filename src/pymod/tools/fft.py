@@ -35,12 +35,12 @@ import gvutils
 import FFT
 
 def layer_is_raster(layer):
-    """Return gtk.TRUE if layer is raster and gtk.FALSE otherwise"""
+    """Return True if layer is raster and False otherwise"""
     try:
         layer.get_nodata(0)
-        return gtk.TRUE
+        return True
     except:
-        return gtk.FALSE
+        return False
 
 class FFTTool(gviewapp.Tool_GViewApp):
     
@@ -69,7 +69,7 @@ class FFTDialog(gtk.Window):
     def close(self, *args):
         self.hide()
         self.visibility_flag = 0
-        return gtk.TRUE
+        return True
 
     def create_gui(self):
         box1 = gtk.VBox(spacing = 10)
@@ -85,17 +85,17 @@ class FFTDialog(gtk.Window):
 	self.switch_inverse.show()
 
 	separator = gtk.HSeparator()
-	box1.pack_start(separator, expand=gtk.FALSE)
+	box1.pack_start(separator, expand=False)
 
 	self.switch_new_view = gtk.CheckButton("Create new view")
 	box1.pack_start(self.switch_new_view)
 	self.switch_new_view.show()
 
 	separator = gtk.HSeparator()
-	box1.pack_start(separator, expand=gtk.FALSE)
+	box1.pack_start(separator, expand=False)
 
 	box2 = gtk.HBox(spacing=10)
-        box1.pack_start(box2, expand=gtk.FALSE)
+        box1.pack_start(box2, expand=False)
         box2.show()
 
         execute_btn = gtk.Button("Ok")

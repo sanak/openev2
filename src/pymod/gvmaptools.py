@@ -109,7 +109,7 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
     layer.set_property('_gl_antialias','1')
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{position},f:"'+font+'",c:'+cstr+')')
-    layer.set_read_only(gtk.TRUE)    
+    layer.set_read_only(True)    
     
     return layer
 
@@ -188,7 +188,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
     layer.set_property('_gl_antialias','1')
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{position},f:"'+font+'",c:'+cstr+')')
-    layer.set_read_only(gtk.TRUE)    
+    layer.set_read_only(True)    
     
     return layer
 
@@ -280,7 +280,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
     layer.set_property('_gl_antialias','1')
     layer.set_property('_gv_ogrfs_point',
                        'LABEL(t:{position},f:"'+font+'",c:'+cstr+')')
-    layer.set_read_only(gtk.TRUE)
+    layer.set_read_only(True)
 
     return layer
 

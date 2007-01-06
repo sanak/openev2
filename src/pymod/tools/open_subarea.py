@@ -36,7 +36,7 @@ import osr
 
 def CoordFrame(name,f_names,visible):
     frame = gtk.Frame(name)
-    table = gtk.Table(2,4,gtk.FALSE)
+    table = gtk.Table(2,4,False)
     table.set_border_width(5)
     table.set_row_spacings(5)
     table.set_col_spacings(5)
@@ -116,10 +116,10 @@ def ProjRectToPixelRect(proj_rect,geotransform):
     
 def EmptyGeotransform(gt):
     if gt[0] != 0 or gt[1] != 1 or gt[2] != 0:
-        return gtk.FALSE
+        return False
     if gt[3] != 0 or gt[4] != 0 or gt[5] != 1:
-        return gtk.FALSE;
-    return gtk.TRUE
+        return False;
+    return True
     
 class OpenSubArea(gviewapp.Tool_GViewApp):
     def __init__(self, app = None):
@@ -233,15 +233,15 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
     	    	
     def update_gui(self,*args):
 	for item in self.frame_dict.keys():
-	    self.frame_dict[item][2] = gtk.FALSE
+	    self.frame_dict[item][2] = False
 	    self.frame_dict[item][0].hide()
  	self.geocoding = self.coord_system.get_history()
 	if self.geocoding == 0:
-	    self.frame_dict['pixcoord'][2] = gtk.TRUE
+	    self.frame_dict['pixcoord'][2] = True
 	elif self.geocoding == 1:
-	    self.frame_dict['geodetic'][2] = gtk.TRUE
+	    self.frame_dict['geodetic'][2] = True
 	else:
-	    self.frame_dict['geocoord'][2] = gtk.TRUE
+	    self.frame_dict['geocoord'][2] = True
 
         for item in self.frame_dict.keys():
             if self.frame_dict[item][2]: 
@@ -267,27 +267,27 @@ class OpenSubArea(gviewapp.Tool_GViewApp):
 	pix_fields_names = \
 	    ('Start Line','Start Pixel','Num of Lines','Num of Pixels')
 	self.frame_dict['pixcoord'] = \
-	    CoordFrame('Pixel Coordinates', pix_fields_names, gtk.TRUE)
-	mainshell.pack_start(self.frame_dict['pixcoord'][0], expand=gtk.FALSE)
+	    CoordFrame('Pixel Coordinates', pix_fields_names, True)
+	mainshell.pack_start(self.frame_dict['pixcoord'][0], expand=False)
 
 	geo_fields_names = ('Westmost Longitude', 'Eastmost Longitude', \
 	    'Northmost Latitude', 'Southmost Latitude')
 	self.frame_dict['geodetic'] = \
 	    CoordFrame('Geodetic (Lat/Long) Coordinates', \
-	    geo_fields_names, gtk.FALSE)
-	mainshell.pack_start(self.frame_dict['geodetic'][0], expand=gtk.FALSE)
+	    geo_fields_names, False)
+	mainshell.pack_start(self.frame_dict['geodetic'][0], expand=False)
 
 	proj_fields_names = ('Northing', 'Westing', 'Southing', 'Easting')
 	self.frame_dict['geocoord'] = \
-	    CoordFrame('Georeferenced Coordinates', proj_fields_names, gtk.FALSE)
-	mainshell.pack_start(self.frame_dict['geocoord'][0], expand=gtk.FALSE)
+	    CoordFrame('Georeferenced Coordinates', proj_fields_names, False)
+	mainshell.pack_start(self.frame_dict['geocoord'][0], expand=False)
 	
 	self.band_grid = pgugrid.pguGrid(config=(2,0,1,1,4,0,0,0))
 	self.band_grid.subscribe("cell-selection-changed",self.band_selected_cb)
-	mainshell.pack_start(self.band_grid,expand=gtk.TRUE)
+	mainshell.pack_start(self.band_grid,expand=True)
 	
 	button_box = gtk.HBox(spacing = 10)
-	mainshell.pack_start(button_box, expand=gtk.FALSE)
+	mainshell.pack_start(button_box, expand=False)
 	button_box.show()
 	btOK = gtk.Button('OK')
  	button_box.pack_start(btOK)

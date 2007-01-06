@@ -26,7 +26,6 @@
 
 import traceback
 import gtk
-from gtk import TRUE, FALSE
 from string import *
 import gvutils
 import pgucolorsel
@@ -59,7 +58,7 @@ class GvRasterSource(gtk.Frame):
     def __init__(self,name,layer,src_index,master_dialog):
         gtk.Frame.__init__(self,name)
         self.master_dialog = master_dialog
-        self.updating = FALSE
+        self.updating = False
         self.src_index = src_index
 
         # Eventually the following will have to be more sophisticated.
@@ -72,11 +71,11 @@ class GvRasterSource(gtk.Frame):
         vbox = gtk.VBox(spacing=5)
         vbox.set_border_width(5)
         self.add(vbox)
-        self.updating = TRUE
+        self.updating = True
         
         # ------ Band Selection -------
         hbox = gtk.HBox(spacing=5)
-        vbox.pack_start(hbox,expand=FALSE)
+        vbox.pack_start(hbox,expand=False)
         hbox.pack_start(gtk.Label('Band:'))
         self.band_combo = gtk.combo_box_entry_new_text()
         hbox.pack_start(self.band_combo)
@@ -149,7 +148,7 @@ class GvRasterSource(gtk.Frame):
         hbox = gtk.HBox(spacing=5)
         self.min_hbox = hbox
         vbox.pack_start(hbox)
-        hbox.pack_start(gtk.Label('Scale Min:'),expand=FALSE)
+        hbox.pack_start(gtk.Label('Scale Min:'),expand=False)
         self.min_adjustment = gtk.Adjustment(layer.min_get(src_index),
                                 smin, smax, new_inc, new_inc, new_inc)
         self.min_adjustment.connect('value-changed',self.adjustment_cb)
@@ -160,13 +159,13 @@ class GvRasterSource(gtk.Frame):
         self.min_entry.set_max_length(8)
         self.min_entry.connect('activate',self.entry_cb)
         self.min_entry.connect('leave-notify-event',self.entry_cb)
-        hbox.pack_start(self.min_entry,expand=FALSE)
+        hbox.pack_start(self.min_entry,expand=False)
 
         # ------ Scale Max -------
         hbox = gtk.HBox(spacing=5)
         self.max_hbox = hbox
         vbox.pack_start(hbox)
-        hbox.pack_start(gtk.Label('Scale Max:'),expand=FALSE)
+        hbox.pack_start(gtk.Label('Scale Max:'),expand=False)
         self.max_adjustment = gtk.Adjustment(layer.max_get(src_index),
                                 smin, smax, new_inc, new_inc, new_inc)
         self.max_adjustment.connect('value-changed',self.adjustment_cb)
@@ -177,18 +176,18 @@ class GvRasterSource(gtk.Frame):
         self.max_entry.set_max_length(8)
         self.max_entry.connect('activate',self.entry_cb)
         self.max_entry.connect('leave-notify-event',self.entry_cb)
-        hbox.pack_start(self.max_entry,expand=FALSE)
+        hbox.pack_start(self.max_entry,expand=False)
 
         # ------ NODATA -------
         hbox = gtk.HBox(spacing=5)
         self.nodata_hbox = hbox
         vbox.pack_start(hbox)
-        hbox.pack_start(gtk.Label('NODATA value:'), expand=FALSE)
+        hbox.pack_start(gtk.Label('NODATA value:'), expand=False)
         self.nodata_entry = gtk.Entry()
         self.nodata_entry.set_max_length(19)
         self.nodata_entry.connect('activate', self.entry_cb)
         self.nodata_entry.connect('leave-notify-event', self.entry_cb)
-        hbox.pack_start(self.nodata_entry, expand=FALSE)
+        hbox.pack_start(self.nodata_entry, expand=False)
         if (src_index < 3) and (ds.RasterCount > src_index):
             nodata=ds.GetRasterBand(src_index+1).GetNoDataValue()
             if nodata is not None:
@@ -203,7 +202,7 @@ class GvRasterSource(gtk.Frame):
         self.const_entry.connect('leave-notify-event',self.const_cb)
         vbox.pack_start(self.const_entry)
 
-        self.updating = FALSE
+        self.updating = False
             
         self.gui_refresh()
         
@@ -276,7 +275,7 @@ class GvRasterSource(gtk.Frame):
         if self.updating:
             return
 
-        self.updating = TRUE
+        self.updating = True
         if self.layer.get_mode() == gview.RLM_COMPLEX:
             new_min = max(0.0,self.layer.min_get(self.src_index))
         else:
@@ -354,7 +353,7 @@ class GvRasterSource(gtk.Frame):
                     self.band_combo.child.set_text(self.band_desc(iband+1))
                     break
 
-        self.updating = FALSE
+        self.updating = False
 
     def set_band_cb(self,*args):
         if len(args[0].get_text().strip()) == 0:
@@ -486,7 +485,7 @@ class GvRasterPropDialog(gtk.Window):
 
         gvhtml.set_help_topic( self, "gvrasterpropdlg.html" )
         self.layer = layer
-        self.updating = FALSE
+        self.updating = False
 
         if self.layer is not None:
             self.display_change_id = self.layer.connect('display-change',
@@ -499,9 +498,9 @@ class GvRasterPropDialog(gtk.Window):
 
         self.create_pane1()
         
-        self.updating = TRUE
+        self.updating = True
         self.create_sourcepane()
-        self.updating = FALSE
+        self.updating = False
         
         self.create_openglprop()
         self.create_lutprop()
@@ -544,7 +543,7 @@ class GvRasterPropDialog(gtk.Window):
             gvutils.GvOptionMenu(('Magnitude', 'Phase',
                                   'Magnitude & Phase', 'Real','Imaginary'),
                                  self.complex_lut_cb)
-        self.lut_pane.pack_start(self.complex_lut_om, expand=FALSE)
+        self.lut_pane.pack_start(self.complex_lut_om, expand=False)
 
     def create_sourcepane(self):
         self.sources = []
@@ -555,24 +554,24 @@ class GvRasterPropDialog(gtk.Window):
         if self.layer.get_mode() == gview.RLM_RGBA:
 
             source = GvRasterSource('Red',self.layer,0,self)
-            self.source_pane.pack_start(source, expand=FALSE)
+            self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
             
             source = GvRasterSource('Green',self.layer,1,self)
-            self.source_pane.pack_start(source, expand=FALSE)
+            self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
             
             source = GvRasterSource('Blue',self.layer,2,self)
-            self.source_pane.pack_start(source, expand=FALSE)
+            self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
             
             source = GvRasterSource('Alpha',self.layer,3,self)
-            self.source_pane.pack_start(source, expand=FALSE)
+            self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
 
             self.grey_toggle = gtk.CheckButton(label='Greyscale Lock')
             self.grey_toggle.connect('toggled', self.greyscale_cb)
-            self.source_pane.pack_start(self.grey_toggle, expand=FALSE)
+            self.source_pane.pack_start(self.grey_toggle, expand=False)
             self.grey_toggle.set_active( self.greyscale_is_set() )
 
             scaleHBox = gtk.HBox(spacing=10)
@@ -591,12 +590,12 @@ class GvRasterPropDialog(gtk.Window):
             scaleHBox.pack_start( self.scale_max_entry )
             
             self.scale_toggle.connect( "toggled", self.scalelock_cb)
-            self.source_pane.pack_start( scaleHBox, expand=FALSE )
+            self.source_pane.pack_start( scaleHBox, expand=False )
             self.scale_toggle.set_active( self.scalelock_is_set() )
             
         else:
             source = GvRasterSource('Raster',self.layer,0,self)
-            self.source_pane.pack_start(source, expand=FALSE)
+            self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
         
     def create_pane1(self):
@@ -607,34 +606,34 @@ class GvRasterPropDialog(gtk.Window):
 
         # Setup layer name entry box.
         box = gtk.HBox(spacing=5)
-        self.pane1.pack_start(box, expand=FALSE)
+        self.pane1.pack_start(box, expand=False)
         label = gtk.Label('Layer:' )
-        box.pack_start(label,expand=FALSE)
+        box.pack_start(label,expand=False)
         self.layer_name = gtk.Entry()
         self.layer_name.connect('changed', self.name_cb)
         box.pack_start(self.layer_name)
 
         # Setup Visibility radio buttons.
         vis_box = gtk.HBox(spacing=5)
-        self.pane1.pack_start(vis_box, expand=FALSE)
-        vis_box.pack_start(gtk.Label('Visibility:'),expand=FALSE)
+        self.pane1.pack_start(vis_box, expand=False)
+        vis_box.pack_start(gtk.Label('Visibility:'),expand=False)
         self.vis_yes = gtk.RadioButton(label='yes')
         self.vis_yes.connect('toggled', self.visibility_cb)
-        vis_box.pack_start(self.vis_yes,expand=FALSE)
+        vis_box.pack_start(self.vis_yes,expand=False)
         self.vis_no = gtk.RadioButton(label='no',group=self.vis_yes)
         self.vis_no.connect('toggled', self.visibility_cb)
-        vis_box.pack_start(self.vis_no,expand=FALSE)
+        vis_box.pack_start(self.vis_no,expand=False)
 
         # Setup Editability radio buttons.
         edit_box = gtk.HBox(spacing=5)
-        self.pane1.pack_start(edit_box, expand=FALSE)
-        edit_box.pack_start(gtk.Label('Editable:'),expand=FALSE)
+        self.pane1.pack_start(edit_box, expand=False)
+        edit_box.pack_start(gtk.Label('Editable:'),expand=False)
         self.edit_yes = gtk.RadioButton(label='yes')
         self.edit_yes.connect('toggled', self.edit_cb)
-        edit_box.pack_start(self.edit_yes,expand=FALSE)
+        edit_box.pack_start(self.edit_yes,expand=False)
         self.edit_no = gtk.RadioButton(label='no',group=self.edit_yes)
         self.edit_no.connect('toggled', self.edit_cb)
-        edit_box.pack_start(self.edit_no,expand=FALSE)
+        edit_box.pack_start(self.edit_no,expand=False)
 
     def create_openglprop(self):
         oglpane = gtk.VBox(spacing=10)
@@ -643,19 +642,19 @@ class GvRasterPropDialog(gtk.Window):
 
         # Create Modulation Color
         box = gtk.HBox(spacing=5)
-        oglpane.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Modulation Color:'),expand=FALSE)
+        oglpane.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Modulation Color:'),expand=False)
         self.mod_color = pgucolorsel.ColorControl('Modulation Color',
                                                   self.color_cb,None)
         box.pack_start(self.mod_color)
 
         # Create Interpolation Control
         box = gtk.HBox(spacing=5)
-        oglpane.pack_start(box, expand=FALSE)
-        box.pack_start(gtk.Label('Subpixel Interpolation:'),expand=FALSE)
+        oglpane.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Subpixel Interpolation:'),expand=False)
         self.interp_om = gvutils.GvOptionMenu(('Linear','Off (Nearest)'), \
                                               self.set_interp_cb)
-        box.pack_start(self.interp_om,expand=FALSE)
+        box.pack_start(self.interp_om,expand=False)
 
     def create_projparms(self):
 	"""Create projection parameters controls"""
@@ -683,13 +682,13 @@ class GvRasterPropDialog(gtk.Window):
 	    parm_entry = gtk.Entry()
 	    parm_entry.set_text(str(parm_value))
 	    self.parm_dict[i[0]] = parm_value
-	    parm_entry.set_editable(TRUE)
+	    parm_entry.set_editable(True)
 	    parm_entry.connect('changed', self.parm_entry_cb, i[0])
 	    self.proj_table.attach(parm_entry, 1, 2, row, row + 1)
 	    parm_entry.show()
 	    row += 1
 
-	self.proj_vbox.pack_end(self.proj_table, expand=FALSE)
+	self.proj_vbox.pack_end(self.proj_table, expand=False)
 	
     def create_projprop(self):
         projpane = gtk.VBox(spacing=10)
@@ -701,7 +700,7 @@ class GvRasterPropDialog(gtk.Window):
 	# Projection frame
 	proj_frame = gtk.Frame('Projection')
 	proj_frame.show()
-        projpane.pack_start(proj_frame, expand=FALSE)
+        projpane.pack_start(proj_frame, expand=False)
 	self.proj_vbox = gtk.VBox(spacing=5)
 
 	# Fetch projection record
@@ -723,7 +722,7 @@ class GvRasterPropDialog(gtk.Window):
         # Create projection switch
 	proj_hbox = gtk.HBox(spacing=5)
 	proj_hbox.pack_start(gtk.Label('Projection Name:'), \
-	    expand=FALSE, padding=5)
+	    expand=False, padding=5)
 	proj_methods = osr.GetProjectionMethods()
 	self.projs = map(lambda x: x.__getitem__(0), proj_methods)
 	self.projs.insert(0, '')
@@ -738,16 +737,16 @@ class GvRasterPropDialog(gtk.Window):
 	self.create_projparms()
 	self.proj_om.set_history(self.proj_index)
 	proj_hbox.pack_start(self.proj_om, padding=5)
-	self.proj_vbox.pack_start(proj_hbox, expand=FALSE)
+	self.proj_vbox.pack_start(proj_hbox, expand=False)
 
 	proj_frame.add(self.proj_vbox)
 
 	# Datum frame
 	datum_frame = gtk.Frame('Datum')
 	datum_frame.show()
-        projpane.pack_start(datum_frame, expand=FALSE)
+        projpane.pack_start(datum_frame, expand=False)
 	datum_hbox = gtk.HBox(spacing=5)
-	datum_hbox.pack_start(gtk.Label('Datum Name:'), expand=FALSE, padding=5)
+	datum_hbox.pack_start(gtk.Label('Datum Name:'), expand=False, padding=5)
 
         try:
             self.datum_name = self.sr.GetAttrValue("DATUM")
@@ -765,36 +764,36 @@ class GvRasterPropDialog(gtk.Window):
 	self.datum_om = gvutils.GvOptionMenu(self.datum_names.values(), \
 	    self.set_datum_cb)
 	self.datum_om.set_history(self.datum_index)
-	datum_hbox.pack_start(self.datum_om, expand=FALSE, padding=5)
+	datum_hbox.pack_start(self.datum_om, expand=False, padding=5)
 
 	datum_frame.add(datum_hbox)
 
 	# Units frame
 	units_frame = gtk.Frame('Units')
 	#units_frame.show()
-        #projpane.pack_start(units_frame, expand=FALSE)
+        #projpane.pack_start(units_frame, expand=False)
 	units_hbox = gtk.HBox(spacing=5)
-	units_hbox.pack_start(gtk.Label('Units:'), expand=FALSE, padding=5)
+	units_hbox.pack_start(gtk.Label('Units:'), expand=False, padding=5)
 
 	units_frame.add(units_hbox)
 
 	# WKT frame
 	proj_text_frame = gtk.Frame('Well Known Text')
 	proj_text_frame.show()
-	projpane.pack_end(proj_text_frame, expand=TRUE)
+	projpane.pack_end(proj_text_frame, expand=True)
 
         self.proj_text_buff = gtk.TextBuffer()
         self.proj_text_buff.set_text(self.proj_full)
         self.proj_text_view = gtk.TextView(self.proj_text_buff)
         self.proj_text_view.set_wrap_mode(gtk.WRAP_CHAR)
-        self.proj_text_view.set_editable(FALSE)
+        self.proj_text_view.set_editable(False)
         self.proj_text_view.show()
 
         # GTK2 Port...
 	#self.proj_text = gtk.Text()
-	#self.proj_text.set_line_wrap(TRUE)
-	#self.proj_text.set_word_wrap(FALSE)
-	#self.proj_text.set_editable(FALSE)
+	#self.proj_text.set_line_wrap(True)
+	#self.proj_text.set_word_wrap(False)
+	#self.proj_text.set_editable(False)
 	#self.proj_text.show()
 	#self.proj_text.insert_defaults(self.proj_full)
 
@@ -811,19 +810,19 @@ class GvRasterPropDialog(gtk.Window):
         self.ii_text_buff = gtk.TextBuffer()
         self.ii_text_view = gtk.TextView(self.ii_text_buff)
         self.ii_text_view.set_wrap_mode(gtk.WRAP_NONE)
-        self.ii_text_view.set_editable(FALSE)
+        self.ii_text_view.set_editable(False)
         self.ii_text_view.show()
 
         # GTK2 Port...
         #self.ii_text = gtk.Text()
-        #self.ii_text.set_line_wrap(FALSE)
-        #self.ii_text.set_word_wrap(FALSE)
-        #self.ii_text.set_editable(FALSE)
+        #self.ii_text.set_line_wrap(False)
+        #self.ii_text.set_word_wrap(False)
+        #self.ii_text.set_editable(False)
         #self.ii_text.show()
 
         self.ii_scrollwin = gtk.ScrolledWindow()
         self.ii_scrollwin.add( self.ii_text_view)
-        iipane.pack_start(self.ii_scrollwin,expand=TRUE)
+        iipane.pack_start(self.ii_scrollwin,expand=True)
 
         # Now create and assign the text contents.
         gdal_ds = self.layer.get_parent().get_dataset()
@@ -881,10 +880,10 @@ class GvRasterPropDialog(gtk.Window):
 
     # Initialize GUI state from underlying object state.
     def update_gui(self):
-        if self.layer is None or self.updating == TRUE:
+        if self.layer is None or self.updating == True:
             return
 
-        self.updating = TRUE
+        self.updating = True
         
         # Layer name.
         self.layer_name.set_text( self.layer.get_name() )
@@ -910,7 +909,7 @@ class GvRasterPropDialog(gtk.Window):
         else:
             self.interp_om.set_history(1)
 
-        self.updating = FALSE
+        self.updating = False
 
         # LUT
         if self.layer.get_mode() != gview.RLM_RGBA:

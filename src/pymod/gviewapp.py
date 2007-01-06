@@ -27,7 +27,6 @@
 
 from gvsignaler import Signaler
 import gtk
-from gtk import FALSE, TRUE
 from gtk.gdk import *
 from gtk.keysyms import *
 
@@ -251,7 +250,7 @@ class GViewApp(Signaler):
                      (gtk.STOCK_YES, gtk.RESPONSE_YES,
                       gtk.STOCK_NO, gtk.RESPONSE_NO))
         label = gtk.Label('Are you sure you want to exit OpenEV?')
-        dialog.vbox.pack_start(label, TRUE, TRUE, 0)
+        dialog.vbox.pack_start(label, True, True, 0)
         label.show()
 
         response = dialog.run();
@@ -1041,7 +1040,7 @@ class Toolbar(gtk.Window):
 
     def close(self, *args):
         self.hide()
-        return gtk.TRUE
+        return True
         
     def toggle(self, button, data):
         if not button.get_active():
@@ -1108,7 +1107,7 @@ class ViewManager(Signaler):
         self.active_view = None
         self.view_list = []
         self.publish( 'active-view-changed' )
-        self.updating = FALSE
+        self.updating = False
 
     def set_layerdlg(self,layerdlg):
         self.layerdlg = layerdlg
@@ -1125,14 +1124,14 @@ class ViewManager(Signaler):
         self.set_active_view( self.toolbar.toolbox.get_view() )
 
     def add_view(self, new_view ):
-        self.updating = TRUE
+        self.updating = True
         self.view_list.append( new_view )
         if self.toolbar is not None:
             self.toolbar.add_view(new_view.viewarea)
         if self.layerdlg is not None:
             self.layerdlg.add_view(new_view.title, new_view.viewarea)
         new_view.connect('destroy', self.view_closing_cb)
-        self.updating = FALSE
+        self.updating = False
         self.set_active_view( new_view )
 
     def view_closing_cb( self, view_window_in, *args ):
@@ -1267,7 +1266,7 @@ class PrefDialog(gtk.Window):
 	table.set_border_width(5)
 	table.set_row_spacings(5)
 	table.set_col_spacings(5)
-	self.cachep.pack_start(table, expand=FALSE)
+	self.cachep.pack_start(table, expand=False)
 
         # File Cache
 	gdal_cache_label = gtk.Label('File Cache (bytes):')
@@ -1305,7 +1304,7 @@ class PrefDialog(gtk.Window):
 	table.set_border_width(5)
 	table.set_row_spacings(5)
 	table.set_col_spacings(5)
-	self.rpp.pack_start(table, expand=FALSE)
+	self.rpp.pack_start(table, expand=False)
 
         # Warp with GCPs
 	gcp_warp_label = gtk.Label('Display Georeferenced:')
@@ -1410,7 +1409,7 @@ class PrefDialog(gtk.Window):
 	table.set_border_width(5)
 	table.set_row_spacings(5)
 	table.set_col_spacings(5)
-	self.pwp.pack_start(table, expand=FALSE)
+	self.pwp.pack_start(table, expand=False)
 
         # HTML Browser
 	html_command_label = gtk.Label('Browser Command:')
@@ -1500,7 +1499,7 @@ class PrefDialog(gtk.Window):
 	table.set_border_width(5)
 	table.set_row_spacings(5)
 	table.set_col_spacings(5)
-	self.ttp.pack_start(table, expand=FALSE)
+	self.ttp.pack_start(table, expand=False)
 
         # Coordinate
 	coord_label = gtk.Label('Coordinate:')
@@ -1886,42 +1885,42 @@ class Position_3D_Dialog(gtk.Window):
         self.view_manager = view_manager
 
     def create_position_dialog(self):
-        self.dialog = gtk.VBox(homogeneous=FALSE, spacing=3)
+        self.dialog = gtk.VBox(homogeneous=False, spacing=3)
         self.add(self.dialog)
         self.dialog.pack_start(gtk.Label('Current Position:'))
         
         # x
-        x_box = gtk.HBox(homogeneous=FALSE, spacing=5)
-        self.dialog.pack_start(x_box, expand=FALSE)
+        x_box = gtk.HBox(homogeneous=False, spacing=5)
+        self.dialog.pack_start(x_box, expand=False)
 
         x = gtk.Label('X: ')
         x_value = gtk.Entry()
         x_value.set_max_length(10)
         x_value.set_text('')
-        x_box.pack_start(x, expand=FALSE)
-        x_box.pack_start(x_value, expand=FALSE)
+        x_box.pack_start(x, expand=False)
+        x_box.pack_start(x_value, expand=False)
         
         # y
-        y_box = gtk.HBox(homogeneous=FALSE, spacing=5)
-        self.dialog.pack_start(y_box, expand=FALSE)
+        y_box = gtk.HBox(homogeneous=False, spacing=5)
+        self.dialog.pack_start(y_box, expand=False)
         
         y = gtk.Label('Y: ')
         y_value = gtk.Entry()
         y_value.set_max_length(10)
         y_value.set_text('')
-        y_box.pack_start(y, expand=FALSE)
-        y_box.pack_start(y_value, expand=FALSE)
+        y_box.pack_start(y, expand=False)
+        y_box.pack_start(y_value, expand=False)
 
         # z
-        z_box = gtk.HBox(homogeneous=FALSE, spacing=5)
-        self.dialog.pack_start(z_box, expand=FALSE)
+        z_box = gtk.HBox(homogeneous=False, spacing=5)
+        self.dialog.pack_start(z_box, expand=False)
         
         z = gtk.Label('Z: ')
         z_value = gtk.Entry()
         z_value.set_max_length(10)
         z_value.set_text('')
-        z_box.pack_start(z, expand=FALSE)
-        z_box.pack_start(z_value, expand=FALSE)
+        z_box.pack_start(z, expand=False)
+        z_box.pack_start(z_value, expand=False)
 
         self.x_value = x_value
         self.y_value = y_value
@@ -1941,26 +1940,26 @@ class Position_3D_Dialog(gtk.Window):
         # Row or x
         self.dialog.pack_start(gtk.HSeparator())
         self.dialog.pack_start(gtk.Label('Looking At Position:'))
-        row_box = gtk.HBox(homogeneous=FALSE, spacing=5)
-        self.dialog.pack_start(row_box, expand=FALSE)
+        row_box = gtk.HBox(homogeneous=False, spacing=5)
+        self.dialog.pack_start(row_box, expand=False)
 
         row = gtk.Label('X: ')
         row_value = gtk.Entry()
         row_value.set_max_length(10)
         row_value.set_text('')
-        row_box.pack_start(row, expand=FALSE)
-        row_box.pack_start(row_value, expand=FALSE)
+        row_box.pack_start(row, expand=False)
+        row_box.pack_start(row_value, expand=False)
         
         # Column or y
-        col_box = gtk.HBox(homogeneous=FALSE, spacing=5)
-        self.dialog.pack_start(col_box, expand=FALSE)
+        col_box = gtk.HBox(homogeneous=False, spacing=5)
+        self.dialog.pack_start(col_box, expand=False)
         
         col = gtk.Label('Y: ')
         col_value = gtk.Entry()
         col_value.set_max_length(10)
         col_value.set_text('')
-        col_box.pack_start(col, expand=FALSE)
-        col_box.pack_start(col_value, expand=FALSE)
+        col_box.pack_start(col, expand=False)
+        col_box.pack_start(col_value, expand=False)
         
         self.row_value = row_value
         self.col_value = col_value

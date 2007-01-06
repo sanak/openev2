@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import string           
 import gvselbrowser
@@ -94,7 +93,7 @@ class OEAttEdit(gtk.Window,Signaler):
         self.visibility_flag = 0
         Signaler.notify(self, 'hidden')
         
-        return TRUE
+        return True
 
     def reconnect(self, *args):
         gview.app.sel_manager.subscribe( 'selection-changed',
@@ -109,7 +108,7 @@ class OEAttEdit(gtk.Window,Signaler):
 
         self.selbrowser = gvselbrowser.GvSelBrowser()
         self.selbrowser.set_border_width(10)
-        box1.pack_start( self.selbrowser, expand=FALSE )
+        box1.pack_start( self.selbrowser, expand=False )
 
         box2 = gtk.VBox(spacing=10)
         box2.set_border_width(10)
@@ -130,7 +129,7 @@ class OEAttEdit(gtk.Window,Signaler):
         text_view.show()
         text_window.add(text_view)
         text_view.set_size_request(400, 100)
-        text_view.set_editable(TRUE)
+        text_view.set_editable(True)
         text_view.set_wrap_mode(gtk.WRAP_CHAR)
         text_window.show()
 
@@ -142,12 +141,12 @@ class OEAttEdit(gtk.Window,Signaler):
 
 
         separator = gtk.HSeparator()
-        box1.pack_start(separator, expand=FALSE)
+        box1.pack_start(separator, expand=False)
         separator.show()
 
         box2 = gtk.VBox(spacing=10)
         box2.set_border_width(10)
-        box1.pack_start(box2, expand=FALSE)
+        box1.pack_start(box2, expand=False)
         box2.show()
 
         # new field options
@@ -157,18 +156,18 @@ class OEAttEdit(gtk.Window,Signaler):
         nf_frame.add(box3)
         self.new_field_width_entry = gtk.Entry(2)
         self.new_field_width_entry.set_text('20')
-        self.new_field_width_entry.set_editable(TRUE)        
+        self.new_field_width_entry.set_editable(True)        
         self.new_field_precision_entry = gtk.Entry(2)
         self.new_field_precision_entry.set_text('0')
-        self.new_field_precision_entry.set_editable(FALSE)
-        self.new_field_precision_entry.set_sensitive(FALSE)
+        self.new_field_precision_entry.set_editable(False)
+        self.new_field_precision_entry.set_sensitive(False)
         
         self.new_field_types = ('string','integer','float')
         self.new_field_type_menu = gvutils.GvOptionMenu(self.new_field_types, self.new_field_precision_cb)
         self.new_field_type_menu.set_history(0)
         box3.pack_start(self.new_field_type_menu)
-        box3.pack_start(self.new_field_width_entry,expand=FALSE,fill=FALSE)
-        box3.pack_start(self.new_field_precision_entry,expand=FALSE,fill=FALSE)
+        box3.pack_start(self.new_field_width_entry,expand=False,fill=False)
+        box3.pack_start(self.new_field_precision_entry,expand=False,fill=False)
         box2.pack_start(nf_frame)
         nf_frame.show_all()
         
@@ -182,12 +181,12 @@ class OEAttEdit(gtk.Window,Signaler):
     def new_field_precision_cb(self,*args):
         if self.new_field_types[self.new_field_type_menu.get_history()] == 'float':
             # precision is only relevant for float
-            self.new_field_precision_entry.set_editable(TRUE)
-            self.new_field_precision_entry.set_sensitive(TRUE)
+            self.new_field_precision_entry.set_editable(True)
+            self.new_field_precision_entry.set_sensitive(True)
         else:
             self.new_field_precision_entry.set_text('0')
-            self.new_field_precision_entry.set_editable(FALSE)
-            self.new_field_precision_entry.set_sensitive(FALSE)
+            self.new_field_precision_entry.set_editable(False)
+            self.new_field_precision_entry.set_sensitive(False)
             
     def gui_update(self,*args):
         text_contents = ''
@@ -268,4 +267,4 @@ class OEAttEdit(gtk.Window,Signaler):
     def insert_text_cb(self,new_text,*args):
         if new_text[0] == '\n':
             self.att_update_cb()
-            return FALSE
+            return False

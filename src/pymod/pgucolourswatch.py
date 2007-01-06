@@ -63,17 +63,17 @@ class ColourSwatch(gtk.DrawingArea, Signaler):
                 
     def configure_event(self, *args):
         #is this required?
-        return gtk.FALSE
+        return False
 
     def expose_event(self, *args):
         #get the window and graphic context 
         win = self.window
         width, height = win.get_size()
-        win.draw_rectangle(self.get_style().black_gc, gtk.FALSE,
+        win.draw_rectangle(self.get_style().black_gc, False,
             2, 2, width-2, height-2)
-        win.draw_rectangle(self.gc, gtk.TRUE,
+        win.draw_rectangle(self.gc, True,
             3, 3, width-3, height-3)
-        return gtk.FALSE
+        return False
         
     def set_colour(self, colour=(0,0,0,0)):
         self.colour = colour

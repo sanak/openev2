@@ -97,7 +97,7 @@ class OpenRawDialog(gtk.Window):
 	# File open controls
 	frame1 = gtk.Frame('Select raw image file')
 	frame1.show()
-        box1.pack_start(frame1, expand=gtk.FALSE)
+        box1.pack_start(frame1, expand=False)
 	box2 = gtk.HBox(spacing = 5)
 	box2.set_border_width(5)
         box2.show()
@@ -106,7 +106,7 @@ class OpenRawDialog(gtk.Window):
 	open_btn.connect("clicked", self.open_cb)
 	box2.pack_start(open_btn)
 	self.open_entry = gtk.Entry()
-	self.open_entry.set_editable(gtk.TRUE)
+	self.open_entry.set_editable(True)
 	self.open_entry.set_text('')
 	box2.pack_start(self.open_entry)
 	frame1.add(box2)
@@ -114,7 +114,7 @@ class OpenRawDialog(gtk.Window):
 	# Image geometry controls
 	frame2 = gtk.Frame('Set image geometry')
 	frame2.show()
-        box1.pack_start(frame2, expand=gtk.FALSE)
+        box1.pack_start(frame2, expand=False)
 	tbl = gtk.Table(4, 5)
 	tbl.set_border_width(5)
 	tbl.set_row_spacings(5)
@@ -126,7 +126,7 @@ class OpenRawDialog(gtk.Window):
 	tbl.attach(width_label, 0, 1, 0, 1)
 	self.width_entry = gtk.Entry()
 	self.width_entry.set_text('0')
-	self.width_entry.set_editable(gtk.TRUE)
+	self.width_entry.set_editable(True)
 	tbl.attach(self.width_entry, 1, 2, 0, 1)
 
 	height_label = gtk.Label('Image height:')
@@ -134,7 +134,7 @@ class OpenRawDialog(gtk.Window):
 	tbl.attach(height_label, 0, 1, 1, 2)
 	self.height_entry = gtk.Entry()
 	self.height_entry.set_text('0')
-	self.height_entry.set_editable(gtk.TRUE)
+	self.height_entry.set_editable(True)
 	tbl.attach(self.height_entry, 1, 2, 1, 2)
 
 	bands_label = gtk.Label('Number of bands:')
@@ -142,7 +142,7 @@ class OpenRawDialog(gtk.Window):
 	tbl.attach(bands_label, 0, 1, 2, 3)
 	self.bands_entry = gtk.Entry()
 	self.bands_entry.set_text('1')
-	self.bands_entry.set_editable(gtk.TRUE)
+	self.bands_entry.set_editable(True)
 	tbl.attach(self.bands_entry, 1, 2, 2, 3)
 
 	header_label = gtk.Label('Image header size:')
@@ -150,7 +150,7 @@ class OpenRawDialog(gtk.Window):
 	tbl.attach(header_label, 0, 1, 3, 4)
 	self.header_entry = gtk.Entry()
 	self.header_entry.set_text('0')
-	self.header_entry.set_editable(gtk.TRUE)
+	self.header_entry.set_editable(True)
 	tbl.attach(self.header_entry, 1, 2, 3, 4)
 
 	guess_btn = gtk.Button("Guess image geometry")
@@ -213,10 +213,10 @@ class OpenRawDialog(gtk.Window):
 
 	# Ok/Cancel buttons
 	separator = gtk.HSeparator()
-	box1.pack_start(separator, expand=gtk.FALSE)
+	box1.pack_start(separator, expand=False)
 
 	box3 = gtk.HBox(spacing=10)
-        box1.pack_start(box3, expand=gtk.FALSE)
+        box1.pack_start(box3, expand=False)
 
         current_btn = gtk.Button("Current View")
         current_btn.connect("clicked", self.import_cb,'Current')

@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import os.path
 

@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from gtk import TRUE, FALSE
 import gview
 import os.path
 import gvhtml
@@ -38,9 +37,9 @@ class GvOGRDlg(gtk.Window):
         self.set_title('Vector Layer Selection')
         self.set_size_request(500, 500)
         self.set_border_width(3)
-        self.set_policy(TRUE,TRUE,FALSE)
+        self.set_policy(True,True,False)
         self.connect('delete-event',self.close)
-        shell = gtk.VBox(homogeneous=FALSE,spacing=3)
+        shell = gtk.VBox(homogeneous=False,spacing=3)
         self.add(shell)
         gvhtml.set_help_topic(self, "veclayerselect.html" );
 
@@ -59,25 +58,25 @@ class GvOGRDlg(gtk.Window):
 
         # Clip to view?
 
-        hbox = gtk.HBox(homogeneous=FALSE)
-        shell.pack_start( hbox, expand=FALSE )
+        hbox = gtk.HBox(homogeneous=False)
+        shell.pack_start( hbox, expand=False )
 
         self.clip_to_view_btn = gtk.CheckButton()
-        hbox.pack_start( self.clip_to_view_btn, expand=FALSE )
+        hbox.pack_start( self.clip_to_view_btn, expand=False )
 
-        hbox.pack_start( gtk.Label('Clip To View' ), expand=FALSE )
+        hbox.pack_start( gtk.Label('Clip To View' ), expand=False )
 
         # SQL Box.
 
-        hbox = gtk.HBox(homogeneous=FALSE, spacing=3)
-        shell.pack_start( hbox,expand=FALSE )
+        hbox = gtk.HBox(homogeneous=False, spacing=3)
+        shell.pack_start( hbox,expand=False )
         
         sql_button = gtk.Button('Execute SQL:')
         sql_button.connect('clicked', self.execute_sql)
-        hbox.pack_start(sql_button, expand=FALSE)
+        hbox.pack_start(sql_button, expand=False)
         
         self.sql_cmd = gtk.Entry()
-        hbox.pack_start(self.sql_cmd,expand=TRUE)
+        hbox.pack_start(self.sql_cmd,expand=True)
 
         # buttons
         button_box = gtk.HButtonBox()
@@ -90,11 +89,11 @@ class GvOGRDlg(gtk.Window):
         cancel_button.connect('clicked', self.close)
         help_button = gtk.Button('Help')
         help_button.connect('clicked', self.help_cb)
-        button_box.pack_start(ok_button, expand=FALSE)
-        button_box.pack_start(loadall_button, expand=FALSE)
-        button_box.pack_start(cancel_button, expand=FALSE)
-        button_box.pack_start(help_button, expand=FALSE)
-        shell.pack_start(button_box,expand=FALSE)
+        button_box.pack_start(ok_button, expand=False)
+        button_box.pack_start(loadall_button, expand=False)
+        button_box.pack_start(cancel_button, expand=False)
+        button_box.pack_start(help_button, expand=False)
+        shell.pack_start(button_box,expand=False)
 
         self.connect('realize', self.realize)
         self.sel_pixmap = gtk.Image().set_from_file(os.path.join(gview.home_dir,'pics',
@@ -124,7 +123,7 @@ class GvOGRDlg(gtk.Window):
     def close(self,*args):
         self.ds.Destroy()
         self.hide()
-        return TRUE
+        return True
 
     def load_all(self,*args):
         for i in range(len(self.layer_sel)):
