@@ -1911,7 +1911,6 @@ def dict_append_min_max(lut_min=None, lut_max=None, metadict=None):
 
 
 if __name__ ==  '__main__':
-    import string
 
     ds=VRTDatasetConstructor(2000,2000)
     ds.AddSimpleBand('reltest.tif',2,'Float32')
@@ -1919,7 +1918,7 @@ if __name__ ==  '__main__':
                      SrcRect=(1000,2000,4000,4000),
                      ScaleOffset=2,ScaleRatio=3)
     ds.AddRawBand('rawtest.x00','CFloat32','MSB',0,8,16000)
-    for item in string.split(ds.GetVRTLines(),'\n'):
+    for item in ds.GetVRTLines().split('\n'):
         print item
 
     #

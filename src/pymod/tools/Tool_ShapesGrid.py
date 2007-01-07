@@ -528,13 +528,12 @@ class SchemaDialog(gtk.Window):
 
     def add_field(self,*args):
         """ Add field """
-        import string
 
         sch=self.shapes.get_schema()
         name=self.new_field_name_entry.get_text()
 
         for item in sch:
-            if string.lower(item[0]) == string.lower(name):
+            if item[0].lower() == name.lower():
                 gvutils.error('Field '+name+' already present!')
                 return
 

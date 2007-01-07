@@ -27,7 +27,6 @@
 import gview
 import os
 import os.path
-import string
 import _gv
 import gtk
 from gtk.gdk import *
@@ -93,8 +92,8 @@ def LaunchHTML( page_name ):
             gvutils.warning( 'Unable to display HTML online help, browser not configured.' )
         return
 
-    if string.find(html_browse_command,"%s") > -1:
-        full_command = string.replace(html_browse_command,"%s",page_name)+" &"
+    if "%s" in html_browse_command:
+        full_command = html_browse_command.replace("%s",page_name) + " &"
     else:
         full_command = html_browse_command + ' ' + page_name + ' &'
 

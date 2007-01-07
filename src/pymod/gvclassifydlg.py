@@ -121,7 +121,6 @@ def load_ramp_config_file():
     """
     import os
     import os.path
-    import string
     ramps = []
     ramp_dir = gview.get_preference('ramp_directory')
     if ramp_dir is None:
@@ -133,7 +132,7 @@ def load_ramp_config_file():
             config = open(config_path)
             lines = config.readlines()
             for line in lines:
-                ramp_file = string.strip(line)
+                ramp_file = line.strip()
                 if ramp_file == '<separator>':
                     ramps.append(gtk.HSeparator())
                 else:

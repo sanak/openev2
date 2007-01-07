@@ -27,7 +27,6 @@
 
 import gtk
 import gview
-import string
 import gvselbrowser
 import pgucolorsel
 import gvutils
@@ -72,9 +71,9 @@ class GvLabelEdit(gtk.Window):
                 color = "#88FF88"
             else:
                 try:
-                    color = string.replace( color, "(", "" )
-                    color = string.replace( color, ")", "" )
-                    r, g, b, a = string.split( color, "," )
+                    color = color.replace("(", "")
+                    color = color.replace(")", "")
+                    r, g, b, a = color.split(",")
                     r = float(r)
                     g = float(g)
                     b = float(b)

@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk; _gtk = gtk; del gtk
-from string import *
 import os.path
 
 simple_file_sel = None

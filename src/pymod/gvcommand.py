@@ -24,9 +24,6 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import string
-
-###############################################################################
 class CommandBase:
     """Base class for command objects.
 
@@ -193,7 +190,7 @@ variable:
         if self.valid_list is not None:
             self.valid_list_lower = []
             for item in self.valid_list:
-                self.valid_list_lower.append( string.lower(item) )
+                self.valid_list_lower.append(item.lower())
 
         # Validate some requirements
         if self.type not in [ 'string_word', 'string_token', 'switch','list_type',
@@ -238,7 +235,7 @@ variable:
             return self.validate_method( arg_text, command_context )
 
         if self.valid_list_lower is not None:
-            lower_arg_text = string.lower(arg_text)
+            lower_arg_text = arg_text.lower()
             if lower_arg_text not in self.valid_list_lower:
                 return '%s: %s is not in the set of valid options.' % \
                        ( self.name, arg_text )
@@ -247,7 +244,7 @@ variable:
 
         if self.type == 'numeric':        
             try:
-                string.atof( arg_text )
+                float(arg_text)
             except ValueError:
                 return '%s: %s is not numeric.' % \
                        ( self.name, arg_text )
@@ -270,7 +267,7 @@ variable:
 
     ###########################################################################
     def read_simple_token(self, line, cc ):
-        tokens = string.split(line,None,1)
+        tokens = line.split(None,1)
         if len(tokens) == 1:
             return (tokens[0], '')
         elif len(tokens) == 2:
@@ -285,35 +282,35 @@ variable:
             return (None,'')
 
         if (line[0] == '"'):
-            tokens1 = string.split(line,'"',1)
-            tokens2 = string.split(tokens1[1],'"',1)
+            tokens1 = line.split('"',1)
+            tokens2 = tokens1[1].split('"',1)
             if len(tokens2) < 2:
                 interpreter.showText( 'Unmatched "  in argument line ','error' )
                 return (None,'')
             return (tokens2[0],tokens2[1])
         elif (line[0] == "'"):
-            tokens1 = string.split(line,"'",1)
-            tokens2 = string.split(tokens1[1],"'",1)
+            tokens1 = .linesplit("'",1)
+            tokens2 = tokens1[1].split("'",1)
             if len(tokens2) < 2:
                 interpreter.showText( "Unmatched '  in argument line ",'error' )
                 return (None,'')
             return (tokens2[0],tokens2[1])
 
         # Check for keyword
-        tokens1=string.split(line,None,1)
+        tokens1 = line.split(None,1)
 
-        if string.find(tokens1[0],'=') == -1:
+        if '=' not in tokens1[0]:
             # No keyword found- simple token
             return self.read_simple_token( line, cc )
         else:
             # keyword found- check for quoted token
-            tokens2=string.split(tokens1[0],'=')
+            tokens2 = tokens1[0].split('=')
             if tokens2[1][0] == '"':
                 # Keyword found.  return quoted token with keyword
                 # to identify the argument in later parsing, but separated
                 # from remainder of line
-                tokens1 = string.split(line,'"',1)
-                tokens2 = string.split(tokens1[1],'"',1)
+                tokens1 = line.split('"',1)
+                tokens2 = tokens1[1].split('"',1)
                 if len(tokens2) < 2:
                     interpreter.showText( 'Unmatched "  in argument line ','error' )
                     return (None,'')
@@ -323,8 +320,8 @@ variable:
                 # Keyword found.  return quoted token with keyword
                 # to identify the argument in later parsing, but separated
                 # from remainder of line
-                tokens1 = string.split(line,"'",1)
-                tokens2 = string.split(tokens1[1],"'",1)            
+                tokens1 = line.split("'",1)
+                tokens2 = tokens1[1].split("'",1)            
                 if len(tokens2) < 2:
                     interpreter.showText( "Unmatched '  in argument line ",'error' )
                     return (None,'')
@@ -353,7 +350,7 @@ variable:
 
 ############################################################################### 
     def process_numeric_token(self, token, cc ):
-        return string.atof( token )
+        return float(token)
 
 ###############################################################################    
     def process_simple_token(self, token, cc):
@@ -423,16 +420,16 @@ class CommandContext:
 
     ###########################################################################
     def parse_command_text(self):
-        tokens = string.split( self.line, None, 1 )
+        tokens = self.line.split(None, 1)
 
         # Null input line is considered valid.
         if len(tokens) == 0:
             return ('', '')
 
         if len(tokens) == 1:
-            return (string.lower(tokens[0]), '')
+            return (tokens[0].lower(), '')
         else:
-            return (string.lower(tokens[0]), tokens[1])
+            return (tokens[0].lower(), tokens[1])
 
     ###########################################################################
     def parse_args(self):
@@ -501,10 +498,10 @@ class CommandContext:
 
         arg_keyword = None
         if test_token is not None:
-            checknamed = string.split(test_token,'=',1)
+            checknamed = test_token.split('=',1)
             if len(checknamed) == 2:
-                if arg.name != string.strip(checknamed[0]):
-                    checknamed[0] = string.strip(checknamed[0])
+                if arg.name != checknamed[0].strip():
+                    checknamed[0] = checknamed[0].strip()
                     # keyword doesn't match current argument name:
                     arg = None
 
@@ -525,7 +522,7 @@ class CommandContext:
                     arg = self.cmd_obj.Args[self.current_arg]
                     next_arg_index = self.current_arg + 1
                 else:
-                    arg_keyword=string.strip(checknamed[0])
+                    arg_keyword = checknamed[0].strip()
 
 
 

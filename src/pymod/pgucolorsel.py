@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from string import *
 import pgu
 from pgucolourswatch import ColourSwatch
 
@@ -187,8 +186,8 @@ class ColorControl(gtk.HBox):
         if new_color is None:
             return
 
-        red, green, blue, alpha = split(new_color,' ')
-        self.set_color((atof(red), atof(green), atof(blue), atof(alpha)))
+        red, green, blue, alpha = new_color.split(' ')
+        self.set_color((float(red), float(green), float(blue), float(alpha)))
 
     def invoke_callback(self):
         if self.callback == None:

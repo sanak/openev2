@@ -27,7 +27,6 @@
 
 import gtk
 from gtk import SHRINK
-from string import *
 from gvsignaler import *
 import gvutils
 import gview
@@ -359,7 +358,6 @@ class GvLabelStyle(gtk.VBox, Signaler):
         color = self.label_color.current_color
         color = gvogrfs.gv_to_ogr_color( color )
 
-        import string
         x_off = ''
         y_off = ''
 

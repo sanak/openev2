@@ -72,7 +72,6 @@ from gvsignaler import Signaler
 import Numeric
 import gview
 import gvutils
-import string
 
 
 # Allowable data sources for pgugrid
@@ -2582,11 +2581,11 @@ class pguGrid(gtk.HBox,Signaler):
                 txt='Invalid entry for array of typecode '+dtype
                 gvutils.error(txt)                
         elif self.src_type == SRC_SHAPES:
-            s1=string.strip(str(value))
+            s1=str(value).strip()
             pval=self.src[row].get_property(
                 self._ColumnDefs[column].member)
             if pval is not None:
-                s2=string.strip(pval)
+                s2=pval.strip()
             else:
                 s2=None
                 if s1 == '':
@@ -2602,11 +2601,11 @@ class pguGrid(gtk.HBox,Signaler):
                 self.src[row]=shape
                 self.src.handler_unblock(self.source_changed_id)
         elif self.src_type == SRC_SHAPESLAYER:
-            s1=string.strip(str(value))
+            s1=str(value).strip()
             pval=self.src[row].get_property(
                 self._ColumnDefs[column].member)
             if pval is not None:
-                s2=string.strip(pval)
+                s2=pval.strip()
             else:
                 s2=None
                 if s1 == '':

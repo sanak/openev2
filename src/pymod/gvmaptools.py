@@ -34,7 +34,6 @@ import Numeric
 import gtk
 import os
 import gvogrfs
-import string
 
 #########################################################################
 # Grid/graticule layers                                                 #
@@ -319,7 +318,7 @@ def CreateNorthSymbol(ntype=GVNORTHSYM1,color1=(0.0,0.0,0.0,1.0),
     if len(cstr2) < 9:
         cstr2=cstr2+"FF"
 
-    sstr=string.replace(str(scale),'.','_')
+    sstr = str(scale).replace('.','_')
 
     refname=ntype+cstr1[1:]+cstr2[1:]+sstr
     if ntype==GVNORTHSYM1:   

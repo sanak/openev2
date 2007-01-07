@@ -70,7 +70,6 @@ import Numeric
 import gtk
 import pgumenu
 import os
-import string
 import gvogrfs
 from gvsignaler import Signaler
 
@@ -2334,7 +2333,7 @@ def Create2DLegendLayer(plot_data,name=None):
         except:
             continue
 
-        tmp=string.split(color)
+        tmp = color.split()
         rgba=[]
         for tmp2 in tmp:
             rgba.append(float(tmp2))

@@ -1,5 +1,5 @@
 ###############################################################################
-# $Id: pgu.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
 # Project:  Python Gtk Utility Widgets
 # Purpose:  Core PGU stuff, such as registering new PyGtk classes.
@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk; _gtk = gtk; del gtk
-from string import *
 import _gv
 
 _name2cls = {}

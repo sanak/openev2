@@ -29,7 +29,6 @@
 #
 
 import gview
-import string
 import gdal
 import gvutils
 import Numeric
@@ -244,16 +243,16 @@ class GvClassification:
               range_max = range_min
 
           try:
-            range_min = string.strip( range_min )
-            range_max = string.strip( range_max )
+            range_min = range_min.strip()
+            range_max = range_max.strip()
           except:
             pass
 
           if name is None:
               #name = 'class_%d' % class_id
-              name = string.strip(str(range_min))
+              name = str(range_min).strip()
               if range_max != range_min and range_max != '':
-                name = name + ' - ' + string.strip(str(range_max))
+                name = name + ' - ' + str(range_max).strip()
 
           if len(color) == 3:
               (r,g,b) = color
@@ -463,7 +462,7 @@ class GvClassification:
 
         # Try to produce a string corresponding to the raw value.
         # Ensure that integer values are represented without any decimals
-        raw_string = string.strip(str(raw_value))
+        raw_string = str(raw_value).strip()
         try:
             num_value = float(raw_string)
             if num_value == int(num_value):
@@ -473,7 +472,7 @@ class GvClassification:
 
         if self.get_type() == CLASSIFY_DISCRETE:
             for i in range(self.count):
-                if raw_string == string.strip(str(self.range[i][0])):
+                if raw_string == str(self.range[i][0]).strip():
                     symbol = self.point_symbols[i]
                     color = self.color[i]
                     scale = self.symbol_scales[i]
@@ -649,10 +648,10 @@ class GvClassification:
             color_spec = dict.get(key, '#000000FF')
 
             try:
-                color = ( string.atoi(color_spec[1:3],16) / 255.0,
-                        string.atoi(color_spec[3:5],16) / 255.0,
-                        string.atoi(color_spec[5:7],16) / 255.0,
-                        string.atoi(color_spec[7:9],16) / 255.0 )
+                color = ( int(color_spec[1:3],16) / 255.0,
+                        int(color_spec[3:5],16) / 255.0,
+                        int(color_spec[5:7],16) / 255.0,
+                        int(color_spec[7:9],16) / 255.0 )
             except:
                 color = ( 0.0, 0.0, 0.0, 1.0 )
 
@@ -660,11 +659,11 @@ class GvClassification:
             range_spec = dict.get(key, '0 0')
             try:
                 (range_min, range_max) = range_spec.split(':')
-                range_min = string.strip(range_min)
-                range_max = string.strip(range_max)
+                range_min = range_min.strip()
+                range_max = range_max.strip()
             except:
                 range_min = range_spec
-                range_min = string.strip(range_min)
+                range_min = range_min.strip()
                 range_max = None
             #allow ranges to be discrete string values
             try:
@@ -1212,7 +1211,7 @@ class GvClassification:
                 name = nsdminmax[3][n]
             elif self.get_type() == CLASSIFY_DISCRETE:
                 try:
-                    range_min = string.strip(unique_vals[n])
+                    range_min = unique_vals[n].strip()
                     range_max = ''
                 except:
                     range_min = unique_vals[n]

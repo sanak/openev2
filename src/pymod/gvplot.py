@@ -28,7 +28,6 @@
 import Numeric
 import gtk
 import os
-import string
 import gvutils
 
 ###############################################################################
@@ -399,7 +398,7 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
 
     elif terminal == 'postscript':
         if (os.name == 'nt'):
-            output = string.join(string.split(output,'\\'),'/')
+            output = '/'.join(output.split('\\'))
 
         g.add_cmd( 'set terminal postscript color 10' )
         g.add_cmd( "set output '%s'" % output )

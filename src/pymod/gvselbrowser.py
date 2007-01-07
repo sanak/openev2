@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gtk
-from string import *
 from gvsignaler import *
 import os.path
 import pgu

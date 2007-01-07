@@ -26,7 +26,6 @@
 
 import gtk
 from gtk.gdk import *
-import string
 import os
 import gview
 import pgu
@@ -87,7 +86,7 @@ class pguMenuFactory(gtk.Widget):
         create a single menuitem and add it to one of the menus already
         created (or create a new one)
         """
-        last_slash = string.rfind(path, '/')
+        last_slash = path.rfind('/')
         if last_slash < 0:
             parentmenu = self.__w
         else:
@@ -96,7 +95,7 @@ class pguMenuFactory(gtk.Widget):
         if label == '<separator>':
             item = gtk.MenuItem()
         elif label[:7] == '<image:':
-            end = string.find(label, '>')
+            end = label.find('>')
             img_name = label[7:end]
             hbox = gtk.HBox(spacing=2)
             try:
@@ -137,7 +136,7 @@ class pguMenuFactory(gtk.Widget):
         if callback:
             apply(item.connect, ("activate", callback) + args)
         # right justify the help menu automatically
-        if string.lower(label) == 'help' and parentmenu == self.__w:
+        if label.lower() == 'help' and parentmenu == self.__w:
             item.right_justify()
         parentmenu.append(item)
         self.__items[path] = item

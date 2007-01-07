@@ -30,7 +30,6 @@ import gvclassification
 from gvogrfs import gv_to_ogr_color
 from pgucolor import color_string_to_tuple
 import pgufont
-import string
 import sys
 import gdal
 
@@ -195,7 +194,7 @@ class GvLegendDialog(gtk.Window):
         except:
             gdk_title_font = gtk.load_font('*')
 
-        lines = string.split(self.classification.title, '\\n')
+        lines = self.classification.title.split('\\n')
 
         x_offset = 10  #start title 10 pixels in from left edge
         col_offset = 30 #space columns apart

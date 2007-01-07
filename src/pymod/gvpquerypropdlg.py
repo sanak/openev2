@@ -25,7 +25,6 @@
 ###############################################################################
 
 import gtk
-from string import *
 
 from gvconst import *
 import gview

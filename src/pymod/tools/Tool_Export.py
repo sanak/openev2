@@ -27,7 +27,7 @@
 
 import gtk
 import gview, gdal, gdalconst, layerdlg, gvutils
-import os, string
+import os
 import gviewapp
 import pgufilesel
 import gvhtml
@@ -397,7 +397,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
             # recognized by mozilla.  Make sure that
             # frmt_various.html is brought up for
             # formats that share this file.
-            ttopic=string.split(topic,"#")
+            ttopic = topic.split("#")
             gvhtml.LaunchHTML(ttopic[0])
         else:
             gvutils.warning('No html help available for '+opformat+' format')
@@ -452,7 +452,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
                 gvutils.error(msg)
                 return
 
-            linelist=string.split(ipfile,'\n')
+            linelist = ipfile.split('\n')
             newlinelist=[]
             for item in linelist:
                 newlinelist.append(item+'\n')
@@ -597,7 +597,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
         driver=gdal.GetDriverByName(opformat)
 
         # Parse creation options:
-        optstr=string.strip(self.optentry.get_text())
+        optstr = self.optentry.get_text().strip()
         if len(optstr) > 0:
             # should be able to deal with several
             # types of entries, eg.
@@ -606,13 +606,13 @@ class GDALTool(gviewapp.Tool_GViewApp):
             # TILED=YES,TFW=YES
 
             if optstr[0] in ["'",'"']:
-                split1=string.split(optstr,",")
+                split1 = optstr.split(",")
                 copts=[]
                 for item in split1:
                     if len(item) > 2:
                         copts.append(item[1:len(item)-1])
             else:    
-                copts=string.split(optstr,',')
+                copts = optstr.split(',')
         else:
             copts=[]
 

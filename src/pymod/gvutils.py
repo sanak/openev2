@@ -28,7 +28,6 @@
 
 import gtk; _gtk = gtk; del gtk
 from gtk.gdk import *
-import string
 import pgu
 import os
 import sys
@@ -151,7 +150,7 @@ def error( text ):
 
 def is_shapefile( filename ):
     try:
-        ext = string.lower(filename[len(filename)-4:])
+        ext = filename[len(filename)-4:].lower()
         if ext == '.shp' or ext == '.shx' or ext == '.dbf':
             return 1
         else:
@@ -161,7 +160,7 @@ def is_shapefile( filename ):
 
 def is_project_file( filename ):
     try:
-        ext = string.lower(filename[len(filename)-4:])
+        ext = filename[len(filename)-4:].lower()
         if ext == '.opf':
             return 1
 
@@ -188,7 +187,7 @@ class GvMenuFactory(_gtk.MenuBar):
         for entry in entries:
             apply(self.create, tuple(entry))
     def create(self, path, accelerator=None, callback=None, *args):
-        last_slash = string.rfind(path, '/')
+        last_slash = path.rfind('/')
         if last_slash < 0:
             parentmenu = self
         else:
@@ -209,7 +208,7 @@ class GvMenuFactory(_gtk.MenuBar):
         if callback:
             apply(item.connect, ("activate", callback) + args)
         # right justify the help menu automatically
-        if string.lower(label) == 'help' and parentmenu == self:
+        if label.lower() == 'help' and parentmenu == self:
             item.set_right_justified(True)
         parentmenu.append(item)
         self.__items[path] = item
@@ -284,7 +283,7 @@ class GvMenuFactory(_gtk.MenuBar):
 
     def insert_entry(self, pos, path, accelerator=None, callback=None, *args):
         # like create, but lets you specify position in menu
-        last_slash = string.rfind(path, '/')
+        last_slash = path.rfind('/')
         if last_slash < 0:
             parentmenu = self
         else:
@@ -305,7 +304,7 @@ class GvMenuFactory(_gtk.MenuBar):
         if callback:
             apply(item.connect, ("activate", callback) + args)
         # right justify the help menu automatically
-        if string.lower(label) == 'help' and parentmenu == self:
+        if label.lower() == 'help' and parentmenu == self:
             item.right_justify()
         # all this copying for just the next few line...
         if pos is not None:
@@ -316,7 +315,7 @@ class GvMenuFactory(_gtk.MenuBar):
                 num_main_menus = 0
                 for current_path in self.__menus.keys():
                     # Check that it isn't a sub-menu...
-                    temp_slash = string.rfind(current_path,'/')
+                    temp_slash = current_path.rfind('/')
                     if temp_slash < 0:
                         num_main_menus = num_main_menus + 1
                 parentmenu.insert(item,max(num_main_menus - 1,1))
@@ -346,7 +345,6 @@ class GvMenuFactory(_gtk.MenuBar):
 
 def read_keyval( line ) :
     import re
-    import string
 
     # skip comments & lines that don't contain a '='
     if line[0] == '#' : return [None,None]
@@ -361,8 +359,8 @@ def read_keyval( line ) :
     key = key[:key_re.search(key).end()]
 
     # Strip excess characters from the value string
-    val = string.strip( val )
-    i = string.find( val, ' ' )
+    val = val.strip()
+    i = val.find(' ')
     if i > 0 : val = val[0:i]
 
     return [ key, val ]
@@ -420,7 +418,6 @@ def FindExecutable( exe_name ):
 
     import os.path
     import gview
-    import string
 
     if os.name == 'nt':
         (root, ext) = os.path.splitext(exe_name)
@@ -435,9 +432,9 @@ def FindExecutable( exe_name ):
 
     exe_path = os.environ['PATH']
     if (os.name == 'nt'):
-        path_items = string.split(exe_path,';')
+        path_items = exe_path.split(';')
     else:
-        path_items = string.split(exe_path,':')
+        path_items = exe_path.split(':')
 
     for item in path_items:
         exe_path = os.path.join(item,exe_name)
@@ -463,7 +460,7 @@ def XMLFindValue( node, path, default = None ):
 
 def XMLFind( node, path, maxfind=1, attr=None,value=None ):
     import gdal
-    broken_up = string.split( path, '.', 1 )
+    broken_up = path.split('.', 1)
     found_list=[]
     if len(broken_up) == 2:
         component, rest_of_path = broken_up
@@ -600,7 +597,7 @@ def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
     else:
         cnode=node
 
-    broken_up = string.split( path, '.', 1 )
+    broken_up = path.split('.', 1)
     popped_list=[]
     subpopped=[]
     if len(broken_up) == 2:
@@ -670,7 +667,7 @@ def XMLInsert(node,path,newnode,maxinsert=1,attr=None,value=None,overwrite='n'):
     else:
         cnode=node
 
-    broken_up = string.split( path, '.', 1 )
+    broken_up = path.split('.', 1)
     if ((maxinsert is not None) and (maxinsert < 1)):
         return (cnode,0)
 

@@ -28,7 +28,6 @@
 import gtk
 import pango
 import gview
-import string
 import sys
 import gdal
 
@@ -108,7 +107,7 @@ class XLFDFontSpec:
                 gdal.Debug( "pgufont", "invalid XLFD(%s), should start with -" % font_spec )
             return
 
-        new_parts = string.split(font_spec, '-')
+        new_parts = font_spec.split('-')
         del new_parts[0] #remove first (empty) part produced by split
 
         if len(new_parts) != 14:

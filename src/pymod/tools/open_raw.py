@@ -53,7 +53,6 @@ import gdalnumeric
 import gview
 import gviewapp
 import gvutils
-import string
 import vrtutils
 import pgufilesel
 
@@ -321,7 +320,7 @@ class OpenRawDialog(gtk.Window):
         fmt=self.format_list[self.format_menu.get_history()]
         dtype=self.type_list[self.type_menu.get_history()]
         dr=gdal.GetDriverByName(fmt)
-        tlist=string.split(dr.GetMetadata()["DMD_CREATIONDATATYPES"])
+        tlist=dr.GetMetadata().split(["DMD_CREATIONDATATYPES"])
         if dtype not in tlist:
             gvutils.error(fmt+' format does not support '+dtype+' data type!')
             return

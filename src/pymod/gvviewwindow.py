@@ -42,7 +42,6 @@ import pgufilesel
 import pguprogress
 import math
 import gvhtml
-import string
 import glob
 import gviewapp
 
@@ -133,7 +132,7 @@ class GvViewWindow(gtk.Window):
         self.viewarea = gview.GvViewArea()
 
         if gview.get_preference('view_background_color') is not None:
-            tokens = string.split(gview.get_preference('view_background_color'))
+            tokens = gview.get_preference('view_background_color').split()
             self.viewarea.set_background_color( [ float(tokens[0]),
                                                   float(tokens[1]),
                                                   float(tokens[2]),
@@ -509,8 +508,8 @@ class GvViewWindow(gtk.Window):
         str_x = self.x_pos_entry.get_text()
         str_y = self.y_pos_entry.get_text()
 
-        x = string.atof(str_x)
-        y = string.atof(str_y)
+        x = float(str_x)
+        y = float(str_y)
 
         if coord_system == 'pixel':
             # Get current raster
@@ -1110,7 +1109,7 @@ class GvViewWindow(gtk.Window):
                 entry_type = gvutils.XMLFindValue( node_path, 'type', '')
                 entry_path = gvutils.XMLFindValue( node, 'path','')
 
-                if (string.find(entry_path,"/") == -1):
+                if (entry_path.find("/") == -1):
                     raise AttributeError,"Invalid menu file format - bad path:%s" % entry_path
 
                 if (entry_type != ''):
@@ -1332,8 +1331,8 @@ class GvViewWindow(gtk.Window):
             return
 
         try:
-            ratio_text = string.split(self.zoom_factor.child.get_text(), ':')
-            ratio = [string.atof(ratio_text[0]), string.atof(ratio_text[1])]
+            ratio_text = self.zoom_factor.child.get_text().split(':')
+            ratio = [float(ratio_text[0]), float(ratio_text[1])]
         except:
             # if invalid text entered do nothing
             return

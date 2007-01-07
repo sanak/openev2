@@ -125,7 +125,6 @@ class GvFunctionsCommand(gvcommand.CommandBase):
             ]
 
     def execute( self, args, line, interp ):
-        import string
         import os
         import Numeric
 
@@ -582,8 +581,7 @@ class GvLocalsCommand(gvcommand.CommandBase):
         import gvshell
 
         if ((searchtypes is not None) and (len(searchtypes) > 0)):
-            import string
-            typelist=string.split(searchtypes,',')
+            typelist = searchtypes.split(',')
             txtlst=gvshell.local_vars_list(interp.locals,typelist)
         else:
             txtlst=gvshell.local_vars_list(interp.locals)

@@ -36,11 +36,10 @@ import _gv
 from gtkmissing import GtkColorWell
 
 def color_string_to_tuple(s):
-    from string import replace, split
-    s = replace(s, '(', '')
-    s = replace(s, ')', '')
-    s = replace(s, ',', '')
-    r, g, b, a = split(s, None)
+    s = s.replace('(', '')
+    s = s.replace(')', '')
+    s = s.replace(',', '')
+    r, g, b, a = s.split()
     return (float(r), float(g), float(b), float(a))
 
 
@@ -233,7 +232,6 @@ class ColorRamp(gtk.Frame, Signaler):
 
     def deserialize(self, fname):
         """read from a file"""
-        import string
         fp = open(fname, 'r')
         lines = fp.readlines()
         self.title.set_text(lines[0].strip())
@@ -241,9 +239,9 @@ class ColorRamp(gtk.Frame, Signaler):
         n_colors = len( lines[2:] )
         for i in range(n_colors):
             line = lines[2+i]
-            line = string.replace(line, '(', '')
-            line = string.replace(line, ')', '')
-            line = string.replace(line, ',', '')
+            line = line.replace('(', '')
+            line = line.replace(')', '')
+            line = line.replace(',', '')
             if self.type == RAMP_GRADIENT:
                 pos, r, g, b, a = line.split()
             else:

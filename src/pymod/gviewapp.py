@@ -2110,8 +2110,7 @@ class Tool_GViewAppIconEntries:
             # On nt, path separators need to be trapped and doubled to avoid
             # being interpreted as an escape before special characters.
             if os.name == 'nt':
-                import string
-                fullfilename=string.replace(fullfilename,"\\","\\\\")
+                fullfilename = fullfilename.replace("\\","\\\\")
 
             if (type(position) == type(0)):
                 self.entries.append((fullfilename,label,hint_text,position,callback,help_topic,icontype))

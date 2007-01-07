@@ -26,7 +26,6 @@
 ###############################################################################
 
 import gview
-import string
 import sys
 
 def gv_to_ogr_color( rgba ):
@@ -71,7 +70,7 @@ class OGRFeatureStyleParam:
         self.role = role
 
     def parse(self, parm):
-        (key,value) = string.split(parm,':',1)
+        (key,value) = parm.split(':',1)
         self.param_name = key
 
         #trap params that have no value
@@ -135,12 +134,12 @@ class OGRFeatureStylePart:
 
     def parse(self, style_part):
 
-        style_part = string.strip(style_part)
-        i = string.find(style_part, '(')
+        style_part = style_part.strip()
+        i = style_part.find('(')
         if i == -1:
             raise ValueError, 'no args to tool name - ' + style_part
 
-        self.tool_name = string.upper(style_part[:i])
+        self.tool_name = style_part[:i].upper()
         if self.tool_name not in [ 'PEN', 'BRUSH', 'SYMBOL', 'LABEL' ]:
             raise ValueError, 'unrecognised tool name - ' + style_part
 
@@ -160,7 +159,7 @@ class OGRFeatureStylePart:
                     in_literal = not in_literal
 
             if not in_literal and tool_parms[i] == ',':
-                parms_list.append( string.strip(tool_parms[last_i:i]) )
+                parms_list.append(tool_parms[last_i:i].strip())
                 i = i + 1
                 last_i = i
 
@@ -169,7 +168,7 @@ class OGRFeatureStylePart:
         if in_literal:
             raise ValueError, 'unterminated string literal - ' + style_part
 
-        parms_list.append(string.strip(tool_parms[last_i:]))
+        parms_list.append(tool_parms[last_i:].strip())
         self.parms = {}
         for parm_literal in parms_list:
             parm = OGRFeatureStyleParam(parm_literal)
@@ -237,7 +236,7 @@ class OGRFeatureStyle:
         if style is None:
             return
 
-        style = string.strip(style)
+        style = style.strip()
         if style == '':
             print 'empty style'
             return

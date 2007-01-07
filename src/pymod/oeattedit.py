@@ -27,7 +27,6 @@
 
 import gtk
 import gview
-import string           
 import gvselbrowser
 import gvutils
 from gvsignaler import *
@@ -225,12 +224,12 @@ class OEAttEdit(gtk.Window,Signaler):
 
         shape = shape.copy()
 
-        lines = string.split(self.text_buff.get_text(self.text_buff.get_bounds()),'\n')
+        lines = self.text_buff.get_text(self.text_buff.get_bounds()).split('\n')
         #lines = string.split(self.text.get_chars(0,-1),'\n')
         for line in lines:
-            tokens = string.split(line,':',1)
+            tokens = line.split(':',1)
             if len(tokens) == 2:
-                value = string.strip(tokens[1])
+                value = tokens[1].strip()
                 shape.set_property(tokens[0],value)
                 property_exists=0
                 for cprop in shapes.get_schema():

@@ -31,7 +31,6 @@ import gvutils
 import gvlut
 import os
 import os.path, sys
-import string
 import pgu
 import gdal
 from gvconst import *
@@ -1388,9 +1387,9 @@ class GvRecords(GvObject, _gv.Records):
             if schema[i][0] == field_name:
                 return i
 
-        field_name = string.lower(field_name)
+        field_name = field_name.lower()
         for i in range(len(schema)):
-            if string.lower(schema[i][0]) == field_name:
+            if schema[i][0].lower() == field_name:
                 return i
 
         return -1
@@ -1439,7 +1438,7 @@ class GvRecords(GvObject, _gv.Records):
             name = prop['_field_name_'+str(cur_field)]
 
             if fieldname is not None \
-               and string.lower(name) != string.lower(fieldname):
+               and name.lower() != fieldname.lower():
                 cur_field = cur_field + 1
                 key_name = '_field_name_' + str(cur_field)
                 continue
@@ -1790,7 +1789,7 @@ class GvShapes(GvData, _gv.Shapes):
             name = prop['_field_name_'+str(cur_field)]
 
             if fieldname is not None \
-               and string.lower(name) != string.lower(fieldname):
+               and name.lower() != fieldname.lower():
                 cur_field = cur_field + 1
                 key_name = '_field_name_' + str(cur_field)
                 continue
@@ -3064,10 +3063,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
             self.get_property("_scale_lock") == "locked" ) :
 
             if( self.get_property("_scale_limits") is not None ) : 
-                min, max = map \
-                ( string.atof, 
-                  string.split(self.get_property("_scale_limits"))
-                )
+                min, max = map(float, self.get_property("_scale_limits").split())
 
         #
         # Check for GvRasterLut default enhancement type set for
@@ -4062,10 +4058,10 @@ def load_preferences():
     file.close()
 
     for line in contents:
-        tokens = string.split(line, '=', 1)
+        tokens = line.split('=', 1)
         if len(tokens) == 2:
             name,value = tokens
-            set_preference( string.strip(name), string.strip(value) )
+            set_preference( name.strip(), value.strip() )
 
 def save_preferences():
     global app_preferences
