@@ -1660,10 +1660,8 @@ class PrefDialog(gtk.Window):
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
 
         color = gview.get_preference('legend-background-color', 
-                                     str(self.default_color))
-        tc = pgucolor.color_string_to_tuple( color ) 
-        cm = self.get_colormap()
-        cb = pgucolor.ColorButton(tc, colormap=cm)
+                                     self.default_color)
+        cb = pgucolor.ColorButton(color)
         cb.connect('color-set', self.set_color_preference,
                         'legend-background-color')
         table.attach(cb, 1, 2, 0, 1,
@@ -1678,9 +1676,7 @@ class PrefDialog(gtk.Window):
 
         color = gview.get_preference('legend-title-font-color',
                                      self.default_color)
-        tc = pgucolor.color_string_to_tuple( color ) 
-        cm = self.get_colormap()
-        cb = pgucolor.ColorButton(tc, colormap=cm)
+        cb = pgucolor.ColorButton(color)
         cb.connect('color-set', self.set_color_preference, 
                    'legend-title-font-color')
         table.attach(cb, 1, 2, 1, 2,
@@ -1720,9 +1716,7 @@ class PrefDialog(gtk.Window):
                         xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
         color = gview.get_preference('legend-label-font-color',
                                      self.default_color)
-        tc = pgucolor.color_string_to_tuple( color ) 
-        cm = self.get_colormap()
-        cb = pgucolor.ColorButton(tc, colormap=cm)
+        cb = pgucolor.ColorButton(color)
         cb.connect('color-set', self.set_color_preference, 
                    'legend-label-font-color')
         table.attach(cb, 1, 2, 2, 3,

@@ -456,8 +456,7 @@ class GvSymbolStyle(gtk.VBox, Signaler):
         #symbol color
         table.attach(gtk.Label('Color: '), 0, 1, 0, 1,
                 xoptions=SHRINK, yoptions=SHRINK)
-        self.symbol_color = pgucolor.ColorButton((0.5, 1.0, 0.5, 1.0),
-                colormap = self.get_colormap())
+        self.symbol_color = pgucolor.ColorButton((0.5, 1.0, 0.5, 1.0))
         self.symbol_color.connect('color-set', self.color_change)
         table.attach(self.symbol_color, 1, 2, 0, 1,
                 xoptions=SHRINK, yoptions=SHRINK)

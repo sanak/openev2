@@ -364,10 +364,9 @@ class GvClassificationDlg(gtk.Window, Signaler):
         into the gui
         """
         cls = self.classification
-        self.color_buttons.insert(class_id, ColorButton(cls.get_color(class_id), 
-            colormap=self.get_colormap()))
-        self.color_buttons[class_id].connect('color-set', 
-                                             self.color_button_cb, class_id)
+        cb = ColorButton(cls.get_color(class_id))
+        cb.connect('color-set', self.color_button_cb, class_id)
+        self.color_buttons.insert(class_id, cb)
         symbol = cls.get_symbol( class_id )
         if symbol is not None:
             sym_menu = pguMenuFactory(MENU_FACTORY_OPTION_MENU)
