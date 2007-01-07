@@ -266,7 +266,7 @@ class GViewApp(Signaler):
         gview.save_preferences()
 
         # Notify listeners of quit event
-        self.notify('quit')
+        Signaler.notify(self,'quit')
 
     def add_to_rfl(self, filename):
         # Don't add NUMPY arrays to file list.
@@ -284,7 +284,7 @@ class GViewApp(Signaler):
 
             next_value = rbl_value
 
-        self.notify('rfl-change')
+        Signaler.notify(self,'rfl-change')
 
     def get_rfl(self):
         list = []
@@ -1218,7 +1218,7 @@ class ViewManager(Signaler):
         if new_view is not None and new_view.window is not None:
             new_view.window.raise_()
 
-        self.notify('active-view-changed')
+        Signaler.notify(self,'active-view-changed')
 
         if self.layerdlg is not None and new_view is not None:
             self.layerdlg.view_selected( None, new_view.title )
