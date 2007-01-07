@@ -27,9 +27,6 @@
 
 import gtk
 import gview
-import gvselbrowser
-import pgucolorsel
-import gvutils
 import gvogrfs
 import gvogrfsgui
 import pgufont

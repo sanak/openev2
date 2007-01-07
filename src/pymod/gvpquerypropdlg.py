@@ -26,8 +26,6 @@
 
 import gtk
 
-from gvconst import *
-import gview
 import gvvectorpropdlg
 import gvutils
 import pgucolorsel

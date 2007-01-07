@@ -29,7 +29,7 @@ import gtk
 import gview
 import gvselbrowser
 import gvutils
-from gvsignaler import *
+from gvsignaler import Signaler
 
 def launch():
     try:

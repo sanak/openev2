@@ -24,7 +24,7 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk; _gtk = gtk; del gtk
+import gtk as _gtk
 import os.path
 
 simple_file_sel = None

@@ -29,11 +29,7 @@ MAX_COLOR = 65535
 
 
 import gtk
-from gtk.gdk import *
-from gtk.keysyms import *
 from gvsignaler import Signaler
-import _gv
-from gtkmissing import GtkColorWell
 
 def color_string_to_tuple(s):
     s = s.replace('(', '')

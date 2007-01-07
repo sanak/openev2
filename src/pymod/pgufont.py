@@ -27,8 +27,6 @@
 
 import gtk
 import pango
-import gview
-import sys
 import gdal
 
 """

@@ -28,13 +28,10 @@
 import gtk
 from gtk import SHRINK
 from gvsignaler import *
-import gvutils
 import gview
 import pgu
-import sys
 import pgucolorsel
 import pgufont
-#import pgucombo
 import pgucolor
 import pgumenu
 import gvogrfs

@@ -30,8 +30,6 @@ import gvclassification
 from gvogrfs import gv_to_ogr_color
 from pgucolor import color_string_to_tuple
 import pgufont
-import sys
-import gdal
 
 legend_dialogs = []
 

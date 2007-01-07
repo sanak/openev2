@@ -24,13 +24,13 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk; _gtk = gtk; del gtk
+import gtk as _gtk
 #import _gtkmissing PENDING  GTK2 PORT
 import _gv
 import gvutils
 import gvlut
 import os
-import os.path, sys
+import sys
 import pgu
 import gdal
 from gvconst import *
@@ -3487,11 +3487,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
     def log( self, viewonly = 0 ):
 
-        import math
+        from math import log
 
         lut = ''
         for i in range(256):
-            value = int((255 * (math.log(1.0+i) / math.log(256.0)))+0.5)
+            value = int((255 * (log(1.0+i) / log(256.0)))+0.5)
             if value < 0 :
                 value = 0
             elif value >= 255:
@@ -3508,11 +3508,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
     def root( self, viewonly = 0 ):
 
-        import math
+        from math import sqrt
 
         lut = ''
         for i in range(256):
-            value = 255 * math.sqrt(i/255.0)
+            value = 255 * sqrt(i/255.0)
             if value < 0 :
                 value = 0
             elif value >= 255:
@@ -3530,11 +3530,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
     def square( self, viewonly = 0 ):
 
-        import math
+        from math import pow
 
         lut = ''
         for i in range(256):
-            value = 255 * math.pow(i/255.0,2.0)
+            value = 255 * pow(i/255.0,2.0)
             if value < 0 :
                 value = 0
             elif value >= 255:

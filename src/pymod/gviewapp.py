@@ -35,21 +35,15 @@ from gtk.keysyms import *
 #import gtkmissing
 import sys
 import gview
-import gvconst
 import layerdlg
 #import gvenhdlg
 import gdal
 import gvutils
 import os
-import os.path
 import pgufilesel
-import pguprogress
-import math
 import gvviewwindow
 import gvhtml
 import gvselbrowser
-import sys
-import traceback
 
 import pgufont
 default_font = pgufont.XLFDFontSpec()

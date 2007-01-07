@@ -25,8 +25,6 @@
 ###############################################################################
 
 import gtk
-
-from gvconst import *
 import gview
 import gvutils
 import gdal

@@ -26,11 +26,10 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk; _gtk = gtk; del gtk
+import gtk as _gtk
 from gtk.gdk import *
 import pgu
 import os
-import sys
 import pgufilesel
 
 def is_of_class(class_obj,class_name):
@@ -382,7 +381,6 @@ def get_tempdir():
     return tmpdir
 
 def tempnam( tdir = None, basename = None, extension = None ):
-    import os.path
     import gview
 
     if tdir is None:
@@ -416,7 +414,6 @@ def FindExecutable( exe_name ):
     Will add .exe on NT.  Returns None on failure.
     """
 
-    import os.path
     import gview
 
     if os.name == 'nt':
@@ -715,7 +712,6 @@ def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, 
     # path should end with the attribute to be replaced.  attr and value, if entered, should be
     # at the same level as the attribute to be replaced.
     import gdal
-    import os.path
 
     if overwrite == 'n':
         import copy

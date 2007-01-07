@@ -26,10 +26,9 @@
 ###############################################################################
 
 import gtk
-import gview, gdal, gdalconst, layerdlg, gvutils
+import gview, gdal, gvutils
 import os
 import gviewapp
-import pgufilesel
 import gvhtml
 import vrtutils
 import pguprogress
@@ -416,7 +415,7 @@ class GDALTool(gviewapp.Tool_GViewApp):
 
         use_viewscale=0
 
-        rast = gdal.OpenShared(ipfile, gdalconst.GA_ReadOnly)
+        rast = gdal.OpenShared(ipfile, gdal.GA_ReadOnly)
         if rast is None:
             if len(ipfile) == 0:
                 gvutils.error('Please specify an input file!')

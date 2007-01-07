@@ -29,7 +29,6 @@ import gtk
 import gview
 import pgugrid
 import gvutils
-import Numeric
 
 class ShapesGridTool(gviewapp.Tool_GViewApp):
 

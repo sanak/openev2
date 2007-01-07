@@ -25,7 +25,6 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gview
 import sys
 
 def gv_to_ogr_color( rgba ):

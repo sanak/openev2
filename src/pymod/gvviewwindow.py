@@ -28,12 +28,8 @@
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *
-import gtkmissing
-import sys
 
 import gview
-import gvconst
-import layerdlg
 import gdal
 from gdalconst import *
 import gvutils
@@ -51,7 +47,6 @@ ratio_list = ['250:1', '200:1', '150:1', '100:1', '80:1', '60:1', '45:1',
               '1:20', '1:25', '1:30', '1:40', '1:60', '1:80', '1:100',]
 
 def GvViewWindowFromXML( node, parent, filename=None ):
-    import gdal
     instance = \
       GvViewWindow( app = parent, 
         title = gvutils.XMLFindValue( node, "title", '' ),
@@ -826,8 +821,8 @@ class GvViewWindow(gtk.Window):
                 raster_layer.set_source(1, intensity_raster)
             else:
                 intensity = 255
-                if md.has_key(gvconst.GV_PSCI_INTENSITY):
-                    intensity = float(md.get(gvconst.GV_PSCI_INTENSITY))
+                if md.has_key(gview.GV_PSCI_INTENSITY):
+                    intensity = float(md.get(gview.GV_PSCI_INTENSITY))
                 raster_layer.set_source(1, None, const_value=intensity)
 
         # Lots of logic to handle RGB and RGBA Layers
@@ -1607,7 +1602,7 @@ class GvViewWindow(gtk.Window):
                 options.append(('raw','yes'))
 
             # Set Current View to 3D Mode
-            view.set_mode(gvconst.MODE_3D)
+            view.set_mode(gview.MODE_3D)
             # view.height_scale(hscale)
             options.append(('mesh_lod',str(mesh_lod)))
 

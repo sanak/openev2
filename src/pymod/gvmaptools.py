@@ -31,7 +31,6 @@
 
 import gview
 import Numeric
-import gtk
 import os
 import gvogrfs
 

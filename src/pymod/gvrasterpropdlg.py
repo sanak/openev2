@@ -29,7 +29,6 @@ import gtk
 from string import *
 import gvutils
 import pgucolorsel
-import sys
 import gdal
 import osr
 import gvhtml
