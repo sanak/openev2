@@ -32,12 +32,26 @@ import gtk
 from gvsignaler import Signaler
 
 def color_string_to_tuple(s):
-    s = s.replace('(', '')
-    s = s.replace(')', '')
-    s = s.replace(',', '')
-    r, g, b, a = s.split()
-    return (float(r), float(g), float(b), float(a))
+    """Convert a string to a color tuple"""
+    if isinstance(s, tuple): # CIETmap requirement
+        return
+    if s.startswith('('): # assume this is '(r,g,b,a)' (or '(r g b a)')
+        s = s[1:-1]
+    sep = None
+    if ',' in s: # in case this is a space separated variant
+        sep = ','
+    rgba = s.split(sep)
+    return tuple([float(c) for c in rgba])
 
+def color_tuple_to_gdk(color):
+    """Convert a gv color tuple to a gtk.gdk.Color"""
+    r,g,b,a = color
+    return gtk.gdk.Color(int(r*MAX_COLOR), int(g*MAX_COLOR), int(b*MAX_COLOR))
+
+def gdk_to_gv_color(gdk_color, alpha):
+    """Convert a gtk.gdk.Color and alpha to a gv color tuple"""
+    maxc = float(MAX_COLOR)
+    return (gdk_color.red/maxc, gdk_color.green/maxc, gdk_color.blue/maxc, alpha/maxc)
 
 class ColorSwatch(gtk.DrawingArea, Signaler):
     """
@@ -49,8 +63,8 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
     for red, green and blue.  The color display doesn't support
     the alpha channel (yet?)
 
-    Don't use GdkColor(red, green, blue) to allocate colors ... use
-    GdkColormap.alloc instead and get a reference to the GdkColormap
+    Don't use gtk.gdk.Color(red, green, blue) to allocate colors ... use
+    gtk.gdk.Colormap.alloc_color instead and get a reference to the Colormap
     from the widget (self.get_colormap())
     """
     def __init__(self, color=(0,0,0,0)):
@@ -63,9 +77,7 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
         self.color = color
         #the color - use GdkColorMap's alloc method to get it
         cm = self.get_colormap()
-        self.icolor = cm.alloc_color(int(color[0] * MAX_COLOR), \
-                               int(color[1] * MAX_COLOR), \
-                               int(color[2] * MAX_COLOR))
+        self.icolor = cm.alloc_color(color_tuple_to_gdk(color))
         self.publish('color-changed')
         #cached graphics context
         self.gc = None
@@ -84,7 +96,7 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
     def expose_event(self, *args):
         #get the window and graphic context
         win = self.window
-        w,h = win.get_size()
+        w,h = self.size_request()
         win.draw_rectangle(self.get_style().black_gc, False, 0, 0, w-1, h-1)
         win.draw_rectangle(self.gc, True, 1, 1, w-2, h-2)
         return False
@@ -93,8 +105,7 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
         self.color = color
         #the color - use GdkColorMap's alloc method to get it
         cm = self.get_colormap()
-        self.icolor = cm.alloc(int(color[0] * MAX_COLOR), int(color[1] * MAX_COLOR),
-                               int(color[2] * MAX_COLOR))
+        self.icolor = cm.alloc_color(color_tuple_to_gdk(color))
         if self.gc is not None:
             self.gc.foreground = self.icolor
         self.queue_draw()
@@ -103,42 +114,37 @@ class ColorSwatch(gtk.DrawingArea, Signaler):
     def get_color(self):
         return self.color
 
-
 class ColorButton(gtk.ColorButton):
     """
     Class ColorButton extends gtk.ColorButton
     """
 
-    def __init__(self, color=(0,0,0,0), title='', use_alpha=True, continuous=False, _obj=None, colormap=None):
+    def __init__(self, color=(0,0,0,0), title="Select a Color", use_alpha=True,
+                    continuous=False, _obj=None, colormap=None):
         if colormap is None:
-            raise ValueError, "Must provide a colormap"
+            pass # colormap no longer required
         gtk.ColorButton.__init__(self)
 
-        self.colormap = colormap
         self.set_color(color)
         self.set_title(title)
-        self.set_use_alpha( use_alpha )
+        self.set_use_alpha(use_alpha)
+
     def get_color(self):
-        gtkcolor = gtk.ColorButton.get_color(self)
-        trans = lambda x: float(x)/MAX_COLOR
-        a = self.get_alpha()
-        r,g,b = gtkcolor.red, gtkcolor.green, gtkcolor.blue
-        pre = (r,g,b)
-        color = tuple([trans(x) for x in pre])
-        return color + (a,)
+        """overriden to return color tuple"""
+        gdkcolor = gtk.ColorButton.get_color(self)
+        alpha = self.get_alpha()
+        return gdk_to_gv_color(gdkcolor, alpha)
+
     def set_color(self, color):
-        assert isinstance(color,tuple)
-        gtkcolor = self.colormap.alloc_color(int(color[0]*MAX_COLOR), 
-                int(color[1]*MAX_COLOR), int(color[2]*MAX_COLOR))
-        gtk.ColorButton.set_color(self, gtkcolor)
-        self.set_alpha(color[-1])
-    def get_alpha(self):
-        return float(gtk.ColorButton.get_alpha(self))/MAX_COLOR
-    def set_alpha(self, alpha):
-        gtk.ColorButton.set_alpha(self, int(alpha*MAX_COLOR))
+        """overriden to set a color tuple"""
+        if isinstance(color, str): # CIETmap requirement
+            color = color_string_to_tuple(color)
+
+        gtk.ColorButton.set_color(self, color_tuple_to_gdk(color))
+        self.set_alpha(int(color[3]*MAX_COLOR))
+
     set_d = set_color
     get_d = get_color
-
 
 class ColorDialog(gtk.Window):
     """used with a ColorButton when it is clicked"""
