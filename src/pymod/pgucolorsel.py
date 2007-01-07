@@ -26,21 +26,15 @@
 
 import gtk
 import pgu
-from pgucolourswatch import ColourSwatch
-
+import pgucolor
 
 class ColorControl(gtk.HBox):
-
     """Embeddable Color Selector Control
 
     The pgucolorsel.ColorControl widget is intended to provide a simple
     color selection widget that can be embedded in dialogs and that will
     launch a fill gtk.ColorSelectionDialog if the user doesn't select one of
     the list of predefined colors.
-
-    At this time the ColorControl's main widgetry is just an option menu, but
-    it is expected in the future to also include some sort of color swatch
-    showing the currently selected color graphically.
 
     The application supplies a single callback which is involved when the
     selected color changes.  All colors are handled as RGBA tuples, with the
@@ -65,93 +59,32 @@ class ColorControl(gtk.HBox):
         print color[0], color[1], color[2], color[3]
     """
 
-    color_list = [ ('Red',         (  1,   0,   0,   1)),
-                   ('Green',       (  0,   1,   0,   1)),
-                   ('Blue',        (  0,   0,   1,   1)),
-                   ('White',       (  1,   1,   1,   1)),
-                   ('Black',       (  0,   0,   0,   1)),
-                   ('Transparent', (  0,   0,   0,   0))]
+    color_list = { "Red": (1, 0, 0, 1),
+                   "Green": (0, 1, 0, 1),
+                   "Blue": (0, 0, 1, 1),
+                   "White": (1, 1, 1, 1),
+                   "Black": (0, 0, 0, 1),
+                   "Transparent": (0, 0, 0, 0),
+                   "Custom": (0, 0, 0, 0)
+                    }
 
-    def __init__(self, title, callback = None, cb_data = None):
-        gtk.HBox.__init__(self)
+    def __init__(self, title, callback=None, cb_data=None):
+        gtk.HBox.__init__(self, spacing=2)
 
         self.callback = callback
         self.cb_data = cb_data
         self.current_color = (1,0,0,1)
-        self.mixer = None
-        self.title = title
 
-        self.swatch = ColourSwatch(self.current_color)
+        but = pgucolor.ColorButton(color=self.current_color, title=title)
+        but.connect('color-set', self.set_color_cb)
+        self.pack_start(but, expand=False)
+        self.cbut = but
 
-        self.om = gtk.OptionMenu()
-
-        menu = gtk.Menu()
-        self.om.set_menu(menu)
-
-        item = None
-        for cinfo in self.color_list:
-            name, value = cinfo
-            item = gtk.RadioMenuItem(item,name)
-            item.connect('activate', self.set_color_cb, value)
-            item.show()
-            menu.append(item)
-
-        item = gtk.RadioMenuItem(item,'Custom')
-        item.connect('activate', self.launch_mixer_cb)
-        item.show()
-        menu.append(item)
-
-        item = gtk.RadioMenuItem(item,'Mixer')
-        item.connect('activate', self.launch_mixer_cb)
-        item.show()
-        menu.append(item)
-
-        self.om.set_history(0)
-
-        self.pack_start(self.swatch, expand=False)
-        self.pack_start(self.om)
-
-    def launch_mixer_cb(self,item):
-        if not item.get_active():
-            return
-
-        cm = self.get_colormap()
-        icolor = cm.alloc_color(int(self.current_color[0] * 65535),
-                                int(self.current_color[1] * 65535),
-                                int(self.current_color[2] * 65535))
-
-        if self.mixer is not None and self.mixer.window is not None:
-            self.mixer.colorsel.set_current_color(icolor)
-            self.mixer.colorsel.set_current_alpha(self.current_color[3] * 65535)
-            self.mixer.window.raise_()
-            return
-
-        self.mixer = gtk.ColorSelectionDialog(self.title)
-        self.mixer.connect('delete-event',self.mixer_delete)
-        self.mixer.colorsel.set_has_opacity_control(True)
-        self.mixer.colorsel.set_current_alpha(self.current_color[3] * 65535)
-        self.mixer.colorsel.set_current_color(icolor)
-        self.mixer.ok_button.connect('clicked',self.mixer_ok_cb )
-        self.mixer.ok_button.set_label('Apply')
-        self.mixer.cancel_button.connect('clicked',self.mixer_cancel )
-        self.mixer.cancel_button.set_label('Close')
-        self.mixer.help_button.hide()
-        self.mixer.show()
-        self.update_om()
-
-    def mixer_delete(self, widget, args):
-        self.mixer = None
-
-    def mixer_cancel(self, args):
-        self.mixer.hide()
-        self.mixer.destroy()
-        self.mixer = None
-
-    def mixer_ok_cb(self, args):
-        rgb = self.mixer.colorsel.get_current_color()
-        alpha = self.mixer.colorsel.get_current_alpha()
-        self.set_color((rgb.red / 65535.0, rgb.green / 65535.0,
-                        rgb.blue / 65535.0, alpha / 65535.0))
+        combo = pgu.ComboText(strings=self.color_list.keys(), action=self.set_color_cb)
+        self.pack_end(combo)
+        self.colorsCB = combo
+        self.show_all()
+        self.updating = False
 
     def set_color(self, new_color):
         if len(new_color) == 3:
@@ -168,19 +101,8 @@ class ColorControl(gtk.HBox):
             return
 
         self.current_color = new_color
-        self.swatch.set_colour(self.current_color)
-        self.invoke_callback()
-        self.update_om()
-
-    def update_om(self):
-        for ci_index in range(len(self.color_list)):
-            name, value = self.color_list[ci_index]
-            if value == self.current_color:
-                self.om.set_history(ci_index)
-                return
-
-        # Mark as custom
-        self.om.set_history(len(self.color_list))
+        self.colorsCB.set_active_text("Custom")
+        self.cbut.set_color(new_color)
 
     def set_color_from_string(self, new_color):
         if new_color is None:
@@ -192,11 +114,27 @@ class ColorControl(gtk.HBox):
     def invoke_callback(self):
         if self.callback == None:
             return
-        self.callback( self.current_color, self.cb_data )
+        self.callback(self.current_color, self.cb_data)
 
-    def set_color_cb(self, item, color):
-        if item.get_active():
-            self.set_color( color )
+    def set_color_cb(self, widget):
+        if self.updating:
+            return
+
+        if widget == self.cbut:
+            color = self.cbut.get_color()
+            self.updating = True
+            self.colorsCB.set_active_text("Custom")
+            self.updating = False
+            self.color_list["Custom"] = self.current_color = color
+            self.invoke_callback()
+        else:
+            color_name = widget.get_active_text()
+            color = self.color_list[color_name]
+            self.current_color = color
+            self.updating = True
+            self.cbut.set_color(color)
+            self.updating = False
+            self.invoke_callback()
 
 pgu.gtk_register('ColorControl',ColorControl)
 
