@@ -2161,8 +2161,8 @@ gv_raster_layer_view_extents( GvRasterLayer *rlayer,
         dx = x; dy = y;
         if( gv_raster_layer_view_to_pixel( rlayer, &dx, &dy, NULL ) )
         {
-            GROW_RANGE(((int) dx), *xoff, *xsize );
-            GROW_RANGE(((int) dy), *yoff, *ysize );
+            GROW_RANGE(dx, *xoff, *xsize );
+            GROW_RANGE(dy, *yoff, *ysize );
         }
 
         /* lower right */
@@ -2173,8 +2173,8 @@ gv_raster_layer_view_extents( GvRasterLayer *rlayer,
         dx = x; dy = y;
         if( gv_raster_layer_view_to_pixel( rlayer, &dx, &dy, NULL ) )
         {
-            GROW_RANGE(((int) dx), *xoff, *xsize );
-            GROW_RANGE(((int) dy), *yoff, *ysize );
+            GROW_RANGE(dx, *xoff, *xsize );
+            GROW_RANGE(dy, *yoff, *ysize );
         }
 
         /* lower left */
@@ -2183,8 +2183,8 @@ gv_raster_layer_view_extents( GvRasterLayer *rlayer,
         dx = x; dy = y;
         if( gv_raster_layer_view_to_pixel( rlayer, &dx, &dy, NULL ) )
         {
-            GROW_RANGE(((int) dx), *xoff, *xsize );
-            GROW_RANGE(((int) dy), *yoff, *ysize );
+            GROW_RANGE(dx, *xoff, *xsize );
+            GROW_RANGE(dy, *yoff, *ysize );
         }
 
         if( *xoff + *xsize > raster->width )
