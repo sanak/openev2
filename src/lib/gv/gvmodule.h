@@ -69,6 +69,11 @@ PyObject *gv_shape_clip_to_rect(PyObject *self, PyObject *args);
 PyObject *gv_shape_add_shape(PyObject *self, PyObject *args);
 PyObject *gv_shape_get_shape(PyObject *self, PyObject *args);
 PyObject *gv_shape_collection_get_count(PyObject *self, PyObject *args);
+PyObject *gv_records_get_properties(PyGObject *self, PyObject *args);
+PyObject *gv_records_get_typed_properties(PyGObject *self, PyObject *args);
+PyObject *gv_records_as_dict(PyGObject *self, PyObject *args);
+PyObject *gv_records_MultiStratifiedCollect(PyGObject *self, PyObject *args);
+PyObject *gv_records_recode(PyGObject *self, PyObject *args);
 
 G_END_DECLS
 

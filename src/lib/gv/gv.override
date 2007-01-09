@@ -43,6 +43,7 @@ headers
 #include "gv-enum-types.h"
 #include "gv_override.h"
 #include "invdistance.h"
+#include "gv_ciet.h"
 
 %%
 modulename _gv
@@ -2045,24 +2046,28 @@ override gv_records_get_typed_properties
 static PyObject *
 _wrap_gv_records_get_typed_properties(PyGObject *self, PyObject *args)
 {
-    int       shp_index = -1, iField, ii;
+    PyGObject *py_records;
+    int       rec_index = -1, iField, ii;
     GvRecords *records;
     const char *pachRecData;
     PyObject *psDict = NULL;
 
-    if (!PyArg_ParseTuple(args, "i:gv_records_get_typed_properties",
-                          &shp_index)) {
+    if (!PyArg_ParseTuple(args, "O!i:gv_records_get_typed_properties",
+                          &PyGvRecords_Type, &py_records,
+                          &rec_index)) {
         return NULL;
     }
 
-    if(!GV_IS_RECORDS(self->obj)) return NULL;
-    records = GV_RECORDS(self->obj);
+    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
+        return NULL;
 
-    if( shp_index < 0 || shp_index >= records->nRecordCount )
+    records = GV_RECORDS(PyGtk_Get(py_records));
+
+    if( rec_index < 0 || rec_index >= records->nRecordCount )
         return NULL;
 
     psDict = PyDict_New();
-    pachRecData = gv_records_get_raw_record_data( records, shp_index );
+    pachRecData = gv_records_get_raw_record_data( records, rec_index );
     for( ii = 0; ii < records->nUsedFieldCount; ii++ )
     {
         PyObject *py_name, *py_value;
@@ -2099,23 +2104,27 @@ override gv_records_get_properties
 static PyObject *
 _wrap_gv_records_get_properties(PyGObject *self, PyObject *args)
 {
-    int       shp_index = -1, iField;
-    GvRecords *records;
+    PyGObject *py_records;
+    int       rec_index = -1, iField;
     const char *pachRecData;
     PyObject *psDict = NULL;
+    GvRecords *records;
 
-    if (!PyArg_ParseTuple(args, "i:gv_records_get_properties",
-                          &shp_index) )
+    if (!PyArg_ParseTuple(args, "O!i:gv_records_get_properties",
+                          &PyGvRecords_Type, &py_records,
+                          &rec_index) )
         return NULL;
 
-    if(!GV_IS_RECORDS(self->obj)) return NULL;
-    records = GV_RECORDS(self->obj);
+    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
+        return NULL;
 
-    if( shp_index < 0 || shp_index >= records->nRecordCount )
+    records = GV_RECORDS(PyGtk_Get(py_records));
+
+    if( rec_index < 0 || rec_index >= records->nRecordCount )
         return NULL;
 
     psDict = PyDict_New();
-    pachRecData = gv_records_get_raw_record_data( records, shp_index );
+    pachRecData = gv_records_get_raw_record_data( records, rec_index );
     for( iField = 0; iField < records->nFieldCount; iField++ )
     {
         PyObject *py_name, *py_value;
@@ -2123,7 +2132,7 @@ _wrap_gv_records_get_properties(PyGObject *self, PyObject *args)
 
         value = pachRecData + records->panFieldOffset[iField];
         if( *value == GV_NULL_MARKER )
-            continue;
+            value = "";
 
         py_value = Py_BuildValue("s",value);
         py_name = Py_BuildValue("s",records->papszFieldName[iField]);
@@ -2180,6 +2189,666 @@ _wrap_gv_records_to_dbf(PyGObject *self, PyObject *args)
     g_free( panSelectionList );
     
     return Py_BuildValue("i", result );
+}
+%%
+override gv_records_as_dict
+static PyObject *
+_wrap_gv_records_as_dict(PyGObject *self, PyObject *args)
+{
+    PyGObject *py_records;
+    PyObject  *py_fields, *py_data_selection;
+    GvRecords *records;
+    int       i, j, nRecordCount, nFields, *panFields;
+    int       *panSelectionList = NULL;
+    PyObject *py_dict = NULL, *py_list = NULL;
+    char ** paszFieldNames;
+
+    if (!PyArg_ParseTuple(args, "O!O!O!:gv_records_as_dict",
+                          &PyGvRecords_Type, &py_records,
+                          &PyList_Type, &py_fields,
+                          &PyList_Type, &py_data_selection ) )
+        return NULL;
+
+    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
+        return NULL;
+
+    records = GV_RECORDS(PyGtk_Get(py_records));
+
+    nFields = PyList_Size(py_fields);
+    paszFieldNames = (char **) g_new( char *, nFields+1 );
+    panFields = g_new( int, nFields );
+    for( i = 0; i < nFields; i++ )
+    {
+        PyArg_Parse( PyList_GET_ITEM(py_fields,i), "s", &paszFieldNames[i] );
+        panFields[i] = -1;
+        for( j = 0; j < records->nFieldCount; j++ )
+        {
+            if( EQUAL(paszFieldNames[i],records->papszFieldName[j]) )
+                panFields[i] = j;
+        }
+        if( panFields[i] == -1)
+        {
+            PyErr_SetString( PyExc_ValueError, "ASDICT variable not recognised." );
+            return NULL;
+        }
+    }
+
+    /*
+    ** Build up the "selection" list.
+    */
+    nRecordCount = PyList_Size( py_data_selection );
+    if( nRecordCount != 0 )
+        panSelectionList = g_new( int, nRecordCount );
+
+    for( i = 0; i < nRecordCount; i++ )
+    {
+        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
+                          panSelectionList + i ) )
+        {
+            PyErr_SetString(PyExc_ValueError,
+                            "problem extracting selection item.");
+            return NULL;
+        }
+    }
+
+    py_dict = PyDict_New();
+    for( i = 0; i < nFields; i++ )
+    {
+        PyDict_SetItem( py_dict, PyString_FromString(paszFieldNames[i]), PyList_New( nRecordCount ) );
+    }
+
+    /*
+     ** Process records 
+     */
+
+    for( i = 0; i < nRecordCount; i++ )
+    {
+        int rec_index = panSelectionList[i];
+        for( j = 0; j < nFields; j++ )
+        {
+            const char *pszRawFieldValue = 
+                gv_records_get_raw_field_data( records, rec_index, panFields[j] );
+
+            py_list = PyDict_GetItem( py_dict, PyString_FromString(paszFieldNames[j]) );
+            
+            if( pszRawFieldValue == NULL )
+            {
+                PyList_SetItem( py_list, rec_index, Py_None );
+            }
+            else
+            {
+                switch( records->panFieldType[panFields[j]] )
+                {
+                    case GV_RFT_INTEGER:
+                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "i", atoi(pszRawFieldValue) ));
+                        break;
+                    case GV_RFT_FLOAT:
+                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "d", atof(pszRawFieldValue) ));
+                        break;
+                    default:
+                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "s", pszRawFieldValue));
+                }
+            }
+            //PyDict_SetItem( py_dict, PyString_FromString(paszFieldNames[j]), py_list );
+        }
+    }
+
+    g_free( panFields );
+    g_free( paszFieldNames );
+    g_free( panSelectionList );
+
+    return py_dict;
+}
+%%
+override gv_records_MultiStratifiedCollect
+static PyObject *
+_wrap_gv_records_MultiStratifiedCollect(PyGObject *self, PyObject *args)
+{
+    PyGObject *py_records;
+    PyObject *py_data_selection, *py_strat_vars;
+    PyObject *pyResultTree, *result;
+    PyObject *v1_keys=Py_None, *v2_keys=Py_None;
+    char     *var1 = NULL, *var2 = NULL;
+    GvRecords *records;
+    int       nSelectionCount, *panSelectionList = NULL, i;
+    int       nVarCount, iVar, bCancelled = FALSE;
+    StratVarInfo *pasVarInfo;
+    StratNode *psRoot = NULL;
+    double    *padfRecValues;
+    PyProgressData sProgressInfo;
+
+    sProgressInfo.psPyCallback = NULL;
+    sProgressInfo.psPyCallbackData = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!O!ssO!OO:gv_records_MultiStratifiedCollect",
+                          &PyGvRecords_Type, &py_records,
+                          &PyList_Type, &py_data_selection,
+                          &var1, &var2, 
+                          &PyList_Type, &py_strat_vars,
+                          &(sProgressInfo.psPyCallback),
+                          &(sProgressInfo.psPyCallbackData) ) )
+        return NULL;
+
+    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
+        return NULL;
+
+    records = GV_RECORDS(PyGtk_Get(py_records));
+
+    /* 
+    ** Initialize progress.
+    */
+    if( !PyProgressProxy( 0.0, "", &sProgressInfo ) )
+        return FALSE;
+
+    /*
+    ** Build up the "selection" list.
+    */
+    nSelectionCount = PyList_Size(py_data_selection);
+    if( nSelectionCount != 0 )
+        panSelectionList = g_new( int, nSelectionCount );
+
+    for( i = 0; i < nSelectionCount; i++ )
+    {
+        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
+                          panSelectionList + i ) )
+        {
+            PyErr_SetString(PyExc_ValueError,
+                            "problem extracting selection item.");
+            return NULL;
+        }
+    }
+
+    /*
+    ** Build the variable list.  Var2 is manditory, var1 is optional. 
+    */
+    nVarCount = PyList_Size( py_strat_vars ) + 1;
+    if( var1 != NULL && strlen(var1) > 0 )
+        nVarCount++;
+
+    pasVarInfo = (StratVarInfo *) VSICalloc(sizeof(StratVarInfo),nVarCount);
+    padfRecValues = (double *) VSICalloc(sizeof(double),nVarCount);
+
+    for( iVar = 0; iVar < nVarCount; iVar++ )
+    {
+        const char *pszVarName = NULL;
+        int iField;
+
+        if( iVar < nVarCount-2 )
+        {
+            if( !PyArg_Parse( PyList_GET_ITEM(py_strat_vars,iVar), "s",
+                              &pszVarName ) )
+            {
+                PyErr_SetString(PyExc_ValueError,
+                                "expecting variable name in strat_vars.");
+                return NULL;
+            }
+        }
+        else if( iVar == nVarCount - 2 )
+        {
+            pszVarName = var1;
+        }
+        else if( iVar == nVarCount - 1 )
+        {
+            pszVarName = var2;
+            pasVarInfo[iVar].bLastVar = TRUE;
+        }
+
+        for( iField = 0; iField < records->nFieldCount; iField++ )
+        {
+            if( EQUAL(pszVarName,records->papszFieldName[iField]) )
+            {
+                pasVarInfo[iVar].nFieldIndex = iField;
+                pasVarInfo[iVar].bIsInteger = 
+                    records->panFieldType[iField] == GV_RFT_INTEGER;
+                break;
+            }
+        }
+
+        if( iField == records->nFieldCount )
+        {
+            PyErr_SetString(PyExc_ValueError,
+                            "unrecognised field name.");
+            return NULL;
+        }
+    }
+
+    /*
+    ** Allocate a root node for the data collection "tree".
+    */
+
+    psRoot = (StratNode *) CPLCalloc(sizeof(StratNode),1);
+
+    /*
+    ** Process all records.
+    */
+    
+    for( i = 0; i < nSelectionCount && !bCancelled; i++ )
+    {
+        int rec_index = panSelectionList[i];
+        StratNode *psNode = psRoot;
+
+        for( iVar = 0; iVar < nVarCount; iVar++ )
+        {
+            const char *pszRawFieldValue 
+                = gv_records_get_raw_field_data( records, rec_index, 
+                                                 pasVarInfo[iVar].nFieldIndex);
+            if( pszRawFieldValue == NULL )
+                break;
+            
+            if( pasVarInfo[iVar].bIsInteger )
+                padfRecValues[iVar] = atoi(pszRawFieldValue);
+            else
+                padfRecValues[iVar] = atof(pszRawFieldValue);
+        }
+
+        if( i % 100 == 0 )
+        {
+            if( !PyProgressProxy( i / (double) nSelectionCount, 
+                                  "", &sProgressInfo ) )
+                bCancelled = TRUE;
+        }
+
+        /* skip records with nulls in a used variable. */
+        if( iVar < nVarCount )
+            continue;
+
+        for( iVar = 0; iVar < nVarCount; iVar++ )
+        {
+            psNode = StratNodeAdd( psNode, pasVarInfo + iVar, 
+                                   padfRecValues[iVar] );
+        }
+    }
+
+    CPLFree( padfRecValues );
+    g_free(panSelectionList);
+
+    if( !bCancelled )
+        PyProgressProxy( 1.0, "", &sProgressInfo );
+
+    /*
+    ** Unsort the values list in the StratVarInfo's so that our indexes can
+    ** be used easily to get back to the variable values. 
+    */
+    for( iVar = 0; iVar < nVarCount; iVar++ )
+    {
+        StratVarInfo  *psVar = pasVarInfo + iVar;
+        int           iValue;
+        double        *padfNewValueList;
+
+        padfNewValueList = (double *) 
+            CPLMalloc(sizeof(double) * psVar->nValueCount);
+        
+        for( iValue = 0; iValue < psVar->nValueCount; iValue++ )
+        {
+            padfNewValueList[psVar->panValueIndex[iValue]] = 
+                psVar->padfValueList[iValue];
+        }
+        CPLFree( psVar->padfValueList );
+        psVar->padfValueList = padfNewValueList;
+
+        CPLFree( psVar->panValueIndex );
+        psVar->panValueIndex = NULL;
+    }
+
+    /*
+    ** Create Python string representations of the values for use in the
+    ** final results dictionary.
+    */
+    for( iVar = 0; iVar < nVarCount; iVar++ )
+    {
+        StratVarInfo *psVar = pasVarInfo + iVar;
+        int           iValue;
+
+        psVar->papyValueList = (PyObject **) 
+            CPLMalloc(sizeof(PyObject *) * psVar->nValueCount);
+
+        for( iValue = 0; iValue < psVar->nValueCount; iValue++ )
+        {
+            if( psVar->bIsInteger )
+            {
+                psVar->papyValueList[iValue] = 
+                    Py_BuildValue( "i", (int) psVar->padfValueList[iValue] );
+            }
+            else
+            {
+                psVar->papyValueList[iValue] = 
+                    Py_BuildValue( "d", psVar->padfValueList[iValue] );
+            }
+        }
+    }
+
+    /*
+    ** Marshall the results into a tree of dictionaries.  Wipe tree as
+    ** part of the process.
+    */
+    
+    pyResultTree = StratTreeToDict( psRoot, pasVarInfo );
+    if( pyResultTree == NULL )
+    {
+        pyResultTree = Py_None;
+        Py_INCREF( Py_None );
+    }
+
+    /*
+    ** Create v1/v2_keys ... a dictionary with one entry for each value of 
+    ** var1/var2 that occurs in the data.
+    */
+
+    for( iVar = nVarCount-1; iVar >= nVarCount-2 && iVar >= 0; iVar-- )
+    {
+        int iValue;
+        PyObject *key_dict = PyDict_New();
+        
+        for( iValue = 0; iValue < pasVarInfo[iVar].nValueCount; iValue++ )
+        {
+            PyDict_SetItem( key_dict, pasVarInfo[iVar].papyValueList[iValue], 
+                            Py_None );
+        }
+
+        if( iVar == nVarCount-1 )
+            v2_keys = key_dict;
+        else
+            v1_keys = key_dict;
+    }
+    /*
+    ** Cleanup working structures. 
+    */
+
+    /*
+    ** Prepare final result tuple. 
+    */
+
+    result = Py_BuildValue( "(OOO)", v1_keys, v2_keys, pyResultTree );
+
+    if( v1_keys != Py_None )
+    {
+        Py_DECREF( v1_keys );
+    }
+    Py_DECREF( v2_keys );
+    Py_DECREF( pyResultTree );
+
+    if( bCancelled )
+    {
+        PyErr_SetString(PyExc_ValueError,
+                        "User called processing.");
+        Py_DECREF( result );
+        return NULL;
+    }
+    else
+    {
+        return result;
+    }
+}
+%%
+override gv_records_recode
+static PyObject *
+_wrap_gv_records_recode(PyGObject *self, PyObject *args)
+{
+    PyObject *py_records, *py_single_mapping, *py_range_mapping, *py_data_selection;
+    GvRecords *records;
+    char      *pszSrcVarName = NULL, *pszDstVarName = NULL;
+    int       bCancelled = FALSE, i, nRecordCount;
+    int       *panSelectionList = NULL, nRangeRecodeCount = 0, nSingleRecodeCount = 0;
+    int       iSrcField, iDstField, nIgnored=0, nAltered=0, nUnchanged=0;
+    PyProgressData sProgressInfo;
+    GvRecodeEntry *pasSingleRecodings;
+    GvRecodeEntry *pasRangeRecodings;
+    PyObject    *pyKey = NULL, *pyValue = NULL;
+    int       bHaveNULLReplacement = FALSE;
+    GvRecodeEntry sNULLEntry;
+    int       bElseClause = FALSE;
+    GvRecodeEntry sElseEntry;
+    
+    sProgressInfo.psPyCallback = NULL;
+    sProgressInfo.psPyCallbackData = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!O!O!O!ssOO:gv_records_recode",
+                          &PyGvRecords_Type, &py_records,
+                          &PyDict_Type, &py_single_mapping,
+                          &PyList_Type, &py_range_mapping,
+                          &PyList_Type, &py_data_selection,
+                          &pszSrcVarName, &pszDstVarName, 
+                          &(sProgressInfo.psPyCallback),
+                          &(sProgressInfo.psPyCallbackData) ) )
+        return NULL;
+
+    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
+        return NULL;
+
+    records = GV_RECORDS(PyGtk_Get(py_records));
+
+    /*
+    ** Identify the source and destination field indexes.
+    */
+    iSrcField = -1;
+    iDstField = -1;
+    for( i = 0; i < records->nFieldCount; i++ )
+    {
+        if( EQUAL(pszSrcVarName,records->papszFieldName[i]) )
+            iSrcField = i;
+        if( EQUAL(pszDstVarName,records->papszFieldName[i]) )
+            iDstField = i;
+    }
+
+    if( iSrcField == -1 || iDstField == -1 )
+    {
+        PyErr_SetString( PyExc_ValueError, "RECODE variable not recognised." );
+        return NULL;
+    }
+
+    cos( 0.0 );
+
+    /*
+    ** Collect the single value mappings.
+    */
+    pasSingleRecodings = 
+        g_new( GvRecodeEntry, PyDict_Size(py_single_mapping) );
+
+    nSingleRecodeCount = 0;
+    i = 0;
+    while( PyDict_Next( py_single_mapping, &i, &pyKey, &pyValue ) )
+    {
+        char *pszKey = NULL,  *pszValue = NULL;
+
+        if( pyValue == Py_None )
+        {
+            pasSingleRecodings[nSingleRecodeCount].dfReplacement = 0.0;
+            pasSingleRecodings[nSingleRecodeCount].bReplaceNULL = TRUE;
+        }
+        else if( !PyArg_Parse( pyValue, "s", &pszValue ) )
+        {
+            PyErr_SetString(PyExc_TypeError, 
+                            "Single value is not numeric." );
+            return NULL;
+        }
+        else
+        {
+            pasSingleRecodings[nSingleRecodeCount].dfReplacement =
+                atof( pszValue );
+            pasSingleRecodings[nSingleRecodeCount].bReplaceNULL = FALSE;
+        }
+
+        if( pyKey == Py_None )
+        {
+            bHaveNULLReplacement = TRUE;
+            memcpy( &sNULLEntry, 
+                    pasSingleRecodings + nSingleRecodeCount, 
+                    sizeof(sNULLEntry) );
+        }
+        else if( !PyArg_Parse( pyKey, "s", &pszKey ) )
+        {
+            PyErr_SetString(PyExc_TypeError, 
+                            "Single value is not numeric." );
+            return NULL;
+        }
+        else if( EQUAL(pszKey,"None") || EQUAL(pszKey,"NULL") )
+        {
+            bHaveNULLReplacement = TRUE;
+            memcpy( &sNULLEntry, 
+                    pasSingleRecodings + nSingleRecodeCount, 
+                    sizeof(sNULLEntry) );
+        }
+        else if( EQUAL(pszKey,"ELSE")  )
+        {
+            /*NULL is a special case*/
+            if( pyValue != Py_None )
+            {
+                sElseEntry.dfReplacement = atof( pszValue );
+            }
+            else
+            {
+                bHaveNULLReplacement = TRUE;
+            }
+            
+            /*any value should be caught by else*/
+            sElseEntry.dfMin = 0 - HUGE_VAL;
+            sElseEntry.dfMax = HUGE_VAL;
+            memcpy( &sElseEntry, 
+                    pasSingleRecodings + nSingleRecodeCount, 
+                    sizeof(sElseEntry) );
+            bElseClause = TRUE;
+        }
+        else
+        {
+            pasSingleRecodings[nSingleRecodeCount].dfMin = atof(pszKey);
+            pasSingleRecodings[nSingleRecodeCount].dfMax = atof(pszKey);
+            nSingleRecodeCount++;
+        }
+    }
+
+    SortRecodings( nSingleRecodeCount, pasSingleRecodings );
+    
+    /*
+    ** Collect range mappings. 
+    */
+
+    nRangeRecodeCount = PyList_Size(py_range_mapping);
+    pasRangeRecodings = g_new( GvRecodeEntry, nRangeRecodeCount );
+
+    for( i = 0; i < nRangeRecodeCount; i++ )
+    {
+        char *pszReplacement=NULL;
+
+        if( !PyArg_Parse( PyList_GetItem( py_range_mapping, i ), "(ddz)", 
+                          &(pasRangeRecodings[i].dfMin),
+                          &(pasRangeRecodings[i].dfMax),
+                          &pszReplacement ) )
+        {
+            PyErr_SetString(PyExc_TypeError, 
+                            "Range value is not (min,max,result) tuple." );
+            return NULL;
+        }
+
+        if( pszReplacement == NULL )
+        {
+            pasRangeRecodings[i].dfReplacement = 0.0;
+            pasRangeRecodings[i].bReplaceNULL = TRUE;
+        }
+        else
+        {
+            pasRangeRecodings[i].dfReplacement = atof(pszReplacement);
+            pasRangeRecodings[i].bReplaceNULL = FALSE;
+        }
+    }
+
+    SortRecodings( nRangeRecodeCount, pasRangeRecodings );
+
+    /* 
+    ** Initialize progress.
+    */
+    if( !PyProgressProxy( 0.0, "", &sProgressInfo ) )
+        return FALSE;
+
+    /*
+    ** Build up the "selection" list.
+    */
+    nRecordCount = PyList_Size( py_data_selection );
+    if( nRecordCount != 0 )
+        panSelectionList = g_new( int, nRecordCount );
+
+    for( i = 0; i < nRecordCount; i++ )
+    {
+        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
+                          panSelectionList + i ) )
+        {
+            PyErr_SetString(PyExc_ValueError,
+                            "problem extracting selection item.");
+            return NULL;
+        }
+    }
+
+    /*
+    ** Process records 
+    */
+    for( i = 0; i < nRecordCount && !bCancelled; i++ )
+    {
+        int rec_index = panSelectionList[i];
+        double dfValue;
+        GvRecodeEntry *psEntry;
+        const char *pszRawFieldValue = 
+            gv_records_get_raw_field_data( records, rec_index, iSrcField );
+
+        if( pszRawFieldValue == NULL )
+        {
+            if( bHaveNULLReplacement )
+                psEntry = &sNULLEntry;
+            else
+                psEntry = NULL;
+        }
+        else
+        {
+            dfValue = atof(pszRawFieldValue);
+        
+            psEntry = FindRecoding( dfValue, 
+                                    nSingleRecodeCount, pasSingleRecodings );
+            if( psEntry == NULL)
+                psEntry = FindRecoding( dfValue, 
+                                        nRangeRecodeCount, pasRangeRecodings );
+            
+            /*
+             if nothing else was applied, use the ELSE value after adding
+             the correct mapping
+            */
+            if (psEntry == NULL && bElseClause)
+            {
+                psEntry = &sElseEntry;
+            }
+        }
+
+        
+        if( psEntry == NULL )
+            nUnchanged++;
+        else if( psEntry->bReplaceNULL )
+        {
+            gv_records_set_raw_field_data( records, rec_index, iDstField, NULL );
+            nIgnored++;
+        }
+        else
+        {
+            char szReplaceText[200];
+
+            sprintf( szReplaceText, "%g", psEntry->dfReplacement );
+            gv_records_set_raw_field_data( records, rec_index, iDstField, 
+                                           szReplaceText);
+            nAltered++;
+        }
+        
+        if( i % 100 == 0 )
+        {
+            if( !PyProgressProxy( i / (double) nRecordCount,
+                                  "", &sProgressInfo ) )
+                bCancelled = TRUE;
+        }
+    }
+
+    if( !bCancelled )
+        PyProgressProxy( 1.0, "", &sProgressInfo );
+
+    g_free( pasSingleRecodings );
+    g_free( pasRangeRecodings );
+    g_free( panSelectionList );
+
+    return Py_BuildValue( "(iii)", nUnchanged, nAltered, nIgnored );
 }
 %%
 override gv_shapes_from_ogr_layer
