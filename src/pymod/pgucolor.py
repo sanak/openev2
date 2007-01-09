@@ -34,7 +34,7 @@ from gvsignaler import Signaler
 def color_string_to_tuple(s):
     """Convert a string to a color tuple"""
     if isinstance(s, tuple): # CIETmap requirement
-        return
+        return s
     if s.startswith('('): # assume this is '(r,g,b,a)' (or '(r g b a)')
         s = s[1:-1]
     sep = None
