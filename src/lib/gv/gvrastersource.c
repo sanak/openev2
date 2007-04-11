@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvrastersource.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Code related to handling of GvRasterSource on a GvRasterLayer.
@@ -90,7 +90,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <gtk/gtksignal.h>
 #include "gvrasterlayer.h"
 #include "gvrastertypes.h"
 #include "gvrasterlut.h"
@@ -103,15 +102,15 @@
 
 static unsigned char *
 gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
-		      GvRasterSource *source);
+                      GvRasterSource *source);
 static unsigned char *
 gv_scale_tile_linear(void *src_data, int tile_x, int tile_y, 
-		     float min, float max, GDALDataType gdal_type);
+                     float min, float max, GDALDataType gdal_type);
 
 
 static unsigned char *
 gv_scale_tile_linear(void *src_data, int tile_x, int tile_y, 
-		     float min, float max,GDALDataType gdal_type)
+                     float min, float max,GDALDataType gdal_type)
 {
     float scale;
     unsigned char *ret_data;
@@ -142,7 +141,7 @@ gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
     }
     else if( gdal_type == GDT_Float32 )
     {
-        float 	*raw_data = (float *) src_data;
+        float   *raw_data = (float *) src_data;
         float    f;
 
         ret_data = (unsigned char *) g_malloc(pixel_count);
@@ -160,7 +159,7 @@ gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
     }
     else if( gdal_type == GDT_CFloat32 )
     {
-        float 	*raw_data = (float *) src_data;
+        float   *raw_data = (float *) src_data;
 
         if( max == 0.0 )
             scale = 1.0;
@@ -231,7 +230,7 @@ gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
  */
 static unsigned char *
 gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
-		      GvRasterSource *source)
+                      GvRasterSource *source)
 {
     float scale, ff, max, min;
     unsigned char *ret_data;
@@ -239,22 +238,22 @@ gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
 
     /* ---- Perform original scaling if no LUTs specified ---- */
     if ((source->data->gdal_type == GDT_CFloat32) ||
-	((source->lut == NULL) &&
-	 (source->gv_lut == NULL))) {
-	return gv_scale_tile_linear(src_data, tile_x, tile_y, source->min,
-				    source->max, source->data->gdal_type);
+        ((source->lut == NULL) &&
+         (source->gv_lut == NULL))) {
+        return gv_scale_tile_linear(src_data, tile_x, tile_y, source->min,
+                                    source->max, source->data->gdal_type);
     }
 
     /* ---- If original 256 entry lut specified, create gv_lut ---- */
     if (source->lut != NULL) {
-	if (source->gv_lut != NULL) {
-	    gv_raster_lut_free(source->gv_lut);
-	}
-	source->gv_lut = gv_raster_lut_create_from_byte_lut
-	    (source->lut, source->min, source->max,
-	     GV_RASTER_LUT_OPTIONS_NONE);
-	g_free(source->lut);
-	source->lut = NULL;
+        if (source->gv_lut != NULL) {
+            gv_raster_lut_free(source->gv_lut);
+        }
+        source->gv_lut = gv_raster_lut_create_from_byte_lut
+            (source->lut, source->min, source->max,
+             GV_RASTER_LUT_OPTIONS_NONE);
+        g_free(source->lut);
+        source->lut = NULL;
     }
 
     /* ---- Use gv_lut to return src_data scaled to byte range ---- */
@@ -272,25 +271,25 @@ gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
         unsigned char *raw_data = (unsigned char *)src_data;
 
         for(ii = 0; ii < pixel_count; ii++ ) {
-	    index = (raw_data[ii] - min) * scale;
-	    if (index < 0) index = 0;
-	    if (index >= source->gv_lut->size) {
-		index = source->gv_lut->size - 1;
-	    }
-	    ret_data[ii] = source->gv_lut->table[index];
-	}
+            index = (raw_data[ii] - min) * scale;
+            if (index < 0) index = 0;
+            if (index >= source->gv_lut->size) {
+                index = source->gv_lut->size - 1;
+            }
+            ret_data[ii] = source->gv_lut->table[index];
+        }
     }
     else if(source->data->gdal_type == GDT_Float32) {
-        float 	*raw_data = (float *)src_data;
+        float   *raw_data = (float *)src_data;
 
         for(ii = 0; ii < pixel_count; ii++ ) {
-	    index = (raw_data[ii] - min) * scale;
-	    if (index < 0) index = 0;
-	    if (index >= source->gv_lut->size) {
-		index = source->gv_lut->size - 1;
-	    }
-	    ret_data[ii] = source->gv_lut->table[index];
-	}
+            index = (raw_data[ii] - min) * scale;
+            if (index < 0) index = 0;
+            if (index >= source->gv_lut->size) {
+                index = source->gv_lut->size - 1;
+            }
+            ret_data[ii] = source->gv_lut->table[index];
+        }
     }
     else {
         g_warning( "unhandled data type in gv_scale_tile_to_byte().\n" );
@@ -311,7 +310,7 @@ gv_scale_pure_phase_tile_to_byte( void *src_data,
 
     if( gdal_type == GDT_CFloat32 )
     {
-        float 	*raw_data = (float *) src_data;
+        float   *raw_data = (float *) src_data;
 
         ret_data = (unsigned char *) g_malloc(pixel_count*2);
 
@@ -387,7 +386,7 @@ gv_raster_layer_srctile_check_nodata( GvRasterSource *source, int pixels,
     }
     else if( source->data->gdal_type == GDT_CFloat32 )
     {
-        float 	*f_data = (float *) data;
+        float   *f_data = (float *) data;
 
         for( i = 0; i < pixels; i++ )
         {
@@ -461,7 +460,7 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
             else
             {
                 ret_data = gv_scale_tile_to_byte(ret_data, layer->tile_x >> lod,
-						 layer->tile_y >> lod, source);
+                                                 layer->tile_y >> lod, source);
             }
         }
 
@@ -773,15 +772,14 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
     /* Manage a reference for each source */
 
     if( source->data != NULL )
-        gtk_object_unref( GTK_OBJECT(source->data) );
-
-    if( data != NULL )
-    {
-        gtk_object_ref( GTK_OBJECT(data) );
-        gtk_object_sink( GTK_OBJECT(data) );
-    }
+        g_object_unref( source->data );
 
     source->data = data;
+    if( data != NULL )
+    {
+        g_object_ref( source->data );
+    }
+
     source->min = min;
     source->max = max;
     source->const_value = const_value;

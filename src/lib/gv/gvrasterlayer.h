@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvrasterlayer.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Raster display layer (managed textures, redraw, etc)
@@ -103,10 +103,10 @@
 
 
 #define GV_TYPE_RASTER_LAYER            (gv_raster_layer_get_type ())
-#define GV_RASTER_LAYER(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_RASTER_LAYER, GvRasterLayer))
-#define GV_RASTER_LAYER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_RASTER_LAYER, GvRasterLayerClass))
-#define GV_IS_RASTER_LAYER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_RASTER_LAYER))
-#define GV_IS_RASTER_LAYER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_CLASS_LAYER))
+#define GV_RASTER_LAYER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_RASTER_LAYER, GvRasterLayer))
+#define GV_RASTER_LAYER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_RASTER_LAYER, GvRasterLayerClass))
+#define GV_IS_RASTER_LAYER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_RASTER_LAYER))
+#define GV_IS_RASTER_LAYER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_CLASS_LAYER))
 
 typedef struct _GvRasterLayer       GvRasterLayer;
 typedef struct _GvRasterLayerClass  GvRasterLayerClass;
@@ -175,10 +175,10 @@ struct _GvRasterLut {
 
 typedef struct {
 
-    GvRaster 	*data;
+    GvRaster    *data;
     unsigned char const_value;  /* used for whole tile if data is NULL */
-    float	max, min;	/* for scaling */
-    unsigned char *lut;		/* greyscale lut (uchar*256 or NULL) */
+    float       max, min;       /* for scaling */
+    unsigned char *lut;         /* greyscale lut (uchar*256 or NULL) */
     GvRasterLut *gv_lut;        /* higher res lut created from 256 entry lut */
 
     /* lut_rgba_composed is used only in the RGBA case in the presence  */
@@ -241,10 +241,14 @@ struct _GvRasterLayerClass
     GvLayerClass parent_class;
 };
 
-GtkType gv_raster_layer_get_type(void);
-GtkObject *gv_raster_layer_new(int mode, 
+GType gv_raster_layer_get_type(void);
+GObject *gv_raster_layer_new(int mode, 
                                GvRaster *prototype_data, 
                                GvProperties prop);
+
+void gv_raster_layer_read(GvRasterLayer *layer, int mode, 
+                           GvRaster *prototype_data, 
+                           GvProperties prop);
 
 /* Raster value setup functions */
 long gv_raster_layer_texture_clamp_set(GvRasterLayer *layer, int s_clamp, int t_clamp);

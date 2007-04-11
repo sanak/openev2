@@ -93,10 +93,10 @@
 #include "gdal.h"
 
 #define GV_TYPE_RASTER            (gv_raster_get_type ())
-#define GV_RASTER(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_RASTER, GvRaster))
-#define GV_RASTER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_RASTER, GvRasterClass))
-#define GV_IS_RASTER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_RASTER))
-#define GV_IS_RASTER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_RASTER))
+#define GV_RASTER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_RASTER, GvRaster))
+#define GV_RASTER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_RASTER, GvRasterClass))
+#define GV_IS_RASTER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_RASTER))
+#define GV_IS_RASTER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_RASTER))
 
 typedef enum {
     GvSMAverage = 0,
@@ -140,7 +140,7 @@ struct _GvRaster
 
     double  geotransform[6];                 /* pl to georef transform */
 
-    int	    gcp_count;			     /* 0 if not relativant */
+    int     gcp_count;                       /* 0 if not relativant */
     GDAL_GCP *gcp_list;
     int     poly_order;                      /* -1 if not intialized */
     double  *poly_pixel_coeff;
@@ -151,7 +151,7 @@ struct _GvRaster
 
     /* Separate transformations to be used by ghost cursor and linking */
     /* DEFAULTS TO REGULAR TRANSFORMATION IF THESE AREN'T SET       */
-    int	    gcp_countCL;			     /* 0 if not relativant */
+    int     gcp_countCL;                             /* 0 if not relativant */
     GDAL_GCP *gcp_listCL;
     int     poly_orderCL;                      /* -1 if not intialized */
     double  *poly_pixel_coeffCL;
@@ -172,10 +172,12 @@ struct _GvRasterClass
 {
     GvDataClass parent_class;
     void (* geotransform_changed)(GvRaster *raster);
+    void (* disconnected)(GvRaster *raster);
 };
 
-GtkType gv_raster_get_type(void);
+GType gv_raster_get_type(void);
 GvData* gv_raster_new(GDALDatasetH dataset, int real_band, GvSampleMethod sm);
+void gv_raster_read(GvRaster *raster, GDALDatasetH dataset, int real_band, GvSampleMethod sm);
 void *gv_raster_tile_get(GvRaster *raster, int tile, int lod);
 gint *gv_raster_tile_xy_get(GvRaster *raster, int tile, int lod, gint *coords);
 void gv_raster_flush_cache(GvRaster *raster,

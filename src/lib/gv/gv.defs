@@ -1,0 +1,4554 @@
+;; -*- scheme -*-
+; object definitions ...
+(define-object Data
+  (in-module "Gv")
+  (parent "GObject")
+  (c-name "GvData")
+  (gtype-id "GV_TYPE_DATA")
+  (fields
+    '("GvData*" "parent")
+    '("gchar*" "name")
+    '("gint" "read_only")
+    '("char*" "projection")
+  )
+)
+
+(define-object Layer
+  (in-module "Gv")
+  (parent "GvData")
+  (c-name "GvLayer")
+  (gtype-id "GV_TYPE_LAYER")
+)
+
+(define-object Manager
+  (in-module "Gv")
+  (parent "GObject")
+  (c-name "GvManager")
+  (gtype-id "GV_TYPE_MANAGER")
+)
+
+(define-object Mesh
+  (in-module "Gv")
+  (parent "GvData")
+  (c-name "GvMesh")
+  (gtype-id "GV_TYPE_MESH")
+)
+
+(define-object Raster
+  (in-module "Gv")
+  (parent "GvData")
+  (c-name "GvRaster")
+  (gtype-id "GV_TYPE_RASTER")
+  (fields
+    '("gint" "width")
+    '("gint" "height")
+    '("float" "min")
+    '("float" "max")
+  )
+)
+
+(define-object RasterLayer
+  (in-module "Gv")
+  (parent "GvLayer")
+  (c-name "GvRasterLayer")
+  (gtype-id "GV_TYPE_RASTER_LAYER")
+)
+
+(define-object ShapeLayer
+  (in-module "Gv")
+  (parent "GvLayer")
+  (c-name "GvShapeLayer")
+  (gtype-id "GV_TYPE_SHAPE_LAYER")
+)
+
+(define-object Shapes
+  (in-module "Gv")
+  (parent "GvData")
+  (c-name "GvShapes")
+  (gtype-id "GV_TYPE_SHAPES")
+)
+
+(define-object ShapesLayer
+  (in-module "Gv")
+  (parent "GvShapeLayer")
+  (c-name "GvShapesLayer")
+  (gtype-id "GV_TYPE_SHAPES_LAYER")
+)
+
+(define-object SymbolManager
+  (in-module "Gv")
+  (parent "GObject")
+  (c-name "GvSymbolManager")
+  (gtype-id "GV_TYPE_SYMBOL_MANAGER")
+)
+
+(define-object Tool
+  (in-module "Gv")
+  (parent "GObject")
+  (c-name "GvTool")
+  (gtype-id "GV_TYPE_TOOL")
+)
+
+(define-object SelectionTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvSelectionTool")
+  (gtype-id "GV_TYPE_SELECTION_TOOL")
+)
+
+(define-object RotateTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvRotateTool")
+  (gtype-id "GV_TYPE_ROTATE_TOOL")
+)
+
+(define-object RoiTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvRoiTool")
+  (gtype-id "GV_TYPE_ROI_TOOL")
+)
+
+(define-object RectTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvRectTool")
+  (gtype-id "GV_TYPE_RECT_TOOL")
+)
+
+(define-object PointTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvPointTool")
+  (gtype-id "GV_TYPE_POINT_TOOL")
+)
+
+(define-object PoiTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvPoiTool")
+  (gtype-id "GV_TYPE_POI_TOOL")
+)
+
+(define-object NodeTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvNodeTool")
+  (gtype-id "GV_TYPE_NODE_TOOL")
+)
+
+(define-object LineTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvLineTool")
+  (gtype-id "GV_TYPE_LINE_TOOL")
+)
+
+(define-object AreaTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvAreaTool")
+  (gtype-id "GV_TYPE_AREA_TOOL")
+)
+
+(define-object Toolbox
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvToolbox")
+  (gtype-id "GV_TYPE_TOOLBOX")
+)
+
+(define-object TrackTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvTrackTool")
+  (gtype-id "GV_TYPE_TRACK_TOOL")
+)
+
+(define-object ViewArea
+  (in-module "Gv")
+  (parent "GtkDrawingArea")
+  (c-name "GvViewArea")
+  (gtype-id "GV_TYPE_VIEW_AREA")
+  (fields
+    '("GObject*" "active_layer")
+    '("char*" "projection")
+  )
+)
+
+(define-object ViewLink
+  (in-module "Gv")
+  (parent "GObject")
+  (c-name "GvViewLink")
+  (gtype-id "GV_TYPE_VIEW_LINK")
+)
+
+(define-object ZoompanTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvZoompanTool")
+  (gtype-id "GV_TYPE_ZOOMPAN_TOOL")
+)
+
+;; Enumerations and flags ...
+
+(define-enum SampleMethod
+  (in-module "Gv")
+  (c-name "GvSampleMethod")
+  (gtype-id "GV_TYPE_SAMPLE_METHOD")
+  (values
+    '("average" "GvSMAverage")
+    '("sample" "GvSMSample")
+    '("average8bitphase" "GvSMAverage8bitPhase")
+  )
+)
+
+(define-enum AutoScaleAlg
+  (in-module "Gv")
+  (c-name "GvAutoScaleAlg")
+  (gtype-id "GV_TYPE_AUTO_SCALE_ALG")
+  (values
+    '("automatic" "GvASAAutomatic")
+    '("percenttailtrim" "GvASAPercentTailTrim")
+    '("stddeviation" "GvASAStdDeviation")
+  )
+)
+
+(define-enum RasterLayerMode
+  (in-module "Gv")
+  (c-name "GvRasterLayerMode")
+  (gtype-id "GV_TYPE_RASTER_LAYER_MODE")
+  (values
+    '("auto" "GV_RLM_AUTO")
+    '("single" "GV_RLM_SINGLE")
+    '("rgba" "GV_RLM_RGBA")
+    '("complex" "GV_RLM_COMPLEX")
+    '("psci" "GV_RLM_PSCI")
+  )
+)
+
+(define-enum RasterLutEnhancement
+  (in-module "Gv")
+  (c-name "GvRasterLutEnhancement")
+  (gtype-id "GV_TYPE_RASTER_LUT_ENHANCEMENT")
+  (values
+    '("unknown" "GV_RASTER_LUT_ENHANCE_UNKNOWN")
+    '("linear" "GV_RASTER_LUT_ENHANCE_LINEAR")
+    '("log" "GV_RASTER_LUT_ENHANCE_LOG")
+    '("root" "GV_RASTER_LUT_ENHANCE_ROOT")
+    '("square" "GV_RASTER_LUT_ENHANCE_SQUARE")
+    '("equalize" "GV_RASTER_LUT_ENHANCE_EQUALIZE")
+    '("gamma" "GV_RASTER_LUT_ENHANCE_GAMMA")
+  )
+)
+
+(define-enum LinkCursorMode
+  (in-module "Gv")
+  (c-name "GvLinkCursorMode")
+  (gtype-id "GV_TYPE_LINK_CURSOR_MODE")
+  (values
+    '("ff" "GV_LINK_CURSOR_OFF")
+    '("n-default" "GV_LINK_CURSOR_ON_DEFAULT")
+    '("n-logical" "GV_LINK_CURSOR_ON_LOGICAL")
+  )
+)
+
+
+;; From crs.h
+
+(define-function CRS_georef
+  (c-name "CRS_georef")
+  (return-type "int")
+  (parameters
+    '("double" "e1")
+    '("double" "n1")
+    '("double*" "e")
+    '("double*" "n")
+    '("double[]" "E")
+    '("double[]" "N")
+    '("int" "order")
+  )
+)
+
+(define-function CRS_compute_georef_equations
+  (c-name "CRS_compute_georef_equations")
+  (return-type "int")
+  (parameters
+    '("struct-Control_Points*" "cp")
+    '("double[]" "E12")
+    '("double[]" "N12")
+    '("double[]" "E21")
+    '("double[]" "N21")
+    '("int" "order")
+  )
+)
+
+
+
+;; From gextra.h
+
+(define-function g_compare_gint
+  (c-name "g_compare_gint")
+  (return-type "gint")
+  (parameters
+    '("gconstpointer" "a")
+    '("gconstpointer" "b")
+  )
+)
+
+(define-method insert_fast
+  (of-object "GPtrArray")
+  (c-name "g_ptr_array_insert_fast")
+  (return-type "none")
+  (parameters
+    '("guint" "index")
+    '("gpointer" "data")
+  )
+)
+
+(define-function g_get_current_time_as_double
+  (c-name "g_get_current_time_as_double")
+  (return-type "double")
+  (parameters
+  )
+)
+
+
+
+;; From gv_config.h
+
+
+
+;; From gvareatool.h
+
+(define-function gv_area_tool_get_type
+  (c-name "gv_area_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_area_tool_new
+  (c-name "gv_area_tool_new")
+  (is-constructor-of "GvAreaTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvAreaTool")
+  (c-name "gv_area_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+(define-method set_named_layer
+  (of-object "GvAreaTool")
+  (c-name "gv_area_tool_set_named_layer")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+
+
+;; From gvdata.h
+
+(define-function gv_data_get_type
+  (c-name "gv_data_get_type")
+  (return-type "GType")
+)
+
+(define-method set_parent
+  (of-object "GvData")
+  (c-name "gv_data_set_parent")
+  (return-type "none")
+  (parameters
+    '("GvData*" "parent")
+  )
+)
+
+(define-method get_parent
+  (of-object "GvData")
+  (c-name "gv_data_get_parent")
+  (return-type "GvData*")
+)
+
+(define-method set_name
+  (of-object "GvData")
+  (c-name "gv_data_set_name")
+  (return-type "none")
+  (parameters
+    '("const-gchar*" "name")
+  )
+)
+
+(define-method get_name
+  (of-object "GvData")
+  (c-name "gv_data_get_name")
+  (return-type "const-gchar*")
+)
+
+(define-method changing
+  (of-object "GvData")
+  (c-name "gv_data_changing")
+  (return-type "none")
+  (parameters
+    '("gpointer" "change_info")
+  )
+)
+
+(define-method changed
+  (of-object "GvData")
+  (c-name "gv_data_changed")
+  (return-type "none")
+  (parameters
+    '("gpointer" "change_info")
+  )
+)
+
+(define-method meta_changed
+  (of-object "GvData")
+  (c-name "gv_data_meta_changed")
+  (return-type "none")
+)
+
+(define-method freeze
+  (of-object "GvData")
+  (c-name "gv_data_freeze")
+  (return-type "none")
+)
+
+(define-method thaw
+  (of-object "GvData")
+  (c-name "gv_data_thaw")
+  (return-type "none")
+)
+
+(define-method get_memento
+  (of-object "GvData")
+  (c-name "gv_data_get_memento")
+  (return-type "GvDataMemento*")
+  (parameters
+    '("gpointer" "change_info")
+  )
+)
+
+(define-method set_memento
+  (of-object "GvData")
+  (c-name "gv_data_set_memento")
+  (return-type "none")
+  (parameters
+    '("GvDataMemento*" "memento")
+  )
+)
+
+(define-method del_memento
+  (of-object "GvData")
+  (c-name "gv_data_del_memento")
+  (return-type "none")
+  (parameters
+    '("GvDataMemento*" "memento")
+  )
+)
+
+(define-method get_projection
+  (of-object "GvData")
+  (c-name "gv_data_get_projection")
+  (return-type "const-char*")
+)
+
+(define-method set_projection
+  (of-object "GvData")
+  (c-name "gv_data_set_projection")
+  (return-type "none")
+  (parameters
+    '("const-char*" "projection")
+  )
+)
+
+(define-method set_read_only
+  (of-object "GvData")
+  (c-name "gv_data_set_read_only")
+  (return-type "none")
+  (parameters
+    '("gint" "read_only")
+  )
+)
+
+(define-method is_read_only
+  (of-object "GvData")
+  (c-name "gv_data_is_read_only")
+  (return-type "gint")
+)
+
+(define-method set_property
+  (of-object "GvData")
+  (c-name "gv_data_set_property")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+    '("const-char*" "value")
+  )
+)
+
+(define-method get_property
+  (of-object "GvData")
+  (c-name "gv_data_get_property")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method get_properties
+  (of-object "GvData")
+  (c-name "gv_data_get_properties")
+  (return-type "GvProperties*")
+)
+
+(define-function gv_data_registry_dump
+  (c-name "gv_data_registry_dump")
+  (return-type "none")
+)
+
+
+
+;; From gview.h
+
+
+
+;; From gvlayer.h
+
+(define-function gv_layer_get_type
+  (c-name "gv_layer_get_type")
+  (return-type "GType")
+)
+
+(define-method setup
+  (of-object "GvLayer")
+  (c-name "gv_layer_setup")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method teardown
+  (of-object "GvLayer")
+  (c-name "gv_layer_teardown")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method draw
+  (of-object "GvLayer")
+  (c-name "gv_layer_draw")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method extents
+  (of-object "GvLayer")
+  (c-name "gv_layer_extents")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method display_change
+  (of-object "GvLayer")
+  (c-name "gv_layer_display_change")
+  (return-type "none")
+  (parameters
+    '("gpointer" "change_info")
+  )
+)
+
+(define-method is_visible
+  (of-object "GvLayer")
+  (c-name "gv_layer_is_visible")
+  (return-type "gint")
+)
+
+(define-method set_visible
+  (of-object "GvLayer")
+  (c-name "gv_layer_set_visible")
+  (return-type "none")
+  (parameters
+    '("gint" "visible")
+  )
+)
+
+(define-method set_visible_temp
+  (of-object "GvLayer")
+  (c-name "gv_layer_set_visible_temp")
+  (return-type "gint")
+  (parameters
+    '("gint" "visible")
+  )
+)
+
+(define-method set_presentation
+  (of-object "GvLayer")
+  (c-name "gv_layer_set_presentation")
+  (return-type "none")
+  (parameters
+    '("gint" "presentation")
+  )
+)
+
+(define-method get_view
+  (of-object "GvLayer")
+  (c-name "gv_layer_get_view")
+  (return-type "GvViewArea*")
+)
+
+(define-method reproject
+  (of-object "GvLayer")
+  (c-name "gv_layer_reproject")
+  (return-type "gint")
+  (parameters
+    '("const-char*" "projection")
+  )
+)
+
+
+
+;; From gvlinetool.h
+
+(define-function gv_line_tool_get_type
+  (c-name "gv_line_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_line_tool_new
+  (c-name "gv_line_tool_new")
+  (is-constructor-of "GvLineTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvLineTool")
+  (c-name "gv_line_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+(define-method set_named_layer
+  (of-object "GvLineTool")
+  (c-name "gv_line_tool_set_named_layer")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+
+
+;; From gvmanager.h
+
+(define-function gv_manager_get_type
+  (c-name "gv_manager_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_manager_new
+  (c-name "gv_manager_new")
+  (is-constructor-of "GvManager")
+  (return-type "GvManager*")
+)
+
+(define-function gv_get_manager
+  (c-name "gv_get_manager")
+  (return-type "GvManager*")
+)
+
+(define-method dump
+  (of-object "GvManager")
+  (c-name "gv_manager_dump")
+  (return-type "none")
+)
+
+(define-method get_preference
+  (of-object "GvManager")
+  (c-name "gv_manager_get_preference")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method get_preferences
+  (of-object "GvManager")
+  (c-name "gv_manager_get_preferences")
+  (return-type "GvProperties*")
+)
+
+(define-method set_preference
+  (of-object "GvManager")
+  (c-name "gv_manager_set_preference")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+    '("const-char*" "value")
+  )
+)
+
+(define-method add_dataset
+  (of-object "GvManager")
+  (c-name "gv_manager_add_dataset")
+  (return-type "GDALDatasetH")
+  (parameters
+    '("GDALDatasetH" "dataset")
+  )
+)
+
+(define-method get_dataset
+  (of-object "GvManager")
+  (c-name "gv_manager_get_dataset")
+  (return-type "GDALDatasetH")
+  (parameters
+    '("const-char*" "filename")
+  )
+)
+
+(define-method get_dataset_raster
+  (of-object "GvManager")
+  (c-name "gv_manager_get_dataset_raster")
+  (return-type "GvRaster*")
+  (parameters
+    '("GDALDatasetH" "dataset")
+    '("int" "band")
+  )
+)
+
+(define-method set_busy
+  (of-object "GvManager")
+  (c-name "gv_manager_set_busy")
+  (return-type "none")
+  (parameters
+    '("int" "busy_flag")
+  )
+)
+
+(define-method get_busy
+  (of-object "GvManager")
+  (c-name "gv_manager_get_busy")
+  (return-type "int")
+)
+
+(define-method queue_task
+  (of-object "GvManager")
+  (c-name "gv_manager_queue_task")
+  (return-type "none")
+  (parameters
+    '("const-char*" "task_name")
+    '("int" "priority")
+    '("GtkFunction" "callback")
+    '("void*" "task_info")
+  )
+)
+
+(define-method dequeue_task
+  (of-object "GvManager")
+  (c-name "gv_manager_dequeue_task")
+  (return-type "none")
+  (parameters
+    '("GvIdleTask*" "task")
+  )
+)
+
+
+
+;; From gvmarshal.h
+
+
+
+;; From gvmesh.h
+
+(define-function gv_mesh_get_type
+  (c-name "gv_mesh_get_type")
+  (return-type "GType")
+)
+
+(define-method get
+  (of-object "GvMesh")
+  (c-name "gv_mesh_get")
+  (return-type "GvMeshTile*")
+  (parameters
+    '("gint" "tile")
+    '("gint" "raster_lod")
+    '("gint" "detail")
+    '("GvMeshTile*" "tile_info")
+  )
+)
+
+(define-method get_tile_corner_coords
+  (of-object "GvMesh")
+  (c-name "gv_mesh_get_tile_corner_coords")
+  (return-type "gint*")
+  (parameters
+    '("int" "tile")
+  )
+)
+
+(define-function gv_mesh_new_identity
+  (c-name "gv_mesh_new_identity")
+  (return-type "GvMesh*")
+  (parameters
+    '("struct-_GvRaster*" "raster")
+    '("gint" "detail")
+  )
+)
+
+(define-method reset_to_identity
+  (of-object "GvMesh")
+  (c-name "gv_mesh_reset_to_identity")
+  (return-type "none")
+)
+
+(define-method add_height
+  (of-object "GvMesh")
+  (c-name "gv_mesh_add_height")
+  (return-type "none")
+  (parameters
+    '("struct-_GvRaster*" "raster")
+    '("double" "default_height")
+  )
+)
+
+(define-method clamp_height
+  (of-object "GvMesh")
+  (c-name "gv_mesh_clamp_height")
+  (return-type "none")
+  (parameters
+    '("int" "bclamp_min")
+    '("int" "bclamp_max")
+    '("double" "min_height")
+    '("double" "max_height")
+  )
+)
+
+(define-method set_transform
+  (of-object "GvMesh")
+  (c-name "gv_mesh_set_transform")
+  (return-type "none")
+  (parameters
+    '("gint" "xsize")
+    '("gint" "ysize")
+    '("double*" "geotransform")
+  )
+)
+
+(define-method extents
+  (of-object "GvMesh")
+  (c-name "gv_mesh_extents")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method get_height
+  (of-object "GvMesh")
+  (c-name "gv_mesh_get_height")
+  (return-type "float")
+  (parameters
+    '("double" "x")
+    '("double" "y")
+    '("int*" "success")
+  )
+)
+
+
+
+;; From gvmodule.h
+
+(define-function copy_obj
+  (c-name "copy_obj")
+  (return-type "none")
+  (parameters
+    '("GObject*" "obj")
+    '("GObject*" "sub")
+  )
+)
+
+(define-function gv_data_set_properties
+  (c-name "gv_data_set_properties")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_view_area_get_width
+  (c-name "gv_view_area_get_width")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_view_area_get_height
+  (c-name "gv_view_area_get_height")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shapes_layer_new
+  (c-name "gv_shapes_layer_new")
+  (is-constructor-of "GvShapesLayer")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shapes_num_shapes
+  (c-name "gv_shapes_num_shapes")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shapes_get_shape
+  (c-name "gv_shapes_get_shape")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_get_min
+  (c-name "gv_raster_get_min")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_get_max
+  (c-name "gv_raster_get_max")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_view_area_get_translation
+  (c-name "gv_view_area_get_translation")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+  )
+)
+
+(define-function gv_have_ogr_support
+  (c-name "gv_have_ogr_support")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+  )
+)
+
+(define-function gv_shapes_get_change_info
+  (c-name "gv_shapes_get_change_info")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shapes_lines_for_vecplot
+  (c-name "gv_shapes_lines_for_vecplot")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_get_change_info
+  (c-name "gv_raster_get_change_info")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_force_load
+  (c-name "gv_raster_force_load")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_get_gdal_band
+  (c-name "gv_raster_get_gdal_band")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_layer_get_height
+  (c-name "gv_raster_layer_get_height")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_layer_get_mesh_lod
+  (c-name "gv_raster_layer_get_mesh_lod")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_layer_get_nodata
+  (c-name "gv_raster_layer_get_nodata")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_layer_get_source_lut
+  (c-name "gv_raster_layer_get_source_lut")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_raster_layer_get_source_const_value
+  (c-name "gv_raster_layer_get_source_const_value")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_view_area_get_eye_dir
+  (c-name "gv_view_area_get_eye_dir")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_view_area_get_eye_pos
+  (c-name "gv_view_area_get_eye_pos")
+  (return-type "PyObject*")
+  (parameters
+    '("PyGObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_rgba_to_rgb
+  (c-name "gv_rgba_to_rgb")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_create
+  (c-name "gv_shape_create")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_from_xml
+  (c-name "gv_shape_from_xml")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_to_xml
+  (c-name "gv_shape_to_xml")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_destroy
+  (c-name "gv_shape_destroy")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_ref
+  (c-name "gv_shape_ref")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_unref
+  (c-name "gv_shape_unref")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_ref
+  (c-name "gv_shape_get_ref")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_copy
+  (c-name "gv_shape_copy")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_shape_type
+  (c-name "gv_shape_get_shape_type")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_line_from_nodelists
+  (c-name "gv_shape_line_from_nodelists")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_property
+  (c-name "gv_shape_get_property")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_properties
+  (c-name "gv_shape_get_properties")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_typed_properties
+  (c-name "gv_shape_get_typed_properties")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_set_property
+  (c-name "gv_shape_set_property")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_set_properties
+  (c-name "gv_shape_set_properties")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_rings
+  (c-name "gv_shape_get_rings")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_nodes
+  (c-name "gv_shape_get_nodes")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_add_node
+  (c-name "gv_shape_add_node")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_set_node
+  (c-name "gv_shape_set_node")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_node
+  (c-name "gv_shape_get_node")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_point_in_polygon
+  (c-name "gv_shape_point_in_polygon")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_distance_from_polygon
+  (c-name "gv_shape_distance_from_polygon")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_clip_to_rect
+  (c-name "gv_shape_clip_to_rect")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_add_shape
+  (c-name "gv_shape_add_shape")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_get_shape
+  (c-name "gv_shape_get_shape")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+(define-function gv_shape_collection_get_count
+  (c-name "gv_shape_collection_get_count")
+  (return-type "PyObject*")
+  (parameters
+    '("PyObject*" "self")
+    '("PyObject*" "args")
+  )
+)
+
+
+
+;; From gvnodetool.h
+
+(define-function gv_node_tool_get_type
+  (c-name "gv_node_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_node_tool_new
+  (c-name "gv_node_tool_new")
+  (is-constructor-of "GvNodeTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvNodeTool")
+  (c-name "gv_node_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+
+
+;; From gvpointtool.h
+
+(define-function gv_point_tool_get_type
+  (c-name "gv_point_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_point_tool_new
+  (c-name "gv_point_tool_new")
+  (is-constructor-of "GvPointTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvPointTool")
+  (c-name "gv_point_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+(define-method set_named_layer
+  (of-object "GvPointTool")
+  (c-name "gv_point_tool_set_named_layer")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+
+
+;; From gvpoitool.h
+
+(define-function gv_poi_tool_get_type
+  (c-name "gv_poi_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_poi_tool_new
+  (c-name "gv_poi_tool_new")
+  (is-constructor-of "GvPoiTool")
+  (return-type "GvTool*")
+)
+
+(define-method get_point
+  (of-object "GvPoiTool")
+  (c-name "gv_poi_tool_get_point")
+  (return-type "gint")
+  (parameters
+    '("GvVertex*" "point")
+  )
+)
+
+(define-method new_point
+  (of-object "GvPoiTool")
+  (c-name "gv_poi_tool_new_point")
+  (return-type "gint")
+  (parameters
+    '("GvVertex*" "point")
+  )
+)
+
+
+
+;; From gvproperties.h
+
+(define-method set
+  (of-object "GvProperties")
+  (c-name "gv_properties_set")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+    '("const-char*" "value")
+  )
+)
+
+(define-method get
+  (of-object "GvProperties")
+  (c-name "gv_properties_get")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method count
+  (of-object "GvProperties")
+  (c-name "gv_properties_count")
+  (return-type "int")
+)
+
+(define-method get_name_by_index
+  (of-object "GvProperties")
+  (c-name "gv_properties_get_name_by_index")
+  (return-type "const-char*")
+  (parameters
+    '("int" "prop_index")
+  )
+)
+
+(define-method get_value_by_index
+  (of-object "GvProperties")
+  (c-name "gv_properties_get_value_by_index")
+  (return-type "const-char*")
+  (parameters
+    '("int" "prop_index")
+  )
+)
+
+(define-method remove
+  (of-object "GvProperties")
+  (c-name "gv_properties_remove")
+  (return-type "none")
+  (parameters
+    '("const-char*" "key")
+  )
+)
+
+(define-method init
+  (of-object "GvProperties")
+  (c-name "gv_properties_init")
+  (return-type "none")
+)
+
+(define-method copy
+  (of-object "GvProperties")
+  (c-name "gv_properties_copy")
+  (return-type "none")
+  (parameters
+    '("GvProperties*" "target")
+  )
+)
+
+(define-method destroy
+  (of-object "GvProperties")
+  (c-name "gv_properties_destroy")
+  (return-type "none")
+)
+
+(define-method clear
+  (of-object "GvProperties")
+  (c-name "gv_properties_clear")
+  (return-type "none")
+)
+
+
+
+;; From gvraster.h
+
+(define-function gv_raster_get_type
+  (c-name "gv_raster_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_raster_new
+  (c-name "gv_raster_new")
+  (is-constructor-of "GvRaster")
+  (return-type "GvData*")
+  (parameters
+    '("GDALDatasetH" "dataset")
+    '("int" "real_band")
+    '("GvSampleMethod" "sm")
+  )
+)
+
+(define-method read
+  (of-object "GvRaster")
+  (c-name "gv_raster_read")
+  (return-type "none")
+  (parameters
+    '("GDALDatasetH" "dataset")
+    '("int" "real_band")
+    '("GvSampleMethod" "sm")
+  )
+)
+
+(define-method tile_get
+  (of-object "GvRaster")
+  (c-name "gv_raster_tile_get")
+  (return-type "void*")
+  (parameters
+    '("int" "tile")
+    '("int" "lod")
+  )
+)
+
+(define-method tile_xy_get
+  (of-object "GvRaster")
+  (c-name "gv_raster_tile_xy_get")
+  (return-type "gint*")
+  (parameters
+    '("int" "tile")
+    '("int" "lod")
+    '("gint*" "coords")
+  )
+)
+
+(define-method flush_cache
+  (of-object "GvRaster")
+  (c-name "gv_raster_flush_cache")
+  (return-type "none")
+  (parameters
+    '("int" "x_off")
+    '("int" "y_off")
+    '("int" "width")
+    '("int" "height")
+  )
+)
+
+(define-method get_nodata
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_nodata")
+  (return-type "gint")
+  (parameters
+    '("double*" "nodata")
+  )
+)
+
+(define-method get_sample
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_sample")
+  (return-type "gint")
+  (parameters
+    '("double" "x")
+    '("double" "y")
+    '("double*" "real")
+    '("double*" "imaginary")
+  )
+)
+
+(define-method pixel_size
+  (of-object "GvRaster")
+  (c-name "gv_raster_pixel_size")
+  (return-type "double")
+)
+
+(define-method pixel_to_georef
+  (of-object "GvRaster")
+  (c-name "gv_raster_pixel_to_georef")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method georef_to_pixel
+  (of-object "GvRaster")
+  (c-name "gv_raster_georef_to_pixel")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method autoscale
+  (of-object "GvRaster")
+  (c-name "gv_raster_autoscale")
+  (return-type "gint")
+  (parameters
+    '("GvAutoScaleAlg" "alg")
+    '("double" "alg_param")
+    '("int" "sample_count")
+    '("float*" "sample_set")
+    '("double*" "out_min")
+    '("double*" "out_max")
+  )
+)
+
+(define-method collect_random_sample
+  (of-object "GvRaster")
+  (c-name "gv_raster_collect_random_sample")
+  (return-type "int")
+  (parameters
+    '("int" "sample_count")
+    '("float*" "sample_set")
+    '("int" "xoff")
+    '("int" "yoff")
+    '("int" "xsize")
+    '("int" "ysize")
+    '("GArray*" "tile_list")
+  )
+)
+
+(define-method collect_histogram
+  (of-object "GvRaster")
+  (c-name "gv_raster_collect_histogram")
+  (return-type "int")
+  (parameters
+    '("double" "scale_min")
+    '("double" "scale_max")
+    '("int" "bucket_count")
+    '("int*" "histogram")
+    '("int" "include_out_of_range")
+    '("int" "xoff")
+    '("int" "yoff")
+    '("int" "xsize")
+    '("int" "ysize")
+    '("GArray*" "tile_list")
+  )
+)
+
+(define-method set_gcps
+  (of-object "GvRaster")
+  (c-name "gv_raster_set_gcps")
+  (return-type "int")
+  (parameters
+    '("int" "gcp_count")
+    '("const-GDAL_GCP*" "gcps")
+  )
+)
+
+(define-method get_gcp_count
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_gcp_count")
+  (return-type "int")
+)
+
+(define-method get_gcps
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_gcps")
+  (return-type "const-GDAL_GCP*")
+)
+
+(define-method set_gcpsCL
+  (of-object "GvRaster")
+  (c-name "gv_raster_set_gcpsCL")
+  (return-type "int")
+  (parameters
+    '("int" "gcp_count")
+    '("const-GDAL_GCP*" "gcps")
+    '("int" "poly_order")
+  )
+)
+
+(define-method get_gcp_countCL
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_gcp_countCL")
+  (return-type "int")
+)
+
+(define-method get_gcpsCL
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_gcpsCL")
+  (return-type "const-GDAL_GCP*")
+)
+
+(define-method pixel_to_georefCL
+  (of-object "GvRaster")
+  (c-name "gv_raster_pixel_to_georefCL")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method georef_to_pixelCL
+  (of-object "GvRaster")
+  (c-name "gv_raster_georef_to_pixelCL")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method set_poly_order_preference
+  (of-object "GvRaster")
+  (c-name "gv_raster_set_poly_order_preference")
+  (return-type "none")
+  (parameters
+    '("int" "poly_order")
+  )
+)
+
+(define-method get_dataset
+  (of-object "GvRaster")
+  (c-name "gv_raster_get_dataset")
+  (return-type "GDALDatasetH")
+)
+
+
+
+;; From gvrasteraverage.h
+
+(define-method float_real_average_nodata
+  (of-object "GvRaster")
+  (c-name "gv_raster_float_real_average_nodata")
+  (return-type "float*")
+  (parameters
+    '("float*" "buffer")
+    '("int" "tsize_x")
+    '("int" "tsize_y")
+  )
+)
+
+(define-method float_real_average
+  (of-object "GvRaster")
+  (c-name "gv_raster_float_real_average")
+  (return-type "float*")
+  (parameters
+    '("float*" "buffer")
+    '("int" "tsize_x")
+    '("int" "tsize_y")
+  )
+)
+
+(define-method float_real_sample
+  (of-object "GvRaster")
+  (c-name "gv_raster_float_real_sample")
+  (return-type "float*")
+  (parameters
+    '("float*" "buffer")
+    '("int" "tsize_x")
+    '("int" "tsize_y")
+  )
+)
+
+(define-method float_complex_average
+  (of-object "GvRaster")
+  (c-name "gv_raster_float_complex_average")
+  (return-type "float*")
+  (parameters
+    '("float*" "buffer")
+    '("int" "tsize_x")
+    '("int" "tsize_y")
+  )
+)
+
+(define-method float_complex_sample
+  (of-object "GvRaster")
+  (c-name "gv_raster_float_complex_sample")
+  (return-type "float*")
+  (parameters
+    '("float*" "buffer")
+    '("int" "tsize_x")
+    '("int" "tsize_y")
+  )
+)
+
+
+
+;; From gvrastercache.h
+
+(define-function gv_raster_cache_new
+  (c-name "gv_raster_cache_new")
+  (is-constructor-of "GvRasterCache")
+  (return-type "gv_raster_cache*")
+  (parameters
+    '("gint" "max_tiles")
+    '("gint" "max_lod")
+  )
+)
+
+(define-function gv_raster_cache_free
+  (c-name "gv_raster_cache_free")
+  (return-type "none")
+  (parameters
+    '("gv_raster_cache*" "cache")
+  )
+)
+
+(define-function gv_raster_cache_get
+  (c-name "gv_raster_cache_get")
+  (return-type "void*")
+  (parameters
+    '("gv_raster_cache*" "cache")
+    '("gint" "tile")
+    '("gint" "lod")
+  )
+)
+
+(define-function gv_raster_cache_put
+  (c-name "gv_raster_cache_put")
+  (return-type "none")
+  (parameters
+    '("gv_raster_cache*" "cache")
+    '("gint" "tile")
+    '("gint" "lod")
+    '("void*" "data")
+    '("gint" "size")
+  )
+)
+
+(define-function gv_raster_cache_get_best_lod
+  (c-name "gv_raster_cache_get_best_lod")
+  (return-type "int")
+  (parameters
+    '("gv_raster_cache*" "cache")
+    '("gint" "tile")
+    '("gint" "lod")
+  )
+)
+
+(define-function gv_raster_cache_flush_all
+  (c-name "gv_raster_cache_flush_all")
+  (return-type "none")
+  (parameters
+    '("gv_raster_cache*" "cache")
+  )
+)
+
+(define-function gv_raster_cache_del
+  (c-name "gv_raster_cache_del")
+  (return-type "none")
+  (parameters
+    '("gv_raster_cache*" "cache")
+    '("gint" "tile")
+    '("gint" "lod")
+  )
+)
+
+(define-function gv_raster_cache_get_max
+  (c-name "gv_raster_cache_get_max")
+  (return-type "int")
+  (parameters
+  )
+)
+
+(define-function gv_raster_cache_set_max
+  (c-name "gv_raster_cache_set_max")
+  (return-type "none")
+  (parameters
+    '("int" "max")
+  )
+)
+
+(define-function gv_raster_cache_get_used
+  (c-name "gv_raster_cache_get_used")
+  (return-type "int")
+  (parameters
+  )
+)
+
+
+
+;; From gvrasterize.h
+
+(define-function llImageFilledPolygon
+  (c-name "llImageFilledPolygon")
+  (return-type "none")
+  (parameters
+    '("int" "nRasterXSize")
+    '("int" "nRasterYSize")
+    '("int" "nPartCount")
+    '("int*" "panPartSize")
+    '("llPoint*" "pasPoints")
+    '("int" "bFillShort")
+    '("llScanlineFunc" "pfnScanlineFunc")
+    '("void*" "pCBData")
+  )
+)
+
+(define-function dllImageFilledPolygon
+  (c-name "dllImageFilledPolygon")
+  (return-type "none")
+  (parameters
+    '("int" "nRasterXSize")
+    '("int" "nRasterYSize")
+    '("int" "nPartCount")
+    '("int*" "panPartSize")
+    '("dllPoint*" "p")
+    '("llScanlineFunc" "pfnScanlineFunc")
+    '("void*" "pCBData")
+    '("int" "method")
+  )
+)
+
+(define-method rasterize_shapes
+  (of-object "GvRaster")
+  (c-name "gv_raster_rasterize_shapes")
+  (return-type "int")
+  (parameters
+    '("int" "shape_count")
+    '("GvShape**" "shapes")
+    '("double" "dfBurnValue")
+    '("int" "bFillShort")
+  )
+)
+
+
+
+;; From gvrasterlayer.h
+
+(define-function gv_raster_layer_get_type
+  (c-name "gv_raster_layer_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_raster_layer_new
+  (c-name "gv_raster_layer_new")
+  (is-constructor-of "GvRasterLayer")
+  (return-type "GObject*")
+  (parameters
+    '("int" "mode")
+    '("GvRaster*" "prototype_data")
+    '("GvProperties" "prop")
+  )
+)
+
+(define-method read
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_read")
+  (return-type "none")
+  (parameters
+    '("int" "mode")
+    '("GvRaster*" "prototype_data")
+    '("GvProperties" "prop")
+  )
+)
+
+(define-method texture_clamp_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_texture_clamp_set")
+  (return-type "long")
+  (parameters
+    '("int" "s_clamp")
+    '("int" "t_clamp")
+  )
+)
+
+(define-method zoom_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_zoom_set")
+  (return-type "long")
+  (parameters
+    '("int" "mag_mode")
+    '("int" "min_mode")
+  )
+)
+
+(define-method zoom_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_zoom_get")
+  (return-type "long")
+  (parameters
+    '("int*" "mag_mode")
+    '("int*" "min_mode")
+  )
+)
+
+(define-method alpha_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_alpha_set")
+  (return-type "long")
+  (parameters
+    '("int" "alpha_mode")
+    '("float" "alpha_check_val")
+  )
+)
+
+(define-method texture_mode_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_texture_mode_set")
+  (return-type "long")
+  (parameters
+    '("int" "texture_mode")
+    '("GvColor" "color")
+  )
+)
+
+(define-method blend_mode_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_blend_mode_set")
+  (return-type "long")
+  (parameters
+    '("int" "blend_mode")
+    '("int" "sfactor")
+    '("int" "dfactor")
+  )
+)
+
+(define-method purge_all_textures
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_purge_all_textures")
+  (return-type "none")
+)
+
+(define-method get_mode
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_get_mode")
+  (return-type "int")
+)
+
+(define-method blend_mode_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_blend_mode_get")
+  (return-type "long")
+  (parameters
+    '("int*" "blend_mode")
+    '("int*" "sfactor")
+    '("int*" "dfactor")
+  )
+)
+
+(define-method alpha_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_alpha_get")
+  (return-type "long")
+  (parameters
+    '("int*" "alpha_mode")
+    '("float*" "alpha_check_val")
+  )
+)
+
+(define-method texture_mode_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_texture_mode_get")
+  (return-type "long")
+  (parameters
+    '("int*" "texture_mode")
+    '("GvColor*" "color")
+  )
+)
+
+(define-method max_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_max_get")
+  (return-type "float")
+  (parameters
+    '("int" "isource")
+  )
+)
+
+(define-method min_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_min_get")
+  (return-type "float")
+  (parameters
+    '("int" "isource")
+  )
+)
+
+(define-method get_data
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_get_data")
+  (return-type "GvRaster*")
+  (parameters
+    '("int" "isource")
+  )
+)
+
+(define-method set_source
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_set_source")
+  (return-type "int")
+  (parameters
+    '("int" "isource")
+    '("GvRaster*" "data")
+    '("float" "min")
+    '("float" "max")
+    '("unsigned-char" "const_value")
+    '("unsigned-char*" "lut")
+    '("int" "nodata_active")
+    '("double" "nodata_real")
+    '("double" "nodata_imaginary")
+  )
+)
+
+(define-method min_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_min_set")
+  (return-type "int")
+  (parameters
+    '("int" "isource")
+    '("float" "min")
+  )
+)
+
+(define-method max_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_max_set")
+  (return-type "int")
+  (parameters
+    '("int" "isource")
+    '("float" "max")
+  )
+)
+
+(define-method nodata_set
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_nodata_set")
+  (return-type "gint")
+  (parameters
+    '("int" "isource")
+    '("double" "nodata_real")
+    '("double" "nodata_imaginary")
+  )
+)
+
+(define-method nodata_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_nodata_get")
+  (return-type "gint")
+  (parameters
+    '("int" "isource")
+    '("double*" "nodata_real")
+    '("double*" "nodata_imaginary")
+  )
+)
+
+(define-method type_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_type_get")
+  (return-type "GDALDataType")
+  (parameters
+    '("int" "isource")
+  )
+)
+
+(define-method pixel_to_view
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_pixel_to_view")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method view_to_pixel
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_view_to_pixel")
+  (return-type "gint")
+  (parameters
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-method autoscale_view
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_autoscale_view")
+  (return-type "gint")
+  (parameters
+    '("int" "isrc")
+    '("GvAutoScaleAlg" "alg")
+    '("double" "alg_param")
+    '("double*" "out_min")
+    '("double*" "out_max")
+  )
+)
+
+(define-method histogram_view
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_histogram_view")
+  (return-type "gint")
+  (parameters
+    '("int" "isrc")
+    '("double" "scale_min")
+    '("double" "scale_max")
+    '("int" "include_out_of_range")
+    '("int" "bucket_count")
+    '("int*" "histogram")
+  )
+)
+
+(define-method pixel_size
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_pixel_size")
+  (return-type "double")
+)
+
+(define-method add_height
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_add_height")
+  (return-type "none")
+  (parameters
+    '("GvRaster*" "height_raster")
+    '("double" "default_height")
+  )
+)
+
+(define-method clamp_height
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_clamp_height")
+  (return-type "none")
+  (parameters
+    '("int" "bclamp_min")
+    '("int" "bclamp_max")
+    '("double" "min_height")
+    '("double" "max_height")
+  )
+)
+
+(define-method set_raw
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_set_raw")
+  (return-type "int")
+  (parameters
+    '("int" "raw_enable")
+  )
+)
+
+(define-method refresh_mesh
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_refresh_mesh")
+  (return-type "none")
+)
+
+(define-method purge_texture
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_purge_texture")
+  (return-type "none")
+  (parameters
+    '("int" "texture")
+  )
+)
+
+(define-method create_texture
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_create_texture")
+  (return-type "none")
+  (parameters
+    '("int" "texture")
+    '("GLuint" "tex_obj")
+    '("int" "lod")
+    '("int" "size")
+  )
+)
+
+(define-method touch_texture
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_touch_texture")
+  (return-type "none")
+  (parameters
+    '("int" "texture")
+  )
+)
+
+(define-method reset_texture
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_reset_texture")
+  (return-type "none")
+  (parameters
+    '("int" "texture")
+    '("int" "lod")
+    '("int" "size")
+  )
+)
+
+(define-function gv_texture_cache_set_max
+  (c-name "gv_texture_cache_set_max")
+  (return-type "none")
+  (parameters
+    '("int" "max")
+  )
+)
+
+(define-function gv_texture_cache_get_max
+  (c-name "gv_texture_cache_get_max")
+  (return-type "int")
+  (parameters
+  )
+)
+
+(define-function gv_texture_cache_get_used
+  (c-name "gv_texture_cache_get_used")
+  (return-type "int")
+  (parameters
+  )
+)
+
+(define-function gv_texture_cache_dump
+  (c-name "gv_texture_cache_dump")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-method tilelist_get
+  (of-object "GvMesh")
+  (c-name "gv_mesh_tilelist_get")
+  (return-type "GArray*")
+  (parameters
+    '("GvViewArea*" "view")
+    '("GvRasterLayer*" "rlayer")
+    '("GArray*" "tilelist")
+  )
+)
+
+(define-function gv_build_skirt
+  (c-name "gv_build_skirt")
+  (return-type "GvLayer*")
+  (parameters
+    '("GvRasterLayer*" "dem_layer")
+    '("double" "base_z")
+  )
+)
+
+
+
+;; From gvrasterlut.h
+
+(define-method lut_color_wheel_new_ev
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_color_wheel_new_ev")
+  (return-type "int")
+  (parameters
+    '("gint" "set_phase")
+    '("gint" "set_magnitude")
+  )
+)
+
+(define-method lut_color_wheel_new
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_color_wheel_new")
+  (return-type "int")
+  (parameters
+    '("gint" "h_type")
+    '("gfloat" "h_param")
+    '("gint" "s_type")
+    '("gfloat" "s_param")
+    '("gint" "v_type")
+    '("gfloat" "v_param")
+  )
+)
+
+(define-method lut_color_wheel_1d_new
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_color_wheel_1d_new")
+  (return-type "int")
+  (parameters
+    '("float" "s")
+    '("float" "v")
+    '("float" "offset")
+  )
+)
+
+(define-method lut_interpolated_new
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_interpolated_new")
+  (return-type "int")
+  (parameters
+    '("GvRasterLayerLutInterpolate*" "color_pair")
+    '("int" "offset")
+  )
+)
+
+(define-method lut_put
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_put")
+  (return-type "int")
+  (parameters
+    '("guchar*" "lut")
+    '("gint" "height")
+  )
+)
+
+(define-method lut_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_get")
+  (return-type "char*")
+  (parameters
+    '("int*" "width")
+    '("int*" "height")
+    '("int" "rgba_complex")
+  )
+)
+
+(define-method lut_compose
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_compose")
+  (return-type "int")
+)
+
+(define-method lut_type_get
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_lut_type_get")
+  (return-type "long")
+)
+
+(define-method apply_gdal_color_table
+  (of-object "GvRasterLayer")
+  (c-name "gv_raster_layer_apply_gdal_color_table")
+  (return-type "int")
+  (parameters
+    '("GDALColorTableH" "color_table")
+  )
+)
+
+(define-function gv_raster_lut_create_from_byte_lut
+  (c-name "gv_raster_lut_create_from_byte_lut")
+  (return-type "GvRasterLut*")
+  (parameters
+    '("unsigned-char*" "byte_lut")
+    '("float" "min")
+    '("float" "max")
+    '("int" "lut_options")
+  )
+)
+
+(define-method free
+  (of-object "GvRasterLut")
+  (c-name "gv_raster_lut_free")
+  (return-type "none")
+)
+
+(define-method print
+  (of-object "GvRasterLut")
+  (c-name "gv_raster_lut_print")
+  (return-type "none")
+  (parameters
+    '("FILE*" "report")
+  )
+)
+
+
+
+;; From gvrastertypes.h
+
+
+
+;; From gvrecttool.h
+
+(define-function gv_rect_tool_get_type
+  (c-name "gv_rect_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_rect_tool_new
+  (c-name "gv_rect_tool_new")
+  (is-constructor-of "GvRectTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvRectTool")
+  (c-name "gv_rect_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+(define-method set_named_layer
+  (of-object "GvRectTool")
+  (c-name "gv_rect_tool_set_named_layer")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+
+
+;; From gvrenderinfo.h
+
+(define-method get_part
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_part")
+  (return-type "GvRenderPart*")
+  (parameters
+    '("guint" "part_index")
+  )
+)
+
+(define-method get_first_part_index
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_first_part_index")
+  (return-type "guint")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method add_part
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_add_part")
+  (return-type "guint")
+  (parameters
+    '("gint" "shape_id")
+    '("gint" "part_type")
+  )
+)
+
+(define-method create_part
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_create_part")
+  (return-type "guint")
+  (parameters
+    '("gint" "part_type")
+  )
+)
+
+(define-method chain_part
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_chain_part")
+  (return-type "guint")
+  (parameters
+    '("gint" "base_part_index")
+    '("gint" "new_part_index")
+  )
+)
+
+(define-method clear_shape_parts
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_clear_shape_parts")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method clear_part
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_clear_part")
+  (return-type "none")
+  (parameters
+    '("guint" "part_index")
+  )
+)
+
+(define-method clear_all_renderinfo
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_clear_all_renderinfo")
+  (return-type "none")
+)
+
+(define-method build_renderinfo
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_build_renderinfo")
+  (return-type "guint")
+  (parameters
+    '("GvShape*" "shape_obj")
+    '("int*" "scale_dep")
+  )
+)
+
+(define-method update_renderinfo
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_update_renderinfo")
+  (return-type "none")
+  (parameters
+    '("int" "shape_id")
+  )
+)
+
+(define-method initialize_renderindex
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_initialize_renderindex")
+  (return-type "none")
+)
+
+(define-function gv_ogrfs_split_tools
+  (c-name "gv_ogrfs_split_tools")
+  (return-type "char**")
+  (parameters
+    '("const-char*" "tool_list_in")
+  )
+)
+
+(define-function gv_ogrfs_get_arg
+  (c-name "gv_ogrfs_get_arg")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "def")
+    '("char**" "next_def")
+    '("char**" "value")
+    '("int*" "value_len")
+  )
+)
+
+
+
+;; From gvroitool.h
+
+(define-function gv_roi_tool_get_type
+  (c-name "gv_roi_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_roi_tool_new
+  (c-name "gv_roi_tool_new")
+  (is-constructor-of "GvRoiTool")
+  (return-type "GvTool*")
+)
+
+(define-method get_rect
+  (of-object "GvRoiTool")
+  (c-name "gv_roi_tool_get_rect")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method new_rect
+  (of-object "GvRoiTool")
+  (c-name "gv_roi_tool_new_rect")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+
+
+;; From gvrotatetool.h
+
+(define-function gv_rotate_tool_get_type
+  (c-name "gv_rotate_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_rotate_tool_new
+  (c-name "gv_rotate_tool_new")
+  (is-constructor-of "GvRotateTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvRotateTool")
+  (c-name "gv_rotate_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+(define-method set_named_layer
+  (of-object "GvRotateTool")
+  (c-name "gv_rotate_tool_set_named_layer")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+
+
+;; From gvselecttool.h
+
+(define-function gv_selection_tool_get_type
+  (c-name "gv_selection_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_selection_tool_new
+  (c-name "gv_selection_tool_new")
+  (is-constructor-of "GvSelectionTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_layer
+  (of-object "GvSelectionTool")
+  (c-name "gv_selection_tool_set_layer")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+  )
+)
+
+
+
+;; From gvshapelayer.h
+
+(define-function gv_shape_layer_get_type
+  (c-name "gv_shape_layer_get_type")
+  (return-type "GType")
+)
+
+(define-method select_shape
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_select_shape")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method deselect_shape
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_deselect_shape")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method clear_selection
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_clear_selection")
+  (return-type "none")
+)
+
+(define-method select_all
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_select_all")
+  (return-type "none")
+)
+
+(define-method draw_selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_draw_selected")
+  (return-type "none")
+  (parameters
+    '("guint" "when")
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method is_selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_is_selected")
+  (return-type "gint")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_selected")
+  (return-type "gint")
+  (parameters
+    '("gint" "what")
+    '("void*" "retval")
+  )
+)
+
+(define-method get_selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_selected")
+  (return-type "gint")
+  (parameters
+    '("GArray*" "shapes")
+  )
+)
+
+(define-method delete_selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_delete_selected")
+  (return-type "none")
+)
+
+(define-method translate_selected
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_translate_selected")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "dx")
+    '("gvgeocoord" "dy")
+  )
+)
+
+(define-method selected_motion
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_selected_motion")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "dx")
+    '("gvgeocoord" "dy")
+  )
+)
+
+(define-method subselect_shape
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_subselect_shape")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method get_subselection
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_subselection")
+  (return-type "gint")
+)
+
+(define-method set_scale_dep
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_set_scale_dep")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+    '("int" "dep")
+  )
+)
+
+(define-method get_scale_dep
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_scale_dep")
+  (return-type "int")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method get_node
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_get_node")
+  (return-type "none")
+  (parameters
+    '("GvNodeInfo*" "info")
+  )
+)
+
+(define-method move_node
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_move_node")
+  (return-type "none")
+  (parameters
+    '("GvNodeInfo*" "info")
+  )
+)
+
+(define-method insert_node
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_insert_node")
+  (return-type "none")
+  (parameters
+    '("GvNodeInfo*" "info")
+  )
+)
+
+(define-method delete_node
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_delete_node")
+  (return-type "none")
+  (parameters
+    '("GvNodeInfo*" "info")
+  )
+)
+
+(define-method node_motion
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_node_motion")
+  (return-type "none")
+  (parameters
+    '("gint" "shape_id")
+  )
+)
+
+(define-method select_region
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_select_region")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method pick_shape
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_pick_shape")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gint*" "shape_id")
+  )
+)
+
+(define-method pick_node
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_pick_node")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gint*" "before")
+    '("GvNodeInfo*" "node_info")
+  )
+)
+
+(define-method set_num_shapes
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_set_num_shapes")
+  (return-type "none")
+  (parameters
+    '("gint" "num_shapes")
+  )
+)
+
+(define-method set_color
+  (of-object "GvShapeLayer")
+  (c-name "gv_shape_layer_set_color")
+  (return-type "none")
+  (parameters
+    '("GvColor" "color")
+  )
+)
+
+
+
+;; From gvshapes.h
+
+(define-function gv_shapes_get_type
+  (c-name "gv_shapes_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_shapes_new
+  (c-name "gv_shapes_new")
+  (is-constructor-of "GvShapes")
+  (return-type "GvData*")
+)
+
+(define-function gv_shapes_from_shapefile
+  (c-name "gv_shapes_from_shapefile")
+  (return-type "GvData*")
+  (parameters
+    '("const-char*" "filename")
+  )
+)
+
+(define-function gv_shapes_read_from_file
+  (c-name "gv_shapes_read_from_file")
+  (return-type "none")
+  (parameters
+    '("const-char*" "filename")
+    '("GvShapes*" "shapes")
+  )
+)
+
+(define-function gv_shapes_from_ogr
+  (c-name "gv_shapes_from_ogr")
+  (return-type "GvData*")
+  (parameters
+    '("const-char*" "filename")
+    '("int" "iLayer")
+  )
+)
+
+(define-function gv_shapes_from_ogr_layer
+  (c-name "gv_shapes_from_ogr_layer")
+  (return-type "GvData*")
+  (parameters
+    '("void*" "ogr_layer")
+  )
+)
+
+(define-method add_height
+  (of-object "GvShapes")
+  (c-name "gv_shapes_add_height")
+  (return-type "none")
+  (parameters
+    '("GvData*" "raster")
+    '("double" "offset")
+    '("double" "default_height")
+  )
+)
+
+(define-function gv_shapes_to_shapefile
+  (c-name "gv_shapes_to_shapefile")
+  (return-type "int")
+  (parameters
+    '("const-char*" "filename")
+    '("GvData*" "shapes_data")
+    '("int" "shp_type")
+  )
+)
+
+(define-function gv_shapes_to_dbf
+  (c-name "gv_shapes_to_dbf")
+  (return-type "int")
+  (parameters
+    '("const-char*" "filename")
+    '("GvData*" "shapes_data")
+  )
+)
+
+(define-method get_extents
+  (of-object "GvShapes")
+  (c-name "gv_shapes_get_extents")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method add_shape
+  (of-object "GvShapes")
+  (c-name "gv_shapes_add_shape")
+  (return-type "gint")
+  (parameters
+    '("GvShape*" "shape")
+  )
+)
+
+(define-method add_shape_last
+  (of-object "GvShapes")
+  (c-name "gv_shapes_add_shape_last")
+  (return-type "gint")
+  (parameters
+    '("GvShape*" "shape")
+  )
+)
+
+(define-method replace_shapes
+  (of-object "GvShapes")
+  (c-name "gv_shapes_replace_shapes")
+  (return-type "none")
+  (parameters
+    '("gint" "num_shapes")
+    '("gint*" "shape_id")
+    '("GvShape**" "shps")
+    '("int" "make_copy")
+  )
+)
+
+(define-method delete_shapes
+  (of-object "GvShapes")
+  (c-name "gv_shapes_delete_shapes")
+  (return-type "none")
+  (parameters
+    '("gint" "num_shapes")
+    '("gint*" "shapeids")
+  )
+)
+
+(define-method translate_shapes
+  (of-object "GvShapes")
+  (c-name "gv_shapes_translate_shapes")
+  (return-type "none")
+  (parameters
+    '("gint" "num_shapes")
+    '("gint*" "shapeids")
+    '("gvgeocoord" "dx")
+    '("gvgeocoord" "dy")
+  )
+)
+
+
+
+;; From gvshapeslayer.h
+
+(define-function gv_draw_info_aggregate_select_region
+  (c-name "gv_draw_info_aggregate_select_region")
+  (return-type "none")
+  (parameters
+    '("GvShapeDrawInfo" "*")
+    '("double" "x")
+    '("double" "y")
+  )
+)
+
+(define-function gv_shapes_layer_get_type
+  (c-name "gv_shapes_layer_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_shapes_layer_new
+  (c-name "gv_shapes_layer_new")
+  (is-constructor-of "GvShapesLayer")
+  (return-type "GObject*")
+  (parameters
+    '("void*" "data")
+  )
+)
+
+(define-method select_new_shape
+  (of-object "GvShapesLayer")
+  (c-name "gv_shapes_layer_select_new_shape")
+  (return-type "gint")
+  (parameters
+    '("GvShape*" "shape")
+  )
+)
+
+(define-method set_data
+  (of-object "GvShapesLayer")
+  (c-name "gv_shapes_layer_set_data")
+  (return-type "none")
+  (parameters
+    '("GvShapes*" "data")
+  )
+)
+
+(define-function gv_shapes_layer_draw_selected
+  (c-name "gv_shapes_layer_draw_selected")
+  (return-type "none")
+  (parameters
+    '("GvShapeLayer*" "layer")
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-function gv_shapes_layer_draw
+  (c-name "gv_shapes_layer_draw")
+  (return-type "none")
+  (parameters
+    '("GvLayer*" "layer")
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-function gv_shapes_layer_get_draw_info
+  (c-name "gv_shapes_layer_get_draw_info")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+    '("GvShapesLayer*" "layer")
+    '("GvShapeDrawInfo*" "drawinfo")
+  )
+)
+
+(define-method s_layer_override_color
+  (of-object "GvShape")
+  (c-name "gv_shapes_layer_override_color")
+  (return-type "none")
+  (parameters
+    '("GvColor" "color")
+    '("const-char*" "property_name")
+  )
+)
+
+(define-method get_symbol_manager
+  (of-object "GvShapesLayer")
+  (c-name "gv_shapes_layer_get_symbol_manager")
+  (return-type "GObject*")
+  (parameters
+    '("int" "ok_to_create")
+  )
+)
+
+(define-function gv_shapes_layer_draw_shape
+  (c-name "gv_shapes_layer_draw_shape")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+    '("GvShapesLayer*" "layer")
+    '("int" "part_index")
+    '("GvShape*" "shape_obj")
+    '("gv_draw_mode" "draw_mode")
+    '("GvShapeDrawInfo*" "drawinfo")
+  )
+)
+
+
+
+;; From gvsymbolmanager.h
+
+(define-function gv_symbol_manager_get_type
+  (c-name "gv_symbol_manager_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_symbol_manager_new
+  (c-name "gv_symbol_manager_new")
+  (is-constructor-of "GvSymbolManager")
+  (return-type "GvSymbolManager*")
+)
+
+(define-function gv_get_symbol_manager
+  (c-name "gv_get_symbol_manager")
+  (return-type "GvSymbolManager*")
+)
+
+(define-method has_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_has_symbol")
+  (return-type "int")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method get_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_get_symbol")
+  (return-type "GvSymbolObj*")
+  (parameters
+    '("const-char*" "pszFilename")
+  )
+)
+
+(define-method inject_raster_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_inject_raster_symbol")
+  (return-type "none")
+  (parameters
+    '("const-char*" "symbol_name")
+    '("int" "width")
+    '("int" "height")
+    '("void*" "rgba_buffer")
+  )
+)
+
+(define-method inject_vector_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_inject_vector_symbol")
+  (return-type "none")
+  (parameters
+    '("const-char*" "symbol_name")
+    '("GvShape*" "shape")
+  )
+)
+
+(define-method eject_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_eject_symbol")
+  (return-type "int")
+  (parameters
+    '("const-char*" "symbol_name")
+  )
+)
+
+(define-method save_vector_symbol
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_save_vector_symbol")
+  (return-type "int")
+  (parameters
+    '("const-char*" "symbol_name")
+    '("const-char*" "new_name")
+  )
+)
+
+(define-method get_names
+  (of-object "GvSymbolManager")
+  (c-name "gv_symbol_manager_get_names")
+  (return-type "char**")
+)
+
+
+
+;; From gvtool.h
+
+(define-function gv_tool_get_type
+  (c-name "gv_tool_get_type")
+  (return-type "GType")
+)
+
+(define-method activate
+  (of-object "GvTool")
+  (c-name "gv_tool_activate")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method deactivate
+  (of-object "GvTool")
+  (c-name "gv_tool_deactivate")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method get_view
+  (of-object "GvTool")
+  (c-name "gv_tool_get_view")
+  (return-type "GvViewArea*")
+)
+
+(define-method set_boundary
+  (of-object "GvTool")
+  (c-name "gv_tool_set_boundary")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method clamp_to_bounds
+  (of-object "GvTool")
+  (c-name "gv_tool_clamp_to_bounds")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord*" "x")
+    '("gvgeocoord*" "y")
+  )
+)
+
+(define-method check_bounds
+  (of-object "GvTool")
+  (c-name "gv_tool_check_bounds")
+  (return-type "gint")
+  (parameters
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+  )
+)
+
+(define-method set_cursor
+  (of-object "GvTool")
+  (c-name "gv_tool_set_cursor")
+  (return-type "none")
+  (parameters
+    '("gint" "cursor_type")
+  )
+)
+
+
+
+;; From gvtoolbox.h
+
+(define-function gv_toolbox_get_type
+  (c-name "gv_toolbox_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_toolbox_new
+  (c-name "gv_toolbox_new")
+  (is-constructor-of "GvToolbox")
+  (return-type "GvTool*")
+)
+
+(define-method add_tool
+  (of-object "GvToolbox")
+  (c-name "gv_toolbox_add_tool")
+  (return-type "none")
+  (parameters
+    '("gchar*" "name")
+    '("GvTool*" "tool")
+  )
+)
+
+(define-method activate_tool
+  (of-object "GvToolbox")
+  (c-name "gv_toolbox_activate_tool")
+  (return-type "none")
+  (parameters
+    '("gchar*" "tool_name")
+  )
+)
+
+
+
+;; From gvtracktool.h
+
+(define-function gv_track_tool_get_type
+  (c-name "gv_track_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_track_tool_new
+  (c-name "gv_track_tool_new")
+  (is-constructor-of "GvTrackTool")
+  (return-type "GvTool*")
+  (parameters
+    '("GtkObject*" "label")
+  )
+)
+
+
+
+;; From gvtypes.h
+
+
+
+;; From gvundo.h
+
+(define-function gv_undo_register_data
+  (c-name "gv_undo_register_data")
+  (return-type "none")
+  (parameters
+    '("GvData*" "data")
+  )
+)
+
+(define-function gv_undo_open
+  (c-name "gv_undo_open")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_close
+  (c-name "gv_undo_close")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_push
+  (c-name "gv_undo_push")
+  (return-type "none")
+  (parameters
+    '("GvDataMemento*" "memento")
+  )
+)
+
+(define-function gv_undo_pop
+  (c-name "gv_undo_pop")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_clear
+  (c-name "gv_undo_clear")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_enable
+  (c-name "gv_undo_enable")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_disable
+  (c-name "gv_undo_disable")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-function gv_undo_can_undo
+  (c-name "gv_undo_can_undo")
+  (return-type "gint")
+  (parameters
+  )
+)
+
+(define-function gv_undo_start_group
+  (c-name "gv_undo_start_group")
+  (return-type "gint")
+  (parameters
+  )
+)
+
+(define-function gv_undo_end_group
+  (c-name "gv_undo_end_group")
+  (return-type "none")
+  (parameters
+    '("gint" "group")
+  )
+)
+
+
+
+;; From gvutils.h
+
+(define-function gv_set_color_from_string
+  (c-name "gv_set_color_from_string")
+  (return-type "none")
+  (parameters
+    '("GvColor" "color")
+    '("const-char*" "string")
+    '("float" "def_red")
+    '("float" "def_green")
+    '("float" "def_blue")
+    '("float" "def_alpha")
+  )
+)
+
+(define-function gv_format_point_query
+  (c-name "gv_format_point_query")
+  (return-type "const-char*")
+  (parameters
+    '("GvViewArea*" "view")
+    '("GvProperties*" "properties")
+    '("double" "geo_x")
+    '("double" "geo_y")
+  )
+)
+
+(define-function gv_reproject_points
+  (c-name "gv_reproject_points")
+  (return-type "int")
+  (parameters
+    '("const-char*" "source_srs")
+    '("const-char*" "destination_srs")
+    '("int" "count")
+    '("double*" "x")
+    '("double*" "y")
+    '("double*" "z")
+  )
+)
+
+(define-function gv_make_latlong_srs
+  (c-name "gv_make_latlong_srs")
+  (return-type "gchar*")
+  (parameters
+    '("const-char*" "projected_srs")
+  )
+)
+
+(define-function gv_complex_to_phase_mag
+  (c-name "gv_complex_to_phase_mag")
+  (return-type "none")
+  (parameters
+    '("float" "real")
+    '("float" "imaginary")
+    '("float*" "phase")
+    '("float*" "magnitude")
+  )
+)
+
+(define-function gv_launch_url
+  (c-name "gv_launch_url")
+  (return-type "int")
+  (parameters
+    '("const-char*" "url")
+  )
+)
+
+(define-function gv_short_path_name
+  (c-name "gv_short_path_name")
+  (return-type "char*")
+  (parameters
+    '("const-char*" "lpszLongPath")
+  )
+)
+
+
+
+;; From gvviewarea.h
+
+(define-function gv_view_area_get_type
+  (c-name "gv_view_area_get_type")
+  (return-type "GType")
+  (parameters
+  )
+)
+
+(define-function gv_view_area_new
+  (c-name "gv_view_area_new")
+  (is-constructor-of "GvViewArea")
+  (return-type "GtkWidget*")
+  (parameters
+  )
+)
+
+(define-method set_mode
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_mode")
+  (return-type "none")
+  (parameters
+    '("int" "flag_3d")
+  )
+)
+
+(define-method get_mode
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_mode")
+  (return-type "int")
+)
+
+(define-method height_scale
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_height_scale")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "scale")
+  )
+)
+
+(define-method get_height_scale
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_height_scale")
+  (return-type "gvgeocoord")
+)
+
+(define-method set_3d_view
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_3d_view")
+  (return-type "none")
+  (parameters
+    '("vec3_t" "eye_pos")
+    '("vec3_t" "eye_dir")
+  )
+)
+
+(define-method set_3d_view_look_at
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_3d_view_look_at")
+  (return-type "none")
+  (parameters
+    '("vec3_t" "eye_pos")
+    '("gvgeocoord*" "eye_look_at")
+  )
+)
+
+(define-method get_look_at_pos
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_look_at_pos")
+  (return-type "gint")
+  (parameters
+    '("gvgeocoord*" "x")
+    '("gvgeocoord*" "y")
+  )
+)
+
+(define-method set_raw
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_raw")
+  (return-type "gint")
+  (parameters
+    '("GObject*" "ref_layer")
+    '("int" "raw_enable")
+  )
+)
+
+(define-method get_raw
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_raw")
+  (return-type "gint")
+  (parameters
+    '("GObject*" "ref_layer")
+  )
+)
+
+(define-method queue_draw
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_queue_draw")
+  (return-type "none")
+)
+
+(define-method zoom
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_zoom")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "zoom")
+  )
+)
+
+(define-method get_zoom
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_zoom")
+  (return-type "gvgeocoord")
+)
+
+(define-method rotate
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_rotate")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "angle")
+  )
+)
+
+(define-method translate
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_translate")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "dx")
+    '("gvgeocoord" "dy")
+  )
+)
+
+(define-method set_translation
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_translation")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+  )
+)
+
+(define-method get_flip_x
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_flip_x")
+  (return-type "int")
+)
+
+(define-method get_flip_y
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_flip_y")
+  (return-type "int")
+)
+
+(define-method set_flip_xy
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_flip_xy")
+  (return-type "none")
+  (parameters
+    '("int" "flip_x")
+    '("int" "flip_y")
+  )
+)
+
+(define-method fit_all_layers
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_fit_all_layers")
+  (return-type "none")
+)
+
+(define-method fit_extents
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_fit_extents")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "llx")
+    '("gvgeocoord" "lly")
+    '("gvgeocoord" "width")
+    '("gvgeocoord" "height")
+  )
+)
+
+(define-function gv_view_area_expose
+  (c-name "gv_view_area_expose")
+  (return-type "gint")
+  (parameters
+    '("GtkWidget*" "view")
+    '("GdkEventExpose*" "event")
+  )
+)
+
+(define-method get_extents
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_extents")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord*" "xmin")
+    '("gvgeocoord*" "ymin")
+    '("gvgeocoord*" "xmax")
+    '("gvgeocoord*" "ymax")
+  )
+)
+
+(define-method get_world_extents
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_world_extents")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "extents")
+  )
+)
+
+(define-method get_volume
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_volume")
+  (return-type "none")
+  (parameters
+    '("double*" "volume")
+  )
+)
+
+(define-method map_location
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_map_location")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord*" "geo_x")
+    '("gvgeocoord*" "geo_y")
+  )
+)
+
+(define-method copy_state
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_copy_state")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "copy")
+  )
+)
+
+(define-method set_state
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_state")
+  (return-type "none")
+  (parameters
+    '("GvViewAreaState*" "state")
+  )
+)
+
+(define-method map_pointer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_map_pointer")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "px")
+    '("gvgeocoord" "py")
+    '("gvgeocoord*" "x")
+    '("gvgeocoord*" "y")
+  )
+)
+
+(define-method inverse_map_pointer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_inverse_map_pointer")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord*" "px")
+    '("gvgeocoord*" "py")
+  )
+)
+
+(define-method correct_for_transform
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_correct_for_transform")
+  (return-type "none")
+  (parameters
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord*" "cx")
+    '("gvgeocoord*" "cy")
+  )
+)
+
+(define-method add_layer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_add_layer")
+  (return-type "none")
+  (parameters
+    '("GObject*" "layer")
+  )
+)
+
+(define-method remove_layer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_remove_layer")
+  (return-type "none")
+  (parameters
+    '("GObject*" "layer")
+  )
+)
+
+(define-method active_layer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_active_layer")
+  (return-type "GObject*")
+)
+
+(define-method set_active_layer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_active_layer")
+  (return-type "none")
+  (parameters
+    '("GObject*" "layer")
+  )
+)
+
+(define-method get_layer_of_type
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_layer_of_type")
+  (return-type "GObject*")
+  (parameters
+    '("GType" "layer_type")
+    '("gint" "read_only_ok")
+  )
+)
+
+(define-method get_named_layer
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_named_layer")
+  (return-type "GObject*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method list_layers
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_list_layers")
+  (return-type "GList*")
+)
+
+(define-method get_primary_raster
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_primary_raster")
+  (return-type "GObject*")
+)
+
+(define-method swap_layers
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_swap_layers")
+  (return-type "none")
+  (parameters
+    '("gint" "layer_a")
+    '("gint" "layer_b")
+  )
+)
+
+(define-method create_thumbnail
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_create_thumbnail")
+  (return-type "GdkPixmap*")
+  (parameters
+    '("GObject*" "layer")
+    '("gint" "width")
+    '("gint" "height")
+  )
+)
+
+(define-method get_fontnames
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_fontnames")
+  (return-type "GPtrArray*")
+)
+
+(define-method bmfont_load
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_bmfont_load")
+  (return-type "gint")
+  (parameters
+    '("gchar*" "name")
+  )
+)
+
+(define-method bmfont_get_info
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_bmfont_get_info")
+  (return-type "GvBMFontInfo*")
+  (parameters
+    '("gint" "font")
+  )
+)
+
+(define-method bmfont_draw
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_bmfont_draw")
+  (return-type "none")
+  (parameters
+    '("gint" "font")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gchar*" "text")
+    '("int" "force_simple")
+  )
+)
+
+(define-method set_background_color
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_background_color")
+  (return-type "none")
+  (parameters
+    '("GvColor" "color")
+  )
+)
+
+(define-method get_background_color
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_background_color")
+  (return-type "none")
+  (parameters
+    '("GvColor" "color")
+  )
+)
+
+(define-method set_adjustments
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_adjustments")
+  (return-type "none")
+  (parameters
+    '("GtkAdjustment*" "hadj")
+    '("GtkAdjustment*" "vadj")
+  )
+)
+
+(define-method set_projection
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_projection")
+  (return-type "gint")
+  (parameters
+    '("const-char*" "projection")
+  )
+)
+
+(define-method get_projection
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_projection")
+  (return-type "const-char*")
+)
+
+(define-method print_to_file
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_print_to_file")
+  (return-type "gint")
+  (parameters
+    '("int" "width")
+    '("int" "height")
+    '("const-char*" "filename")
+    '("const-char*" "format")
+    '("int" "is_rgb")
+  )
+)
+
+(define-method print_postscript_to_file
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_print_postscript_to_file")
+  (return-type "gint")
+  (parameters
+    '("int" "width")
+    '("int" "height")
+    '("float" "ulx")
+    '("float" "uly")
+    '("float" "lrx")
+    '("float" "lry")
+    '("int" "is_rgb")
+    '("const-char*" "filename")
+  )
+)
+
+(define-method render_postscript
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_render_postscript")
+  (return-type "gint")
+  (parameters
+    '("int" "width")
+    '("int" "height")
+    '("float" "ulx")
+    '("float" "uly")
+    '("float" "lrx")
+    '("float" "lry")
+    '("int" "is_rgb")
+    '("gint-(*" "cb_func")
+  )
+)
+
+(define-method render_to_func
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_render_to_func")
+  (return-type "gint")
+  (parameters
+    '("gint" "width")
+    '("gint" "height")
+    '("gint-(*" "scanline_handler")
+  )
+)
+
+(define-function gv_view_area_page_setup
+  (c-name "gv_view_area_page_setup")
+  (return-type "none")
+  (parameters
+  )
+)
+
+(define-method print_to_windriver
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_print_to_windriver")
+  (return-type "gint")
+  (parameters
+    '("int" "width")
+    '("int" "height")
+    '("float" "ulx")
+    '("float" "uly")
+    '("float" "lrx")
+    '("float" "lry")
+    '("int" "is_rgb")
+  )
+)
+
+(define-method zoompan_event
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_zoompan_event")
+  (return-type "none")
+  (parameters
+    '("GdkEventButton*" "event")
+  )
+)
+
+(define-method redraw_timeout
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_redraw_timeout")
+  (return-type "int")
+)
+
+(define-method pending_idle_work
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_pending_idle_work")
+  (return-type "int")
+)
+
+(define-function gv_get_render_counter
+  (c-name "gv_get_render_counter")
+  (return-type "int")
+  (parameters
+  )
+)
+
+(define-method set_property
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_set_property")
+  (return-type "none")
+  (parameters
+    '("const-char*" "name")
+    '("const-char*" "value")
+  )
+)
+
+(define-method get_property
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_property")
+  (return-type "const-char*")
+  (parameters
+    '("const-char*" "name")
+  )
+)
+
+(define-method get_properties
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_properties")
+  (return-type "GvProperties*")
+)
+
+(define-method queue_cursor_draw
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_queue_cursor_draw")
+  (return-type "none")
+  (parameters
+    '("int" "next_valid")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+  )
+)
+
+(define-method gl_begin
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_gl_begin")
+  (return-type "gint")
+)
+
+(define-method gl_end
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_gl_end")
+  (return-type "none")
+)
+
+(define-method make_current
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_make_current")
+  (return-type "gint")
+)
+
+(define-method get_gl_context
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_get_gl_context")
+  (return-type "GdkGLContext*")
+)
+
+(define-method begin
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_begin")
+  (return-type "gint")
+)
+
+(define-method swap_buffers
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_swap_buffers")
+  (return-type "none")
+)
+
+(define-method format_point_query
+  (of-object "GvViewArea")
+  (c-name "gv_view_area_format_point_query")
+  (return-type "const-char*")
+  (parameters
+    '("GvProperties*" "properties")
+    '("double" "geo_x")
+    '("double" "geo_y")
+  )
+)
+
+
+
+;; From gvviewlink.h
+
+(define-function gv_view_link_get_type
+  (c-name "gv_view_link_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_view_link_new
+  (c-name "gv_view_link_new")
+  (is-constructor-of "GvViewLink")
+  (return-type "GObject*")
+)
+
+(define-method register_view
+  (of-object "GvViewLink")
+  (c-name "gv_view_link_register_view")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method remove_view
+  (of-object "GvViewLink")
+  (c-name "gv_view_link_remove_view")
+  (return-type "none")
+  (parameters
+    '("GvViewArea*" "view")
+  )
+)
+
+(define-method enable
+  (of-object "GvViewLink")
+  (c-name "gv_view_link_enable")
+  (return-type "none")
+)
+
+(define-method disable
+  (of-object "GvViewLink")
+  (c-name "gv_view_link_disable")
+  (return-type "none")
+)
+
+(define-method set_cursor_mode
+  (of-object "GvViewLink")
+  (c-name "gv_view_link_set_cursor_mode")
+  (return-type "none")
+  (parameters
+    '("int" "cursor_mode")
+  )
+)
+
+
+
+;; From gvzoompantool.h
+
+(define-function gv_zoompan_tool_get_type
+  (c-name "gv_zoompan_tool_get_type")
+  (return-type "GType")
+)
+
+(define-function gv_zoompan_tool_new
+  (c-name "gv_zoompan_tool_new")
+  (is-constructor-of "GvZoompanTool")
+  (return-type "GvTool*")
+)
+
+
+
+;; From invdistance.h
+
+(define-function WIDInterpolate
+  (c-name "WIDInterpolate")
+  (return-type "int")
+  (parameters
+    '("int" "nPoints")
+    '("double*" "padfX")
+    '("double*" "padfY")
+    '("double*" "padfValue")
+    '("double*" "padfWeight")
+    '("GDALRasterBandH" "hBand")
+    '("double" "fExponent")
+    '("GDALProgressFunc" "pfnProgress")
+    '("void*" "pCBData")
+  )
+)
+
+
+
+;; From gvshape.h
+
+(define-function gv_shape_new
+  (c-name "gv_shape_new")
+  (is-constructor-of "GvShape")
+  (return-type "GvShape*")
+  (parameters
+    '("gint" "type")
+  )
+)
+
+(define-function gv_shape_from_xml_tree
+  (c-name "gv_shape_from_xml_tree")
+  (return-type "GvShape*")
+  (parameters
+    '("CPLXMLNode" "*")
+  )
+)
+
+(define-method to_xml_tree
+  (of-object "GvShape")
+  (c-name "gv_shape_to_xml_tree")
+  (return-type "CPLXMLNode*")
+)
+
+(define-method unref
+  (of-object "GvShape")
+  (c-name "gv_shape_unref")
+  (return-type "none")
+)
+
+(define-method ref
+  (of-object "GvShape")
+  (c-name "gv_shape_ref")
+  (return-type "none")
+)
+
+(define-method get_ref
+  (of-object "GvShape")
+  (c-name "gv_shape_get_ref")
+  (return-type "int")
+)
+
+(define-method delete
+  (of-object "GvShape")
+  (c-name "gv_shape_delete")
+  (return-type "none")
+)
+
+(define-method copy
+  (of-object "GvShape")
+  (c-name "gv_shape_copy")
+  (return-type "GvShape*")
+)
+
+(define-method get_rings
+  (of-object "GvShape")
+  (c-name "gv_shape_get_rings")
+  (return-type "gint")
+)
+
+(define-method get_nodes
+  (of-object "GvShape")
+  (c-name "gv_shape_get_nodes")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+  )
+)
+
+(define-method get_xyz
+  (of-object "GvShape")
+  (c-name "gv_shape_get_xyz")
+  (return-type "gvgeocoord")
+  (parameters
+    '("gint" "ring")
+    '("gint" "node")
+    '("gint" "off")
+  )
+)
+
+(define-method get_extents
+  (of-object "GvShape")
+  (c-name "gv_shape_get_extents")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method set_xyz
+  (of-object "GvShape")
+  (c-name "gv_shape_set_xyz")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+    '("gint" "node")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord" "z")
+  )
+)
+
+(define-method add_node
+  (of-object "GvShape")
+  (c-name "gv_shape_add_node")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord" "z")
+  )
+)
+
+(define-method insert_node
+  (of-object "GvShape")
+  (c-name "gv_shape_insert_node")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+    '("int" "node")
+    '("gvgeocoord" "x")
+    '("gvgeocoord" "y")
+    '("gvgeocoord" "z")
+  )
+)
+
+(define-method delete_node
+  (of-object "GvShape")
+  (c-name "gv_shape_delete_node")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+    '("gint" "node")
+  )
+)
+
+(define-method delete_ring
+  (of-object "GvShape")
+  (c-name "gv_shape_delete_ring")
+  (return-type "gint")
+  (parameters
+    '("gint" "ring")
+  )
+)
+
+(define-method point_in_polygon
+  (of-object "GvShape")
+  (c-name "gv_shape_point_in_polygon")
+  (return-type "gint")
+  (parameters
+    '("double" "x")
+    '("double" "y")
+  )
+)
+
+(define-method distance_from_polygon
+  (of-object "GvShape")
+  (c-name "gv_shape_distance_from_polygon")
+  (return-type "gdouble")
+  (parameters
+    '("double" "x")
+    '("double" "y")
+  )
+)
+
+(define-method clip_to_rect
+  (of-object "GvShape")
+  (c-name "gv_shape_clip_to_rect")
+  (return-type "GvShape*")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method collection_add_shape
+  (of-object "GvShape")
+  (c-name "gv_shape_collection_add_shape")
+  (return-type "none")
+  (parameters
+    '("GvShape*" "shape")
+  )
+)
+
+(define-method collection_get_shape
+  (of-object "GvShape")
+  (c-name "gv_shape_collection_get_shape")
+  (return-type "GvShape*")
+  (parameters
+    '("int" "shp_index")
+  )
+)
+
+(define-method collection_get_count
+  (of-object "GvShape")
+  (c-name "gv_shape_collection_get_count")
+  (return-type "int")
+)
+
+(define-method tessellate
+  (of-object "GvAreaShape")
+  (c-name "gv_area_shape_tessellate")
+  (return-type "gint")
+)
+
+(define-function gv_shape_get_count
+  (c-name "gv_shape_get_count")
+  (return-type "int")
+)
+
+(define-method update_attribute
+  (of-object "GvShape")
+  (c-name "gv_shape_update_attribute")
+  (return-type "gint")
+  (parameters
+    '("const-char*" "tool")
+    '("const-char*" "attribute")
+    '("const-char*" "update_value")
+  )
+)
+
+(define-method get_center
+  (of-object "GvShape")
+  (c-name "gv_shape_get_center")
+  (return-type "gint")
+  (parameters
+    '("GvVertex3d*" "xyz")
+  )
+)
+
+(define-method rotate
+  (of-object "GvShape")
+  (c-name "gv_shape_rotate")
+  (return-type "gint")
+  (parameters
+    '("double" "angle_in_degrees")
+  )
+)
+
+(define-method scale
+  (of-object "GvShape")
+  (c-name "gv_shape_scale")
+  (return-type "gint")
+  (parameters
+    '("double" "new_scale")
+  )
+)
+
+

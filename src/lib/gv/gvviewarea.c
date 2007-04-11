@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvviewarea.c,v 1.2 2005/04/21 19:40:18 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  GTK/OpenGL View Canvas
@@ -330,7 +330,6 @@
 #include "gvundo.h"
 #include "gvmanager.h"
 #include "gvutils.h"
-#include <gtk/gtksignal.h>
 #include <gtk/gtkgl.h>
 #include <gdk/gdkkeysyms.h>
 #include "gextra.h"
@@ -407,6 +406,7 @@ static GdkGLContext* gv_view_area_get_share_list(GvViewArea *view);
 */
 static PangoFontDescription *gv_view_XLFD_to_pango(gchar *XLFD_name);
 
+static GtkDrawingAreaClass *parent_class = NULL;
 static guint view_area_signals[LAST_SIGNAL] = { 0 };
 
 static void  gv_view_area_set_arg        (GtkObject      *object,
@@ -420,7 +420,7 @@ static void  gv_view_area_get_arg        (GtkObject      *object,
 static void vec_point(vec3_t point, gvgeocoord az, gvgeocoord el);
 static int inv_vec_point(vec3_t point, gvgeocoord *az, gvgeocoord *el);
 static void vec_near_far_range( vec3_t point, double *volume,
-				double *min, double *max );
+                                double *min, double *max );
 
 static struct { char *gvname, *gdkname; } bmfontmap[] =
 {
@@ -536,111 +536,75 @@ vec_near_far_range( vec3_t point, double *volume, double *min, double *max )
 
 }
 
-GtkType gv_view_area_get_type()
+GType gv_view_area_get_type()
 {
-    static GtkType view_area_type = 0;
+  static GType view_area_type = 0;
 
-    if (!view_area_type)
+  if (!view_area_type)
     {
-    static const GtkTypeInfo view_area_info =
-    {
-        "GvViewArea",
-        sizeof(GvViewArea),
-        sizeof(GvViewAreaClass),
-        (GtkClassInitFunc) gv_view_area_class_init,
-        (GtkObjectInitFunc) gv_view_area_init,
-        /* reserved_1 */ NULL,
-        /* reserved_2 */ NULL,
-        (GtkClassInitFunc) NULL,
-    };
+      static const GTypeInfo view_area_info =
+      {
+        sizeof (GvViewAreaClass),
+        (GBaseInitFunc) NULL,
+        (GBaseFinalizeFunc) NULL,
+        (GClassInitFunc) gv_view_area_class_init,
+        NULL,           /* class_finalize */
+        NULL,           /* class_data     */
+        sizeof (GvViewArea),
+        0,              /* n_preallocs    */
+        (GInstanceInitFunc) gv_view_area_init,
+      };
 
-    view_area_type = gtk_type_unique( gtk_drawing_area_get_type(),
-				      &view_area_info );
-
+      view_area_type = g_type_register_static (GTK_TYPE_DRAWING_AREA,
+                                            "GvViewArea",
+                                            &view_area_info, 0);
     }
+
     return view_area_type;
 }
 
 static void
 gv_view_area_class_init(GvViewAreaClass *klass)
 {
-    GtkObjectClass *object_class;
-    GtkWidgetClass *widget_class;
+    GtkObjectClass *object_class = GTK_OBJECT_CLASS(klass);
+    GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
-    object_class = GTK_OBJECT_CLASS(klass);
-    widget_class = GTK_WIDGET_CLASS(klass);
+    parent_class = g_type_class_peek_parent (klass);
 
     view_area_signals[GLDRAW] =
       g_signal_new ("gldraw",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvViewAreaClass, gldraw),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvViewAreaClass, gldraw),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     view_area_signals[GLCURSOR] =
       g_signal_new ("glcursor",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvViewAreaClass, glcursor),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvViewAreaClass, glcursor),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     view_area_signals[ACTIVE_CHANGED] =
       g_signal_new ("active-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvViewAreaClass, active_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvViewAreaClass, active_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     view_area_signals[VIEW_STATE_CHANGED] =
       g_signal_new ("view-state-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvViewAreaClass, view_state_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
-
-    /* GTK2 PORT...
-    view_area_signals[GLDRAW] =
-    gtk_signal_new ("gldraw",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvViewAreaClass, gldraw),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    view_area_signals[GLCURSOR] =
-    gtk_signal_new ("glcursor",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvViewAreaClass, glcursor),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    view_area_signals[ACTIVE_CHANGED] =
-    gtk_signal_new ("active-changed",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvViewAreaClass, active_changed),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    view_area_signals[VIEW_STATE_CHANGED] =
-    gtk_signal_new ("view-state-changed",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvViewAreaClass,
-                       view_state_changed),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    gtk_object_class_add_signals(object_class, view_area_signals, LAST_SIGNAL);
-    */
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvViewAreaClass, view_state_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_view_area_finalize;
+    G_OBJECT_CLASS(klass)->finalize = gv_view_area_finalize;
 
     object_class->destroy = gv_view_area_destroy;
     object_class->set_arg = gv_view_area_set_arg;
@@ -655,28 +619,14 @@ gv_view_area_class_init(GvViewAreaClass *klass)
     widget_class->motion_notify_event = gv_view_area_motion_notify;
     widget_class->key_press_event = gv_view_area_key_press;
 
-
     widget_class->set_scroll_adjustments_signal =
       g_signal_new ("set_scroll_adjustments",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_LAST,
-		    G_STRUCT_OFFSET (GvViewAreaClass, set_scroll_adjustments),
-		    NULL, NULL,
-		    gvmarshal_VOID__POINTER_POINTER, G_TYPE_NONE, 2,
-		    GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
-
-    /* GTK2 PORT...
-    widget_class->set_scroll_adjustments_signal =
-        gtk_signal_new ("set_scroll_adjustments",
-                        GTK_RUN_LAST,
-                        object_class->type,
-                        GTK_SIGNAL_OFFSET (GvViewAreaClass,
-                                           set_scroll_adjustments),
-                        gtk_marshal_NONE__POINTER_POINTER,
-                        GTK_TYPE_NONE, 2, GTK_TYPE_ADJUSTMENT,
-			GTK_TYPE_ADJUSTMENT);
-    */
-
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_LAST,
+                    G_STRUCT_OFFSET (GvViewAreaClass, set_scroll_adjustments),
+                    NULL, NULL,
+                    gvmarshal_VOID__POINTER_POINTER, G_TYPE_NONE, 2,
+                    GTK_TYPE_ADJUSTMENT, GTK_TYPE_ADJUSTMENT);
 
     klass->set_scroll_adjustments = gv_view_area_set_adjustments;
     klass->gldraw = NULL;
@@ -695,12 +645,12 @@ gv_view_area_init(GvViewArea *view)
     glconfig = gdk_gl_context_get_gl_config(glcontext);
     */
     glconfig = gdk_gl_config_new_by_mode (GDK_GL_MODE_RGB    |
-					  GDK_GL_MODE_DEPTH  |
-					  GDK_GL_MODE_DOUBLE);
+                                          GDK_GL_MODE_DEPTH  |
+                                          GDK_GL_MODE_DOUBLE);
 
     /* ---- Enable GL capability ---- */
     gtk_widget_set_gl_capability (GTK_WIDGET(view), glconfig,
-				  glcontext, TRUE, GDK_GL_RGBA_TYPE);
+                                  glcontext, TRUE, GDK_GL_RGBA_TYPE);
 
     view->state.tx = view->state.ty = view->state.rot = 0.0;
     view->state.zoom = 0.0;
@@ -758,8 +708,8 @@ gv_view_area_init(GvViewArea *view)
               VIEW_EVENT_MASK);
 
     /* Need to handle motion hints BEFORE other handlers */
-    gtk_signal_connect(GTK_OBJECT(view), "motion-notify-event",
-               GTK_SIGNAL_FUNC(gv_view_area_motion_handle_hint), NULL);
+    g_signal_connect(G_OBJECT(view), "motion-notify-event",
+               G_CALLBACK(gv_view_area_motion_handle_hint), NULL);
 }
 
 GtkWidget *gv_view_area_new()
@@ -769,7 +719,7 @@ GtkWidget *gv_view_area_new()
     /* SD check that geometric data type are in sync with OpenGL */
     g_assert(sizeof(gvgeocoord) == sizeof(GLgeocoord));
 
-    view = gtk_type_new(gv_view_area_get_type());
+    view = g_object_new(GV_TYPE_VIEW_AREA, NULL);
 
     return GTK_WIDGET(view);
 }
@@ -793,13 +743,13 @@ static GdkGLContext* gv_view_area_get_share_list(GvViewArea *view)
      config = gdk_gl_config_new_by_mode
        (GDK_GL_MODE_RGBA | GDK_GL_MODE_DEPTH  | GDK_GL_MODE_DOUBLE);
      if (config == NULL) {
-	 g_print ("*** Cannot find the double-buffered visual.\n");
-	 g_print ("*** Trying single-buffered visual.\n");
-	 config = gdk_gl_config_new_by_mode
-	     (GDK_GL_MODE_RGBA | GDK_GL_MODE_DEPTH);
-	 if (config == NULL) {
+         g_print ("*** Cannot find the double-buffered visual.\n");
+         g_print ("*** Trying single-buffered visual.\n");
+         config = gdk_gl_config_new_by_mode
+             (GDK_GL_MODE_RGBA | GDK_GL_MODE_DEPTH);
+         if (config == NULL) {
              return NULL;
-	 }
+         }
      }
      pixmap = gdk_pixmap_new(0, 8, 8, gdk_gl_config_get_depth(config));
      if (pixmap != NULL) {
@@ -807,11 +757,11 @@ static GdkGLContext* gv_view_area_get_share_list(GvViewArea *view)
      }
      if (glpixmap == NULL) {
 
-	 g_print("get share list, trying again..\n");
+         g_print("get share list, trying again..\n");
 
-	 pixmap = gdk_pixmap_new
-	     (GDK_DRAWABLE((GTK_WIDGET(view))->window), 8, 8, -1);
-	 glpixmap = gdk_pixmap_set_gl_capability(pixmap, config, 0);
+         pixmap = gdk_pixmap_new
+             (GDK_DRAWABLE((GTK_WIDGET(view))->window), 8, 8, -1);
+         glpixmap = gdk_pixmap_set_gl_capability(pixmap, config, 0);
      }
 
      share_list = gdk_gl_context_new
@@ -902,62 +852,8 @@ void gv_view_area_gl_end(GvViewArea *view)
 {
 
     return gdk_gl_drawable_gl_end
-	(gtk_widget_get_gl_drawable(GTK_WIDGET(view)));
+        (gtk_widget_get_gl_drawable(GTK_WIDGET(view)));
 }
-
-#ifdef REMOVED_GTK2_PORT
-GtkWidget *
-gv_view_area_new_OLD(void)
-{
-    GdkGLContext *glcontext;
-    GvViewArea *view;
-    int attrlist[] = {
-        GDK_GL_RGBA, 
-        GDK_GL_DOUBLEBUFFER, 
-        GDK_GL_DEPTH_SIZE, 	4, 
-        GDK_GL_RED_SIZE, 	3, 
-        GDK_GL_GREEN_SIZE, 	3, 
-        GDK_GL_BLUE_SIZE, 	3, 
-        GDK_GL_NONE};
-
-#ifdef WIN32
-    /* figure out how to actually share context later */
-    glcontext = gdk_gl_context_attrlist_share_new(attrlist, NULL, TRUE);
-    if (glcontext == NULL)
-        return NULL;
-
-    view = gtk_type_new(gv_view_area_get_type());
-    GTK_GL_AREA(view)->glcontext = glcontext;
-
-    return GTK_WIDGET(view);
-#else
-    /* Largely copied from gtkglarea.c - should be in the constructor(?) */
-    GdkVisual *visual;
-
-    /* SD check that geometric data type are in sync with OpenGL */
-    g_assert(sizeof(gvgeocoord) == sizeof(GLgeocoord));
-
-    visual = gdk_gl_choose_visual(attrlist);
-    if (visual == NULL) return NULL;
-
-    glcontext = gdk_gl_context_share_new(visual, NULL , TRUE);
-    if (glcontext == NULL) return NULL;
-
-    /* use colormap and visual suitable for OpenGL rendering */
-    gtk_widget_push_colormap(gdk_colormap_new(visual, TRUE));
-    gtk_widget_push_visual(visual);
-
-    view = gtk_type_new(gv_view_area_get_type());
-    GTK_GL_AREA(view)->glcontext = glcontext;
-
-    /* pop back defaults */
-    gtk_widget_pop_visual();
-    gtk_widget_pop_colormap();
-
-    return GTK_WIDGET(view);
-#endif
-}
-#endif
 
 gint
 gv_view_area_set_projection( GvViewArea *view, const char *projection )
@@ -1299,7 +1195,7 @@ gv_view_area_correct_for_transform(GvViewArea *view, gvgeocoord x, gvgeocoord y,
 }
 
 void
-gv_view_area_add_layer(GvViewArea *view, GtkObject *layer_obj)
+gv_view_area_add_layer(GvViewArea *view, GObject *layer_obj)
 {
     GvLayer *layer;
 
@@ -1328,8 +1224,7 @@ gv_view_area_add_layer(GvViewArea *view, GtkObject *layer_obj)
     }
 
     /* Maintain reference to layer */
-    gtk_object_ref(GTK_OBJECT(layer));
-    gtk_object_sink(GTK_OBJECT(layer));
+    g_object_ref(layer);
 
     g_assert( layer->view == NULL );
 
@@ -1338,20 +1233,20 @@ gv_view_area_add_layer(GvViewArea *view, GtkObject *layer_obj)
 
     layer->view = view;
 
-    gtk_signal_connect_object(GTK_OBJECT(layer), "changed",
-                              GTK_SIGNAL_FUNC(gv_view_area_change_notify),
-                              GTK_OBJECT(view));
-    gtk_signal_connect_object(GTK_OBJECT(layer), "display-change",
-                              GTK_SIGNAL_FUNC(gv_view_area_change_notify),
-                              GTK_OBJECT(view));
+    g_signal_connect_swapped(layer, "changed",
+                              G_CALLBACK(gv_view_area_change_notify),
+                              view);
+    g_signal_connect_swapped(layer, "display-change",
+                              G_CALLBACK(gv_view_area_change_notify),
+                              view);
 
-    gtk_signal_emit(GTK_OBJECT(view), view_area_signals[ACTIVE_CHANGED]);
+    g_signal_emit(view, view_area_signals[ACTIVE_CHANGED], 0);
 
     gv_view_area_state_changed(view);
 }
 
 void
-gv_view_area_remove_layer(GvViewArea *view, GtkObject *layer_obj)
+gv_view_area_remove_layer(GvViewArea *view, GObject *layer_obj)
 {
     GvLayer *layer;
     GList *link;
@@ -1361,17 +1256,13 @@ gv_view_area_remove_layer(GvViewArea *view, GtkObject *layer_obj)
 
     if (GTK_WIDGET_REALIZED(GTK_WIDGET(view)))
     {
-      /* Allow layer to destroy gl handles if necessary */
-      if (gv_view_area_make_current(view))
-      {
-	  gv_layer_teardown(layer, view);
-      }
+        /* Allow layer to destroy gl handles if necessary */
+        if (gv_view_area_make_current(view))
+            gv_layer_teardown(layer, view);
     }
 
     if (layer_obj == view->active_layer)
-    {
-    gv_view_area_set_active_layer(view, NULL);
-    }
+        gv_view_area_set_active_layer(view, NULL);
 
     g_assert( layer->view == view );
     layer->view = NULL;
@@ -1379,16 +1270,14 @@ gv_view_area_remove_layer(GvViewArea *view, GtkObject *layer_obj)
     link = g_list_find(view->layers, layer);
     if (link == NULL)
     {
-    CPLDebug( "OpenEV",
+        CPLDebug( "OpenEV",
                   "gv_view_area_remove_link(): layer %s is not in view",
-          gtk_type_name(GTK_OBJECT_TYPE(layer)));
-    return;
+                    g_type_name (G_TYPE_FROM_INSTANCE(layer)));
+        return;
     }
 
     view->layers = g_list_remove_link(view->layers, link);
     view->volume_current = FALSE;
-
-
 
     /* clear projection if no layers are left. */
     if( view->layers == NULL )
@@ -1400,22 +1289,23 @@ gv_view_area_remove_layer(GvViewArea *view, GtkObject *layer_obj)
         }
     }
 
-    gtk_signal_disconnect_by_data(layer_obj, GTK_OBJECT(view));
-    gtk_object_unref(layer_obj);
+    g_signal_handlers_disconnect_matched (layer_obj, G_SIGNAL_MATCH_DATA,
+                                            0, 0, NULL, NULL, G_OBJECT(view));
+    g_object_unref(layer_obj);
 
-    gtk_signal_emit(GTK_OBJECT(view), view_area_signals[ACTIVE_CHANGED]);
+    g_signal_emit(view, view_area_signals[ACTIVE_CHANGED], 0);
 
     gv_view_area_queue_draw(view);
 }
 
-GtkObject *
+GObject *
 gv_view_area_active_layer(GvViewArea *view)
 {
     return view->active_layer;
 }
 
 void
-gv_view_area_set_active_layer(GvViewArea *view, GtkObject *layer)
+gv_view_area_set_active_layer(GvViewArea *view, GObject *layer)
 {
     g_return_if_fail(layer == NULL || GV_IS_LAYER(layer));
 
@@ -1424,30 +1314,30 @@ gv_view_area_set_active_layer(GvViewArea *view, GtkObject *layer)
 
     if (layer)
     {
-    /* Make sure this layer is in the list */
-    if (g_list_find(view->layers, (gpointer)layer) == NULL)
-    {
-        CPLDebug( "OpenEV",
-                      "gv_view_area_set_active_layer(): layer %s not in view",
-              gtk_type_name(GTK_OBJECT_TYPE(layer)));
-        return;
-    }
+        /* Make sure this layer is in the list */
+        if (g_list_find(view->layers, (gpointer)layer) == NULL)
+        {
+            CPLDebug( "OpenEV",
+                          "gv_view_area_set_active_layer(): layer %s not in view",
+                        g_type_name (G_TYPE_FROM_INSTANCE(layer)));
+            return;
+        }
     }
 
     view->active_layer = layer;
 
-    gtk_signal_emit(GTK_OBJECT(view), view_area_signals[ACTIVE_CHANGED]);
+    g_signal_emit(view, view_area_signals[ACTIVE_CHANGED], 0);
 }
 
-GtkObject *
-gv_view_area_get_layer_of_type(GvViewArea *view, GtkType layer_type,
+GObject *
+gv_view_area_get_layer_of_type(GvViewArea *view, GType layer_type,
                                gint read_only_ok )
 {
     GList *list;
 
     /* First check the active layer */
     if(view->active_layer &&
-       gtk_type_is_a(GTK_OBJECT_TYPE(view->active_layer), layer_type)
+       g_type_is_a(G_OBJECT_TYPE(view->active_layer), layer_type)
        && (read_only_ok || !gv_data_is_read_only(GV_DATA(view->active_layer))))
     {
     return view->active_layer;
@@ -1458,17 +1348,17 @@ gv_view_area_get_layer_of_type(GvViewArea *view, GtkType layer_type,
     while (list)
     {
     GvLayer *layer = (GvLayer*)list->data;
-    if( gtk_type_is_a(GTK_OBJECT_TYPE(layer), layer_type)
+    if( g_type_is_a(G_OBJECT_TYPE(layer), layer_type)
             && (read_only_ok || !gv_data_is_read_only(GV_DATA(layer))) )
     {
-        return GTK_OBJECT(layer);
+        return G_OBJECT(layer);
     }
     list = g_list_next(list);
     }
     return NULL;
 }
 
-GtkObject *
+GObject *
 gv_view_area_get_named_layer(GvViewArea *view, const char *name)
 {
     GList *list;
@@ -1479,7 +1369,7 @@ gv_view_area_get_named_layer(GvViewArea *view, const char *name)
     GvLayer *layer = (GvLayer*)list->data;
     if (GV_DATA(layer)->name && strcmp(GV_DATA(layer)->name, name) == 0)
     {
-        return GTK_OBJECT(layer);
+        return G_OBJECT(layer);
     }
     list = g_list_next(list);
     }
@@ -1521,7 +1411,7 @@ gv_view_area_swap_layers(GvViewArea *view, gint index_a, gint index_b)
 }
 
 GdkPixmap *
-gv_view_area_create_thumbnail(GvViewArea *view, GtkObject *layerobj,
+gv_view_area_create_thumbnail(GvViewArea *view, GObject *layerobj,
                   gint width, gint height)
 {
 
@@ -1699,7 +1589,7 @@ gv_view_area_render_to_func(GvViewArea *view,
     {
         g_warning( "out of memory in gv_view_area_render_to_func" );
         view->exact_render = save_exact;
-	gv_view_area_gl_end(view);
+        gv_view_area_gl_end(view);
         return -1;
     }
     memset( row_of_chunks, 0, width*y_chunk_size*3 );
@@ -1712,7 +1602,7 @@ gv_view_area_render_to_func(GvViewArea *view,
     if (extents.width == 0 || extents.height == 0)
     {
         view->exact_render = save_exact;
-	gv_view_area_gl_end(view);
+        gv_view_area_gl_end(view);
         return -1;
     }
 
@@ -1861,10 +1751,10 @@ gv_view_area_bmfont_load(GvViewArea *view, gchar *name)
     pango_desc = gv_view_XLFD_to_pango(name);
     if (pango_desc == NULL) {
         pango_desc = pango_font_description_from_string(name);
-	if (pango_desc == NULL) {
+        if (pango_desc == NULL) {
             g_warning("%s: pango font load failed: %s", fn, name );
-	    return -1;
-	}
+            return -1;
+        }
     }
 
     /* Do we already have this font loaded? */
@@ -1872,9 +1762,9 @@ gv_view_area_bmfont_load(GvViewArea *view, gchar *name)
     {
         GvBMFontInfo    *finfo;
         finfo = &(g_array_index( view->bmfonts, GvBMFontInfo, font ));
-	if (strcmp(pango_font_description_to_string(pango_desc), finfo->name) == 0) {
-	    return font;
-	}
+        if (strcmp(pango_font_description_to_string(pango_desc), finfo->name) == 0) {
+            return font;
+        }
     }
 
     /* >>>> Try to load the font <<<< */
@@ -1898,18 +1788,18 @@ gv_view_area_bmfont_load(GvViewArea *view, gchar *name)
       (pango_desc, 0, 127, new_finfo.listbase);
     if (pango_font == NULL) {
         pango_desc = pango_font_description_from_string("Sans 12");
-	pango_font = gdk_gl_font_use_pango_font
-	    (pango_desc, 0, 127, new_finfo.listbase);
-	if (pango_font == NULL) {
-	    g_warning("%s: Unable to obtain font: %s", fn,
+        pango_font = gdk_gl_font_use_pango_font
+            (pango_desc, 0, 127, new_finfo.listbase);
+        if (pango_font == NULL) {
+            g_warning("%s: Unable to obtain font: %s", fn,
                 pango_font_description_to_string(pango_desc));
-	    gv_view_area_gl_end(view);
-	    return -1;
-	}
-	else {
-	    g_warning("%s:\n   Unable to obtain font '%s'\n   Using '%s'\n", fn,
-		      name, pango_font_description_to_string(pango_desc));
-	}
+            gv_view_area_gl_end(view);
+            return -1;
+        }
+        else {
+            g_warning("%s:\n   Unable to obtain font '%s'\n   Using '%s'\n", fn,
+                      name, pango_font_description_to_string(pango_desc));
+        }
     }
 
     new_finfo.pango_desc = pango_desc;
@@ -1947,9 +1837,9 @@ static PangoFontDescription *gv_view_XLFD_to_pango(gchar *XLFD_name) {
 
   /* ---- Create pango string from tokens of interest ---- */
   pango_name = (gchar *)g_malloc(strlen(XLFD_tokens[1]) +
-				 strlen(XLFD_tokens[2]) +
-				 strlen(XLFD_tokens[4]) +
-				 strlen(XLFD_tokens[5]) + 32);
+                                 strlen(XLFD_tokens[2]) +
+                                 strlen(XLFD_tokens[4]) +
+                                 strlen(XLFD_tokens[5]) + 32);
 
   if (pango_name == NULL) return NULL;
 
@@ -2040,7 +1930,7 @@ gv_view_area_bmfont_get_info(GvViewArea *view, gint font)
 
 void
 gv_view_area_bmfont_draw(GvViewArea *view, gint font, gvgeocoord x,
-			 gvgeocoord y, gchar *text, int force_simple )
+                         gvgeocoord y, gchar *text, int force_simple )
 {
     GvBMFontInfo    *finfo;
 
@@ -2048,7 +1938,7 @@ gv_view_area_bmfont_draw(GvViewArea *view, gint font, gvgeocoord x,
         return;
     finfo = &(g_array_index( view->bmfonts, GvBMFontInfo, font ));
     if ((finfo == NULL) || (text == NULL)) {
-	return;
+        return;
     }
 
     /*
@@ -2144,10 +2034,10 @@ gv_view_area_configure(GtkWidget *widget, GdkEventConfigure *event)
 
     if (!gv_view_area_begin(view)) return 0;
 
-    CPLDebug( "OpenEV", "VENDOR = %s", glGetString( GL_VENDOR ) );
+    /*CPLDebug( "OpenEV", "VENDOR = %s", glGetString( GL_VENDOR ) );
     CPLDebug( "OpenEV", "RENDERER = %s", glGetString( GL_RENDERER ) );
     CPLDebug( "OpenEV", "VERSION = %s", glGetString( GL_VERSION ) );
-    CPLDebug( "OpenEV", "EXTENSIONS = %s", glGetString( GL_EXTENSIONS ) );
+    CPLDebug( "OpenEV", "EXTENSIONS = %s", glGetString( GL_EXTENSIONS ) );*/
 
     w = event->width;
     h = event->height;
@@ -2189,8 +2079,8 @@ gv_view_area_expose(GtkWidget *widget, GdkEventExpose *event)
     {
 
         gv_view_area_swap_buffers(view);
-	gtk_signal_emit(GTK_OBJECT(view), view_area_signals[GLCURSOR]);
-	gv_view_area_gl_end(view);
+        g_signal_emit(view, view_area_signals[GLCURSOR], 0);
+        gv_view_area_gl_end(view);
         return 0;
     }
 
@@ -2305,13 +2195,13 @@ gv_view_area_expose(GtkWidget *widget, GdkEventExpose *event)
     list = view->layers;
     while (list)
     {
-	layer = (GvLayer*)list->data;
-	gv_layer_draw(layer, view);
-	list = g_list_next(list);
+        layer = (GvLayer*)list->data;
+        gv_layer_draw(layer, view);
+        list = g_list_next(list);
     }
 
     /* Give other interested objects a chance to add to the drawing */
-    gtk_signal_emit(GTK_OBJECT(view), view_area_signals[GLDRAW]);
+    g_signal_emit(view, view_area_signals[GLDRAW], 0);
 
     /* draw banded zoom area */
     if (view->dragging_mode)
@@ -2344,7 +2234,7 @@ gv_view_area_expose(GtkWidget *widget, GdkEventExpose *event)
     /* Don't XOR last ghost cursor position, since view has been redrawn */
     /* (only has effect in logical cursor mode) */
     view->last_valid=FALSE;
-    gtk_signal_emit(GTK_OBJECT(view),view_area_signals[GLCURSOR]);
+    g_signal_emit(view,view_area_signals[GLCURSOR], 0);
 
     glFinish();
 
@@ -2374,13 +2264,11 @@ static void
 gv_view_area_realize(GtkWidget *widget)
 {
     GvViewArea *view = GV_VIEW_AREA(widget);
-    GtkDrawingAreaClass *parent_class;
     GList *list;
     GvLayer *layer;
     const char *auto_fit_flag;
 
     /* Call parent class function first */
-    parent_class = gtk_type_class(gtk_drawing_area_get_type());
     GTK_WIDGET_CLASS(parent_class)->realize(widget);
 
     g_return_if_fail(GTK_WIDGET_REALIZED(widget));
@@ -2392,9 +2280,9 @@ gv_view_area_realize(GtkWidget *widget)
     list = view->layers;
     while (list)
     {
-    layer = (GvLayer*)list->data;
-    gv_layer_setup(layer, view);
-    list = g_list_next(list);
+        layer = (GvLayer*)list->data;
+        gv_layer_setup(layer, view);
+        list = g_list_next(list);
     }
 
     /* Set up the inital view transformation using the first layer */
@@ -2402,8 +2290,8 @@ gv_view_area_realize(GtkWidget *widget)
                                       "_supress_realize_auto_fit");
     if (view->layers && (auto_fit_flag == NULL || EQUAL(auto_fit_flag,"off")))
     {
-    layer = (GvLayer*)view->layers->data;
-    gv_view_area_fit_layer(view, layer);
+        layer = (GvLayer*)view->layers->data;
+        gv_view_area_fit_layer(view, layer);
     }
 }
 
@@ -2411,7 +2299,6 @@ static void
 gv_view_area_unrealize(GtkWidget *widget)
 {
     GvViewArea *view = GV_VIEW_AREA(widget);
-    GtkDrawingAreaClass *parent_class;
     GList *list;
     gint font;
 
@@ -2434,9 +2321,9 @@ gv_view_area_unrealize(GtkWidget *widget)
     list = view->layers;
     while (list)
     {
-    GvLayer *layer = (GvLayer*)list->data;
-    gv_layer_teardown(layer, view);
-    list = g_list_next(list);
+        GvLayer *layer = (GvLayer*)list->data;
+        gv_layer_teardown(layer, view);
+        list = g_list_next(list);
     }
 
     /* Destroy bmfont listbase array */
@@ -2447,11 +2334,7 @@ gv_view_area_unrealize(GtkWidget *widget)
         finfo = &(g_array_index( view->bmfonts, GvBMFontInfo, font ));
 
         if( finfo->pango_desc != NULL )
-	    pango_font_description_free(finfo->pango_desc);
-
-	/* GTK2 PORT...
-            gdk_font_unref(finfo->gdkfont);
-	*/
+            pango_font_description_free(finfo->pango_desc);
 
         g_free( finfo->name );
         glDeleteLists(finfo->listbase, 96);
@@ -2459,7 +2342,6 @@ gv_view_area_unrealize(GtkWidget *widget)
     g_array_free( view->bmfonts, TRUE );
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gtk_drawing_area_get_type());
     GTK_WIDGET_CLASS(parent_class)->unrealize(widget);
 }
 
@@ -2576,7 +2458,7 @@ gv_view_area_get_world_extents(GvViewArea *view, GvRect *extents )
     list = view->layers;
     while (list)
     {
-    GvLayer *layer = (GvLayer*)list->data;
+        GvLayer *layer = (GvLayer*)list->data;
         GvRect  layer_rect;
 
         gv_layer_extents(layer, &layer_rect);
@@ -2760,7 +2642,7 @@ gv_view_area_get_volume( GvViewArea *view, double *volume )
     list = view->layers;
     while (list)
     {
-    GvLayer *layer = (GvLayer*)list->data;
+        GvLayer *layer = (GvLayer*)list->data;
         GvRect  layer_rect;
 
         gv_layer_extents(layer, &layer_rect);
@@ -2826,10 +2708,10 @@ gv_view_area_motion_handle_hint(GtkWidget *view, GdkEventMotion *event)
 
     if (event->is_hint)
     {
-    int x, y;
-    gtk_widget_get_pointer(view, &x, &y);
-    event->x = (gdouble)x;
-    event->y = (gdouble)y;
+        int x, y;
+        gtk_widget_get_pointer(view, &x, &y);
+        event->x = (gdouble)x;
+        event->y = (gdouble)y;
     }
 
     return FALSE;
@@ -2952,8 +2834,8 @@ gv_view_area_motion_notify(GtkWidget *widget, GdkEventMotion *event)
     }
     /* rotate */
     else if ((event->state & GDK_SHIFT_MASK) &&
-	     (event->state & GDK_BUTTON1_MASK) &&
-	     !(event->state & GDK_MOD1_MASK))
+             (event->state & GDK_BUTTON1_MASK) &&
+             !(event->state & GDK_MOD1_MASK))
     {
         gvgeocoord ax, ay, bx, by, dr;
 
@@ -3513,7 +3395,7 @@ gv_view_area_change_notify(GvViewArea *view, gpointer info)
 static void
 gv_view_area_state_changed(GvViewArea *view)
 {
-    gtk_signal_emit(GTK_OBJECT(view), view_area_signals[VIEW_STATE_CHANGED]);
+    g_signal_emit(view, view_area_signals[VIEW_STATE_CHANGED], 0);
     gv_view_area_queue_draw(view);
     gv_view_area_update_adjustments( view );
 }
@@ -3521,10 +3403,7 @@ gv_view_area_state_changed(GvViewArea *view)
 static void
 gv_view_area_destroy(GtkObject *object)
 {
-    GtkDrawingAreaClass *parent_class;
-    GvViewArea *view;
-
-    view = GV_VIEW_AREA(object);
+    GvViewArea *view = GV_VIEW_AREA(object);
 
     CPLDebug( "OpenEV", "gv_view_area_destroy" );
 
@@ -3532,35 +3411,26 @@ gv_view_area_destroy(GtkObject *object)
     view->active_layer = NULL;
     while (view->layers != NULL)
     {
-      GvLayer *layer = (GvLayer*)view->layers->data;
-      gv_view_area_remove_layer(view, GTK_OBJECT(layer));
+        GvLayer *layer = (GvLayer*)view->layers->data;
+        gv_view_area_remove_layer(view, G_OBJECT(layer));
     }
 
     gv_view_area_set_adjustments( view, NULL, NULL );
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gtk_drawing_area_get_type());
     GTK_OBJECT_CLASS(parent_class)->destroy(object);
 }
 
 static void
 gv_view_area_finalize(GObject *gobject)
 {
-    GvLayerClass *parent_class;
-
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
        as finalize may be called more than once. */
 
     CPLDebug( "OpenEV", "gv_view_area_finalize" );
 
     /* Call parent class finalize */
-    parent_class = gtk_type_class(gtk_drawing_area_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* Call parent class function
-    parent_class = gtk_type_class(gtk_gl_area_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(gobject);
-    */
 }
 
 static void
@@ -3568,9 +3438,7 @@ gv_view_area_set_arg (GtkObject        *object,
                       GtkArg           *arg,
                       guint             arg_id)
 {
-    GvViewArea *view;
-
-    view = GV_VIEW_AREA (object);
+    GvViewArea *view = GV_VIEW_AREA (object);
 
     switch (arg_id)
     {
@@ -3594,9 +3462,7 @@ gv_view_area_get_arg (GtkObject        *object,
                       GtkArg           *arg,
                       guint             arg_id)
 {
-    GvViewArea *view;
-
-    view = GV_VIEW_AREA (object);
+    GvViewArea *view = GV_VIEW_AREA (object);
 
     switch (arg_id)
     {
@@ -3783,14 +3649,16 @@ gv_view_area_set_adjustments (GvViewArea    *view,
 
     if (view->hadj && (view->hadj != hadj))
     {
-        gtk_signal_disconnect_by_data (GTK_OBJECT (view->hadj), view);
-        gtk_object_unref (GTK_OBJECT (view->hadj));
+        g_signal_handlers_disconnect_matched (G_OBJECT(view->hadj), G_SIGNAL_MATCH_DATA,
+                                                0, 0, NULL, NULL, G_OBJECT(view));
+        g_object_unref (view->hadj);
     }
 
     if (view->vadj && (view->vadj != vadj))
     {
-        gtk_signal_disconnect_by_data (GTK_OBJECT (view->vadj), view);
-        gtk_object_unref (GTK_OBJECT (view->vadj));
+        g_signal_handlers_disconnect_matched (G_OBJECT(view->vadj), G_SIGNAL_MATCH_DATA,
+                                                0, 0, NULL, NULL, G_OBJECT(view));
+        g_object_unref (view->vadj);
     }
 
     if( hadj == NULL )
@@ -3798,20 +3666,20 @@ gv_view_area_set_adjustments (GvViewArea    *view,
     else if (view->hadj != hadj)
     {
         view->hadj = hadj;
-        gtk_object_ref (GTK_OBJECT (view->hadj));
-        gtk_object_sink (GTK_OBJECT (view->hadj));
+        g_object_ref (view->hadj);
+        /*gtk_object_sink (GTK_OBJECT (view->hadj));*/
 
-        gtk_signal_connect (GTK_OBJECT (view->hadj), "changed",
-                            (GtkSignalFunc) gv_view_area_adjustment,
+        g_signal_connect (view->hadj, "changed",
+                            G_CALLBACK (gv_view_area_adjustment),
                             view);
-        gtk_signal_connect (GTK_OBJECT (view->hadj), "value_changed",
-                            (GtkSignalFunc) gv_view_area_adjustment,
+        g_signal_connect (view->hadj, "value_changed",
+                            G_CALLBACK (gv_view_area_adjustment),
                             view);
-	/* GTK2 PORT.. PENDING - Need alternative for this?
+        /* GTK2 PORT.. PENDING - Need alternative for this?
         gtk_signal_connect (GTK_OBJECT (view->hadj), "disconnect",
                             (GtkSignalFunc) gv_view_area_disconnect,
                             view);
-	*/
+        */
         gv_view_area_adjustment (hadj, view);
     }
 
@@ -3820,20 +3688,20 @@ gv_view_area_set_adjustments (GvViewArea    *view,
     else if (view->vadj != vadj)
     {
         view->vadj = vadj;
-        gtk_object_ref (GTK_OBJECT (view->vadj));
-        gtk_object_sink (GTK_OBJECT (view->vadj));
+        g_object_ref (view->vadj);
+        /*gtk_object_sink (GTK_OBJECT (view->vadj));*/
 
-        gtk_signal_connect (GTK_OBJECT (view->vadj), "changed",
-                            (GtkSignalFunc) gv_view_area_adjustment,
+        g_signal_connect (view->vadj, "changed",
+                            G_CALLBACK (gv_view_area_adjustment),
                             view);
-        gtk_signal_connect (GTK_OBJECT (view->vadj), "value_changed",
-                            (GtkSignalFunc) gv_view_area_adjustment,
+        g_signal_connect (view->vadj, "value_changed",
+                            G_CALLBACK (gv_view_area_adjustment),
                             view);
-	/* GTK2 PORT.. PENDING - Need alternative for this?
+        /* GTK2 PORT.. PENDING - Need alternative for this?
         gtk_signal_connect (GTK_OBJECT (view->vadj), "disconnect",
                             (GtkSignalFunc) gv_view_area_disconnect,
                             view);
-	*/
+        */
         gv_view_area_adjustment (vadj, view);
     }
 
@@ -3847,7 +3715,7 @@ gv_view_area_set_adjustments (GvViewArea    *view,
 /*      mode relative to the indicated raster layer.                    */
 /************************************************************************/
 
-int gv_view_area_set_raw(GvViewArea *view, GtkObject *ref_layer, int raw_enable)
+int gv_view_area_set_raw(GvViewArea *view, GObject *ref_layer, int raw_enable)
 {
     GvRasterLayer *rlayer = NULL;
     gvgeocoord    xmin, ymin, xmax, ymax;
@@ -3942,7 +3810,7 @@ int gv_view_area_set_raw(GvViewArea *view, GtkObject *ref_layer, int raw_enable)
 /*      given layer.  TRUE is returned for raw mode.                    */
 /************************************************************************/
 
-int gv_view_area_get_raw( GvViewArea *view, GtkObject *ref_layer )
+int gv_view_area_get_raw( GvViewArea *view, GObject *ref_layer )
 
 {
     GvRasterLayer *rlayer = NULL;
@@ -4026,7 +3894,7 @@ int gv_get_render_counter()
 /*                  gv_view_area_get_primary_raster()                   */
 /************************************************************************/
 
-GtkObject *gv_view_area_get_primary_raster( GvViewArea *view )
+GObject *gv_view_area_get_primary_raster( GvViewArea *view )
 
 {
     GList *layer_list, *node;
@@ -4039,7 +3907,7 @@ GtkObject *gv_view_area_get_primary_raster( GvViewArea *view )
 
         layer = GV_LAYER(node->data);
         if( gv_layer_is_visible(layer) && GV_IS_RASTER_LAYER( layer ) )
-            return GTK_OBJECT(layer);
+            return G_OBJECT(layer);
     }
 
     return NULL;
@@ -4068,7 +3936,7 @@ gv_view_area_get_properties(GvViewArea *data)
  */
 const char *gv_view_area_format_point_query(GvViewArea *view,
                                             GvProperties *properties,
-					    double geo_x, double geo_y)
+                                            double geo_x, double geo_y)
 
 {
     static gchar buf[256];
@@ -4382,9 +4250,9 @@ const char *gv_view_area_format_point_query(GvViewArea *view,
                 }
             }
 
-	    g_snprintf(buf+strlen(buf), 64, "%g hue %g intensity ",
-		       psci[0], psci[1] );
-	    
+            g_snprintf(buf+strlen(buf), 64, "%g hue %g intensity ",
+                       psci[0], psci[1] );
+            
             if ( g_strcasecmp( nodata_mode, "on") == 0 )
             {
                 if( (gv_raster_layer_nodata_get(raster_layer, 0, &nodata[0], NULL) 

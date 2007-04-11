@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvrasterlayer.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Raster display layer (managed textures, redraw, etc)
@@ -204,7 +204,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <gtk/gtksignal.h>
 #include "gvrasterlayer.h"
 #include "gvrastertypes.h"
 #include "gvrasteraverage.h"
@@ -228,7 +227,7 @@ static void gv_raster_layer_setup( GvLayer *layer, GvViewArea *view );
 static void gv_raster_layer_teardown( GvLayer *layer, GvViewArea *view );
 static void gv_raster_layer_state_changed( GvViewArea *view, GvRasterLayer *layer );
 static void gv_raster_layer_finalize( GObject *gobject );
-static void gv_raster_layer_destroy( GtkObject *gtk_object );
+static void gv_raster_layer_dispose( GObject *gobject );
 static gint gv_raster_layer_texture_size( gint format, gint type );
 static void gv_raster_layer_gl_disp_set( GvRasterLayer *layer );
 static void gv_raster_layer_gl_disp_unset( void );
@@ -243,6 +242,7 @@ gv_mesh_transform_with_func(GvMesh *mesh,
                             int (*trfunc)(int,double*,double*,double*,void *),
                             void *cb_data );
 static void gv_raster_layer_cleanup_idle( GvRasterLayer *layer );
+static GvLayerClass *parent_class = NULL;
 
 struct _GvRasterLayerIdleInfo {
     GvRasterLayer *layer;
@@ -258,28 +258,29 @@ enum {
     GV_RASTER_LAYER_BLEND_CUSTOM
 };
 
-GtkType
+GType
 gv_raster_layer_get_type(void)
 {
-    static GtkType raster_layer_type = 0;
+    static GType raster_layer_type = 0;
 
-    if (!raster_layer_type)
-    {
-	static const GtkTypeInfo area_layer_info =
-	{
-	    "GvRasterLayer",
-	    sizeof(GvRasterLayer),
-	    sizeof(GvRasterLayerClass),
-	    (GtkClassInitFunc) gv_raster_layer_class_init,
-	    (GtkObjectInitFunc) gv_raster_layer_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
-
-	raster_layer_type = gtk_type_unique(gv_layer_get_type(),
-					    &area_layer_info);
+    if (!raster_layer_type) {
+        static const GTypeInfo raster_layer_info =
+        {
+            sizeof(GvRasterLayerClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_raster_layer_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvRasterLayer),
+            0,
+            (GInstanceInitFunc) gv_raster_layer_init,
+        };
+        raster_layer_type = g_type_register_static (GV_TYPE_LAYER,
+                                                    "GvRasterLayer",
+                                                    &raster_layer_info, 0);
     }
+
     return raster_layer_type;
 }
 
@@ -311,9 +312,11 @@ gv_raster_layer_init(GvRasterLayer *layer)
 static void
 gv_raster_layer_class_init(GvRasterLayerClass *klass)
 {
-    GvLayerClass *layer_class;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GvLayerClass *layer_class = GV_LAYER_CLASS (klass);
 
-    layer_class = (GvLayerClass*) klass;
+    parent_class = g_type_class_peek_parent (klass);
+
     layer_class->draw = gv_raster_layer_draw;
     layer_class->extents_request = gv_raster_layer_extents;
     layer_class->setup = gv_raster_layer_setup;
@@ -321,18 +324,11 @@ gv_raster_layer_class_init(GvRasterLayerClass *klass)
     layer_class->reproject = gv_raster_layer_reproject;
 
     /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_raster_layer_finalize;
-
-    ((GtkObjectClass *) klass)->destroy = gv_raster_layer_destroy;
-
-    /* GTK2 PORT...
-    ((GtkObjectClass *) klass)->finalize = gv_raster_layer_finalize;
-    */
-
-
+    object_class->finalize = gv_raster_layer_finalize;
+    object_class->dispose = gv_raster_layer_dispose;
 }
 
-GtkObject *
+GObject *
 gv_raster_layer_new(int mode, GvRaster *prototype_data, 
                     GvProperties creation_properties)
 {
@@ -344,7 +340,7 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
     if( prototype_data == NULL )
         return NULL;
 
-    layer = GV_RASTER_LAYER(gtk_type_new(gv_raster_layer_get_type()));
+    layer = g_object_new (GV_TYPE_RASTER_LAYER, NULL);
 
     layer->tile_x = prototype_data->tile_x;
     layer->tile_y = prototype_data->tile_y;
@@ -364,9 +360,9 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
                  || interp == GCI_GreenBand
                  || interp == GCI_BlueBand )
             mode = GV_RLM_RGBA;
-	else if ((interp == GCI_HueBand) || (interp == GCI_PaletteIndex)) {
-	    mode = GV_RLM_PSCI;
-	}
+    else if ((interp == GCI_HueBand) || (interp == GCI_PaletteIndex)) {
+        mode = GV_RLM_PSCI;
+    }
         else
             mode = GV_RLM_SINGLE;
     }
@@ -380,8 +376,6 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
     } else {
         layer->mesh = gv_mesh_new_identity( prototype_data, 0 );
     }
-    gtk_object_ref( GTK_OBJECT(layer->mesh) );
-    gtk_object_sink( GTK_OBJECT(layer->mesh) );
 
     layer->mesh_is_raw = TRUE;
     layer->mesh_is_dirty = FALSE;
@@ -453,7 +447,7 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
     if( ( layer->textures = g_new0( GvRasterLayerTexObj *, 
                                     prototype_data->max_tiles ) ) == NULL )
     {
-	return NULL;
+    return NULL;
     }
 
     /* FIXME ... should we always do this? */
@@ -496,11 +490,11 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
       case GV_RLM_PSCI:
         layer->source_count = 2;
         gv_raster_layer_set_source( layer, 0, prototype_data,
-				    prototype_data->min, prototype_data->max,
+                    prototype_data->min, prototype_data->max,
                                     0, NULL, nodata_active, nodata_real, 
                                     nodata_imaginary );
-	gv_raster_layer_apply_gdal_color_table
-	    (layer, GDALGetRasterColorTable( prototype_data->gdal_band ) );
+    gv_raster_layer_apply_gdal_color_table
+        (layer, GDALGetRasterColorTable( prototype_data->gdal_band ) );
         gv_raster_layer_set_source( layer, 1, prototype_data, 
                                     prototype_data->min, prototype_data->max, 
                                     0, NULL, nodata_active, nodata_real, 
@@ -535,17 +529,197 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
         return NULL;
     }
 
-    return GTK_OBJECT(layer);
+    return G_OBJECT(layer);
 }
 
-static void gv_raster_layer_destroy( GtkObject *gtk_object )
-
+void
+gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data, 
+                    GvProperties creation_properties)
 {
-    GvLayerClass *parent_class;
-    GvRasterLayer *rlayer = GV_RASTER_LAYER(gtk_object);
+    double nodata_real=-1e8, nodata_imaginary=0.0;
+    int nodata_active = FALSE;
+    const char *interp_pref;
+
+    if( prototype_data == NULL )
+        return;
+
+    layer->tile_x = prototype_data->tile_x;
+    layer->tile_y = prototype_data->tile_y;
+    layer->prototype_data = prototype_data;
+    layer->pc_lut = NULL;
+    layer->pc_lut_composed = NULL;
+    layer->pc_lut_rgba_complex = NULL;
+
+    if( mode == GV_RLM_AUTO )
+    {
+        GDALColorInterp interp;
+
+        interp = GDALGetRasterColorInterpretation( prototype_data->gdal_band );
+        if( GDALDataTypeIsComplex( prototype_data->gdal_type ) )
+            mode = GV_RLM_COMPLEX;
+        else if( interp == GCI_RedBand 
+                 || interp == GCI_GreenBand
+                 || interp == GCI_BlueBand )
+            mode = GV_RLM_RGBA;
+    else if ((interp == GCI_HueBand) || (interp == GCI_PaletteIndex)) {
+        mode = GV_RLM_PSCI;
+    }
+        else
+            mode = GV_RLM_SINGLE;
+    }
+
+    layer->mode = mode;
+
+    if( gv_properties_get(&creation_properties,"mesh_lod") != NULL)
+    {
+        layer->mesh = gv_mesh_new_identity( prototype_data, 
+                    atoi(gv_properties_get(&creation_properties,"mesh_lod")));
+    } else {
+        layer->mesh = gv_mesh_new_identity( prototype_data, 0 );
+    }
+
+    layer->mesh_is_raw = TRUE;
+    layer->mesh_is_dirty = FALSE;
+    gv_mesh_transform_with_func( layer->mesh, gvrl_to_raw_cb, 
+                                 prototype_data );
+
+    if( gv_properties_get(&creation_properties,"raw") == NULL )
+    {
+        gv_mesh_transform_with_func( layer->mesh, gvrl_to_georef_cb, 
+                                     prototype_data );
+
+        gv_data_set_projection( GV_DATA(layer), 
+                           gv_data_get_projection(GV_DATA(prototype_data)) );
+
+        layer->mesh_is_raw = FALSE;
+    }
+
+    memset( layer->source_list + 0, 0, 
+            sizeof(GvRasterSource) * MAX_RASTER_SOURCE);
+
+    /* Default GL parameters */
+    layer->gl_info.blend_enable = 0;
+    layer->gl_info.alpha_test = 0;
+    
+    layer->gl_info.tex_env_mode = GL_REPLACE;
+    layer->gl_info.fragment_color[0] = 1.0;
+    layer->gl_info.fragment_color[1] = 1.0;
+    layer->gl_info.fragment_color[2] = 1.0;
+    layer->gl_info.fragment_color[3] = 1.0;
+
+    layer->gl_info.s_wrap = GL_CLAMP;
+    layer->gl_info.t_wrap = GL_CLAMP;
+
+    interp_pref = gv_properties_get(&creation_properties,"interp_mode");
+    if( interp_pref == NULL )
+        interp_pref = gv_manager_get_preference(gv_get_manager(),
+                                                "interp_mode");
+
+    if( interp_pref == NULL || strcmp(interp_pref,"nearest") != 0 )
+    {
+        layer->gl_info.mag_filter = GL_LINEAR;
+        layer->gl_info.min_filter = GL_LINEAR;
+    }
+    else
+    {
+        layer->gl_info.mag_filter = GL_NEAREST;
+        layer->gl_info.min_filter = GL_NEAREST;
+    }
+
+    /* Setup texture related information */
+    layer->tile_list = g_array_new( FALSE, FALSE, sizeof( int ) ) ;
+    layer->missing_tex = g_array_new( FALSE, FALSE, sizeof( int ) );
+    
+    /* Allocate texture structures */
+
+    if( ( layer->textures = g_new0( GvRasterLayerTexObj *, 
+                                    prototype_data->max_tiles ) ) == NULL )
+        return;
+
+    /* FIXME ... should we always do this? */
+    gv_data_set_parent(GV_DATA(layer), GV_DATA(prototype_data));
+
+    /* check for nodata value */
+    nodata_active = gv_raster_get_nodata( prototype_data, &nodata_real );
+
+    /* Setup mode dependent information */
+    switch( mode )
+    {
+      case GV_RLM_SINGLE:
+        layer->source_count = 1;
+        if( GDALGetRasterColorTable( prototype_data->gdal_band ) != NULL )
+        {
+            gv_raster_layer_set_source( layer, 0, prototype_data, 0, 255.0,
+                                        0, NULL, nodata_active, nodata_real, 
+                                        nodata_imaginary );
+            gv_raster_layer_apply_gdal_color_table( layer, 
+                    GDALGetRasterColorTable( prototype_data->gdal_band ) );
+        }
+        else
+            gv_raster_layer_set_source( layer, 0, prototype_data, 
+                                    prototype_data->min, prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        break;
+
+      case GV_RLM_COMPLEX:
+        layer->source_count = 1;
+        layer->pc_lut = NULL;
+        gv_raster_layer_lut_color_wheel_new_ev(layer, FALSE, TRUE );
+        gv_raster_layer_set_source( layer, 0, prototype_data, 
+                                    prototype_data->min, 
+                                    prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        break;
+
+      case GV_RLM_PSCI:
+        layer->source_count = 2;
+        gv_raster_layer_set_source( layer, 0, prototype_data,
+                    prototype_data->min, prototype_data->max,
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        gv_raster_layer_apply_gdal_color_table
+            (layer, GDALGetRasterColorTable( prototype_data->gdal_band ) );
+        gv_raster_layer_set_source( layer, 1, prototype_data, 
+                                    prototype_data->min, prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+
+        break;
+
+      case GV_RLM_RGBA:
+        layer->source_count = 4;
+
+        layer->pc_lut_rgba_complex = NULL;
+        gv_raster_layer_lut_color_wheel_new_ev(layer, FALSE, TRUE );
+
+        gv_raster_layer_set_source( layer, 0, prototype_data, 
+                                    prototype_data->min, prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        gv_raster_layer_set_source( layer, 1, prototype_data, 
+                                    prototype_data->min, prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        gv_raster_layer_set_source( layer, 2, prototype_data, 
+                                    prototype_data->min, prototype_data->max, 
+                                    0, NULL, nodata_active, nodata_real, 
+                                    nodata_imaginary );
+        gv_raster_layer_set_source( layer, 3, NULL, 0, 255, 
+                                    255, NULL, FALSE, 0.0, 0.0 );
+        break;
+
+      default:
+        g_warning( "unexpected raster layer mode" );
+    }
+}
+static void gv_raster_layer_dispose( GObject *gobject )
+{
+    GvRasterLayer *rlayer = GV_RASTER_LAYER(gobject);
     int          isource;
 
-    CPLDebug( "OpenEV", "gv_raster_layer_destroy(%s)\n", 
+    CPLDebug( "OpenEV", "gv_raster_layer_dispose(%s)\n", 
               gv_data_get_name(GV_DATA(rlayer)) );
 
     /* clear any "source" references */
@@ -554,18 +728,7 @@ static void gv_raster_layer_destroy( GtkObject *gtk_object )
                                     FALSE, 0.0, 0.0 );
     }
 
-    /* GTK2 PORT... test and nullify resources */
-    if (rlayer->mesh != NULL) {
-      gtk_object_unref( GTK_OBJECT(rlayer->mesh) );
-      rlayer->mesh = NULL;
-    }
-
-    if ( rlayer->textures != NULL) {
-      g_free( rlayer->textures );
-      rlayer->textures = NULL;
-    }
-
-    /* No parent destroy.. */
+    G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
 
 /*
@@ -573,7 +736,6 @@ static void gv_raster_layer_destroy( GtkObject *gtk_object )
 */
 
 static void gv_raster_layer_cleanup_idle( GvRasterLayer *layer )
-
 {
     GvIdleTask *task_list;
 
@@ -586,7 +748,7 @@ static void gv_raster_layer_cleanup_idle( GvRasterLayer *layer )
             struct _GvRasterLayerIdleInfo *info;
 
             info = (struct _GvRasterLayerIdleInfo *) task_list->task_info;
-	    if (info == NULL) continue;
+        if (info == NULL) continue;
             if( info->layer == layer )
             {
                 g_assert( GV_LAYER(layer)->pending_idle );
@@ -594,7 +756,7 @@ static void gv_raster_layer_cleanup_idle( GvRasterLayer *layer )
 
                 gv_manager_dequeue_task( gv_get_manager(), task_list );
                 g_free( info );
-		// task_list->task_info = NULL;
+        // task_list->task_info = NULL;
                 break;
             }
         }
@@ -605,9 +767,7 @@ static void gv_raster_layer_cleanup_idle( GvRasterLayer *layer )
 }
 
 static void gv_raster_layer_finalize( GObject *gobject )
-
 {
-    GvLayerClass *parent_class;
     GvRasterLayer *rlayer = GV_RASTER_LAYER(gobject);
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
@@ -615,6 +775,22 @@ static void gv_raster_layer_finalize( GObject *gobject )
 
     CPLDebug( "OpenEV", "gv_raster_layer_finalize(%s)\n", 
               gv_data_get_name(GV_DATA(rlayer)) );
+
+    /* GTK2 PORT... test and nullify resources */
+    if (rlayer->mesh != NULL) {
+        g_object_unref(rlayer->mesh);
+        rlayer->mesh = NULL;
+    }
+
+    if ( rlayer->textures != NULL) {
+        g_free( rlayer->textures );
+        rlayer->textures = NULL;
+    }
+
+    if (rlayer->prototype_data != NULL) {
+//~         g_object_unref(rlayer->prototype_data);
+        rlayer->prototype_data = NULL;
+    }
 
     if( rlayer->pc_lut != NULL )
     {
@@ -630,17 +806,10 @@ static void gv_raster_layer_finalize( GObject *gobject )
     gv_raster_layer_cleanup_idle( rlayer );
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_layer_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* Call parent class function
-    parent_class = gtk_type_class(gv_layer_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(gtk_object);
-    */
 }
 
 void gv_raster_layer_purge_all_textures( GvRasterLayer *layer )
-
 {
     gint texture; 
 
@@ -705,33 +874,34 @@ gv_raster_layer_raster_geotransform_changed( GvRaster *raster,
     
 static void gv_raster_layer_setup( GvLayer *layer, GvViewArea *view )
 {
-    gtk_signal_connect( GTK_OBJECT(view), "view-state-changed",
-			(GtkSignalFunc)gv_raster_layer_state_changed, layer );
+    g_signal_connect(view, "view-state-changed",
+                    G_CALLBACK (gv_raster_layer_state_changed), layer );
     /* FIXME: we need this on all sources. */
-    gtk_signal_connect( GTK_OBJECT(GV_RASTER_LAYER(layer)->prototype_data), 
-                        "changed",
-			(GtkSignalFunc)gv_raster_layer_raster_changed, layer );
-    gtk_signal_connect( GTK_OBJECT(GV_RASTER_LAYER(layer)->prototype_data), 
-                        "geotransform-changed",
-			(GtkSignalFunc)gv_raster_layer_raster_geotransform_changed, layer );
+    g_signal_connect(GV_RASTER_LAYER(layer)->prototype_data, "changed",
+                    G_CALLBACK (gv_raster_layer_raster_changed), layer );
+    g_signal_connect(GV_RASTER_LAYER(layer)->prototype_data, 
+                    "geotransform-changed",
+                    G_CALLBACK (gv_raster_layer_raster_geotransform_changed),
+                    layer );
 }
 
 static void gv_raster_layer_teardown( GvLayer *layer, GvViewArea *view )
 {
     gv_raster_layer_cleanup_idle( GV_RASTER_LAYER(layer) );
 
-    gtk_signal_disconnect_by_data( GTK_OBJECT(view), GTK_OBJECT(layer) );
+    g_signal_handlers_disconnect_matched (view, G_SIGNAL_MATCH_DATA,
+                                            0, 0, NULL, NULL, layer);
 #ifdef notdef
-    gtk_signal_disconnect_by_data( 
-        GTK_OBJECT(GV_RASTER_LAYER(layer)->prototype_data), 
-        GTK_OBJECT(layer) );
+    g_signal_handlers_disconnect_matched (GV_RASTER_LAYER(layer)->prototype_data,
+                                            G_SIGNAL_MATCH_DATA,
+                                            0, 0, NULL, NULL, layer);
 #endif
 }
 
 static void gv_raster_layer_state_changed( GvViewArea *view, GvRasterLayer *layer )
 {
     if( layer->tile_list )
-	g_array_set_size( layer->tile_list, 0 );
+    g_array_set_size( layer->tile_list, 0 );
 }
     
 
@@ -740,7 +910,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
 {
     GvRasterLayer *raster_layer = GV_RASTER_LAYER(layer);
     gint *list = NULL,
-	lod=0, i = 0, e;
+    lod=0, i = 0, e;
     struct _GvRasterLayerIdleInfo *idle_info = NULL;
     double   pixel_size, pixel_zoom;
     int      tiles_to_force_load = 0;
@@ -761,7 +931,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
 
     if( !raster_layer->tile_list->len )
     {
-	raster_layer->tile_list =
+    raster_layer->tile_list =
             gv_mesh_tilelist_get( raster_layer->mesh, area, raster_layer,
                                   raster_layer->tile_list );
     }
@@ -807,7 +977,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
 
     for( i = 0; list[i] != -1; i++ )
     {
-        int	process_when_idle;
+        int process_when_idle;
         int     skip_render;
         double  tile_dist = 0.0;
         GvRasterLayerTexObj *tex;
@@ -859,7 +1029,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
              */
 
             pixel_ratio = (ABS(tile_dist) / pixel_size)
-            				/ (area->state.shape_y*0.5);
+                            / (area->state.shape_y*0.5);
             
             lod = (int) (log(pixel_ratio)/log(2));
 
@@ -910,12 +1080,12 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
             process_when_idle = TRUE;
             skip_render = TRUE;
         } 
-	else if( mesh == NULL )
-	{
+    else if( mesh == NULL )
+    {
             /* this should never happen, right? */
             skip_render = TRUE;
             process_when_idle = FALSE;
-	}
+    }
 
         else if( tex->lod != lod )
         {
@@ -986,11 +1156,11 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
         glDisableClientState( GL_NORMAL_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
 
-	if ( mesh )
-	{
-	    g_free( mesh );
-	    mesh = NULL;
-	}
+    if ( mesh )
+    {
+        g_free( mesh );
+        mesh = NULL;
+    }
     }
 
     gv_raster_layer_gl_disp_unset();
@@ -1024,14 +1194,14 @@ gv_raster_layer_idle_handler( gpointer data )
     /* first scan for any completely missing textures */
     for( i = 0; i < layer->missing_tex->len; i++ )
     {
-	tile = g_array_index( layer->missing_tex, int, i );
+    tile = g_array_index( layer->missing_tex, int, i );
 
         /* try to fill in textures where we have no lod at all */
-	if( layer->textures[tile] == NULL )
-	{
+    if( layer->textures[tile] == NULL )
+    {
             /* FIXME: Need to check all sources? */
-	    if( ( temp_lod = gv_raster_cache_get_best_lod( 
-                			layer->prototype_data->cache,
+        if( ( temp_lod = gv_raster_cache_get_best_lod( 
+                            layer->prototype_data->cache,
                                         tile, lod ) ) == -1 )
                 temp_lod = lod;
 
@@ -1048,7 +1218,7 @@ gv_raster_layer_idle_handler( gpointer data )
                to provide input */
             if( gv_view_area_redraw_timeout(view) )
                 break;
-	}
+    }
     }
 
     /* make another pass processing anything that needs updating. */
@@ -1056,7 +1226,7 @@ gv_raster_layer_idle_handler( gpointer data )
          i < layer->missing_tex->len && !gv_view_area_redraw_timeout(view);
          i++ )
     {
-	tile = g_array_index( layer->missing_tex, int, i );
+    tile = g_array_index( layer->missing_tex, int, i );
         if( tile < 0 )
             continue;
 
@@ -1193,33 +1363,33 @@ static gint gv_raster_layer_texture_size( gint format, gint type )
 
     switch( type   )
     {
-	case GL_UNSIGNED_BYTE:
-	    elem_size = sizeof( unsigned char );
-	    break;
-	default:
-	    elem_size = 1;
-	    fprintf( stderr, "Unknown type in gv_raster_layer_texture_size\n" );
-	    break;
+    case GL_UNSIGNED_BYTE:
+        elem_size = sizeof( unsigned char );
+        break;
+    default:
+        elem_size = 1;
+        fprintf( stderr, "Unknown type in gv_raster_layer_texture_size\n" );
+        break;
     }
 
     switch( format )
     {
-	case GL_RGBA:
-	    n_elems = 4;
-	    break;
-	case GL_RGB:
-	    n_elems = 3;
-	    break;
-	case GL_LUMINANCE:
-	    n_elems = 1;
-	    break;
-	case GL_LUMINANCE_ALPHA:
-	    n_elems = 2;
-	    break;
-	default:
-	    n_elems = 1;
-	    fprintf( stderr, "Unknown format in gv_raster_layer_texture_size\n" );
-	    break;
+    case GL_RGBA:
+        n_elems = 4;
+        break;
+    case GL_RGB:
+        n_elems = 3;
+        break;
+    case GL_LUMINANCE:
+        n_elems = 1;
+        break;
+    case GL_LUMINANCE_ALPHA:
+        n_elems = 2;
+        break;
+    default:
+        n_elems = 1;
+        fprintf( stderr, "Unknown format in gv_raster_layer_texture_size\n" );
+        break;
     }
 
     return n_elems * elem_size;
@@ -1243,17 +1413,17 @@ static void gv_raster_layer_gl_disp_set( GvRasterLayer *layer )
 
     if( layer->gl_info.blend_enable )
     {
-	glEnable( GL_BLEND );
+    glEnable( GL_BLEND );
 
-	glBlendFunc( layer->gl_info.blend_src, layer->gl_info.blend_dst );
+    glBlendFunc( layer->gl_info.blend_src, layer->gl_info.blend_dst );
     }
 
     if( layer->gl_info.alpha_test )
     {
-	glEnable( GL_ALPHA_TEST );
+    glEnable( GL_ALPHA_TEST );
 
-	glAlphaFunc( layer->gl_info.alpha_test_mode,
-		     layer->gl_info.alpha_test_val );
+    glAlphaFunc( layer->gl_info.alpha_test_mode,
+             layer->gl_info.alpha_test_val );
     }
 
 }
@@ -1281,7 +1451,7 @@ gv_raster_layer_texture_clamp_set( GvRasterLayer *layer, int s_clamp, int t_clam
     g_return_val_if_fail( layer != NULL, 1 );
 
     if( s_clamp >= max_modes || t_clamp >= max_modes )
-	return 1;
+    return 1;
 
     layer->gl_info.s_wrap = modes[s_clamp];
     layer->gl_info.t_wrap = modes[t_clamp];
@@ -1300,7 +1470,7 @@ gv_raster_layer_zoom_set( GvRasterLayer *layer, int mag_mode, int min_mode )
     int max_min_modes = 3;
 
     if( mag_mode >= max_mag_modes || min_mode >= max_min_modes )
-	return 1;
+    return 1;
 
     layer->gl_info.mag_filter = modes[mag_mode];
     layer->gl_info.min_filter = modes[min_mode];
@@ -1326,15 +1496,15 @@ gv_raster_layer_zoom_get( GvRasterLayer *layer, int *mag_mode, int *min_mode )
     *min_mode = -1;
 
     for( i = 0; i < max_mag_modes; i++ )
-	if( layer->gl_info.mag_filter == modes[i] )
-	    *mag_mode = i;
+    if( layer->gl_info.mag_filter == modes[i] )
+        *mag_mode = i;
 
     for( i = 0; i < max_min_modes; i++ )
-	if( layer->gl_info.min_filter == modes[i] )
-	    *min_mode = i;
+    if( layer->gl_info.min_filter == modes[i] )
+        *min_mode = i;
 
     if( *mag_mode == -1 || *min_mode == -1 )
-	return 1;
+    return 1;
 
     return 0;
 }
@@ -1373,14 +1543,14 @@ gv_raster_layer_texture_mode_get( GvRasterLayer *layer, int *texture_mode, GvCol
 
     switch( layer->gl_info.tex_env_mode )
     {
-	case GL_REPLACE:
-	    *texture_mode = 0;
-	    break;
-	case GL_MODULATE:
-	    *texture_mode = 1;
-	    break;
-	default:
-	    return 1;
+    case GL_REPLACE:
+        *texture_mode = 0;
+        break;
+    case GL_MODULATE:
+        *texture_mode = 1;
+        break;
+    default:
+        return 1;
     }
 
     memcpy( color, layer->gl_info.fragment_color, sizeof( GvColor ) );
@@ -1399,13 +1569,13 @@ gv_raster_layer_alpha_set( GvRasterLayer *layer, int alpha_mode, float alpha_che
 
     if( alpha_mode )
     {
-	layer->gl_info.alpha_test = 1;
+    layer->gl_info.alpha_test = 1;
 
-	layer->gl_info.alpha_test_mode = modes[alpha_mode];
+    layer->gl_info.alpha_test_mode = modes[alpha_mode];
 
-	layer->gl_info.alpha_test_val = alpha_check_val;
+    layer->gl_info.alpha_test_val = alpha_check_val;
     } else {
-	layer->gl_info.alpha_test = 0;
+    layer->gl_info.alpha_test = 0;
     }
 
     gv_layer_display_change( GV_LAYER(layer), NULL );
@@ -1423,37 +1593,37 @@ gv_raster_layer_alpha_get( GvRasterLayer *layer, int *alpha_mode, float *alpha_c
 
     if( layer->gl_info.alpha_test )
     {
-	switch( layer->gl_info.alpha_test_mode )
-	{
-	    case GL_NEVER:
-		*alpha_mode = 1;
-		break;
-	    case GL_ALWAYS:
-		*alpha_mode = 2;
-		break;
-	    case GL_LESS:
-		*alpha_mode = 3;
-		break;
-	    case GL_LEQUAL:
-		*alpha_mode = 4;
-		break;
-	    case GL_EQUAL:
-		*alpha_mode = 5;
-		break;
-	    case GL_GEQUAL:
-		*alpha_mode = 6;
-		break;
-	    case GL_GREATER:
-		*alpha_mode = 7;
-		break;
-	    case GL_NOTEQUAL:
-		*alpha_mode = 8;
-		break;
-	    default:
-		return 1;
-	}
+    switch( layer->gl_info.alpha_test_mode )
+    {
+        case GL_NEVER:
+        *alpha_mode = 1;
+        break;
+        case GL_ALWAYS:
+        *alpha_mode = 2;
+        break;
+        case GL_LESS:
+        *alpha_mode = 3;
+        break;
+        case GL_LEQUAL:
+        *alpha_mode = 4;
+        break;
+        case GL_EQUAL:
+        *alpha_mode = 5;
+        break;
+        case GL_GEQUAL:
+        *alpha_mode = 6;
+        break;
+        case GL_GREATER:
+        *alpha_mode = 7;
+        break;
+        case GL_NOTEQUAL:
+        *alpha_mode = 8;
+        break;
+        default:
+        return 1;
+    }
     } else {
-	*alpha_mode = 0;
+    *alpha_mode = 0;
     }
 
     *alpha_check_val = layer->gl_info.alpha_test_val;
@@ -1525,25 +1695,25 @@ gv_raster_layer_blend_mode_get( GvRasterLayer *layer, int *blend_mode, int *sfac
 
     if( layer->gl_info.blend_enable )
     {
-	*blend_mode = 4;
+    *blend_mode = 4;
 
-	for( i = 0; i < max_factors; i++ )
-	{
-	    if( factors[i] == layer->gl_info.blend_src )
-	    {
-		*sfactor = i;
-		break;
-	    }
+    for( i = 0; i < max_factors; i++ )
+    {
+        if( factors[i] == layer->gl_info.blend_src )
+        {
+        *sfactor = i;
+        break;
+        }
       
-	    if( factors[i] == layer->gl_info.blend_dst )
-	    {
-		*dfactor = i;
-	    }
-	}
+        if( factors[i] == layer->gl_info.blend_dst )
+        {
+        *dfactor = i;
+        }
+    }
     } else {
-	*blend_mode = 0;
-	*sfactor = 0;
-	*dfactor = 0;
+    *blend_mode = 0;
+    *sfactor = 0;
+    *dfactor = 0;
     }
     return 0;
 }
@@ -1554,7 +1724,7 @@ int gv_raster_layer_mode_get( GvRasterLayer *layer )
     return layer->mode;
 }
 
-		
+        
 /* the following function should move to gvmesh.h/c when Paul is done with
    them. */
 
@@ -1571,7 +1741,7 @@ gv_mesh_transform_with_func(GvMesh *mesh,
         float  *xyz_verts;
         int    xyz_offset;
 
-	verts = g_array_index( mesh->vertices, GArray *, tile );
+    verts = g_array_index( mesh->vertices, GArray *, tile );
         
         xyz_verts = (float *) verts->data;
         for( xyz_offset = 0; xyz_offset < verts->len; xyz_offset += 3 )
@@ -1708,7 +1878,7 @@ gvrl_to_raw_cb( int pt_count, double *x, double *y, double *z,
 void gv_raster_layer_refresh_mesh( GvRasterLayer *layer )
 
 {
-    GvRaster	*prototype_data = layer->prototype_data;
+    GvRaster    *prototype_data = layer->prototype_data;
 
     if( !layer->mesh_is_dirty )
         return;
@@ -1727,7 +1897,7 @@ void gv_raster_layer_refresh_mesh( GvRasterLayer *layer )
 int gv_raster_layer_set_raw( GvRasterLayer *layer, int raw_enable )
 
 {
-    GvRaster	*prototype_data = layer->prototype_data;
+    GvRaster    *prototype_data = layer->prototype_data;
 
     if( !raw_enable == !layer->mesh_is_raw )
         return TRUE;
@@ -1808,7 +1978,7 @@ gint gv_raster_layer_view_to_pixel(GvRasterLayer *layer,
 double gv_raster_layer_pixel_size( GvRasterLayer *raster )
 
 {
-    double	x1, y1, x2, y2;
+    double  x1, y1, x2, y2;
 
     x1 = raster->prototype_data->width / 2; 
     y1 = raster->prototype_data->height / 2;
@@ -2200,7 +2370,7 @@ gv_raster_layer_autoscale_view( GvRasterLayer *rlayer, int isrc,
                                 double *out_min, double *out_max )
 
 {
-    int	sample_count, ret_val;
+    int sample_count, ret_val;
     float *samples;
     GvRaster *raster;
     GvViewArea   *view;

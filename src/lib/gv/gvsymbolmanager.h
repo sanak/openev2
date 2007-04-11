@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvsymbolmanager.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  manage file-based symbols
@@ -60,16 +60,15 @@
 
 #include <gtk/gtkgl.h>
 #include <GL/gl.h>
-#include <gtk/gtkobject.h>
 #include "gvtypes.h"
 #include "gvshapes.h"
 
 
 #define GV_TYPE_SYMBOL_MANAGER       (gv_symbol_manager_get_type ())
-#define GV_SYMBOL_MANAGER(obj)       (GTK_CHECK_CAST ((obj), GV_TYPE_SYMBOL_MANAGER, GvSymbolManager))
-#define GV_SYMBOL_MANAGER_CLASS(klass)      (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_SYMBOL_MANAGER, GvSymbolManagerClass))
-#define GV_IS_SYMBOL_MANAGER(obj)           (GTK_CHECK_TYPE ((obj), GV_TYPE_SYMBOL_MANAGER))
-#define GV_IS_SYMBOL_MANAGER_CLASS(klass)   (GTK_CHECK_CLASS_TYPE ((klass), GV_SYMBOL_TYPE_MANAGER))
+#define GV_SYMBOL_MANAGER(obj)       (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_SYMBOL_MANAGER, GvSymbolManager))
+#define GV_SYMBOL_MANAGER_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_SYMBOL_MANAGER, GvSymbolManagerClass))
+#define GV_IS_SYMBOL_MANAGER(obj)           (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_SYMBOL_MANAGER))
+#define GV_IS_SYMBOL_MANAGER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_SYMBOL_TYPE_MANAGER))
 
 enum { GV_SYMBOL_RASTER = 0, GV_SYMBOL_VECTOR = 1 };
 
@@ -92,16 +91,16 @@ typedef struct _GvSymbolObj
 
 struct _GvSymbolManager
 {
-    GtkObject object;
+    GObject object;
     GHashTable *symbol_cache;
 };
 
 struct _GvSymbolManagerClass
 {
-    GtkObjectClass parent_class;
+    GObjectClass parent_class;
 };
 
-GtkType          gv_symbol_manager_get_type  (void);
+GType            gv_symbol_manager_get_type  (void);
 GvSymbolManager* gv_symbol_manager_new       (void);
 GvSymbolManager* gv_get_symbol_manager       (void);
 

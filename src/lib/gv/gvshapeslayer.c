@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapeslayer.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Display layer for vector shapes.
@@ -100,7 +100,6 @@
 #include <GL/gl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <gtk/gtksignal.h>
 #include <gmodule.h>
 
 #define DEFAULT_POINT_SIZE 6
@@ -132,33 +131,36 @@ static void gv_shapes_layer_insert_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_delete_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_node_motion(GvShapeLayer *layer, gint area_id);
 static void gv_shapes_layer_finalize(GObject *gobject );
-static void gv_shapes_layer_destroy( GtkObject *object );
+static void gv_shapes_layer_dispose( GObject *gobject );
+
+static GvShapeLayerClass *parent_class = NULL;
 
 /************************************************************************/
 /*                      gv_shapes_layer_get_type()                      */
 /************************************************************************/
-GtkType
+GType
 gv_shapes_layer_get_type(void)
 {
-    static GtkType shapes_layer_type = 0;
+    static GType shapes_layer_type = 0;
 
-    if (!shapes_layer_type)
-    {
-    static const GtkTypeInfo shapes_layer_info =
-    {
-        "GvShapesLayer",
-        sizeof(GvShapesLayer),
-        sizeof(GvShapesLayerClass),
-        (GtkClassInitFunc) gv_shapes_layer_class_init,
-        (GtkObjectInitFunc) gv_shapes_layer_init,
-        /* reserved_1 */ NULL,
-        /* reserved_2 */ NULL,
-        (GtkClassInitFunc) NULL,
-    };
-
-    shapes_layer_type = gtk_type_unique(gv_shape_layer_get_type(),
-                                            &shapes_layer_info);
+    if (!shapes_layer_type) {
+        static const GTypeInfo shapes_layer_info =
+        {
+            sizeof(GvShapesLayerClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_shapes_layer_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvShapesLayer),
+            0,
+            (GInstanceInitFunc) gv_shapes_layer_init,
+        };
+        shapes_layer_type = g_type_register_static (GV_TYPE_SHAPE_LAYER,
+                                                    "GvShapesLayer",
+                                                    &shapes_layer_info, 0);
     }
+
     return shapes_layer_type;
 }
 
@@ -168,13 +170,12 @@ gv_shapes_layer_get_type(void)
 static void
 gv_shapes_layer_class_init(GvShapesLayerClass *klass)
 {
-    GvDataClass *data_class;
-    GvLayerClass *layer_class;
-    GvShapeLayerClass *shape_layer_class;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GvDataClass *data_class = GV_DATA_CLASS (klass);
+    GvLayerClass *layer_class = GV_LAYER_CLASS (klass);
+    GvShapeLayerClass *shape_layer_class = GV_SHAPE_LAYER_CLASS (klass);
 
-    data_class = (GvDataClass*) klass;
-    layer_class = (GvLayerClass*) klass;
-    shape_layer_class = (GvShapeLayerClass*) klass;
+    parent_class = g_type_class_peek_parent (klass);
 
     data_class->changed = gv_shapes_layer_data_change;
 
@@ -194,13 +195,7 @@ gv_shapes_layer_class_init(GvShapesLayerClass *klass)
 
     klass->draw_shape = gv_shapes_layer_draw_shape;
 
-    /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_shapes_layer_finalize;
-
-    ((GtkObjectClass *) klass)->destroy = gv_shapes_layer_destroy;
-    /* GTK2 PORT...
-    ((GtkObjectClass *) klass)->finalize = gv_shapes_layer_finalize;
-    */
+    object_class->finalize = gv_shapes_layer_finalize;
 }
 
 /************************************************************************/
@@ -232,31 +227,32 @@ gv_shapes_layer_init(GvShapesLayer *layer)
     gv_properties_set( &(GV_DATA(layer)->properties), "_area_fill_color",
                        "0.5 1.0 0.5 0.5" );
 
-    gtk_signal_connect_object(GTK_OBJECT(layer), "display-change",
-                  GTK_SIGNAL_FUNC(gv_shapes_layer_display_change),
-                  GTK_OBJECT(layer));
-    gtk_signal_connect_object(GTK_OBJECT(layer), "selection-changed",
-                  GTK_SIGNAL_FUNC(gv_shapes_layer_selection_change),
-                  GTK_OBJECT(layer));
+    g_signal_connect_swapped(layer, "display-change",
+                  G_CALLBACK(gv_shapes_layer_display_change),
+                  layer);
+    g_signal_connect_swapped(layer, "selection-changed",
+                  G_CALLBACK(gv_shapes_layer_selection_change),
+                  layer);
 }
 
 /************************************************************************/
 /*                         gv_shape_layer_new()                         */
 /************************************************************************/
-GtkObject *
+GObject *
 gv_shapes_layer_new(void *data)
 {
-    GvShapesLayer *layer = GV_SHAPES_LAYER(gtk_type_new(
-    gv_shapes_layer_get_type()));
+    GvShapesLayer *layer = g_object_new (GV_TYPE_SHAPES_LAYER, NULL);
 
     if(( data != NULL ) && (GV_IS_SHAPES(data))) {
-        gv_shapes_layer_set_data( layer, data );
+        gv_shapes_layer_set_data(layer, data);
     }
     else {
-        gv_shapes_layer_set_data( layer, GV_SHAPES(gv_shapes_new()) );
+        GvShapes *shapes = GV_SHAPES(gv_shapes_new());
+        gv_shapes_layer_set_data(layer, shapes);
+        g_object_unref(shapes);
     }
 
-    return GTK_OBJECT(layer);
+    return G_OBJECT(layer);
 }
 
 /************************************************************************/
@@ -266,10 +262,14 @@ void gv_shapes_layer_set_data( GvShapesLayer *layer,
                                GvShapes *data )
 
 {
+//~     if (layer->data)
+//~         g_object_unref(layer->data);
+
     layer->data = data;
-    gv_data_set_parent(GV_DATA(layer), GV_DATA(layer->data));
+    /*GV_DATA(layer)->parent = GV_DATA(layer->data);*/
+    gv_data_set_parent(GV_DATA(layer), GV_DATA(data));
     gv_shape_layer_set_num_shapes(GV_SHAPE_LAYER(layer),
-                  gv_shapes_num_shapes(layer->data));
+                  gv_shapes_num_shapes(data));
 
 #ifdef GV_USE_RENDER_PLUGIN
     {
@@ -310,12 +310,12 @@ void gv_shapes_layer_set_data( GvShapesLayer *layer,
 /*                 gv_shapes_layer_get_symbol_manager()                 */
 /************************************************************************/
 
-GtkObject *gv_shapes_layer_get_symbol_manager( GvShapesLayer *layer, 
+GObject *gv_shapes_layer_get_symbol_manager( GvShapesLayer *layer, 
                                                int ok_to_create )
 
 {
     if( ok_to_create && layer->symbol_manager == NULL )
-        layer->symbol_manager = GTK_OBJECT(gv_symbol_manager_new());
+        layer->symbol_manager = G_OBJECT(gv_symbol_manager_new());
 
     return layer->symbol_manager;
 }
@@ -862,11 +862,11 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
 
               glScale( base_scale, base_scale, base_scale );
 
-              (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)
-		  ( view, layer, symbol_info->part_index,
-		     shape_obj,
-		     draw_mode == SELECTED ? NORMAL_GET_BOX : draw_mode,
-		     &sub_drawinfo );
+              GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+                                symbol_info->part_index,
+                                shape_obj,
+                                draw_mode == SELECTED ? NORMAL_GET_BOX : draw_mode,
+                                &sub_drawinfo );
 
               if( draw_mode == SELECTED && sub_drawinfo.box_set )
               {
@@ -1850,8 +1850,9 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
             GvShape *sub_shape
                 = gv_shape_collection_get_shape(shape_obj, i_sub);
 
-            (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)( view, layer, GVP_LAST_PART,
-				  sub_shape, draw_mode, drawinfo );
+              GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer,
+                                        GVP_LAST_PART,
+                                        sub_shape, draw_mode, drawinfo );
         }
     }
 }
@@ -1871,10 +1872,10 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
 #ifdef ATLANTIS_BUILD
     int          bDisplayListsEnabled = 0; /* display lists unreliable */ 
 #else
-    int          bDisplayListsEnabled =
-        gv_manager_get_preference(gv_get_manager(),"display_lists") == NULL
+    int          bDisplayListsEnabled = 0;
+        /*gv_manager_get_preference(gv_get_manager(),"display_lists") == NULL
         || EQUAL(gv_manager_get_preference(gv_get_manager(),
-                                           "display_lists"),"ON");
+                                           "display_lists"),"ON"); */
 #endif
     presentation = GV_LAYER(layer)->presentation;
     selected = GV_SHAPE_LAYER_SELBUF(layer);
@@ -1963,8 +1964,9 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
             {
                 in_list_count++;
                 drawinfo.box_set = FALSE;
-                (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)( view, layer, part_index, shape_obj,
-				      NORMAL, &drawinfo );
+                GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+                                        part_index, shape_obj,
+                                        NORMAL, &drawinfo );
             }
         }
 
@@ -2002,8 +2004,9 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
         {
             out_list_count++;
             drawinfo.box_set = FALSE;
-            (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)( view, layer, part_index, shape_obj,
-				  NORMAL, &drawinfo );
+            GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+                                        part_index, shape_obj,
+                                        NORMAL, &drawinfo );
         }
     }
 
@@ -2087,8 +2090,9 @@ gv_shapes_layer_draw_selected(GvShapeLayer *r_layer, GvViewArea *view)
 
         /* draw the shape in selected mode. */
         drawinfo.box_set = FALSE;
-        (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)( view, layer, part_index, shape_obj,
-			      SELECTED, &drawinfo );
+        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+                                    part_index, shape_obj,
+                                    SELECTED, &drawinfo );
     }
     glDisable(GL_BLEND);
     glDisableClientState(GL_VERTEX_ARRAY);
@@ -2136,8 +2140,9 @@ gv_shapes_layer_pick_shape(GvShapeLayer *r_layer)
 
         /* Draw it in PICKING mode */
         drawinfo.box_set = FALSE;
-        (*GV_SHAPES_LAYER_CLASS((GTK_OBJECT_GET_CLASS(layer)))->draw_shape)
-	    (view, layer, part_index, shape_obj, PICKING, &drawinfo);
+        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape(view, layer, 
+                                    part_index, shape_obj,
+                                    PICKING, &drawinfo);
     }
     glDisableClientState(GL_VERTEX_ARRAY);
 }
@@ -2504,27 +2509,19 @@ gv_shapes_layer_display_change(GvLayer *data, gpointer change_info)
 }
 
 /************************************************************************/
-/*                      gv_shapes_layer_destroy()                       */
+/*                      gv_shapes_layer_dispose()                       */
 /************************************************************************/
 
-static void gv_shapes_layer_destroy( GtkObject *gtk_object )
+static void gv_shapes_layer_dispose( GObject *gobject )
 
 {
-    GvShapeLayerClass *parent_class;
-    GvShapesLayer *slayer = GV_SHAPES_LAYER(gtk_object);
+    GvShapesLayer *slayer = GV_SHAPES_LAYER(gobject);
 
-    CPLDebug( "OpenEV", "gv_shapes_layer_destroy(%s)", 
+    CPLDebug( "OpenEV", "gv_shapes_layer_dispose(%s)", 
               gv_data_get_name(GV_DATA(slayer)) );
 
-    if( slayer->symbol_manager != NULL )
-    {
-        gtk_object_unref( GTK_OBJECT(slayer->symbol_manager) );
-        slayer->symbol_manager = NULL;
-    }
-
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_shape_layer_get_type());
-    GTK_OBJECT_CLASS(parent_class)->destroy(gtk_object);         
+    G_OBJECT_CLASS(parent_class)->dispose(gobject);         
 }
 
 /************************************************************************/
@@ -2534,7 +2531,6 @@ static void
 gv_shapes_layer_finalize(GObject *gobject)
 
 {
-    GvShapeLayerClass *parent_class;
     GvShapesLayer *layer = GV_SHAPES_LAYER(gobject);
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
@@ -2543,20 +2539,26 @@ gv_shapes_layer_finalize(GObject *gobject)
     CPLDebug( "OpenEV", "gv_shapes_layer_finalize(%s)",
               gv_data_get_name( GV_DATA(gobject) ) );
 
+    if( layer->data != NULL )
+    {
+//~         g_object_unref( layer->data );
+        layer->data = NULL;
+    }
+
+    if( layer->symbol_manager != NULL )
+    {
+        g_object_unref( layer->symbol_manager );
+        layer->symbol_manager = NULL;
+    }
+
     /* delete the display list if it is valid */
     if (layer->display_list != -1) {
       if (glIsList(layer->display_list)) {
-	glDeleteLists( layer->display_list, 1 );
+        glDeleteLists( layer->display_list, 1 );
       }
       layer->display_list = -1;
     }
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_shape_layer_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* Call parent class function
-    parent_class = gtk_type_class(gv_shape_layer_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(object);
-    */
 }

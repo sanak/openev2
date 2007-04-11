@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapeslayer.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Display layer for vector shapes.
@@ -93,11 +93,15 @@
 #include "gvshapelayer.h"
 #include "gvshapes.h"
 
-#define GV_TYPE_SHAPES_LAYER           (gv_shapes_layer_get_type ())
-#define GV_SHAPES_LAYER(obj)           (GTK_CHECK_CAST ((obj), GV_TYPE_SHAPES_LAYER, GvShapesLayer))
-#define GV_SHAPES_LAYER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_SHAPES_LAYER, GvShapesLayerClass))
-#define GV_IS_SHAPES_LAYER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_SHAPES_LAYER))
-#define GV_IS_SHAPES_LAYER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPES_LAYER))
+#define GV_TYPE_SHAPES_LAYER            (gv_shapes_layer_get_type ())
+#define GV_SHAPES_LAYER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_SHAPES_LAYER,\
+                                                   GvShapesLayer))
+#define GV_SHAPES_LAYER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),GV_TYPE_SHAPES_LAYER,\
+                                                        GvShapesLayerClass))
+#define GV_IS_SHAPES_LAYER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_SHAPES_LAYER))
+#define GV_IS_SHAPES_LAYER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPES_LAYER))
+#define GV_SHAPES_LAYER_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS((obj),GV_TYPE_SHAPES_LAYER,\
+                                                        GvShapesLayerClass))
 
 typedef struct _GvShapesLayer       GvShapesLayer;
 typedef struct _GvShapesLayerClass  GvShapesLayerClass;
@@ -110,7 +114,7 @@ struct _GvShapesLayer
     gint edit_ring;
     gint display_list;
 
-    GtkObject *symbol_manager;
+    GObject *symbol_manager;
 };
 
 typedef enum
@@ -150,31 +154,31 @@ struct _GvShapesLayerClass
 {
     GvShapeLayerClass parent_class;
     void (* draw_shape)         (GvViewArea *view, GvShapesLayer *layer,
-				int part_index, GvShape *shape_obj, 
-				gv_draw_mode draw_mode,
-				GvShapeDrawInfo *drawinfo);
+                                int part_index, GvShape *shape_obj, 
+                                gv_draw_mode draw_mode,
+                                GvShapeDrawInfo *drawinfo);
 };
 
 void gv_draw_info_aggregate_select_region(GvShapeDrawInfo *, 
                                            double x, double y);
 
-GtkType gv_shapes_layer_get_type(void);
-GtkObject* gv_shapes_layer_new(void *data);
+GType gv_shapes_layer_get_type(void);
+GObject* gv_shapes_layer_new(void *data);
 gint gv_shapes_layer_select_new_shape(GvShapesLayer *layer, GvShape *shape);
 void gv_shapes_layer_set_data(GvShapesLayer *layer, GvShapes *data);
 void gv_shapes_layer_draw_selected(GvShapeLayer *layer, GvViewArea *view);
 void gv_shapes_layer_draw(GvLayer *layer, GvViewArea *view);
 void gv_shapes_layer_get_draw_info(GvViewArea *view, GvShapesLayer *layer,
-				   GvShapeDrawInfo *drawinfo);
+                                   GvShapeDrawInfo *drawinfo);
 void gv_shapes_layer_override_color(GvShape *shape, GvColor color,
-				    const char *property_name);
+                                    const char *property_name);
 
-GtkObject *gv_shapes_layer_get_symbol_manager(GvShapesLayer *layer, 
+GObject *gv_shapes_layer_get_symbol_manager(GvShapesLayer *layer, 
                                                int ok_to_create);
 
 void gv_shapes_layer_draw_shape(GvViewArea *view, GvShapesLayer *layer,
-				int part_index, GvShape *shape_obj, 
-				gv_draw_mode draw_mode,
-				GvShapeDrawInfo *drawinfo);
+                                int part_index, GvShape *shape_obj, 
+                                gv_draw_mode draw_mode,
+                                GvShapeDrawInfo *drawinfo);
 
 #endif /* __GV_SHAPES_LAYER_H__ */

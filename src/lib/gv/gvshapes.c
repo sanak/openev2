@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapes.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Vector shape container class.
@@ -115,28 +115,32 @@ static void gv_shapes_set_memento(GvData *points, GvDataMemento *memento);
 static void gv_shapes_del_memento(GvData *points, GvDataMemento *memento);
 static void gv_shapes_changed(GvData *points, gpointer data);
 static void gv_shapes_finalize(GObject *gobject);
-static void gv_shapes_destroy(GtkObject *gtk_object);
+static void gv_shapes_dispose(GObject *gobject);
 
-GtkType
+static GvDataClass *parent_class = NULL;
+
+GType
 gv_shapes_get_type(void)
 {
-    static GtkType shapes_type = 0;
+    static GType shapes_type = 0;
 
-    if (!shapes_type)
-    {
-	static const GtkTypeInfo shapes_info =
-	{
-	    "GvShapes",
-	    sizeof(GvShapes),
-	    sizeof(GvShapesClass),
-	    (GtkClassInitFunc) gv_shapes_class_init,
-	    (GtkObjectInitFunc) gv_shapes_init,
-	    /** reserved_1 **/ NULL,
-	    /** reserved_2 **/ NULL,
-	    (GtkClassInitFunc) NULL
-	};
-	shapes_type = gtk_type_unique(gv_data_get_type(), &shapes_info);
-    }
+    if (!shapes_type) {
+        static const GTypeInfo shapes_info =
+        {
+            sizeof(GvShapesClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_shapes_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvShapes),
+            0,
+            (GInstanceInitFunc) gv_shapes_init,
+        };
+        shapes_type = g_type_register_static (GV_TYPE_DATA,
+                                            "GvShapes",
+                                            &shapes_info, 0);
+        }
 
     return shapes_type;
 }
@@ -152,18 +156,12 @@ gv_shapes_init(GvShapes *shapes)
 static void
 gv_shapes_class_init(GvShapesClass *klass)
 {
-    GvDataClass *data_class;
+    GvDataClass *data_class = GV_DATA_CLASS (klass);
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    data_class = (GvDataClass*) klass;
+    parent_class = g_type_class_peek_parent (klass);
 
-    /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_shapes_finalize;
-
-    ((GtkObjectClass *) klass)->destroy = gv_shapes_destroy;
-
-    /* GTK2 PORT...
-    object_class->finalize = gv_shapes_finalize;
-    */
+    object_class->dispose = gv_shapes_dispose;
 
     data_class->changed = gv_shapes_changed;
     data_class->get_memento = gv_shapes_get_memento;
@@ -174,13 +172,13 @@ gv_shapes_class_init(GvShapesClass *klass)
 GvData *
 gv_shapes_new(void)
 {
-    GvData *data;
+    GvShapes *shapes;
 
-    data = GV_DATA(gtk_type_new(gv_shapes_get_type()));
+    shapes = g_object_new(GV_TYPE_SHAPES, NULL);
 
-    CPLDebug( "OpenEV", "gv_shapes_new(%p)", data );
+    CPLDebug( "OpenEV", "gv_shapes_new(%p)", shapes );
 
-    return data;
+    return GV_DATA(shapes);
 }
 
 gint
@@ -294,7 +292,7 @@ gv_shapes_delete_shapes(GvShapes *shapes, gint num_shapes, gint *id_list)
 
 void
 gv_shapes_translate_shapes(GvShapes *shapes, gint num_shapes, gint *id_list,
-			   gvgeocoord dx, gvgeocoord dy)
+                           gvgeocoord dx, gvgeocoord dy)
 {
     GvShape *shape;
     gint i;
@@ -335,15 +333,15 @@ gv_shapes_get_extents(GvShapes *shapes, GvRect *rect)
 {
     if (!shapes->extents_valid)
     {
-	gint i, num_shapes, valid_shapes = 0;
-	GvVertex vmax, vmin;
+        gint i, num_shapes, valid_shapes = 0;
+        GvVertex vmax, vmin;
 
-	vmin.x = vmin.y = GV_MAXFLOAT;
-	vmax.x = vmax.y = -GV_MAXFLOAT;
+        vmin.x = vmin.y = GV_MAXFLOAT;
+        vmax.x = vmax.y = -GV_MAXFLOAT;
 
-	num_shapes = gv_shapes_num_shapes(shapes);
-	for (i=0; i < num_shapes; ++i)
-	{
+        num_shapes = gv_shapes_num_shapes(shapes);
+        for (i=0; i < num_shapes; ++i)
+        {
             GvRect   rect;
             GvShape *shape = gv_shapes_get_shape(shapes,i);
 
@@ -361,23 +359,23 @@ gv_shapes_get_extents(GvShapes *shapes, GvRect *rect)
                 vmin.y = MIN(vmin.y,rect.y);
                 vmax.y = MAX(vmax.y,rect.y+rect.height);
             }
-	}
+        }
 
-	if (valid_shapes == 0)
-	{
-	    shapes->extents.x = 0;
-	    shapes->extents.y = 0;
-	    shapes->extents.width = 0;
-	    shapes->extents.height = 0;
-	}
-	else
-	{
-	    shapes->extents.x = vmin.x;
-	    shapes->extents.y = vmin.y;
-	    shapes->extents.width = vmax.x - vmin.x;
-	    shapes->extents.height = vmax.y - vmin.y;
-	}
-	shapes->extents_valid = TRUE;
+        if (valid_shapes == 0)
+        {
+            shapes->extents.x = 0;
+            shapes->extents.y = 0;
+            shapes->extents.width = 0;
+            shapes->extents.height = 0;
+        }
+        else
+        {
+            shapes->extents.x = vmin.x;
+            shapes->extents.y = vmin.y;
+            shapes->extents.width = vmax.x - vmin.x;
+            shapes->extents.height = vmax.y - vmin.y;
+        }
+        shapes->extents_valid = TRUE;
     }
 
     *rect = shapes->extents;
@@ -385,7 +383,7 @@ gv_shapes_get_extents(GvShapes *shapes, GvRect *rect)
 
 void
 gv_shapes_replace_shapes(GvShapes *shapes, gint num_shapes, gint *shape_id,
-			 GvShape **shps, int make_copy)
+                         GvShape **shps, int make_copy)
 {
     gint i;
     GvShapeChangeInfo change_info = {GV_CHANGE_REPLACE, 0, NULL};
@@ -397,7 +395,7 @@ gv_shapes_replace_shapes(GvShapes *shapes, gint num_shapes, gint *shape_id,
 
     for (i=0; i < num_shapes; ++i)
     {
-        GvShape	*shape;
+        GvShape *shape;
 
         if( shape_id[i] < 0 || shape_id[i] >= shapes->shapes->len )
             continue;
@@ -420,7 +418,7 @@ gv_shapes_replace_shapes(GvShapes *shapes, gint num_shapes, gint *shape_id,
 
 static void
 gv_shapes_insert_shapes(GvShapes *shapes, gint num_shapes, gint *shape_ids,
-			GvShape **shps)
+                        GvShape **shps)
 {
     gint i;
     GvShapeChangeInfo change_info = {GV_CHANGE_ADD, 0, NULL};
@@ -467,9 +465,9 @@ gv_shapes_insert_shapes(GvShapes *shapes, gint num_shapes, gint *shape_ids,
 
 static void
 gv_shapes_get_memento(GvData *gv_data, gpointer data,
-		      GvDataMemento **memento)
+                      GvDataMemento **memento)
 {
-    GvShapes	*shapes = GV_SHAPES(gv_data);
+    GvShapes    *shapes = GV_SHAPES(gv_data);
     GvShapesMemento *mem;
     GvShapeChangeInfo *info = (GvShapeChangeInfo *) data;
     int i;
@@ -484,24 +482,24 @@ gv_shapes_get_memento(GvData *gv_data, gpointer data,
     /* Grab in ascending order */
     if (info->num_shapes > 1)
     {
-	g_sort_type(mem->ids->data, gint, mem->ids->len);
+        g_sort_type(mem->ids->data, gint, mem->ids->len);
     }
 
     if (info->change_type == GV_CHANGE_ADD)
     {
-	mem->shapes = NULL;
+        mem->shapes = NULL;
     }
     else
     {
-	mem->shapes = g_ptr_array_new();
-	for (i=0; i < info->num_shapes; ++i)
-	{
+        mem->shapes = g_ptr_array_new();
+        for (i=0; i < info->num_shapes; ++i)
+        {
             GvShape    *shape = gv_shapes_get_shape(shapes,info->shape_id[i]);
 
             shape = gv_shape_copy( shape );
             gv_shape_ref( shape );
             g_ptr_array_add(mem->shapes, shape );
-	}
+        }
     }
 
     *memento = (GvDataMemento*)mem;
@@ -510,28 +508,28 @@ gv_shapes_get_memento(GvData *gv_data, gpointer data,
 static void
 gv_shapes_set_memento(GvData *gv_data, GvDataMemento *data_memento)
 {
-    GvShapes	*shapes = GV_SHAPES(gv_data);
+    GvShapes    *shapes = GV_SHAPES(gv_data);
     GvShapesMemento *memento = (GvShapesMemento *) data_memento;
 
     switch (memento->base.type)
     {
-	case GV_CHANGE_ADD:
-	    gv_shapes_delete_shapes(shapes, memento->ids->len,
-				    (gint*)memento->ids->data);
-	    break;
+        case GV_CHANGE_ADD:
+            gv_shapes_delete_shapes(shapes, memento->ids->len,
+                                    (gint*)memento->ids->data);
+            break;
 
-	case GV_CHANGE_REPLACE:
-	    gv_shapes_replace_shapes(shapes, memento->ids->len,
-				     (gint*)memento->ids->data,
-				     (GvShape **)memento->shapes->pdata,
+        case GV_CHANGE_REPLACE:
+            gv_shapes_replace_shapes(shapes, memento->ids->len,
+                                     (gint*)memento->ids->data,
+                                     (GvShape **)memento->shapes->pdata,
                                      TRUE);
-	    break;
+            break;
 
-	case GV_CHANGE_DELETE:
-	    gv_shapes_insert_shapes(shapes, memento->ids->len,
-				     (gint*)memento->ids->data,
-				     (GvShape **)memento->shapes->pdata);
-	    break;
+        case GV_CHANGE_DELETE:
+            gv_shapes_insert_shapes(shapes, memento->ids->len,
+                                     (gint*)memento->ids->data,
+                                     (GvShape **)memento->shapes->pdata);
+            break;
     }
 
     gv_shapes_del_memento((GvData *) shapes, (GvDataMemento *) memento);
@@ -560,7 +558,7 @@ gv_shapes_del_memento(GvData *gv_data, GvDataMemento *data_memento)
 static void
 gv_shapes_changed(GvData *gv_data, gpointer data)
 {
-    GvShapes	*shapes = GV_SHAPES(gv_data);
+    GvShapes    *shapes = GV_SHAPES(gv_data);
 
     shapes->extents_valid = FALSE;
 }
@@ -568,66 +566,35 @@ gv_shapes_changed(GvData *gv_data, gpointer data)
 static void
 gv_shapes_finalize(GObject *gobject)
 {
-    GvDataClass *parent_class;
+    GvShapes *shapes = GV_SHAPES(gobject);
+    int          i;
 
     CPLDebug( "OpenEV", "gv_shapes_finalize(%s/%p)", 
               gv_data_get_name( GV_DATA(gobject) ), gobject );
 
-    /* GTK2 PORT... Override GObject finalize, test for and set NULLs as
-       finalize may be called more than once, move object frees to destroy */
-
-    /* Moved to destroy...
-    for( i = 0; i < gv_shapes_num_shapes(shapes); i++ )
-    {
-        if( gv_shapes_get_shape(shapes, i) != NULL )
-            gv_shape_unref( gv_shapes_get_shape(shapes, i) );
-    }
-
-    g_ptr_array_free(shapes->shapes,TRUE);
-    */
-
-    /* Call parent class finalize */
-    parent_class = gtk_type_class(gv_data_get_type());
-    G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* Call parent class function
-    parent_class = gtk_type_class(gv_data_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(object);
-    */
-}
-
-static void
-gv_shapes_destroy(GtkObject *object)
-{
-    GvDataClass *parent_class;
-    GvShapes *shapes = GV_SHAPES(object);
-    int          i;
-
-    CPLDebug( "OpenEV", "gv_shapes_destroy(%s/%p)", 
-              gv_data_get_name( GV_DATA(object) ), object );
-
-    /* GTK2 PORT... test for and set NULLs as
-       destroy may be called more than once */
-
     if (shapes->shapes != NULL) {
       for( i = 0; i < gv_shapes_num_shapes(shapes); i++ )
-	{
-	  if( gv_shapes_get_shape(shapes, i) != NULL )
+        {
+          if( gv_shapes_get_shape(shapes, i) != NULL )
             gv_shape_unref( gv_shapes_get_shape(shapes, i) );
-	}
+        }
 
       g_ptr_array_free(shapes->shapes,TRUE);
       shapes->shapes = NULL;
     }
 
-    /* Call parent class destroy */
-    parent_class = gtk_type_class(gv_data_get_type());
-    GTK_OBJECT_CLASS(parent_class)->destroy(object);
+    /* Call parent class finalize */
+    G_OBJECT_CLASS(parent_class)->finalize(gobject);
+}
 
-    /* Call parent class function
-    parent_class = gtk_type_class(gv_data_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(object);
-    */
+static void
+gv_shapes_dispose(GObject *gobject)
+{
+    CPLDebug( "OpenEV", "gv_shapes_dispose(%s/%p)", 
+              gv_data_get_name( GV_DATA(gobject) ), gobject );
+
+    /* Call parent class dispose */
+    G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
 
 #ifndef HAVE_OGR
@@ -655,7 +622,7 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
     double x, y, z, last_z, imaginary, nodata_value;
     GvRaster *raster = GV_RASTER(raster_data);
     GvShapeChangeInfo change_info = {GV_CHANGE_REPLACE, 0, NULL};
-    int	   *id_list;
+    int    *id_list;
 
     /*
      * Notify of impending change.
@@ -687,7 +654,7 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
     for (i=0; i < num_shapes; i++)
     {
         GvShape *shape = gv_shapes_get_shape(shapes,i);
-        int 	ring, ring_count = gv_shape_get_rings( shape );
+        int     ring, ring_count = gv_shape_get_rings( shape );
         
         if( shape == NULL )
             continue;
@@ -696,11 +663,11 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
 
         for( ring = 0; ring < ring_count; ring++ )
         {
-            int	node, node_count = gv_shape_get_nodes( shape, ring );
+            int node, node_count = gv_shape_get_nodes( shape, ring );
 
             for( node = 0; node < node_count; node++ )
             {
-                double	x_orig, y_orig;
+                double  x_orig, y_orig;
 
                 /* get xy in image space */
                 x_orig = x = gv_shape_get_x( shape, ring, node );

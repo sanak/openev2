@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvlayer.h,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for all display layers.
@@ -57,10 +57,10 @@
 #include "gvviewarea.h"
 
 #define GV_TYPE_LAYER            (gv_layer_get_type ())
-#define GV_LAYER(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_LAYER, GvLayer))
-#define GV_LAYER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_LAYER, GvLayerClass))
-#define GV_IS_LAYER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_LAYER))
-#define GV_IS_LAYER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_LAYER))
+#define GV_LAYER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_LAYER, GvLayer))
+#define GV_LAYER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_LAYER, GvLayerClass))
+#define GV_IS_LAYER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_LAYER))
+#define GV_IS_LAYER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_LAYER))
 
 typedef struct _GvLayer       GvLayer;
 typedef struct _GvLayerClass  GvLayerClass;
@@ -95,7 +95,7 @@ struct _GvLayerClass
     gint (* reproject)       (GvLayer *layer, const char *);
 };
 
-GtkType    gv_layer_get_type (void);
+GType    gv_layer_get_type (void);
 
 void gv_layer_setup(GvLayer *layer, GvViewArea *view);
 void gv_layer_teardown(GvLayer *layer, GvViewArea *view);

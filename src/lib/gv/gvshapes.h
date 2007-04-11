@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapes.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Definitions of GvShape (single object) and GvShapes (data
@@ -103,12 +103,12 @@
 #include "cpl_minixml.h"
 
 #define GV_TYPE_SHAPES            (gv_shapes_get_type ())
-#define GV_SHAPES(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_SHAPES,\
+#define GV_SHAPES(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_SHAPES,\
                                                    GvShapes))
-#define GV_SHAPES_CLASS(klass)    (GTK_CHECK_CLASS_CAST((klass),GV_TYPE_SHAPES,\
+#define GV_SHAPES_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),GV_TYPE_SHAPES,\
                                                         GvShapesClass))
-#define GV_IS_SHAPES(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_SHAPES))
-#define GV_IS_SHAPES_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPES))
+#define GV_IS_SHAPES(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_SHAPES))
+#define GV_IS_SHAPES_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPES))
 
 typedef struct _GvShapes GvShapes;
 typedef struct _GvShapesClass GvShapesClass;
@@ -133,10 +133,11 @@ struct _GvShapesClass
 #define gv_shapes_get_shape(adata,id) \
      ((GvShape*)g_ptr_array_index(adata->shapes, id))
 
-GtkType  gv_shapes_get_type (void);
+GType  gv_shapes_get_type (void);
 GvData* gv_shapes_new(void);
 
 GvData* gv_shapes_from_shapefile(const char *filename);
+void gv_shapes_read_from_file(const char *filename, GvShapes *shapes);
 GvData *gv_shapes_from_ogr(const char *filename, int iLayer);
 GvData* gv_shapes_from_ogr_layer(void *ogr_layer);
 

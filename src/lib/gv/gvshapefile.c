@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapefile.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Read/write link to ESRI Shapefiles from GvShapes.
@@ -325,6 +325,235 @@ GvData *gv_shapes_from_shapefile(const char *filename)
     gv_data_set_name( GV_DATA(shapes_data), filename );
 
     return GV_DATA(shapes_data);
+}
+
+/************************************************************************/
+/*                      gv_shapes_read_from_file()                      */
+/************************************************************************/
+
+void gv_shapes_read_from_file(const char *filename, GvShapes *shapes_data)
+
+{
+    SHPHandle   shp_handle;
+    DBFHandle   dbf_handle;
+    int         shape_count, shape_index, field_count = 0, field_index;
+    int         field_type;
+    GvProperties *properties;
+    char        **field_names = NULL;
+
+
+/* -------------------------------------------------------------------- */
+/*      Open the .shp and .dbf file.                                    */
+/* -------------------------------------------------------------------- */
+    shp_handle = SHPOpen( filename, "rb" );
+    dbf_handle = DBFOpen( filename, "rb" );
+    if( dbf_handle == NULL && shp_handle == NULL )
+    {
+        g_warning( "Invalid shapefile and DBF." );
+        return;
+    }
+    else if( dbf_handle == NULL )
+        g_warning( "Unable to open DBF file ... continuing anyways." );
+    else
+        field_count = DBFGetFieldCount( dbf_handle );
+
+
+    if ( shp_handle != NULL )
+        SHPGetInfo( shp_handle, &shape_count, NULL, NULL, NULL );
+    else
+    {
+        CPLDebug( "OpenEV", "Unable to open shapefile, just using .dbf file.");
+        shape_count = DBFGetRecordCount( dbf_handle );
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Create shapes layer, and assign some metadata about the         */
+/*      field definitions.                                              */
+/* -------------------------------------------------------------------- */
+    properties = gv_data_get_properties( GV_DATA(shapes_data) );
+
+    //set the filename property
+    gv_properties_set( properties, "_filename", filename );
+
+    field_names = (char **) g_new( char *, field_count+1 );
+
+    for(field_index = 0; field_index < field_count; field_index++ )
+    {
+        char      prop_value[64], prop_name[64];
+        int       field_type, width, precision;
+
+        field_type = DBFGetFieldInfo( dbf_handle, field_index,
+                                      prop_value, &width, &precision );
+
+        sprintf( prop_name, "_field_name_%d", field_index+1 );
+        gv_properties_set( properties, prop_name, prop_value );
+
+        field_names[field_index] = g_strdup( prop_value );
+
+        sprintf( prop_name, "_field_width_%d", field_index+1 );
+        sprintf( prop_value, "%d", width );
+        gv_properties_set( properties, prop_name, prop_value );
+
+        if( field_type == FTDouble )
+        {
+            sprintf( prop_name, "_field_precision_%d", field_index+1 );
+            sprintf( prop_value, "%d", precision );
+            gv_properties_set( properties, prop_name, prop_value );
+        }
+
+        sprintf( prop_name, "_field_type_%d", field_index+1 );
+        if( field_type == FTInteger )
+            gv_properties_set( properties, prop_name, "integer" );
+        else if( field_type == FTDouble )
+            gv_properties_set( properties, prop_name, "float" );
+        else
+            gv_properties_set( properties, prop_name, "string" );
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Copy all the shapes, and their attributes.                      */
+/* -------------------------------------------------------------------- */
+
+    for( shape_index = 0; shape_index < shape_count; shape_index++ )
+    {
+        SHPObject  *src_shape;
+        GvShape    *gv_shape = NULL;
+
+        if ( shp_handle != NULL )
+        {
+            src_shape = SHPReadObject( shp_handle, shape_index );
+            if( src_shape == NULL )
+                continue;
+
+            if( src_shape->nSHPType == SHPT_POINT
+                || src_shape->nSHPType == SHPT_POINTM
+                || src_shape->nSHPType == SHPT_POINTZ )
+            {
+                gv_shape = gv_shape_new( GVSHAPE_POINT );
+                gv_shape_set_xyz( gv_shape, 0, 0,
+                                  src_shape->padfX[0],
+                                  src_shape->padfY[0],
+                                  src_shape->padfZ[0] );
+            }
+
+            else if( src_shape->nSHPType == SHPT_ARC
+                     || src_shape->nSHPType == SHPT_ARCM
+                     || src_shape->nSHPType == SHPT_ARCZ )
+            {
+                int    node;
+
+                if( src_shape->nParts == 1 )
+                {
+                    gv_shape = gv_shape_new( GVSHAPE_LINE );
+                    for( node = src_shape->nVertices-1; node >= 0; node-- )
+                        gv_shape_set_xyz( gv_shape, 0, node,
+                                          src_shape->padfX[node],
+                                          src_shape->padfY[node],
+                                          src_shape->padfZ[node] );
+                }
+                else
+                {
+                    int part;
+                    
+                    gv_shape = gv_shape_new( GVSHAPE_COLLECTION );
+
+                    for( part = 0; part < src_shape->nParts; part++ )
+                    {
+                        GvShape *line;
+                        int     node, node_count, start;
+                    
+                        start = src_shape->panPartStart[part];
+                        
+                        if( part == src_shape->nParts-1 )
+                            node_count = src_shape->nVertices - start;
+                        else
+                            node_count = src_shape->panPartStart[part+1] - start;
+                        
+                        line = gv_shape_new( GVSHAPE_LINE );
+
+                        for( node = node_count - 1; node >= 0; node-- )
+                            gv_shape_set_xyz( line, 0, node,
+                                          src_shape->padfX[node+start],
+                                          src_shape->padfY[node+start],
+                                          src_shape->padfZ[node+start] );
+                        
+                        gv_shape_collection_add_shape( gv_shape, line );
+                    }
+                }
+            }
+
+            else if( src_shape->nSHPType == SHPT_POLYGON
+                     || src_shape->nSHPType == SHPT_POLYGONM
+                     || src_shape->nSHPType == SHPT_POLYGONZ )
+            {
+                int    part;
+
+                gv_shape = gv_shape_new( GVSHAPE_AREA );
+                for( part = 0; part < src_shape->nParts; part++ )
+                {
+                    int     node, node_count, start;
+
+                    start = src_shape->panPartStart[part];
+
+                    if( part == src_shape->nParts-1 )
+                        node_count = src_shape->nVertices - start;
+                    else
+                        node_count = src_shape->panPartStart[part+1] - start;
+
+                    for( node = node_count - 1; node >= 0; node-- )
+                        gv_shape_set_xyz( gv_shape, part, node,
+                                          src_shape->padfX[node+start],
+                                          src_shape->padfY[node+start],
+                                          src_shape->padfZ[node+start] );
+                }
+            }
+
+            SHPDestroyObject( src_shape );
+        }
+        else
+            gv_shape = gv_shape_new( GVSHAPE_COLLECTION );
+
+        /* add other types later */
+
+        if( gv_shape != NULL && dbf_handle != NULL )
+        {
+            properties = gv_shape_get_properties( gv_shape );
+
+            for( field_index = 0; field_index < field_count; field_index++ )
+            {
+                const char  *field_value;
+
+                if( DBFIsAttributeNULL(dbf_handle,shape_index,field_index) )
+                    continue;
+
+                field_value = DBFReadStringAttribute( dbf_handle, shape_index,
+                                                      field_index );
+                field_type = DBFGetFieldInfo( dbf_handle, field_index,
+                                              NULL, NULL, NULL);
+
+                gv_properties_set( properties,
+                                   field_names[field_index],
+                                   field_value );
+            }
+        }
+
+        if( gv_shape != NULL )
+            gv_shapes_add_shape( shapes_data, gv_shape );
+    }
+
+/* -------------------------------------------------------------------- */
+/*      Cleanup                                                         */
+/* -------------------------------------------------------------------- */
+    if( dbf_handle != NULL )
+        DBFClose( dbf_handle );
+    if( shp_handle != NULL )
+        SHPClose( shp_handle );
+
+    for( field_index = 0; field_index < field_count; field_index++ )
+        g_free( field_names[field_index] );
+    g_free( field_names );
+
+    gv_data_set_name( GV_DATA(shapes_data), filename );
 }
 
 /************************************************************************/

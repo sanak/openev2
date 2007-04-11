@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvlayer.c,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for all display layers.
@@ -50,7 +50,6 @@
  */
 
 #include "gvlayer.h"
-#include <gtk/gtksignal.h>
 #include <stdio.h>
 
 enum
@@ -67,131 +66,88 @@ static void gv_layer_class_init(GvLayerClass *klass);
 static void gv_layer_init(GvLayer *layer);
 static void gv_layer_finalize(GObject *gobject);
 
+static GvDataClass *parent_class = NULL;
 static guint layer_signals[LAST_SIGNAL] = { 0 };
 
-GtkType
+GType
 gv_layer_get_type(void)
 {
-    static GtkType layer_type = 0;
+    static GType layer_type = 0;
 
-    if (!layer_type)
-    {
-	static const GtkTypeInfo layer_info =
-	{
-	    "GvLayer",
-	    sizeof(GvLayer),
-	    sizeof(GvLayerClass),
-	    (GtkClassInitFunc) gv_layer_class_init,
-	    (GtkObjectInitFunc) gv_layer_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
-
-	layer_type = gtk_type_unique(gv_data_get_type(), &layer_info);
+    if (!layer_type) {
+        static const GTypeInfo layer_info =
+        {
+            sizeof(GvLayerClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_layer_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvLayer),
+            0,
+            (GInstanceInitFunc) gv_layer_init,
+        };
+        layer_type = g_type_register_static (GV_TYPE_DATA,
+                                            "GvLayer",
+                                            &layer_info, 0);
     }
+
     return layer_type;
 }
 
 static void
 gv_layer_class_init(GvLayerClass *klass)
 {
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);;
 
-  layer_signals[SETUP] =
-    g_signal_new ("setup",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                  G_STRUCT_OFFSET (GvLayerClass, setup),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		  G_TYPE_POINTER);
-
-  layer_signals[TEARDOWN] =
-    g_signal_new ("teardown",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                  G_STRUCT_OFFSET (GvLayerClass, teardown),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		  G_TYPE_POINTER);
-
-  layer_signals[DRAW] =
-    g_signal_new ("draw",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_FIRST,
-                  G_STRUCT_OFFSET (GvLayerClass, draw),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		  G_TYPE_POINTER);
-
-  layer_signals[EXTENTS_REQUEST] =
-    g_signal_new ("get_extents",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                  G_STRUCT_OFFSET (GvLayerClass, extents_request),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		  G_TYPE_POINTER);
-
-  layer_signals[DISPLAY_CHANGE] =
-    g_signal_new ("display-change",
-                  G_TYPE_FROM_CLASS (klass),
-                  G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-                  G_STRUCT_OFFSET (GvLayerClass, display_change),
-                  NULL, NULL,
-                  g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		  G_TYPE_POINTER);
-
-  /* ---- Override finalize ---- */
-  (G_OBJECT_CLASS(klass))->finalize = gv_layer_finalize;
-
-  /* GTK2 PORT...
-    GtkObjectClass *object_class;
-
-    object_class = (GtkObjectClass*) klass;
+    parent_class = g_type_class_peek_parent (klass);
 
     layer_signals[SETUP] =
-	gtk_signal_new ("setup",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvLayerClass, setup),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 1,
-			GTK_TYPE_POINTER);
+        g_signal_new ("setup",
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                      G_STRUCT_OFFSET (GvLayerClass, setup),
+                      NULL, NULL,
+                      g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                      G_TYPE_POINTER);
+
     layer_signals[TEARDOWN] =
-	gtk_signal_new ("teardown",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvLayerClass, teardown),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 1,
-			GTK_TYPE_POINTER);
+        g_signal_new ("teardown",
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                      G_STRUCT_OFFSET (GvLayerClass, teardown),
+                      NULL, NULL,
+                      g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                      G_TYPE_POINTER);
+
     layer_signals[DRAW] =
-	gtk_signal_new ("draw",
-			GTK_RUN_FIRST | GTK_RUN_NO_RECURSE,
-                        object_class->type,
-			GTK_SIGNAL_OFFSET (GvLayerClass, draw),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 1,
-			GTK_TYPE_POINTER);
+        g_signal_new ("draw",
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET (GvLayerClass, draw),
+                      NULL, NULL,
+                      g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                      G_TYPE_POINTER);
+
     layer_signals[EXTENTS_REQUEST] =
-	gtk_signal_new ("get-extents",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvLayerClass, extents_request),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 1,
-			GTK_TYPE_POINTER);
+        g_signal_new ("get_extents",
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                      G_STRUCT_OFFSET (GvLayerClass, extents_request),
+                      NULL, NULL,
+                      g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                      G_TYPE_POINTER);
+
     layer_signals[DISPLAY_CHANGE] =
-	gtk_signal_new ("display-change",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvLayerClass, display_change),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 1,
-			GTK_TYPE_POINTER);
-    gtk_object_class_add_signals(object_class, layer_signals, LAST_SIGNAL);
-  */
+        g_signal_new ("display-change",
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                      G_STRUCT_OFFSET (GvLayerClass, display_change),
+                      NULL, NULL,
+                      g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                      G_TYPE_POINTER);
+
+    object_class->finalize = gv_layer_finalize;
 
     klass->setup = NULL;
     klass->teardown = NULL;
@@ -204,6 +160,8 @@ gv_layer_class_init(GvLayerClass *klass)
 void
 gv_layer_finalize(GObject *gobject)
 {
+    CPLDebug( "OpenEV", "gv_layer_finalize(%s)",
+              gv_data_get_name( GV_DATA(gobject) ) );
     GvLayer *layer = GV_LAYER(gobject);
     g_return_if_fail(GV_IS_LAYER(layer));
 
@@ -211,6 +169,8 @@ gv_layer_finalize(GObject *gobject)
       g_free (layer->projection);
       layer->projection = NULL;
     }
+
+    G_OBJECT_CLASS(parent_class)->finalize(gobject);
 }
 
 void
@@ -228,18 +188,14 @@ void
 gv_layer_setup(GvLayer *layer, GvViewArea *view)
 {
     if (++layer->setup_count == 1)
-    {
-	gtk_signal_emit(GTK_OBJECT(layer), layer_signals[SETUP], view);
-    }
+        g_signal_emit(layer, layer_signals[SETUP], 0, view);
 }
 
 void
 gv_layer_teardown(GvLayer *layer, GvViewArea *view)
 {
     if (--layer->setup_count < 1)
-    {
-	gtk_signal_emit(GTK_OBJECT(layer), layer_signals[TEARDOWN], view);
-    }
+        g_signal_emit(layer, layer_signals[TEARDOWN], 0, view);
 }
 
 void
@@ -249,45 +205,32 @@ gv_layer_draw(GvLayer *layer, GvViewArea *view)
 
     if (!layer->invisible)
     {
-	if (layer->presentation)
-	{
-	    /* Avoid triggering tool drawing by not emitting a signal */
-           
-	    GvLayerClass *klass = GV_LAYER_CLASS(GTK_OBJECT_GET_CLASS(layer));
-
-	    /* GTK2 PORT...
-	    GvLayerClass *klass = GV_LAYER_CLASS(GTK_OBJECT(layer)->klass);
-	    */
-	    if (klass->draw)
-	    {
-		klass->draw(layer, view);
-	    }
-	}
-	else
-	{
-
-	    /* Same result as gtk_signal_emit... */
-	    g_signal_emit(GTK_OBJECT(layer), layer_signals[DRAW], 0, view);
-
-	    /* GTK2 PORT...
-	    gtk_signal_emit(GTK_OBJECT(layer), layer_signals[DRAW], view);
-	    */
-	}
+        if (layer->presentation)
+        {
+            /* Avoid triggering tool drawing by not emitting a signal */
+            GvLayerClass *klass = GV_LAYER_CLASS(G_OBJECT_GET_CLASS(layer));
+            if (klass->draw)
+                klass->draw(layer, view);
+        }
+        else
+        {
+            /* Same result as gtk_signal_emit... */
+            g_signal_emit(layer, layer_signals[DRAW], 0, view);
+        }
     }
 }
-
 
 void
 gv_layer_extents(GvLayer *layer, GvRect *rect)
 {
     rect->x = rect->y = rect->width = rect->height = 0.0;
-    gtk_signal_emit(GTK_OBJECT(layer), layer_signals[EXTENTS_REQUEST], rect);
+    g_signal_emit(layer, layer_signals[EXTENTS_REQUEST], 0, rect);
 }
 
 void
 gv_layer_display_change(GvLayer *layer, gpointer change_info)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), layer_signals[DISPLAY_CHANGE], 
+    g_signal_emit(layer, layer_signals[DISPLAY_CHANGE], 0,
                     change_info);
 }
 
@@ -303,7 +246,7 @@ gv_layer_set_visible(GvLayer *layer, gint visible)
     gint invisible = !visible;
     if (invisible != layer->invisible)
     {
-	layer->invisible = invisible;
+        layer->invisible = invisible;
         gv_layer_display_change(layer, NULL);
     }    
 }
@@ -325,16 +268,10 @@ gv_layer_set_presentation(GvLayer *layer, gint presentation)
 gint 
 gv_layer_reproject(GvLayer *layer, const char *projection)
 {
-
-            
-  GvLayerClass *klass = GV_LAYER_CLASS(GTK_OBJECT_GET_CLASS(layer));
-
-  /* GTK2 PORT...
-    GvLayerClass *klass = GV_LAYER_CLASS(GTK_OBJECT(layer)->klass);
-  */
+    GvLayerClass *klass = GV_LAYER_CLASS(G_OBJECT_GET_CLASS(layer));
 
     if (klass->reproject)
-	return klass->reproject(layer, projection);
+        return klass->reproject(layer, projection);
     else
         return FALSE;
 }
@@ -344,4 +281,3 @@ gv_layer_get_view(GvLayer *layer)
 {
     return GV_LAYER(layer)->view;
 }
-

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvmesh.h,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Geometric mesh mapping tile s/t coordinates to display x/y/z
@@ -71,10 +71,10 @@
 #include "gvraster.h"
 
 #define GV_TYPE_MESH            (gv_mesh_get_type ())
-#define GV_MESH(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_MESH, GvMesh))
-#define GV_MESH_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_MESH, GvMeshClass))
-#define GV_IS_MESH(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_MESH))
-#define GV_IS_MESH_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_MESH))
+#define GV_MESH(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_MESH, GvMesh))
+#define GV_MESH_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_MESH, GvMeshClass))
+#define GV_IS_MESH(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_MESH))
+#define GV_IS_MESH_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_MESH))
 
 typedef struct _GvMesh       GvMesh;
 typedef struct _GvMeshClass  GvMeshClass;
@@ -116,7 +116,7 @@ struct _GvMeshClass
 
 struct _GvRaster;
 
-GtkType gv_mesh_get_type(void);
+GType gv_mesh_get_type(void);
 
 GvMeshTile *gv_mesh_get(GvMesh *mesh, gint tile, gint raster_lod, gint detail,
                         GvMeshTile *tile_info);

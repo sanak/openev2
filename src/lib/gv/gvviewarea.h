@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvviewarea.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  GTK/OpenGL View Canvas
@@ -160,10 +160,10 @@
 #include "gvproperties.h"
 
 #define GV_TYPE_VIEW_AREA            (gv_view_area_get_type ())
-#define GV_VIEW_AREA(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_VIEW_AREA, GvViewArea))
-#define GV_VIEW_AREA_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_VIEW_AREA, GvViewAreaClass))
-#define GV_IS_VIEW_AREA(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_VIEW_AREA))
-#define GV_IS_VIEW_AREA_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_VIEW_AREA))
+#define GV_VIEW_AREA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_VIEW_AREA, GvViewArea))
+#define GV_VIEW_AREA_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_VIEW_AREA, GvViewAreaClass))
+#define GV_IS_VIEW_AREA(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_VIEW_AREA))
+#define GV_IS_VIEW_AREA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_VIEW_AREA))
 
 typedef struct _GvViewArea GvViewArea;
 typedef struct _GvViewAreaClass GvViewAreaClass;
@@ -200,7 +200,7 @@ struct _GvViewArea
     GvViewAreaState state;
 
     GList *layers;
-    GtkObject *active_layer;
+    GObject *active_layer;
 
     GArray   *bmfonts;
 
@@ -259,7 +259,7 @@ struct _GvViewAreaClass
 #define gv_view_area_get_width(view) (view)->state.shape_x
 #define gv_view_area_get_height(view) (view)->state.shape_y
 
-GtkType    gv_view_area_get_type();
+GType      gv_view_area_get_type();
 GtkWidget* gv_view_area_new();
 
 void gv_view_area_set_mode(GvViewArea *view, int flag_3d);
@@ -270,8 +270,8 @@ void gv_view_area_set_3d_view(GvViewArea *view, vec3_t eye_pos, vec3_t eye_dir);
 void gv_view_area_set_3d_view_look_at(GvViewArea *view, vec3_t eye_pos, gvgeocoord *eye_look_at);
 gint gv_view_area_get_look_at_pos(GvViewArea *view, gvgeocoord *x, gvgeocoord *y);
 
-gint gv_view_area_set_raw(GvViewArea *view, GtkObject *ref_layer, int raw_enable);
-gint gv_view_area_get_raw(GvViewArea *view, GtkObject *ref_layer);
+gint gv_view_area_set_raw(GvViewArea *view, GObject *ref_layer, int raw_enable);
+gint gv_view_area_get_raw(GvViewArea *view, GObject *ref_layer);
 
 void gv_view_area_queue_draw(GvViewArea *view);
 void gv_view_area_zoom(GvViewArea *view, gvgeocoord zoom);
@@ -296,16 +296,16 @@ void gv_view_area_map_pointer(GvViewArea *view, gvgeocoord px, gvgeocoord py, gv
 void gv_view_area_inverse_map_pointer(GvViewArea *view, gvgeocoord x, gvgeocoord y, gvgeocoord *px, gvgeocoord *py);
 void gv_view_area_correct_for_transform(GvViewArea *view, gvgeocoord x, gvgeocoord y, gvgeocoord *cx, gvgeocoord *cy);
 
-void gv_view_area_add_layer(GvViewArea *view, GtkObject *layer);
-void gv_view_area_remove_layer(GvViewArea *view, GtkObject *layer);
-GtkObject* gv_view_area_active_layer(GvViewArea *view);
-void gv_view_area_set_active_layer(GvViewArea *view, GtkObject *layer);
-GtkObject* gv_view_area_get_layer_of_type(GvViewArea *view, GtkType layer_type, gint read_only_ok);
-GtkObject* gv_view_area_get_named_layer(GvViewArea *view, const char *name);
+void gv_view_area_add_layer(GvViewArea *view, GObject *layer);
+void gv_view_area_remove_layer(GvViewArea *view, GObject *layer);
+GObject* gv_view_area_active_layer(GvViewArea *view);
+void gv_view_area_set_active_layer(GvViewArea *view, GObject *layer);
+GObject* gv_view_area_get_layer_of_type(GvViewArea *view, GType layer_type, gint read_only_ok);
+GObject* gv_view_area_get_named_layer(GvViewArea *view, const char *name);
 GList* gv_view_area_list_layers(GvViewArea *view);
-GtkObject *gv_view_area_get_primary_raster(GvViewArea *view);
+GObject *gv_view_area_get_primary_raster(GvViewArea *view);
 void gv_view_area_swap_layers(GvViewArea *view, gint layer_a, gint layer_b);
-GdkPixmap* gv_view_area_create_thumbnail(GvViewArea *view, GtkObject *layer, gint width, gint height);
+GdkPixmap* gv_view_area_create_thumbnail(GvViewArea *view, GObject *layer, gint width, gint height);
 
 GPtrArray *gv_view_area_get_fontnames(GvViewArea *view);
 gint gv_view_area_bmfont_load(GvViewArea *view, gchar *name);
@@ -319,22 +319,22 @@ void gv_view_area_set_adjustments (GvViewArea *view, GtkAdjustment *hadj, GtkAdj
 gint gv_view_area_set_projection(GvViewArea *view, const char *projection);
 const char *gv_view_area_get_projection(GvViewArea *view);
 gint gv_view_area_print_to_file(GvViewArea *view, int width, int height, const char * filename,
-				const char * format, int is_rgb);
+                                const char * format, int is_rgb);
 gint gv_view_area_print_postscript_to_file(GvViewArea *view, int width, int height,
-					   float ulx, float uly, float lrx, float lry,
-					   int is_rgb, const char * filename);
+                                           float ulx, float uly, float lrx, float lry,
+                                           int is_rgb, const char * filename);
 
 gint gv_view_area_render_postscript(GvViewArea *view, int width, int height, 
-				    float ulx, float uly, float lrx, float lry,
-				    int is_rgb,
-				    gint (*cb_func)(void *, const char *), void * cb_data);
+                                    float ulx, float uly, float lrx, float lry,
+                                    int is_rgb,
+                                    gint (*cb_func)(void *, const char *), void * cb_data);
 gint gv_view_area_render_to_func(GvViewArea *view,
-				 gint width, gint height,
-				 gint (*scanline_handler)( void *, void * ), void *cb_data);
+                                 gint width, gint height,
+                                 gint (*scanline_handler)( void *, void * ), void *cb_data);
 void gv_view_area_page_setup();
 gint gv_view_area_print_to_windriver(GvViewArea *view, int width, int height,
-				     float ulx, float uly, float lrx, float lry,
-				     int is_rgb);
+                                     float ulx, float uly, float lrx, float lry,
+                                     int is_rgb);
 void gv_view_area_zoompan_event(GvViewArea *view, GdkEventButton *event);
 
 int gv_view_area_redraw_timeout(GvViewArea *view);
@@ -343,7 +343,7 @@ int gv_view_area_pending_idle_work(GvViewArea *view);
 int gv_get_render_counter();
 
 void gv_view_area_set_property(GvViewArea *data, const char *name, 
-			       const char *value);
+                               const char *value);
 const char *gv_view_area_get_property(GvViewArea *data, const char *name);
 GvProperties *gv_view_area_get_properties(GvViewArea *data);
 void gv_view_area_queue_cursor_draw(GvViewArea *view, int next_valid, gvgeocoord x, gvgeocoord y);
@@ -355,7 +355,7 @@ gint gv_view_area_begin(GvViewArea *view);
 void gv_view_area_swap_buffers(GvViewArea *view);
 const char *gv_view_area_format_point_query(GvViewArea *view,
                                             GvProperties *properties,
-					    double geo_x, double geo_y);
+                                            double geo_x, double geo_y);
 
 #endif /* __GV_VIEW_AREA_H__ */
 

@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvmesh.c,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Geometric mesh mapping tile s/t coordinates to display x/y/z
@@ -107,6 +107,7 @@
 static void gv_mesh_class_init(GvMeshClass *klass);
 static void gv_mesh_init(GvMesh *mesh);
 static void gv_mesh_finalize(GObject *gobject);
+static GvDataClass *parent_class = NULL;
 
 #define GV_MESH_RIGHT_X_BIT 1
 #define GV_MESH_LEFT_X_BIT  2
@@ -116,27 +117,29 @@ static void gv_mesh_finalize(GObject *gobject);
 #define DEG2RAD         0.01745329252
 #define RAD2DEG         57.2986885
 
-GtkType
+GType
 gv_mesh_get_type(void)
 {
-    static GtkType mesh_type = 0;
+    static GType mesh_type = 0;
 
-    if (!mesh_type)
-    {
-	static const GtkTypeInfo mesh_info =
-	{
-	    "GvMesh",
-	    sizeof(GvMesh),
-	    sizeof(GvMeshClass),
-	    (GtkClassInitFunc) gv_mesh_class_init,
-	    (GtkObjectInitFunc) gv_mesh_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
-
-	mesh_type = gtk_type_unique(gv_data_get_type(), &mesh_info);
+    if (!mesh_type) {
+        static const GTypeInfo mesh_info =
+        {
+            sizeof(GvMeshClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_mesh_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvMesh),
+            0,
+            (GInstanceInitFunc) gv_mesh_init,
+        };
+        mesh_type = g_type_register_static (GV_TYPE_DATA,
+                                            "GvMesh",
+                                            &mesh_info, 0);
     }
+
     return mesh_type;
 }
 
@@ -152,17 +155,10 @@ gv_mesh_init(GvMesh *mesh)
 static void
 gv_mesh_class_init(GvMeshClass *klass)
 {
+    parent_class = g_type_class_peek_parent (klass);
 
     /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_mesh_finalize;
-
-    /*
-    GtkObjectClass *object_class;
-    GvDataClass *data_class;
-    data_class = (GvDataClass*) klass;
-    object_class = (GtkObjectClass*) klass;
-    object_class->finalize = gv_mesh_finalize;
-    */
+    G_OBJECT_CLASS(klass)->finalize = gv_mesh_finalize;
 }
 
 static GArray *
@@ -303,7 +299,7 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
     gint y = raster->height;
     GArray *tex_coords;
     
-    GvMesh *mesh = (GvMesh *) GV_DATA(gtk_type_new(gv_mesh_get_type()));
+    GvMesh *mesh = g_object_new (GV_TYPE_MESH, NULL);
 
     mesh->raster = raster;
 
@@ -388,42 +384,42 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
     tile = 0; 
     for( i = 0; i < tiles_down; i++ )
     {
-	for( e = 0; e < tiles_across; e++ )
-	{
-	    GArray *tile_vertices;
+        for( e = 0; e < tiles_across; e++ )
+        {
+            GArray *tile_vertices;
             int     tex_index = 0;
 
             tex_coords = gv_mesh_get_tile_tex_coords( mesh, tile, 0 );
 
-	    begin_x = e * (tile_x-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
-	    begin_y = i * (tile_y-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
+            begin_x = e * (tile_x-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
+            begin_y = i * (tile_y-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
 
-	    tile_vertices = g_array_new( FALSE, FALSE, sizeof( float ) );
+            tile_vertices = g_array_new( FALSE, FALSE, sizeof( float ) );
 
-	    for( j = 0; j <= tile_y; j += stride_y )
-	    {
-		for( k = 0; k <= tile_x; k += stride_x )
-		{
-		    float t_x, t_y, t_z;
+            for( j = 0; j <= tile_y; j += stride_y )
+            {
+                for( k = 0; k <= tile_x; k += stride_x )
+                {
+                    float t_x, t_y, t_z;
                     float s, t;
 
                     s = g_array_index( tex_coords, float, 2*tex_index );
                     t = g_array_index( tex_coords, float, 2*tex_index+1);
                     tex_index++;
 
-		    t_x = begin_x + s*tile_x;
-		    t_y = y - (begin_y + t*tile_y);
-		    t_z = 0.0;
-		    
-		    g_array_append_val( tile_vertices, t_x );
-		    g_array_append_val( tile_vertices, t_y );
-		    g_array_append_val( tile_vertices, t_z );
-		}
-	    }
+                    t_x = begin_x + s*tile_x;
+                    t_y = y - (begin_y + t*tile_y);
+                    t_z = 0.0;
+                    
+                    g_array_append_val( tile_vertices, t_x );
+                    g_array_append_val( tile_vertices, t_y );
+                    g_array_append_val( tile_vertices, t_z );
+                }
+            }
 
-	    g_array_append_val( mesh->vertices, tile_vertices );
+            g_array_append_val( mesh->vertices, tile_vertices );
             tile++;
-	}
+        }
     }
 
     return mesh;
@@ -433,8 +429,8 @@ void
 gv_mesh_reset_to_identity( GvMesh *mesh )
 
 {
-    int	i, e, tile, tiles_across, tiles_down, stride_x, stride_y;
-    int	begin_x, begin_y;
+    int i, e, tile, tiles_across, tiles_down, stride_x, stride_y;
+    int begin_x, begin_y;
     gint tile_x = mesh->tile_x;
     gint tile_y = mesh->tile_y;
 
@@ -448,41 +444,41 @@ gv_mesh_reset_to_identity( GvMesh *mesh )
     tile = 0; 
     for( i = 0; i < tiles_down; i++ )
     {
-	for( e = 0; e < tiles_across; e++ )
-	{
+        for( e = 0; e < tiles_across; e++ )
+        {
             GArray *tex_coords;
-	    GArray *tile_vertices;
+            GArray *tile_vertices;
             int     tex_index = 0, out_vert = 0, j, k;
 
             tex_coords = gv_mesh_get_tile_tex_coords( mesh, tile, 0 );
 
-	    begin_x = e * (tile_x-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
-	    begin_y = i * (tile_y-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
+            begin_x = e * (tile_x-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
+            begin_y = i * (tile_y-GV_TILE_OVERLAP) - GV_TILE_OVERLAP/2;
 
-	    tile_vertices = g_array_index( mesh->vertices, GArray *, tile );
+            tile_vertices = g_array_index( mesh->vertices, GArray *, tile );
 
-	    for( j = 0; j <= tile_y; j += stride_y )
-	    {
-		for( k = 0; k <= tile_x; k += stride_x )
-		{
-		    float t_x, t_y;
+            for( j = 0; j <= tile_y; j += stride_y )
+            {
+                for( k = 0; k <= tile_x; k += stride_x )
+                {
+                    float t_x, t_y;
                     float s, t;
 
                     s = g_array_index( tex_coords, float, 2*tex_index );
                     t = g_array_index( tex_coords, float, 2*tex_index+1);
                     tex_index++;
 
-		    t_x = begin_x + s*tile_x;
-  		    t_y = begin_y + t*tile_y;
-		    
-		    g_array_index(tile_vertices, float, out_vert++) = t_x;
-		    g_array_index(tile_vertices, float, out_vert++) = t_y;
+                    t_x = begin_x + s*tile_x;
+                    t_y = begin_y + t*tile_y;
+                    
+                    g_array_index(tile_vertices, float, out_vert++) = t_x;
+                    g_array_index(tile_vertices, float, out_vert++) = t_y;
                     out_vert++;
-		}
-	    }
+                }
+            }
 
             tile++;
-	}
+        }
     }
 }
 
@@ -576,9 +572,9 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
         for( i=0; i < mesh->vertices->len; i++)
         {
             GArray *tile_vertices;
-            int	j, k;
-            int	mesh_xsize, mesh_ysize;
-            float	*data;
+            int j, k;
+            int mesh_xsize, mesh_ysize;
+            float       *data;
 
             tile_vertices = g_array_index( mesh->vertices, GArray *, i);
             data = (float *) tile_vertices->data;
@@ -592,9 +588,9 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
             {
                 for( k = 0; k < mesh_xsize; k++ )
                 {
-                    float	sum = 0; 
-                    int	count = 0;
-                    int	t_i;
+                    float       sum = 0; 
+                    int count = 0;
+                    int t_i;
 
                     t_i = j * mesh_xsize + k;
 
@@ -673,9 +669,9 @@ gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
     for( i=0; i < mesh->vertices->len; i++)
     {
         GArray *tile_vertices;
-        int	j, k;
-        int	mesh_xsize, mesh_ysize;
-        float	*data;
+        int     j, k;
+        int     mesh_xsize, mesh_ysize;
+        float   *data;
 
         tile_vertices = g_array_index( mesh->vertices, GArray *, i);
         data = (float *) tile_vertices->data;
@@ -690,7 +686,7 @@ gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
         {
             for( k = 0; k < mesh_xsize; k++ )
             {
-                int	t_i;
+                int     t_i;
 
                 t_i = j * mesh_xsize + k;
 
@@ -727,7 +723,7 @@ gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize,
         float  *xyz_verts;
         int    xyz_offset;
 
-	verts = g_array_index( mesh->vertices, GArray *, tile );
+        verts = g_array_index( mesh->vertices, GArray *, tile );
         
         xyz_verts = (float *) verts->data;
         for( xyz_offset = 0; xyz_offset < verts->len; xyz_offset += 3 )
@@ -762,10 +758,10 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
 
     if( tile_info == NULL )
     {
-	if( ( tile_info = g_new( GvMeshTile, 1 ) ) == NULL )
-	{
-	    return NULL;
-	}
+        if( ( tile_info = g_new( GvMeshTile, 1 ) ) == NULL )
+        {
+            return NULL;
+        }
     }
 
     if( detail < raster_lod )
@@ -773,93 +769,93 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
     
     if( tile < mesh->max_tiles )
     {
-	if( mesh->tex_coords )
+        if( mesh->tex_coords )
         {
             GArray  *tex_coords; 
 
             tex_coords = gv_mesh_get_tile_tex_coords( mesh, tile, detail );
-	    tile_info->tex_coords = (float *) tex_coords->data;
+            tile_info->tex_coords = (float *) tex_coords->data;
         }
-	else
-	    tile_info->tex_coords = NULL;
+        else
+            tile_info->tex_coords = NULL;
 
-	verts = g_array_index( mesh->vertices, GArray *, tile );
+        verts = g_array_index( mesh->vertices, GArray *, tile );
 
-	if( verts == NULL )
-	{
-	    fprintf( stderr, "Missing vertices information\n" );
-	}
-	
-	tile_info->vertices = (float *)verts->data;
+        if( verts == NULL )
+        {
+            fprintf( stderr, "Missing vertices information\n" );
+        }
+        
+        tile_info->vertices = (float *)verts->data;
 
-	/* Figure out the spacing for the index */
+        /* Figure out the spacing for the index */
 
         /*  What does this do ??? */
-	if( detail >= mesh->detail )
-	{
+        if( detail >= mesh->detail )
+        {
             /* Use mesh spacing */
-	    step = 1;
-	    detail = mesh->detail;
-	} else {
+            step = 1;
+            detail = mesh->detail;
+        } else {
             /* Use raster spacing */
-	    step = 1 << (mesh->detail - detail);
-	}
+            step = 1 << (mesh->detail - detail);
+        }
 
         /* Note: overwrites above calculations */
         step = 1;
         detail = mesh->detail;
        
 
-	/* Now we build the indices and get ready to return the tile */
+        /* Now we build the indices and get ready to return the tile */
 
-	tile_info->restarts = 0;
-	tile_info->list_type = GL_TRIANGLE_STRIP;
+        tile_info->restarts = 0;
+        tile_info->list_type = GL_TRIANGLE_STRIP;
 
-	if( g_indices )
-	{
-	    g_array_set_size( g_indices, 0 );
-	} else {
-	    g_indices = g_array_new( FALSE, FALSE, sizeof( int ) );
-	}
+        if( g_indices )
+        {
+            g_array_set_size( g_indices, 0 );
+        } else {
+            g_indices = g_array_new( FALSE, FALSE, sizeof( int ) );
+        }
 
-	for( i = 0; i < dimensions-1; i += step )
-	{
-	    for( e = 0; e < dimensions; e += step )
-	    {
-		gint val;
+        for( i = 0; i < dimensions-1; i += step )
+        {
+            for( e = 0; e < dimensions; e += step )
+            {
+                gint val;
 
-		val = i * dimensions + e;
+                val = i * dimensions + e;
 
-		g_array_append_val( g_indices, val );
+                g_array_append_val( g_indices, val );
 
-		val = (i+step) * dimensions + e;
+                val = (i+step) * dimensions + e;
 
-		g_array_append_val( g_indices, val );
-	    }
-	    tile_info->restarts++;
-	}
+                g_array_append_val( g_indices, val );
+            }
+            tile_info->restarts++;
+        }
 
-	switch( tile_info->list_type )
-	{
-	    case 0:
-		tile_info->range = dimensions*4;
-		break;
-	    case GL_TRIANGLE_STRIP:
+        switch( tile_info->list_type )
+        {
+            case 0:
+                tile_info->range = dimensions*4;
+                break;
+            case GL_TRIANGLE_STRIP:
                 /* Only this case works right now */
-		tile_info->range = ( (1 << detail ) + 1 ) * 2; 
-		break;
-	    case 2:
-		tile_info->range = 2+dimensions;
-		break;
-	    case 3:
-		tile_info->range = dimensions*2;
-		break;
-	}
-	
-	tile_info->restarts--;
-	tile_info->indices = (gint *) g_indices->data;
+                tile_info->range = ( (1 << detail ) + 1 ) * 2; 
+                break;
+            case 2:
+                tile_info->range = 2+dimensions;
+                break;
+            case 3:
+                tile_info->range = dimensions*2;
+                break;
+        }
+        
+        tile_info->restarts--;
+        tile_info->indices = (gint *) g_indices->data;
     } else {
-	return NULL;
+        return NULL;
     }
     return tile_info;
     
@@ -876,53 +872,53 @@ void gv_mesh_extents( GvMesh *mesh, GvRect *rect )
     {
         gint   tiles_per_row;
 
-	/* First we get the top left tile */
+        /* First we get the top left tile */
 
-	if( ( verts = g_array_index( mesh->vertices, GArray *, 0 ) ) == NULL )
-	{
-	    return;
-	}
+        if( ( verts = g_array_index( mesh->vertices, GArray *, 0 ) ) == NULL )
+        {
+            return;
+        }
 
-	dimensions = ( 1 << mesh->detail ) + 1;
+        dimensions = ( 1 << mesh->detail ) + 1;
 
-	x[0] = g_array_index( verts, float, 0 );
-	y[0] = g_array_index( verts, float, 1 );
+        x[0] = g_array_index( verts, float, 0 );
+        y[0] = g_array_index( verts, float, 1 );
 
-	/* The we do the top right tile */
+        /* The we do the top right tile */
 
         tiles_per_row = mesh->raster->tiles_across;
         tile = tiles_per_row - 1;
 
-	if( ( verts = g_array_index( mesh->vertices, GArray *, tile ) ) == NULL )
-	{
-	    return;
-	}
+        if( ( verts = g_array_index( mesh->vertices, GArray *, tile ) ) == NULL )
+        {
+            return;
+        }
 
-	x[1] = g_array_index( verts, float, 3*(dimensions-1) );
-	y[1] = g_array_index( verts, float, 3*(dimensions-1)+1 );
+        x[1] = g_array_index( verts, float, 3*(dimensions-1) );
+        y[1] = g_array_index( verts, float, 3*(dimensions-1)+1 );
 
-	/* The we do the bottom left tile */
+        /* The we do the bottom left tile */
 
         tile = mesh->raster->tiles_across * (mesh->raster->tiles_down-1);
 
-	if( ( verts = g_array_index( mesh->vertices, GArray *, tile ) ) == NULL )
-	{
-	    return;
-	}
+        if( ( verts = g_array_index( mesh->vertices, GArray *, tile ) ) == NULL )
+        {
+            return;
+        }
 
-	x[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1)) );
-	y[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1))+1);
-	
-	/* The we do the last tile */
+        x[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1)) );
+        y[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1))+1);
+        
+        /* The we do the last tile */
 
-	if( ( verts = g_array_index( mesh->vertices, GArray *, mesh->max_tiles-1 ) ) == NULL )
-	{
-	    return;
-	}
+        if( ( verts = g_array_index( mesh->vertices, GArray *, mesh->max_tiles-1 ) ) == NULL )
+        {
+            return;
+        }
 
-	x[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1) );
-	y[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1)+1 );
-	
+        x[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1) );
+        y[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1)+1 );
+        
     }
 
     rect->x = MIN( MIN( MIN( x[0], x[1] ), x[2] ), x[3] );
@@ -944,14 +940,14 @@ float gv_mesh_get_height( GvMesh *mesh,
                           double x, double y, int *success )
 
 {
-    int		tile, tile_in_x, tile_in_y, vert_off;
-    int		mesh_pnts_per_line, mesh_pnts_per_column, vert_x, vert_y;
+    int         tile, tile_in_x, tile_in_y, vert_off;
+    int         mesh_pnts_per_line, mesh_pnts_per_column, vert_x, vert_y;
     int         factor;
     double      stride_x, stride_y;
     GvRaster    *raster = mesh->raster;
     double      pl_x, pl_y;
     GArray      *tile_vertices;
-    float	x_vert[4], y_vert[4], z_vert[4], u, v;
+    float       x_vert[4], y_vert[4], z_vert[4], u, v;
     int         tile_width, tile_height;
 
     if( success != NULL )
@@ -1058,7 +1054,7 @@ float gv_mesh_get_height( GvMesh *mesh,
         
     if( vert_y+1 < mesh_pnts_per_column )
     {
-        int	off = vert_off + mesh_pnts_per_line;
+        int     off = vert_off + mesh_pnts_per_line;
 
         x_vert[2] = g_array_index( tile_vertices, float, 3*off     );
         y_vert[2] = g_array_index( tile_vertices, float, 3*off + 1 );
@@ -1073,7 +1069,7 @@ float gv_mesh_get_height( GvMesh *mesh,
         
     if( vert_y+1 < mesh_pnts_per_column && vert_x+1 < mesh_pnts_per_line )
     {
-        int	off = vert_off + mesh_pnts_per_line + 1;
+        int     off = vert_off + mesh_pnts_per_line + 1;
 
         x_vert[3] = g_array_index( tile_vertices, float, 3*off     );
         y_vert[3] = g_array_index( tile_vertices, float, 3*off + 1 );
@@ -1138,9 +1134,8 @@ float gv_mesh_get_height( GvMesh *mesh,
 static void
 gv_mesh_finalize(GObject *gobject)
 {
-    GvDataClass *parent_class;
     GvMesh    *mesh = GV_MESH(gobject);
-    int	       ii;
+    int        ii;
     GPtrArray  *tex_coords;
     
     CPLDebug( "OpenEV", "gv_mesh_finalize(%s)\n", 
@@ -1148,6 +1143,8 @@ gv_mesh_finalize(GObject *gobject)
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
        as finalize may be called more than once. */
+
+    mesh->raster = NULL;
 
     /* free all vertices */
     if (mesh->vertices != NULL) {
@@ -1184,11 +1181,5 @@ gv_mesh_finalize(GObject *gobject)
     }
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_data_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* Call parent class function
-    parent_class = gtk_type_class(gv_data_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(object);
-    */     
 }

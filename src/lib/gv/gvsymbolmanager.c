@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvsymbolmanager.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  manage file-based symbols
@@ -81,7 +81,6 @@
 #include "cpl_conv.h"
 #include "cpl_string.h"
 #include "cpl_minixml.h"
-#include <gtk/gtksignal.h>
 #include <stdio.h>
 
 /* signals (none for now?) */
@@ -94,32 +93,35 @@ static void gv_symbol_manager_init( GvSymbolManager *manager );
 static void gv_symbol_manager_class_init( GvSymbolManagerClass *klass );
 static void gv_symbol_manager_finalize( GObject *manager );
 
+static GObjectClass *parent_class = NULL;
 /* static void gv_symbol_manager_signals[LAST_SIGNAL] = { 0 }; */
 
 /************************************************************************/
 /*                    gv_symbol_manager_class_init()                    */
 /************************************************************************/
-GtkType 
+GType 
 gv_symbol_manager_get_type(void)
 {
-    static GtkType symbol_manager_type = 0;
+    static GType symbol_manager_type = 0;
 
-    if (!symbol_manager_type)
-    {
-        static const GtkTypeInfo symbol_manager_info =
+    if (!symbol_manager_type) {
+        static const GTypeInfo symbol_manager_info =
         {
-            "GvSymbolManager",
-            sizeof(GvSymbolManager),
             sizeof(GvSymbolManagerClass),
-            (GtkClassInitFunc) gv_symbol_manager_class_init,
-            (GtkObjectInitFunc) gv_symbol_manager_init,
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_symbol_manager_class_init,
             /* reserved_1 */ NULL,
             /* reserved_2 */ NULL,
-            (GtkClassInitFunc) NULL,
+            sizeof(GvSymbolManager),
+            0,
+            (GInstanceInitFunc) gv_symbol_manager_init,
         };
-        symbol_manager_type = gtk_type_unique( gtk_object_get_type(),
-                                               &symbol_manager_info );
-    }
+        symbol_manager_type = g_type_register_static (G_TYPE_OBJECT,
+                                                    "GvSymbolManager",
+                                                    &symbol_manager_info, 0);
+        }
+
     return symbol_manager_type;
 }
 
@@ -129,15 +131,10 @@ gv_symbol_manager_get_type(void)
 static void 
 gv_symbol_manager_class_init( GvSymbolManagerClass *klass )
 {
+    parent_class = g_type_class_peek_parent (klass);
 
     /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_symbol_manager_finalize;
-
-    /* GTK2 PORT...
-    GtkObjectClass *object_class;
-    object_class = (GtkObjectClass*) klass;
-    ((GtkObjectClass *) klass)->finalize = gv_symbol_manager_finalize;
-    */
+    G_OBJECT_CLASS(klass)->finalize = gv_symbol_manager_finalize;
 }
 
 /************************************************************************/
@@ -159,7 +156,7 @@ gv_symbol_manager_init( GvSymbolManager *manager )
 /************************************************************************/
 GvSymbolManager *gv_symbol_manager_new()
 {
-    return GV_SYMBOL_MANAGER(gtk_type_new(GV_TYPE_SYMBOL_MANAGER));
+    return g_object_new(GV_TYPE_SYMBOL_MANAGER, NULL);
 }
 
 /************************************************************************/
@@ -390,7 +387,6 @@ finalize_symbol( gpointer key, gpointer value, gpointer user_data )
 static void
 gv_symbol_manager_finalize( GObject *gobject)
 {
-    GvSymbolManagerClass *parent_class;
     GvSymbolManager *manager = GV_SYMBOL_MANAGER(gobject);
 
     CPLDebug( "OpenEV", "gv_symbol_manager_finalize(%p)", gobject );
@@ -402,13 +398,7 @@ gv_symbol_manager_finalize( GObject *gobject)
     }
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gtk_object_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /* parent class destructor
-    parent_class = gtk_type_class( gtk_object_get_type() );
-    GTK_OBJECT_CLASS(parent_class)->finalize(gobject);
-    */
 }
 
 /************************************************************************/

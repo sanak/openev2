@@ -3,28 +3,19 @@
 headers
 #include <Python.h>               
 #include "pygobject.h"
-#include "gtkcolorwell.h"
-#include "gvarealayer.h"
-#include "gvareas.h"
 #include "gvareatool.h"
 #include "gvdata.h"
 #include "gview.h"
 #include "gvlayer.h"
-#include "gvlinelayer.h"
 #include "gvlinetool.h"
 #include "gvmanager.h"
 #include "gvmesh.h"
 #include "gvnodetool.h"
-#include "gvpointlayer.h"
-#include "gvpoints.h"
 #include "gvpointtool.h"
 #include "gvpoitool.h"
-#include "gvpolylines.h"
-#include "gvpquerylayer.h"
 #include "gvproperties.h"
 #include "gvraster.h"
 #include "gvrasterlayer.h"
-#include "gvrecords.h"
 #include "gvrecttool.h"
 #include "gvroitool.h"
 #include "gvrotatetool.h"
@@ -57,7 +48,21 @@ import gtk.Widget as PyGtkWidget_Type
 
 %%
 ignore-glob
-  *_get_type                          
+  *_get_type
+  gv_mesh_*
+%%
+ignore
+  gv_data_get_memento
+  gv_data_set_memento
+  gv_data_del_memento
+  gv_data_set_properties
+  gv_view_area_get_width
+  gv_view_area_get_height
+  gv_view_area_get_translation
+  gv_view_area_get_eye_pos
+  gv_view_area_get_eye_dir
+  gv_raster_get_gdal_band
+  
 %%
 override copy_obj kwargs
 static PyObject *
@@ -83,30 +88,17 @@ _wrap_copy_obj(PyObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 %%
-override gv_view_area_get_width
+define GvViewArea.get_width noargs
 static PyObject *
-_wrap_gv_view_area_get_width(PyGObject *self, PyObject *args)
+_wrap_gv_view_area_get_width(PyGObject *self)
 {
-    PyGObject *py_view;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_view_area_get_width", &PyGvViewArea_Type,
-			  &py_view)) {
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_view_area_get_width(GV_VIEW_AREA(py_view->obj)));
+    return PyInt_FromLong(gv_view_area_get_width(GV_VIEW_AREA(pygobject_get(self))));
 }
 %%
-override gv_view_area_get_height
-static PyObject *_wrap_gv_view_area_get_height(PyGObject *self, PyObject *args) {
-    PyGObject *py_view;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_view_area_get_height", &PyGvViewArea_Type,
-			  &py_view)) {
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_view_area_get_height(GV_VIEW_AREA(py_view->obj)));
+define GvViewArea.get_height noargs
+static PyObject *_wrap_gv_view_area_get_height(PyGObject *self)
+{
+    return PyInt_FromLong(gv_view_area_get_height(GV_VIEW_AREA(pygobject_get(self))));
 }
 %%
 override gv_view_area_zoom
@@ -114,7 +106,7 @@ static PyObject *_wrap_gv_view_area_zoom(PyGObject *self, PyObject *args)
 {
     double zoom;
 
-    if (!PyArg_ParseTuple(args, "d:gv_view_area_zoom", &zoom))
+    if (!PyArg_ParseTuple(args, "d:_gv.ViewArea.zoom", &zoom))
         return NULL;
     gv_view_area_zoom(GV_VIEW_AREA(self->obj), zoom);
     Py_INCREF(Py_None);
@@ -135,7 +127,7 @@ override gv_view_area_rotate
 static PyObject *_wrap_gv_view_area_rotate(PyGObject *self, PyObject *args) {
     double angle;
 
-    if (!PyArg_ParseTuple(args, "d:gv_view_area_rotate", &angle))
+    if (!PyArg_ParseTuple(args, "d:_gv.ViewArea.rotate", &angle))
         return NULL;
     gv_view_area_rotate(GV_VIEW_AREA(self->obj), angle);
     Py_INCREF(Py_None);
@@ -146,7 +138,7 @@ override gv_view_area_translate
 static PyObject *_wrap_gv_view_area_translate(PyGObject *self, PyObject *args) {
     double dx, dy;
 
-    if (!PyArg_ParseTuple(args, "dd:gv_view_area_translate", &dx, &dy))
+    if (!PyArg_ParseTuple(args, "dd:_gv.ViewArea.translate", &dx, &dy))
         return NULL;
     gv_view_area_translate(GV_VIEW_AREA(self->obj), dx, dy);
     Py_INCREF(Py_None);
@@ -157,7 +149,7 @@ override gv_view_area_set_translation
 static PyObject *_wrap_gv_view_area_set_translation(PyGObject *self, PyObject *args) {
     double x, y;
 
-    if (!PyArg_ParseTuple(args, "dd:gv_view_area_set_translation", &x, &y))
+    if (!PyArg_ParseTuple(args, "dd:_gv.ViewArea.set_translation", &x, &y))
         return NULL;
     gv_view_area_set_translation(GV_VIEW_AREA(self->obj), x, y);
     Py_INCREF(Py_None);
@@ -168,7 +160,7 @@ override gv_view_area_fit_extents
 static PyObject *_wrap_gv_view_area_fit_extents(PyGObject *self, PyObject *args) {
     double llx, llyy, width, height;
 
-    if (!PyArg_ParseTuple(args, "dddd:gv_view_area_fit_extents", &llx, &llyy, &width, &height))
+    if (!PyArg_ParseTuple(args, "dddd:_gv.ViewArea.fit_extents", &llx, &llyy, &width, &height))
         return NULL;
     gv_view_area_fit_extents(GV_VIEW_AREA(self->obj), llx, llyy, width, height);
     Py_INCREF(Py_None);
@@ -179,7 +171,7 @@ override gv_view_area_height_scale
 static PyObject *_wrap_gv_view_area_height_scale(PyGObject *self, PyObject *args) {
     double scale;
 
-    if (!PyArg_ParseTuple(args, "d:gv_view_area_height_scale", &scale))
+    if (!PyArg_ParseTuple(args, "d:_gv.ViewArea.height_scale", &scale))
         return NULL;
     gv_view_area_height_scale(GV_VIEW_AREA(self->obj), scale);
     Py_INCREF(Py_None);
@@ -191,30 +183,19 @@ static PyObject *_wrap_gv_view_area_get_height_scale(PyGObject *self) {
     return PyFloat_FromDouble(gv_view_area_get_height_scale(GV_VIEW_AREA(self->obj)));
 }
 %%
-override gv_records_from_dbf
-static PyObject *_wrap_gv_records_from_dbf(PyObject *self, PyObject *args) {
-    char *filename;
-    GObject *retval;
-    PyProgressData sProgressInfo;
+override gv_view_area_remove_layer kwargs
+static PyObject *
+_wrap_gv_view_area_remove_layer(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "layer", NULL };
+    PyGObject *layer;
 
-    if (!PyArg_ParseTuple(args, "sOO:gv_records_from_dbf", &filename, &(sProgressInfo.psPyCallback), &(sProgressInfo.psPyCallbackData)))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!:_gv.ViewArea.remove_layer", kwlist, &PyGObject_Type, &layer))
         return NULL;
-    retval = (GObject *)gv_records_from_dbf(filename, PyProgressProxy, &sProgressInfo);
-    if (retval) return PyGtk_New(retval);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-%%
-override gv_records_from_rec
-static PyObject *_wrap_gv_records_from_rec(PyObject *self, PyObject *args) {
-    char *filename;
-    GObject *retval;
-    PyProgressData sProgressInfo;
-
-    if (!PyArg_ParseTuple(args, "sOO:gv_records_from_rec", &filename, &(sProgressInfo.psPyCallback), &(sProgressInfo.psPyCallbackData)))
-        return NULL;
-    retval = (GObject *)gv_records_from_rec(filename, PyProgressProxy, &sProgressInfo);
-    if (retval) return PyGtk_New(retval);
+    
+    gv_view_area_remove_layer(GV_VIEW_AREA(self->obj), G_OBJECT(layer->obj));
+//~     Py_XDECREF(layer);
+    
     Py_INCREF(Py_None);
     return Py_None;
 }
@@ -229,47 +210,11 @@ static PyObject *_wrap_gv_shapes_num_shapes(PyGObject *self, PyObject *args) {
     PyGObject *py_shapes;
 
     if (!PyArg_ParseTuple(args, "O!:gv_shapes_num_shapes", &PyGvShapes_Type,
-			  &py_shapes)) {
-	return NULL;
+              &py_shapes)) {
+    return NULL;
     }
 
     return PyInt_FromLong(gv_shapes_num_shapes(GV_SHAPES(py_shapes->obj)));
-}
-%%
-override gv_points_num_points
-static PyObject *_wrap_gv_points_num_points(PyGObject *self, PyObject *args) {
-    PyGObject *py_points;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_shapes_num_points", &PyGvPoints_Type,
-			  &py_points)) {
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_points_num_points(GV_POINTS(py_points->obj)));
-}
-%%
-override gv_polylines_num_lines
-static PyObject *_wrap_gv_polylines_num_lines(PyGObject *self, PyObject *args) {
-    PyGObject *py_lines;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_shapes_num_lines", &PyGvPolylines_Type,
-			  &py_lines)) {
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_polylines_num_lines(GV_POLYLINES(py_lines->obj)));
-}
-%%
-override gv_areas_num_areas
-static PyObject *_wrap_gv_areas_num_areas(PyGObject *self, PyObject *args) {
-    PyGObject *py_areas;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_shapes_num_areas", &PyGvAreas_Type,
-			  &py_areas)) {
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_areas_num_areas(GV_AREAS(py_areas->obj)));
 }
 %%
 override gv_raster_get_min
@@ -277,8 +222,8 @@ static PyObject *_wrap_gv_raster_get_min(PyGObject *self, PyObject *args) {
     PyGObject *py_raster;
 
     if (!PyArg_ParseTuple(args, "O!:gv_raster_get_min", &PyGvRaster_Type,
-			  &py_raster)) {
-	return NULL;
+              &py_raster)) {
+    return NULL;
     }
 
     return PyFloat_FromDouble(gv_raster_get_min(GV_RASTER(py_raster->obj)));
@@ -289,8 +234,8 @@ static PyObject *_wrap_gv_raster_get_max(PyGObject *self, PyObject *args) {
     PyGObject *py_raster;
 
     if (!PyArg_ParseTuple(args, "O!:gv_raster_get_max", &PyGvRaster_Type,
-			  &py_raster)) {
-	return NULL;
+              &py_raster)) {
+    return NULL;
     }
 
     return PyFloat_FromDouble(gv_raster_get_max(GV_RASTER(py_raster->obj)));
@@ -306,8 +251,8 @@ _wrap_gv_raster_get_dataset(PyGObject *self)
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     dataset = raster->dataset;
@@ -329,7 +274,7 @@ static PyObject *_wrap_gv_raster_layer_type_get(PyGObject *self, PyObject *args)
         return NULL;
 
     return PyInt_FromLong((long)gv_raster_layer_type_get
-			  (GV_RASTER_LAYER(self->obj), isource));
+              (GV_RASTER_LAYER(self->obj), isource));
 }
 %%
 override gv_raster_layer_get_source_const_value
@@ -341,14 +286,14 @@ static PyObject *_wrap_gv_raster_layer_get_source_const_value(PyGObject *self, P
     int isource=0;
 
     if (!PyArg_ParseTuple(args, "O!i:gv_raster_layer_get_source_const_value",
-			  &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     return PyInt_FromLong(gv_raster_layer_get_const_value(rlayer, isource));
@@ -361,17 +306,17 @@ static PyObject *_wrap_gv_build_skirt(PyGObject *self, PyObject *args) {
     double base_z;
 
     if (!PyArg_ParseTuple(args, "O!d:gv_build_skirt",
-			  &PyGvRasterLayer_Type, &py_rlayer, &base_z)) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer, &base_z)) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+        PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+        return NULL;
     }
 
-    return PyGtk_New((GObject *)gv_build_skirt(rlayer, base_z));
+    return pygobject_new((GObject *)gv_build_skirt(rlayer, base_z));
 }
 %%
 override gv_shape_create
@@ -719,7 +664,7 @@ _wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
         g_free(shape_ids);
     }
 
-    return PyGtk_New((GObject *) shapes);
+    return pygobject_new((GObject *) shapes);
 }
 %%
 override gv_shape_get_property
@@ -1260,8 +1205,8 @@ _wrap_gv_symbol_manager_get_names(PyGObject *self, PyObject *args)
 
     manager = GV_SYMBOL_MANAGER(self->obj);
     if (!GV_IS_SYMBOL_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
+    return NULL;
     }
     name_list = gv_symbol_manager_get_names(manager);
     
@@ -1291,8 +1236,8 @@ _wrap_gv_symbol_manager_inject_vector_symbol(PyGObject *self, PyObject *args)
 
     manager = GV_SYMBOL_MANAGER(self->obj);
     if (!GV_IS_SYMBOL_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
+    return NULL;
     }
 
     if( swig_shape_ptr )
@@ -1323,8 +1268,8 @@ _wrap_gv_symbol_manager_inject_raster_symbol(PyGObject *self, PyObject *args)
 
     manager = GV_SYMBOL_MANAGER(self->obj);
     if (!GV_IS_SYMBOL_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
+    return NULL;
     }
 
     if( width*height*4 > rgba_len )
@@ -1335,7 +1280,7 @@ _wrap_gv_symbol_manager_inject_raster_symbol(PyGObject *self, PyObject *args)
     }
 
     gv_symbol_manager_inject_raster_symbol(manager, symbol_name,
-					   width, height, rgba_string );
+                       width, height, rgba_string );
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -1354,8 +1299,8 @@ _wrap_gv_symbol_manager_get_symbol(PyGObject *self, PyObject *args)
 
     manager = GV_SYMBOL_MANAGER(self->obj);
     if (!GV_IS_SYMBOL_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
+    return NULL;
     }
 
     symbol = gv_symbol_manager_get_symbol(manager, symbol_name );
@@ -1400,13 +1345,7 @@ _wrap_gv_data_get_properties(PyGObject *self, PyObject *args)
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
 
-    data = GV_DATA(self->obj);
-    if (!GV_IS_DATA(data)) {
-	PyErr_SetString(PyExc_TypeError, "data argument must be a GvData object");
-	return NULL;
-    }
-
-    properties = gv_data_get_properties(data);
+    properties = gv_data_get_properties( GV_DATA(self->obj) );
 
     psDict = PyDict_New();
     if( properties != NULL )
@@ -1434,31 +1373,20 @@ _wrap_gv_data_get_properties(PyGObject *self, PyObject *args)
     return psDict;
 }
 %%
-override gv_data_set_properties
+define GvData.set_properties
 static PyObject *
 _wrap_gv_data_set_properties(PyGObject *self, PyObject *args)
 {
-    PyGObject *py_data;
-    GvData *data;
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
     PyObject    *pyKey = NULL, *pyValue = NULL;
     int ii;
 
 
-    if (!PyArg_ParseTuple(args, "O!O!:gv_data_set_properties", &PyGvData_Type,
-			  &py_data, &PyDict_Type, &psDict)) {
-	return NULL;
-    }
+    if (!PyArg_ParseTuple(args, "O!:_gv.Data.set_properties", &PyDict_Type, &psDict))
+        return NULL;
 
-    data = GV_DATA(py_data->obj);
-    if (!GV_IS_DATA(data)) {
-	PyErr_SetString(PyExc_TypeError, "data argument must be a GvData object");
-	return NULL;
-    }
-
-    properties = gv_data_get_properties(data);
-
+    properties = gv_data_get_properties( GV_DATA(self->obj) );
     gv_properties_clear( properties );
 
     ii = 0;
@@ -1479,6 +1407,104 @@ _wrap_gv_data_set_properties(PyGObject *self, PyObject *args)
     return Py_None;
 }
 %%
+override gv_data_changing kwargs
+static PyObject *
+_wrap_gv_data_changing(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "x_off", "y_off", "width", "height", NULL };
+    GvRaster *raster;
+    int      x_off=0, y_off=0, width=0, height=0;
+    GvRasterChangeInfo change_info;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|iiii:_gv.Data.changing",
+                                    kwlist, &x_off, &y_off, &width, &height ))
+        return NULL;
+
+    if (GV_IS_RASTER(self->obj)) {
+        raster = GV_RASTER(self->obj);
+
+        if( height > 0 ) {
+            change_info.change_type = GV_CHANGE_REPLACE;
+            change_info.x_off = x_off;
+            change_info.y_off = y_off;
+            change_info.width = width;
+            change_info.height = height;
+
+            gv_data_changing( GV_DATA(raster), &change_info );
+        }
+        else
+            gv_data_changing( GV_DATA(raster), NULL );
+    }
+    else {
+        PyErr_SetString(PyExc_TypeError, "argument must be a handled GvData type");
+        return NULL;
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+override gv_data_changed
+static PyObject *
+_wrap_gv_data_changed(PyGObject *self, PyObject *args)
+{
+    GvRaster *raster;
+    GvData *data;
+    int      x_off=0, y_off=0, width=0, height=0;
+    GvRasterChangeInfo change_info;
+
+    if (!PyArg_ParseTuple(args, "iiii:gv_data_changed",
+              &x_off, &y_off, &width, &height ))
+        return NULL;
+
+    if (GV_IS_RASTER(self->obj)) {
+        raster = GV_RASTER(self->obj);
+
+        if( height > 0 ) {
+            change_info.change_type = GV_CHANGE_REPLACE;
+            change_info.x_off = x_off;
+            change_info.y_off = y_off;
+            change_info.width = width;
+            change_info.height = height;
+    
+            gv_data_changed( GV_DATA(raster), &change_info );
+        }
+        else
+            gv_data_changed( GV_DATA(raster), NULL );
+    }
+    else {
+        data = GV_DATA(self->obj);
+        if (!GV_IS_DATA(data)) {
+            PyErr_SetString(PyExc_TypeError, "data argument must be a GvData object");
+            return NULL;
+        }
+        gv_data_changed( GV_DATA(data), NULL );
+    }
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+%%
+define GvData.destroy noargs
+static void
+_wrap_gv_data_destroy(PyGObject *self)
+{
+    gv_data_destroy(GV_DATA(pygobject_get(self)));
+}
+//~ %%
+//~ override-slot GvData.tp_dealloc
+//~ static void
+//~ _wrap_gv_data_tp_dealloc(PyGObject *self)
+//~ {
+//~     if (self->obj) {
+//~         g_object_unref(self->obj);
+//~         self->obj = NULL;
+//~     }
+//~ 
+//~     PyObject_Del((PyObject*) self);
+//~ }
+
+%%
 override gv_layer_extents
 static PyObject *
 _wrap_gv_layer_extents(PyGObject *self, PyObject *args)
@@ -1488,8 +1514,8 @@ _wrap_gv_layer_extents(PyGObject *self, PyObject *args)
 
     layer = GV_LAYER(self->obj);
     if (!GV_IS_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "layer argument must be a GvLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "layer argument must be a GvLayer");
+    return NULL;
     }
 
     gv_layer_extents(layer, &rect);
@@ -1505,8 +1531,8 @@ _wrap_gv_layer_display_change(PyGObject *self, PyObject *args)
 
     layer = GV_LAYER(self->obj);
     if (!GV_IS_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "layer argument must be a GvLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "layer argument must be a GvLayer");
+    return NULL;
     }
 
     gv_layer_display_change(layer, NULL );
@@ -1525,14 +1551,14 @@ _wrap_gv_view_area_list_layers(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+        PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+        return NULL;
     }
 
     py_list = PyList_New(0);
     for (list = gv_view_area_list_layers(view); list != NULL; list = list->next)
     {
-        PyObject *layer = PyGtk_New(G_OBJECT(list->data));
+        PyObject *layer = pygobject_new(G_OBJECT(list->data));
         PyList_Append(py_list, layer);
         Py_DECREF(layer);
     }
@@ -1540,19 +1566,11 @@ _wrap_gv_view_area_list_layers(PyGObject *self, PyObject *args)
     return py_list;
 }
 %%
-override gv_view_area_get_translation
+define GvViewArea.get_translation noargs
 static PyObject *
-_wrap_gv_view_area_get_translation(PyGObject *self, PyObject *args)
+_wrap_gv_view_area_get_translation(PyGObject *self)
 {
-    PyGObject *py_view;
-    GvViewArea *view;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_view_area_get_translation",
-			  &PyGvViewArea_Type, &py_view)) {
-	return NULL;
-    }
-
-    view = GV_VIEW_AREA(py_view->obj);
+    GvViewArea *view = GV_VIEW_AREA(pygobject_get(self));
 
     return Py_BuildValue( "(" CC ")", view->state.tx, view->state.ty );
 }
@@ -1567,14 +1585,10 @@ _wrap_gv_view_area_map_location(PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "(" CC "):gv_view_area_map_location",
                           &x, &y))
     {
-	return NULL;
+        return NULL;
     }
 
-    view = GV_VIEW_AREA(self->obj);
-    if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
-    }
+    view = GV_VIEW_AREA(pygobject_get(self));
 
     gv_view_area_map_location( view, x, y, &x, &y );
 
@@ -1588,13 +1602,10 @@ _wrap_gv_view_area_get_pointer(PyGObject *self, PyObject *args)
     GvViewArea *view;
     gvgeocoord  x, y;
 
-    view = GV_VIEW_AREA(self->obj);
-    if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
-    }
+    view = GV_VIEW_AREA(pygobject_get(self));
+
     gv_view_area_map_pointer(view, view->state.mpos_x,
-			     view->state.mpos_y, &x, &y );
+                            view->state.mpos_y, &x, &y );
 
     return Py_BuildValue("(" CC ")", x, y );
 }
@@ -1607,15 +1618,15 @@ _wrap_gv_view_area_map_pointer(PyGObject *self, PyObject *args)
     gvgeocoord  x, y;
 
     if (!PyArg_ParseTuple(args, "(" CC "):gv_view_area_map_pointer",
-			  &x, &y))
+              &x, &y))
     {
-	return NULL;
+    return NULL;
     }
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
     gv_view_area_map_pointer( view, x, y, &x, &y );
 
@@ -1631,8 +1642,8 @@ _wrap_gv_view_area_get_extents(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
     gv_view_area_get_extents( view, &xmin, &ymin, &xmax, &ymax );
 
@@ -1648,8 +1659,8 @@ _wrap_gv_view_area_get_volume(PyGObject *self)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
     gv_view_area_get_volume( view, volume );
 
@@ -1675,8 +1686,8 @@ _wrap_gv_view_area_inverse_map_pointer(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
     gv_view_area_inverse_map_pointer( view, x, y, &x, &y );
 
@@ -1694,8 +1705,8 @@ _wrap_gv_view_area_get_fontnames(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     g_list = gv_view_area_get_fontnames(view);
@@ -1724,14 +1735,14 @@ _wrap_gv_view_area_set_background_color(PyGObject *self, PyObject *args)
     GvColor color;
 
     if (!PyArg_ParseTuple(args, "(ffff):gv_view_area_set_background_color",
-			  &color[0], &color[1], &color[2], &color[3])) {
-	return NULL;
+              &color[0], &color[1], &color[2], &color[3])) {
+    return NULL;
     }
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     gv_view_area_set_background_color(view, color);
@@ -1749,8 +1760,8 @@ _wrap_gv_view_area_get_background_color(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     gv_view_area_get_background_color(view, color);
@@ -1769,13 +1780,13 @@ _wrap_gv_view_area_set_3d_view(PyGObject *self, PyObject *args)
                           eye_pos+0, eye_pos+1, eye_pos+2,
                           eye_dir+0, eye_dir+1, eye_dir+2))
     {
-	return NULL;
+    return NULL;
     }
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     gv_view_area_set_3d_view( view, eye_pos, eye_dir );
@@ -1795,14 +1806,14 @@ _wrap_gv_view_area_set_3d_view_look_at(PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple(args, "(" CCC ")(" CC "):gv_view_area_set_3d_view_look_at",
                           eye_pos+0, eye_pos+1, eye_pos+2,
                           eye_look_at+0, eye_look_at+1))
-	{
-	    return NULL;
-	}
+    {
+        return NULL;
+    }
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     gv_view_area_set_3d_view_look_at( view, eye_pos, eye_look_at );
@@ -1811,23 +1822,11 @@ _wrap_gv_view_area_set_3d_view_look_at(PyGObject *self, PyObject *args)
     return Py_None;
 }
 %%
-override gv_view_area_get_eye_pos
+define GvViewArea.get_eye_pos noargs
 static PyObject *
-_wrap_gv_view_area_get_eye_pos(PyGObject *self, PyObject *args)
+_wrap_gv_view_area_get_eye_pos(PyGObject *self)
 {
-    PyGObject *py_view;
-    GvViewArea *view;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_view_area_get_pos", &PyGvViewArea_Type,
-			  &py_view)) {
-	return NULL;
-    }
-
-    view = GV_VIEW_AREA(py_view->obj);
-    if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
-    }
+    GvViewArea *view = GV_VIEW_AREA(pygobject_get(self));
 
     return Py_BuildValue( "(" CCC ")",
                           view->state.eye_pos[0],
@@ -1835,23 +1834,11 @@ _wrap_gv_view_area_get_eye_pos(PyGObject *self, PyObject *args)
                           view->state.eye_pos[2] );
 }
 %%
-override gv_view_area_get_eye_dir
+define GvViewArea.get_eye_dir noargs
 static PyObject *
-_wrap_gv_view_area_get_eye_dir(PyGObject *self, PyObject *args)
+_wrap_gv_view_area_get_eye_dir(PyGObject *self)
 {
-    PyGObject *py_view;
-    GvViewArea *view;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_view_area_get_eye_dir",
-			  &PyGvViewArea_Type, &py_view)) {
-	return NULL;
-    }
-
-    view = GV_VIEW_AREA(py_view->obj);
-    if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
-    }
+    GvViewArea *view = GV_VIEW_AREA(pygobject_get(self));
 
     return Py_BuildValue( "(" CCC ")",
                           view->state.eye_dir[0],
@@ -1868,8 +1855,8 @@ _wrap_gv_view_area_get_look_at_pos(PyGObject *self, PyObject *args)
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     if (!gv_view_area_get_look_at_pos( view, &x, &y))
@@ -1891,8 +1878,8 @@ _wrap_gv_roi_tool_get_rect(PyGObject *self, PyObject *args)
 
     tool = GV_ROI_TOOL(self->obj);
     if (!GV_IS_ROI_TOOL(tool)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRoiTool");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRoiTool");
+    return NULL;
     }
 
     if (!gv_roi_tool_get_rect(tool, &rect)) {
@@ -1911,19 +1898,19 @@ _wrap_gv_roi_tool_new_rect(PyGObject *self, PyObject *args)
     GvRoiTool *tool;
 
     if (!PyArg_ParseTuple(args, "(" CCCC "):gv_roi_tool_new_rect",
-			  &rect.x, &rect.y, &rect.width, &rect.height)) {
-	return NULL;
+              &rect.x, &rect.y, &rect.width, &rect.height)) {
+    return NULL;
     }
 
     tool = GV_ROI_TOOL(self->obj);
     if (!GV_IS_ROI_TOOL(tool)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRoiTool");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRoiTool");
+    return NULL;
     }
 
     if (!gv_roi_tool_new_rect(tool, &rect)){
-	PyErr_SetString(PyExc_RuntimeError, "invalid ROI specified");
-	return NULL;
+    PyErr_SetString(PyExc_RuntimeError, "invalid ROI specified");
+    return NULL;
     }
 
     Py_INCREF(Py_None);
@@ -1939,13 +1926,13 @@ _wrap_gv_poi_tool_get_point(PyGObject *self, PyObject *args)
 
     tool = GV_POI_TOOL(self->obj);
     if (!GV_IS_POI_TOOL(tool)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPoiTool");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvPoiTool");
+    return NULL;
     }
 
     if (!gv_poi_tool_get_point(tool, &point)) {
-	PyErr_SetString(PyExc_RuntimeError, "no POI marked");
-	return NULL;
+    PyErr_SetString(PyExc_RuntimeError, "no POI marked");
+    return NULL;
     }
 
     return Py_BuildValue("(" CC ")", point.x, point.y);
@@ -1959,14 +1946,14 @@ _wrap_gv_poi_tool_new_point(PyGObject *self, PyObject *args)
     GvPoiTool *tool;
 
     if (!PyArg_ParseTuple(args, "(" CC "):gv_poi_tool_new_point",
-			  &point.x, &point.y)) {
-	return NULL;
+              &point.x, &point.y)) {
+    return NULL;
     }
 
     tool = GV_POI_TOOL(self->obj);
     if (!GV_IS_POI_TOOL(tool)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPoiTool");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvPoiTool");
+    return NULL;
     }
 
     if (!gv_poi_tool_new_point(tool, &point)) {
@@ -1992,8 +1979,8 @@ _wrap_gv_tool_set_boundary(PyGObject *self, PyObject *args)
 
     tool = GV_TOOL(self->obj);
     if (!GV_IS_TOOL(tool)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvTool");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvTool");
+    return NULL;
     }
 
     if (!gv_tool_set_boundary(tool, &rect)) {
@@ -2004,851 +1991,6 @@ _wrap_gv_tool_set_boundary(PyGObject *self, PyObject *args)
 
     Py_INCREF(Py_None);
     return Py_None;
-}
-%%
-override gv_records_set_used_properties
-static PyObject *
-_wrap_gv_records_set_used_properties(PyGObject *self, PyObject *args)
-{
-    PyObject *py_list;
-    GvRecords *records;
-    int       nFieldCount, *panFieldList = NULL, i;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_records_set_used_properties",
-                          &PyList_Type, &py_list) )
-        return NULL;
-
-    if(!GV_IS_RECORDS(self->obj)) return NULL;
-    records = GV_RECORDS(self->obj);
-    
-    nFieldCount = PyList_Size(py_list);
-    panFieldList = g_new( int, nFieldCount );
-
-    for( i = 0; i < nFieldCount; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(py_list,i), "i", panFieldList + i ) )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "expecting ints in gv_records_set_used_fields argument");
-            return NULL;
-        }
-    }
-
-    gv_records_set_used_properties( records, nFieldCount, panFieldList );
-
-    g_free( panFieldList );
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-%%
-override gv_records_get_typed_properties
-static PyObject *
-_wrap_gv_records_get_typed_properties(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_records;
-    int       rec_index = -1, iField, ii;
-    GvRecords *records;
-    const char *pachRecData;
-    PyObject *psDict = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!i:gv_records_get_typed_properties",
-                          &PyGvRecords_Type, &py_records,
-                          &rec_index)) {
-        return NULL;
-    }
-
-    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
-        return NULL;
-
-    records = GV_RECORDS(PyGtk_Get(py_records));
-
-    if( rec_index < 0 || rec_index >= records->nRecordCount )
-        return NULL;
-
-    psDict = PyDict_New();
-    pachRecData = gv_records_get_raw_record_data( records, rec_index );
-    for( ii = 0; ii < records->nUsedFieldCount; ii++ )
-    {
-        PyObject *py_name, *py_value;
-        const char *value;
-
-        iField = records->panUsedFieldList[ii];
-
-        value = pachRecData + records->panFieldOffset[iField];
-
-        if( *value == GV_NULL_MARKER )
-        {
-            py_value = Py_None;
-            Py_INCREF( Py_None );
-        }
-        else if( records->panFieldType[iField] == GV_RFT_INTEGER )
-            py_value = Py_BuildValue("i",atoi(value));
-        else if( records->panFieldType[iField] == GV_RFT_FLOAT )
-            py_value = Py_BuildValue("f",atof(value));
-        else
-            py_value = Py_BuildValue("s",value);
-        
-        py_name = Py_BuildValue("s",records->papszFieldName[iField]);
-
-        PyDict_SetItem( psDict, py_name, py_value );
-
-        Py_DECREF(py_name);
-        Py_DECREF(py_value);
-    }
-
-    return psDict;
-}
-%%
-override gv_records_get_properties
-static PyObject *
-_wrap_gv_records_get_properties(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_records;
-    int       rec_index = -1, iField;
-    const char *pachRecData;
-    PyObject *psDict = NULL;
-    GvRecords *records;
-
-    if (!PyArg_ParseTuple(args, "O!i:gv_records_get_properties",
-                          &PyGvRecords_Type, &py_records,
-                          &rec_index) )
-        return NULL;
-
-    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
-        return NULL;
-
-    records = GV_RECORDS(PyGtk_Get(py_records));
-
-    if( rec_index < 0 || rec_index >= records->nRecordCount )
-        return NULL;
-
-    psDict = PyDict_New();
-    pachRecData = gv_records_get_raw_record_data( records, rec_index );
-    for( iField = 0; iField < records->nFieldCount; iField++ )
-    {
-        PyObject *py_name, *py_value;
-        const char *value;
-
-        value = pachRecData + records->panFieldOffset[iField];
-        if( *value == GV_NULL_MARKER )
-            value = "";
-
-        py_value = Py_BuildValue("s",value);
-        py_name = Py_BuildValue("s",records->papszFieldName[iField]);
-
-        PyDict_SetItem( psDict, py_name, py_value );
-
-        Py_DECREF(py_name);
-        Py_DECREF(py_value);
-    }
-
-    return psDict;
-}
-%%
-override gv_records_to_dbf
-static PyObject *
-_wrap_gv_records_to_dbf(PyGObject *self, PyObject *args)
-{
-    PyObject *py_list;
-    char      *filename = NULL;
-    GvRecords *records;
-    int       nSelectionCount, *panSelectionList = NULL, i, result;
-    PyProgressData sProgressInfo;
-
-    sProgressInfo.psPyCallback = NULL;
-    sProgressInfo.psPyCallbackData = NULL;
-
-    if (!PyArg_ParseTuple(args, "sO!OO:gv_records_to_dbf",
-                          &filename, &PyList_Type, &py_list,
-                          &(sProgressInfo.psPyCallback),
-                          &(sProgressInfo.psPyCallbackData) ) )
-        return NULL;
-
-    if(!GV_IS_RECORDS(self->obj)) return NULL;
-    records = GV_RECORDS(self->obj);
-
-    nSelectionCount = PyList_Size(py_list);
-    if( nSelectionCount != 0 )
-        panSelectionList = g_new( int, nSelectionCount );
-
-    for( i = 0; i < nSelectionCount; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(py_list,i), "i", panSelectionList + i ) )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "expecting ints in gv_records_to_dbf argument");
-            return NULL;
-        }
-    }
-
-    result = gv_records_to_dbf( records, filename, 
-                                nSelectionCount, panSelectionList,
-                                PyProgressProxy, &sProgressInfo );
-
-    g_free( panSelectionList );
-    
-    return Py_BuildValue("i", result );
-}
-%%
-override gv_records_as_dict
-static PyObject *
-_wrap_gv_records_as_dict(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_records;
-    PyObject  *py_fields, *py_data_selection;
-    GvRecords *records;
-    int       i, j, nRecordCount, nFields, *panFields;
-    int       *panSelectionList = NULL;
-    PyObject *py_dict = NULL, *py_list = NULL;
-    char ** paszFieldNames;
-
-    if (!PyArg_ParseTuple(args, "O!O!O!:gv_records_as_dict",
-                          &PyGvRecords_Type, &py_records,
-                          &PyList_Type, &py_fields,
-                          &PyList_Type, &py_data_selection ) )
-        return NULL;
-
-    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
-        return NULL;
-
-    records = GV_RECORDS(PyGtk_Get(py_records));
-
-    nFields = PyList_Size(py_fields);
-    paszFieldNames = (char **) g_new( char *, nFields+1 );
-    panFields = g_new( int, nFields );
-    for( i = 0; i < nFields; i++ )
-    {
-        PyArg_Parse( PyList_GET_ITEM(py_fields,i), "s", &paszFieldNames[i] );
-        panFields[i] = -1;
-        for( j = 0; j < records->nFieldCount; j++ )
-        {
-            if( EQUAL(paszFieldNames[i],records->papszFieldName[j]) )
-                panFields[i] = j;
-        }
-        if( panFields[i] == -1)
-        {
-            PyErr_SetString( PyExc_ValueError, "ASDICT variable not recognised." );
-            return NULL;
-        }
-    }
-
-    /*
-    ** Build up the "selection" list.
-    */
-    nRecordCount = PyList_Size( py_data_selection );
-    if( nRecordCount != 0 )
-        panSelectionList = g_new( int, nRecordCount );
-
-    for( i = 0; i < nRecordCount; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
-                          panSelectionList + i ) )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "problem extracting selection item.");
-            return NULL;
-        }
-    }
-
-    py_dict = PyDict_New();
-    for( i = 0; i < nFields; i++ )
-    {
-        PyDict_SetItem( py_dict, PyString_FromString(paszFieldNames[i]), PyList_New( nRecordCount ) );
-    }
-
-    /*
-     ** Process records 
-     */
-
-    for( i = 0; i < nRecordCount; i++ )
-    {
-        int rec_index = panSelectionList[i];
-        for( j = 0; j < nFields; j++ )
-        {
-            const char *pszRawFieldValue = 
-                gv_records_get_raw_field_data( records, rec_index, panFields[j] );
-
-            py_list = PyDict_GetItem( py_dict, PyString_FromString(paszFieldNames[j]) );
-            
-            if( pszRawFieldValue == NULL )
-            {
-                PyList_SetItem( py_list, rec_index, Py_None );
-            }
-            else
-            {
-                switch( records->panFieldType[panFields[j]] )
-                {
-                    case GV_RFT_INTEGER:
-                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "i", atoi(pszRawFieldValue) ));
-                        break;
-                    case GV_RFT_FLOAT:
-                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "d", atof(pszRawFieldValue) ));
-                        break;
-                    default:
-                        PyList_SetItem( py_list, rec_index, Py_BuildValue( "s", pszRawFieldValue));
-                }
-            }
-            //PyDict_SetItem( py_dict, PyString_FromString(paszFieldNames[j]), py_list );
-        }
-    }
-
-    g_free( panFields );
-    g_free( paszFieldNames );
-    g_free( panSelectionList );
-
-    return py_dict;
-}
-%%
-override gv_records_MultiStratifiedCollect
-static PyObject *
-_wrap_gv_records_MultiStratifiedCollect(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_records;
-    PyObject *py_data_selection, *py_strat_vars;
-    PyObject *pyResultTree, *result;
-    PyObject *v1_keys=Py_None, *v2_keys=Py_None;
-    char     *var1 = NULL, *var2 = NULL;
-    GvRecords *records;
-    int       nSelectionCount, *panSelectionList = NULL, i;
-    int       nVarCount, iVar, bCancelled = FALSE;
-    StratVarInfo *pasVarInfo;
-    StratNode *psRoot = NULL;
-    double    *padfRecValues;
-    PyProgressData sProgressInfo;
-
-    sProgressInfo.psPyCallback = NULL;
-    sProgressInfo.psPyCallbackData = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!O!ssO!OO:gv_records_MultiStratifiedCollect",
-                          &PyGvRecords_Type, &py_records,
-                          &PyList_Type, &py_data_selection,
-                          &var1, &var2, 
-                          &PyList_Type, &py_strat_vars,
-                          &(sProgressInfo.psPyCallback),
-                          &(sProgressInfo.psPyCallbackData) ) )
-        return NULL;
-
-    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
-        return NULL;
-
-    records = GV_RECORDS(PyGtk_Get(py_records));
-
-    /* 
-    ** Initialize progress.
-    */
-    if( !PyProgressProxy( 0.0, "", &sProgressInfo ) )
-        return FALSE;
-
-    /*
-    ** Build up the "selection" list.
-    */
-    nSelectionCount = PyList_Size(py_data_selection);
-    if( nSelectionCount != 0 )
-        panSelectionList = g_new( int, nSelectionCount );
-
-    for( i = 0; i < nSelectionCount; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
-                          panSelectionList + i ) )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "problem extracting selection item.");
-            return NULL;
-        }
-    }
-
-    /*
-    ** Build the variable list.  Var2 is manditory, var1 is optional. 
-    */
-    nVarCount = PyList_Size( py_strat_vars ) + 1;
-    if( var1 != NULL && strlen(var1) > 0 )
-        nVarCount++;
-
-    pasVarInfo = (StratVarInfo *) VSICalloc(sizeof(StratVarInfo),nVarCount);
-    padfRecValues = (double *) VSICalloc(sizeof(double),nVarCount);
-
-    for( iVar = 0; iVar < nVarCount; iVar++ )
-    {
-        const char *pszVarName = NULL;
-        int iField;
-
-        if( iVar < nVarCount-2 )
-        {
-            if( !PyArg_Parse( PyList_GET_ITEM(py_strat_vars,iVar), "s",
-                              &pszVarName ) )
-            {
-                PyErr_SetString(PyExc_ValueError,
-                                "expecting variable name in strat_vars.");
-                return NULL;
-            }
-        }
-        else if( iVar == nVarCount - 2 )
-        {
-            pszVarName = var1;
-        }
-        else if( iVar == nVarCount - 1 )
-        {
-            pszVarName = var2;
-            pasVarInfo[iVar].bLastVar = TRUE;
-        }
-
-        for( iField = 0; iField < records->nFieldCount; iField++ )
-        {
-            if( EQUAL(pszVarName,records->papszFieldName[iField]) )
-            {
-                pasVarInfo[iVar].nFieldIndex = iField;
-                pasVarInfo[iVar].bIsInteger = 
-                    records->panFieldType[iField] == GV_RFT_INTEGER;
-                break;
-            }
-        }
-
-        if( iField == records->nFieldCount )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "unrecognised field name.");
-            return NULL;
-        }
-    }
-
-    /*
-    ** Allocate a root node for the data collection "tree".
-    */
-
-    psRoot = (StratNode *) CPLCalloc(sizeof(StratNode),1);
-
-    /*
-    ** Process all records.
-    */
-    
-    for( i = 0; i < nSelectionCount && !bCancelled; i++ )
-    {
-        int rec_index = panSelectionList[i];
-        StratNode *psNode = psRoot;
-
-        for( iVar = 0; iVar < nVarCount; iVar++ )
-        {
-            const char *pszRawFieldValue 
-                = gv_records_get_raw_field_data( records, rec_index, 
-                                                 pasVarInfo[iVar].nFieldIndex);
-            if( pszRawFieldValue == NULL )
-                break;
-            
-            if( pasVarInfo[iVar].bIsInteger )
-                padfRecValues[iVar] = atoi(pszRawFieldValue);
-            else
-                padfRecValues[iVar] = atof(pszRawFieldValue);
-        }
-
-        if( i % 100 == 0 )
-        {
-            if( !PyProgressProxy( i / (double) nSelectionCount, 
-                                  "", &sProgressInfo ) )
-                bCancelled = TRUE;
-        }
-
-        /* skip records with nulls in a used variable. */
-        if( iVar < nVarCount )
-            continue;
-
-        for( iVar = 0; iVar < nVarCount; iVar++ )
-        {
-            psNode = StratNodeAdd( psNode, pasVarInfo + iVar, 
-                                   padfRecValues[iVar] );
-        }
-    }
-
-    CPLFree( padfRecValues );
-    g_free(panSelectionList);
-
-    if( !bCancelled )
-        PyProgressProxy( 1.0, "", &sProgressInfo );
-
-    /*
-    ** Unsort the values list in the StratVarInfo's so that our indexes can
-    ** be used easily to get back to the variable values. 
-    */
-    for( iVar = 0; iVar < nVarCount; iVar++ )
-    {
-        StratVarInfo  *psVar = pasVarInfo + iVar;
-        int           iValue;
-        double        *padfNewValueList;
-
-        padfNewValueList = (double *) 
-            CPLMalloc(sizeof(double) * psVar->nValueCount);
-        
-        for( iValue = 0; iValue < psVar->nValueCount; iValue++ )
-        {
-            padfNewValueList[psVar->panValueIndex[iValue]] = 
-                psVar->padfValueList[iValue];
-        }
-        CPLFree( psVar->padfValueList );
-        psVar->padfValueList = padfNewValueList;
-
-        CPLFree( psVar->panValueIndex );
-        psVar->panValueIndex = NULL;
-    }
-
-    /*
-    ** Create Python string representations of the values for use in the
-    ** final results dictionary.
-    */
-    for( iVar = 0; iVar < nVarCount; iVar++ )
-    {
-        StratVarInfo *psVar = pasVarInfo + iVar;
-        int           iValue;
-
-        psVar->papyValueList = (PyObject **) 
-            CPLMalloc(sizeof(PyObject *) * psVar->nValueCount);
-
-        for( iValue = 0; iValue < psVar->nValueCount; iValue++ )
-        {
-            if( psVar->bIsInteger )
-            {
-                psVar->papyValueList[iValue] = 
-                    Py_BuildValue( "i", (int) psVar->padfValueList[iValue] );
-            }
-            else
-            {
-                psVar->papyValueList[iValue] = 
-                    Py_BuildValue( "d", psVar->padfValueList[iValue] );
-            }
-        }
-    }
-
-    /*
-    ** Marshall the results into a tree of dictionaries.  Wipe tree as
-    ** part of the process.
-    */
-    
-    pyResultTree = StratTreeToDict( psRoot, pasVarInfo );
-    if( pyResultTree == NULL )
-    {
-        pyResultTree = Py_None;
-        Py_INCREF( Py_None );
-    }
-
-    /*
-    ** Create v1/v2_keys ... a dictionary with one entry for each value of 
-    ** var1/var2 that occurs in the data.
-    */
-
-    for( iVar = nVarCount-1; iVar >= nVarCount-2 && iVar >= 0; iVar-- )
-    {
-        int iValue;
-        PyObject *key_dict = PyDict_New();
-        
-        for( iValue = 0; iValue < pasVarInfo[iVar].nValueCount; iValue++ )
-        {
-            PyDict_SetItem( key_dict, pasVarInfo[iVar].papyValueList[iValue], 
-                            Py_None );
-        }
-
-        if( iVar == nVarCount-1 )
-            v2_keys = key_dict;
-        else
-            v1_keys = key_dict;
-    }
-    /*
-    ** Cleanup working structures. 
-    */
-
-    /*
-    ** Prepare final result tuple. 
-    */
-
-    result = Py_BuildValue( "(OOO)", v1_keys, v2_keys, pyResultTree );
-
-    if( v1_keys != Py_None )
-    {
-        Py_DECREF( v1_keys );
-    }
-    Py_DECREF( v2_keys );
-    Py_DECREF( pyResultTree );
-
-    if( bCancelled )
-    {
-        PyErr_SetString(PyExc_ValueError,
-                        "User called processing.");
-        Py_DECREF( result );
-        return NULL;
-    }
-    else
-    {
-        return result;
-    }
-}
-%%
-override gv_records_recode
-static PyObject *
-_wrap_gv_records_recode(PyGObject *self, PyObject *args)
-{
-    PyObject *py_records, *py_single_mapping, *py_range_mapping, *py_data_selection;
-    GvRecords *records;
-    char      *pszSrcVarName = NULL, *pszDstVarName = NULL;
-    int       bCancelled = FALSE, i, nRecordCount;
-    int       *panSelectionList = NULL, nRangeRecodeCount = 0, nSingleRecodeCount = 0;
-    int       iSrcField, iDstField, nIgnored=0, nAltered=0, nUnchanged=0;
-    PyProgressData sProgressInfo;
-    GvRecodeEntry *pasSingleRecodings;
-    GvRecodeEntry *pasRangeRecodings;
-    PyObject    *pyKey = NULL, *pyValue = NULL;
-    int       bHaveNULLReplacement = FALSE;
-    GvRecodeEntry sNULLEntry;
-    int       bElseClause = FALSE;
-    GvRecodeEntry sElseEntry;
-    
-    sProgressInfo.psPyCallback = NULL;
-    sProgressInfo.psPyCallbackData = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!O!O!O!ssOO:gv_records_recode",
-                          &PyGvRecords_Type, &py_records,
-                          &PyDict_Type, &py_single_mapping,
-                          &PyList_Type, &py_range_mapping,
-                          &PyList_Type, &py_data_selection,
-                          &pszSrcVarName, &pszDstVarName, 
-                          &(sProgressInfo.psPyCallback),
-                          &(sProgressInfo.psPyCallbackData) ) )
-        return NULL;
-
-    if( !GV_IS_RECORDS(PyGtk_Get(py_records)) )
-        return NULL;
-
-    records = GV_RECORDS(PyGtk_Get(py_records));
-
-    /*
-    ** Identify the source and destination field indexes.
-    */
-    iSrcField = -1;
-    iDstField = -1;
-    for( i = 0; i < records->nFieldCount; i++ )
-    {
-        if( EQUAL(pszSrcVarName,records->papszFieldName[i]) )
-            iSrcField = i;
-        if( EQUAL(pszDstVarName,records->papszFieldName[i]) )
-            iDstField = i;
-    }
-
-    if( iSrcField == -1 || iDstField == -1 )
-    {
-        PyErr_SetString( PyExc_ValueError, "RECODE variable not recognised." );
-        return NULL;
-    }
-
-    cos( 0.0 );
-
-    /*
-    ** Collect the single value mappings.
-    */
-    pasSingleRecodings = 
-        g_new( GvRecodeEntry, PyDict_Size(py_single_mapping) );
-
-    nSingleRecodeCount = 0;
-    i = 0;
-    while( PyDict_Next( py_single_mapping, &i, &pyKey, &pyValue ) )
-    {
-        char *pszKey = NULL,  *pszValue = NULL;
-
-        if( pyValue == Py_None )
-        {
-            pasSingleRecodings[nSingleRecodeCount].dfReplacement = 0.0;
-            pasSingleRecodings[nSingleRecodeCount].bReplaceNULL = TRUE;
-        }
-        else if( !PyArg_Parse( pyValue, "s", &pszValue ) )
-        {
-            PyErr_SetString(PyExc_TypeError, 
-                            "Single value is not numeric." );
-            return NULL;
-        }
-        else
-        {
-            pasSingleRecodings[nSingleRecodeCount].dfReplacement =
-                atof( pszValue );
-            pasSingleRecodings[nSingleRecodeCount].bReplaceNULL = FALSE;
-        }
-
-        if( pyKey == Py_None )
-        {
-            bHaveNULLReplacement = TRUE;
-            memcpy( &sNULLEntry, 
-                    pasSingleRecodings + nSingleRecodeCount, 
-                    sizeof(sNULLEntry) );
-        }
-        else if( !PyArg_Parse( pyKey, "s", &pszKey ) )
-        {
-            PyErr_SetString(PyExc_TypeError, 
-                            "Single value is not numeric." );
-            return NULL;
-        }
-        else if( EQUAL(pszKey,"None") || EQUAL(pszKey,"NULL") )
-        {
-            bHaveNULLReplacement = TRUE;
-            memcpy( &sNULLEntry, 
-                    pasSingleRecodings + nSingleRecodeCount, 
-                    sizeof(sNULLEntry) );
-        }
-        else if( EQUAL(pszKey,"ELSE")  )
-        {
-            /*NULL is a special case*/
-            if( pyValue != Py_None )
-            {
-                sElseEntry.dfReplacement = atof( pszValue );
-            }
-            else
-            {
-                bHaveNULLReplacement = TRUE;
-            }
-            
-            /*any value should be caught by else*/
-            sElseEntry.dfMin = 0 - HUGE_VAL;
-            sElseEntry.dfMax = HUGE_VAL;
-            memcpy( &sElseEntry, 
-                    pasSingleRecodings + nSingleRecodeCount, 
-                    sizeof(sElseEntry) );
-            bElseClause = TRUE;
-        }
-        else
-        {
-            pasSingleRecodings[nSingleRecodeCount].dfMin = atof(pszKey);
-            pasSingleRecodings[nSingleRecodeCount].dfMax = atof(pszKey);
-            nSingleRecodeCount++;
-        }
-    }
-
-    SortRecodings( nSingleRecodeCount, pasSingleRecodings );
-    
-    /*
-    ** Collect range mappings. 
-    */
-
-    nRangeRecodeCount = PyList_Size(py_range_mapping);
-    pasRangeRecodings = g_new( GvRecodeEntry, nRangeRecodeCount );
-
-    for( i = 0; i < nRangeRecodeCount; i++ )
-    {
-        char *pszReplacement=NULL;
-
-        if( !PyArg_Parse( PyList_GetItem( py_range_mapping, i ), "(ddz)", 
-                          &(pasRangeRecodings[i].dfMin),
-                          &(pasRangeRecodings[i].dfMax),
-                          &pszReplacement ) )
-        {
-            PyErr_SetString(PyExc_TypeError, 
-                            "Range value is not (min,max,result) tuple." );
-            return NULL;
-        }
-
-        if( pszReplacement == NULL )
-        {
-            pasRangeRecodings[i].dfReplacement = 0.0;
-            pasRangeRecodings[i].bReplaceNULL = TRUE;
-        }
-        else
-        {
-            pasRangeRecodings[i].dfReplacement = atof(pszReplacement);
-            pasRangeRecodings[i].bReplaceNULL = FALSE;
-        }
-    }
-
-    SortRecodings( nRangeRecodeCount, pasRangeRecodings );
-
-    /* 
-    ** Initialize progress.
-    */
-    if( !PyProgressProxy( 0.0, "", &sProgressInfo ) )
-        return FALSE;
-
-    /*
-    ** Build up the "selection" list.
-    */
-    nRecordCount = PyList_Size( py_data_selection );
-    if( nRecordCount != 0 )
-        panSelectionList = g_new( int, nRecordCount );
-
-    for( i = 0; i < nRecordCount; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(py_data_selection,i), "i",
-                          panSelectionList + i ) )
-        {
-            PyErr_SetString(PyExc_ValueError,
-                            "problem extracting selection item.");
-            return NULL;
-        }
-    }
-
-    /*
-    ** Process records 
-    */
-    for( i = 0; i < nRecordCount && !bCancelled; i++ )
-    {
-        int rec_index = panSelectionList[i];
-        double dfValue;
-        GvRecodeEntry *psEntry;
-        const char *pszRawFieldValue = 
-            gv_records_get_raw_field_data( records, rec_index, iSrcField );
-
-        if( pszRawFieldValue == NULL )
-        {
-            if( bHaveNULLReplacement )
-                psEntry = &sNULLEntry;
-            else
-                psEntry = NULL;
-        }
-        else
-        {
-            dfValue = atof(pszRawFieldValue);
-        
-            psEntry = FindRecoding( dfValue, 
-                                    nSingleRecodeCount, pasSingleRecodings );
-            if( psEntry == NULL)
-                psEntry = FindRecoding( dfValue, 
-                                        nRangeRecodeCount, pasRangeRecodings );
-            
-            /*
-             if nothing else was applied, use the ELSE value after adding
-             the correct mapping
-            */
-            if (psEntry == NULL && bElseClause)
-            {
-                psEntry = &sElseEntry;
-            }
-        }
-
-        
-        if( psEntry == NULL )
-            nUnchanged++;
-        else if( psEntry->bReplaceNULL )
-        {
-            gv_records_set_raw_field_data( records, rec_index, iDstField, NULL );
-            nIgnored++;
-        }
-        else
-        {
-            char szReplaceText[200];
-
-            sprintf( szReplaceText, "%g", psEntry->dfReplacement );
-            gv_records_set_raw_field_data( records, rec_index, iDstField, 
-                                           szReplaceText);
-            nAltered++;
-        }
-        
-        if( i % 100 == 0 )
-        {
-            if( !PyProgressProxy( i / (double) nRecordCount,
-                                  "", &sProgressInfo ) )
-                bCancelled = TRUE;
-        }
-    }
-
-    if( !bCancelled )
-        PyProgressProxy( 1.0, "", &sProgressInfo );
-
-    g_free( pasSingleRecodings );
-    g_free( pasRangeRecodings );
-    g_free( panSelectionList );
-
-    return Py_BuildValue( "(iii)", nUnchanged, nAltered, nIgnored );
 }
 %%
 override gv_shapes_from_ogr_layer
@@ -2879,13 +2021,7 @@ _wrap_gv_shapes_from_ogr_layer(PyObject *self, PyObject *args)
         return Py_None;
     }
 
-    py_ret = PyGtk_New( G_OBJECT(data) );
-
-    /* PENDING - Do we need this anymore?
-    gtk_object_sink( GTK_OBJECT(data) );
-    */
-
-    return py_ret;
+    return pygobject_new( G_OBJECT(data) );
 }
 %%
 override gv_shapes_get_shape
@@ -2899,14 +2035,14 @@ _wrap_gv_shapes_get_shape(PyGObject *self, PyObject *args)
     GvShape   *gv_shape = NULL;
 
     if (!PyArg_ParseTuple(args, "O!i:gv_shapes_get_shape", &PyGvShapes_Type,
-			  &py_shapes, &shp_index) ) {
+              &py_shapes, &shp_index) ) {
         return NULL;
     }
 
     shapes = GV_SHAPES(py_shapes->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     if( shp_index >= 0 && shp_index < gv_shapes_num_shapes(shapes)) {
@@ -2933,14 +2069,14 @@ _wrap_gv_shapes_add_shape(PyGObject *self, PyObject *args)
     GvShape   *gv_shape = NULL;
 
     if (!PyArg_ParseTuple(args, "s:gv_shapes_add_shape", 
-			  &swig_shape_ptr)) {
-	return NULL;
+              &swig_shape_ptr)) {
+    return NULL;
     }
 
     shapes = GV_SHAPES(self->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     if( swig_shape_ptr )
@@ -2966,13 +2102,13 @@ _wrap_gv_shapes_add_shape_last(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "s:gv_shapes_add_shape_last",
                           &swig_shape_ptr) ) {
-	return NULL;
+    return NULL;
     }
 
     shapes = GV_SHAPES(self->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     if( swig_shape_ptr ) {
@@ -2997,13 +2133,13 @@ _wrap_gv_shapes_delete_shapes(PyGObject *self, PyObject *args)
 
     if (!PyArg_ParseTuple(args, "O!:gv_shapes_delete_shapes",
                           &PyList_Type, &pylist) ) {
-	return NULL;
+    return NULL;
     }
 
     shapes = GV_SHAPES(self->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     shape_count = PyList_Size(pylist);
@@ -3042,13 +2178,13 @@ _wrap_gv_shapes_replace_shapes(PyGObject *self, PyObject *args)
                           &PyList_Type, &pyindex_list,
                           &PyList_Type, &pyshape_list,
                           &copy_flag ) ) {
-	return NULL;
+    return NULL;
     }
 
     shapes = GV_SHAPES(self->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     if( PyList_Size(pyindex_list) != PyList_Size(pyshape_list) )
@@ -3100,8 +2236,8 @@ _wrap_gv_shapes_get_extents(PyGObject *self, PyObject *args)
 
     shapes = GV_SHAPES(self->obj);
     if (!GV_IS_SHAPES(shapes)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapes");
+    return NULL;
     }
 
     gv_shapes_get_extents(shapes, &rect);
@@ -3139,120 +2275,6 @@ _wrap_gv_shapes_get_change_info(PyObject *self, PyObject *args)
                          id_list );
 }
 %%
-override gv_points_get_point
-static PyObject *
-_wrap_gv_points_get_point(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_points;
-    GvPoints *points;
-    GvPoint *point;
-    int index;
-
-    if (!PyArg_ParseTuple(args, "O!i:gv_points_get_point", &PyGvPoints_Type,
-			  *py_points, &index)) {
-        return NULL;
-    }
-
-    points = GV_POINTS(py_points->obj);
-    if (!GV_IS_POINTS(points)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPoints");
-	return NULL;
-    }
-
-    if (index < 0 || index >= gv_points_num_points(points))
-    {
-        PyErr_SetString(PyExc_IndexError, "point index out of range");
-        return NULL;
-    }
-    point = gv_points_get_point(points, index);
-    return Py_BuildValue("(" CC ")", point->v.x, point->v.y);
-}
-%%
-override gv_points_new_point
-static PyObject *
-_wrap_gv_points_new_point(PyGObject *self, PyObject *args)
-{
-    GvVertex vertex;
-    GvPoints *points;
-
-    if (!PyArg_ParseTuple(args, "(" CC "):gv_points_new_point",
-			  &vertex.x, &vertex.y)) {
-	return NULL;
-    }
-
-    points = GV_POINTS(self->obj);
-    if (!GV_IS_POINTS(points)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPoints");
-	return NULL;
-    }
-
-    return PyInt_FromLong(gv_points_new_point(points, &vertex));
-}
-%%
-override gv_polylines_get_line
-static PyObject *
-_wrap_gv_polylines_get_line(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_pline; 
-    GvPolylines *pline;
-    int index;
-
-    if (!PyArg_ParseTuple(args, "O!i:gv_polylines_get_line", &PyGvPolylines_Type,
-			  &py_pline, &index)) {
-	return NULL;
-    }
-
-    pline = GV_POLYLINES(py_pline->obj);
-    if (!GV_IS_POLYLINES(pline)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPolylines");
-	return NULL;
-    }
-
-    if (index < 0 || index >= gv_polylines_num_lines(pline))
-    {
-	PyErr_SetString(PyExc_IndexError, "line index out of range");
-	return NULL;
-    }
-    return build_py_line(gv_polylines_get_line(pline, index));
-}
-%%
-override gv_areas_get_area
-static PyObject *
-_wrap_gv_areas_get_area(PyGObject *self, PyObject *args)
-{
-    PyGObject *py_areas;
-    PyObject *pyarea;
-    GvAreas *areas;
-    GvArea *area;
-    int index, ring;
-
-    if (!PyArg_ParseTuple(args, "O!i:gv_areas_get_area", &PyGvAreas_Type,
-			  &py_areas, &index)) {
-	return NULL;
-    }
-
-    areas = GV_AREAS(py_areas->obj);
-    if (!GV_IS_AREAS(areas)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvAreas");
-	return NULL;
-    }
-
-    if (index < 0 || index >= gv_areas_num_areas(areas))
-    {
-	PyErr_SetString(PyExc_IndexError, "area index out of range");
-	return NULL;
-    }
-    area = gv_areas_get_area(areas, index);
-
-    pyarea = PyList_New(gv_areas_num_rings(area));
-    for (ring = 0; ring < gv_areas_num_rings(area); ring++)
-    {
-        PyObject *pyline = build_py_line(gv_areas_get_ring(area, ring));
-        PyList_SetItem(pyarea, ring, pyline);
-    }
-    return pyarea;
-}
-%%
 override gv_shape_layer_set_color
 static PyObject *
 _wrap_gv_shape_layer_set_color(PyGObject *self, PyObject *args)
@@ -3261,14 +2283,14 @@ _wrap_gv_shape_layer_set_color(PyGObject *self, PyObject *args)
     GvColor color;
 
     if (!PyArg_ParseTuple(args, "(ffff):gv_shape_layer_set_color",
-			  &color[0], &color[1], &color[2], &color[3])) {
-	return NULL;
+              &color[0], &color[1], &color[2], &color[3])) {
+    return NULL;
     }
 
     layer = GV_SHAPE_LAYER(self->obj);
     if (!GV_IS_SHAPE_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
+    return NULL;
     }
 
     gv_shape_layer_set_color(layer, color);
@@ -3288,8 +2310,8 @@ _wrap_gv_shape_layer_get_selected(PyGObject *self, PyObject *args)
 
     layer = GV_SHAPE_LAYER(self->obj);
     if (!GV_IS_SHAPE_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
+    return NULL;
     }
 
     array = g_array_new(FALSE,TRUE,sizeof(gint));
@@ -3325,14 +2347,14 @@ _wrap_gv_shape_layer_pick_shape( PyGObject *self, PyObject *args )
 
     layer = GV_SHAPE_LAYER(self->obj);
     if (!GV_IS_SHAPE_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvShapeLayer");
+    return NULL;
     }
 
     view = GV_VIEW_AREA(py_view->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
 
     if (gv_shape_layer_pick_shape(layer, view, x, y, &shape_id )) {
@@ -3345,12 +2367,12 @@ _wrap_gv_shape_layer_pick_shape( PyGObject *self, PyObject *args )
     }
 }
 %%
-override gv_raster_new
+override gv_raster_new kwargs
 static int
-_wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *keywds)
+_wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     PyObject * py_ret;
-    char *filename = NULL, *dataset_string = NULL;
+    char *filename = NULL, *dataset_string = NULL, *name;
     GDALDatasetH  dataset;
     static int gdal_initialized = 0;
     GvSampleMethod sm = GvSMAverage;
@@ -3359,10 +2381,9 @@ _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *keywds)
                              "dataset", NULL};
     GvRaster *raster;
 
-    if (!PyArg_ParseTupleAndKeywords(args, keywds, "|ziiz", kwlist,
-                                     &filename, &sm, &rband,
-                                     &dataset_string))
-      return -1;
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ziiz:_gv.Raster.__init__", kwlist,
+                                     &filename, &sm, &rband, &dataset_string))
+        return -1;
 
     if( !gdal_initialized )
     {
@@ -3393,49 +2414,52 @@ _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *keywds)
 
         GDALDereferenceDataset( dataset );
     }
+    else if( self->obj != NULL )
+    {
+        pygobject_constructv(self, 0, NULL);
+        return 0;
+    }
     else
     {
         PyErr_SetString(PyExc_IOError,
-                        "gv_raster_new: either a filename, or dataset handle"
+                        "_gv.Raster.__init__: either a filename, or dataset handle"
                         " is required.  Neither provided." );
         return -1;
     }
 
-    raster = GV_RASTER(gv_raster_new(dataset,rband,sm));
-    if( filename != NULL )
-        gv_data_set_name(GV_DATA(raster), filename);
+    pygobject_constructv(self, 0, NULL);
+    if (!self->obj) {
+        PyErr_SetString(PyExc_RuntimeError, "could not create _gv.Raster object");
+        return -1;
+    }
 
-    self->obj = (GObject *)raster;
-    pygobject_register_wrapper((PyObject *)self);
+    gv_raster_read(GV_RASTER(self->obj), dataset, rband, sm);
+    /*pygobject_construct(self, "filename", filename,
+                        "sample", sm,
+                        "real", rband,
+                        "dataset", dataset, NULL);*/
 
     return 0;
-    /* TEMP
-    py_ret = PyGtk_New( G_OBJECT(raster) );
-    gtk_object_sink( GTK_OBJECT(raster) );
-    return py_ret;
-    */
 }
 %%
-override gv_raster_autoscale
+new-constructor GV_TYPE_RASTER
+%%
+override gv_raster_autoscale kwargs
 static PyObject *
-_wrap_gv_raster_autoscale(PyGObject *self, PyObject *args)
-
+_wrap_gv_raster_autoscale(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
+    static char *kwlist[] = {"alg", "alg_param", "assign", NULL};
     int alg = GvASAAutomatic, assign = 0, success;
     double alg_param = -1.0;
     GvRaster *raster = NULL;
     double   out_min, out_max;
 
-    if (!PyArg_ParseTuple(args, "idi:gv_raster_autoscale", 
-                          &alg, &alg_param, &assign)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|idi:_gv.Raster.autoscale", 
+                                    kwlist, &alg, &alg_param, &assign)) {
         return NULL;
     }
 
-    raster = GV_RASTER(self->obj);
-    if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
-    }
+    raster = GV_RASTER(pygobject_get(self));
 
     if( assign == 0 )
     {
@@ -3467,28 +2491,14 @@ _wrap_gv_raster_autoscale(PyGObject *self, PyObject *args)
     }
 }
 %%
-override gv_raster_get_gdal_band
+define GvRaster.get_band noargs
 static PyObject *
-_wrap_gv_raster_get_gdal_band(PyGObject *self, PyObject *args)
+_wrap_gv_raster_get_band(PyGObject *self)
 {
-    PyGObject *py_raster;
-    GvRaster *raster;
     char swig_ptr[32];
     GDALRasterBandH band;
 
-
-    if (!PyArg_ParseTuple(args, "O!:gv_raster_get_gdal_band", &PyGvRaster_Type,
-			  &py_raster)) {
-	return NULL;
-    }
-
-    raster = GV_RASTER(py_raster->obj);
-    if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
-    }
-
-    band = raster->gdal_band;
+    band = GV_RASTER(pygobject_get(self))->gdal_band;
 
     if( band == NULL )
     {
@@ -3497,7 +2507,7 @@ _wrap_gv_raster_get_gdal_band(PyGObject *self, PyObject *args)
     }
 
     SWIG_SimpleMakePtr( swig_ptr, band, "_GDALRasterBandH" );
-    return Py_BuildValue("s",swig_ptr);
+    return Py_BuildValue("s", swig_ptr);
 }
 %%
 override gv_raster_force_load
@@ -3509,14 +2519,14 @@ _wrap_gv_raster_force_load(PyGObject *self, PyObject *args)
     int       i;
 
     if (!PyArg_ParseTuple(args, "O!:gv_raster_force_load", &PyGvRaster_Type,
-			  &py_raster)) {
-	return NULL;
+              &py_raster)) {
+    return NULL;
     }
 
     raster = GV_RASTER(py_raster->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     for( i = 0; i < raster->max_tiles; i++ )
@@ -3534,14 +2544,14 @@ _wrap_gv_raster_get_sample(PyGObject *self, PyObject *args)
     double x, y, real, imaginary;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_get_sample",
-			  &x, &y )) {
-	return NULL;
+              &x, &y )) {
+    return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     if( !gv_raster_get_sample(raster, x, y, &real, &imaginary ) )
@@ -3560,13 +2570,13 @@ _wrap_gv_raster_georef_to_pixel(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_georef_to_pixel", &x, &y )) {
-	return NULL;
+    return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     if( gv_raster_georef_to_pixel(raster, &x, &y, NULL) )
@@ -3589,14 +2599,14 @@ _wrap_gv_raster_pixel_to_georef(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_pixel_to_georef",
-			  &x, &y )) {
+              &x, &y )) {
         return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     if( gv_raster_pixel_to_georef(raster, &x, &y, NULL ) )
@@ -3619,14 +2629,14 @@ _wrap_gv_raster_georef_to_pixelCL(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_georef_to_pixelCL",
-			  &x, &y )) {
-	return NULL;
+              &x, &y )) {
+    return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     if( gv_raster_georef_to_pixelCL(raster, &x, &y, NULL) )
@@ -3649,14 +2659,14 @@ _wrap_gv_raster_pixel_to_georefCL(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_pixel_to_georefCL",
-			  &x, &y )) {
+              &x, &y )) {
         return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     if( gv_raster_pixel_to_georefCL(raster, &x, &y, NULL ) )
@@ -3669,87 +2679,6 @@ _wrap_gv_raster_pixel_to_georefCL(PyGObject *self, PyObject *args)
                         "georef_to_pixelCL transformation failed." );
         return NULL;
     }
-}
-%%
-override gv_data_changing
-static PyObject *
-_wrap_gv_data_changing(PyGObject *self, PyObject *args)
-{
-    GvRaster *raster;
-    int      x_off=0, y_off=0, width=0, height=0;
-    GvRasterChangeInfo change_info;
-
-    if (!PyArg_ParseTuple(args, "iiii:gv_data_changing",
-			  &x_off, &y_off, &width, &height )) {
-	return NULL;
-    }
-
-    if (GV_IS_RASTER(self->obj)) {
-        raster = GV_RASTER(self->obj);
-
-	if( height > 0 ) {
-	    change_info.change_type = GV_CHANGE_REPLACE;
-	    change_info.x_off = x_off;
-	    change_info.y_off = y_off;
-	    change_info.width = width;
-	    change_info.height = height;
-
-	    gv_data_changing( GV_DATA(raster), &change_info );
-	}
-	else {
-	    gv_data_changing( GV_DATA(raster), NULL );
-	}
-    }
-    else {
-	PyErr_SetString(PyExc_TypeError, "argument must be a handled GvData type");
-	return NULL;
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-%%
-override gv_data_changed
-static PyObject *
-_wrap_gv_data_changed(PyGObject *self, PyObject *args)
-{
-    GvRaster *raster;
-    GvData *data;
-    int      x_off=0, y_off=0, width=0, height=0;
-    GvRasterChangeInfo change_info;
-
-    if (!PyArg_ParseTuple(args, "iiii:gv_data_changed",
-			  &x_off, &y_off, &width, &height )) {
-	return NULL;
-    }
-
-    if (GV_IS_RASTER(self->obj)) {
-        raster = GV_RASTER(self->obj);
-
-	if( height > 0 ) {
-	    change_info.change_type = GV_CHANGE_REPLACE;
-	    change_info.x_off = x_off;
-	    change_info.y_off = y_off;
-	    change_info.width = width;
-	    change_info.height = height;
-
-	    gv_data_changed( GV_DATA(raster), &change_info );
-	}
-	else {
-	    gv_data_changed( GV_DATA(raster), NULL );
-	}
-    }
-    else {
-	data = GV_DATA(self->obj);
-	if (!GV_IS_DATA(data)) {
-	    PyErr_SetString(PyExc_TypeError, "data argument must be a GvData object");
-	    return NULL;
-	}
-        gv_data_changed( GV_DATA(data), NULL );
-    }
-
-    Py_INCREF(Py_None);
-    return Py_None;
 }
 %%
 override gv_raster_get_change_info
@@ -3787,8 +2716,8 @@ _wrap_gv_raster_get_gcps(PyGObject *self, PyObject *args) {
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     pasGCPList = gv_raster_get_gcps( raster );
@@ -3828,8 +2757,8 @@ _wrap_gv_raster_set_gcps(PyGObject *self, PyObject *args) {
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     nGCPCount = PyList_Size(psList);
@@ -3877,8 +2806,8 @@ _wrap_gv_raster_get_gcpsCL(PyGObject *self, PyObject *args) {
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     pasGCPList = gv_raster_get_gcpsCL( raster );
@@ -3896,7 +2825,7 @@ _wrap_gv_raster_get_gcpsCL(PyGObject *self, PyObject *args) {
                                 pasGCPList[iGCP].dfGCPX,
                                 pasGCPList[iGCP].dfGCPY,
                                 pasGCPList[iGCP].dfGCPZ );
-	PyList_SetItem(psList, iGCP, py_item );
+    PyList_SetItem(psList, iGCP, py_item );
     }
 
     return psList;
@@ -3912,15 +2841,15 @@ _wrap_gv_raster_set_gcpsCL(PyGObject *self, PyObject *args) {
     int iGCP, nGCPCount, success, poly_order;
 
     if (!PyArg_ParseTuple(args,"O!i:gv_raster_set_gcpsCL",
-			  &PyList_Type, &psList,
-			  &poly_order)) {
+              &PyList_Type, &psList,
+              &poly_order)) {
         return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     nGCPCount = PyList_Size(psList);
@@ -3968,16 +2897,25 @@ _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
     GvRasterLayer *layer;
     GvProperties properties = NULL;
     int      mode = GV_RLM_AUTO;
+    double nodata_real=-1e8, nodata_imaginary=0.0;
+    int nodata_active = FALSE;
+    const char *interp_pref;
 
-    if (!PyArg_ParseTuple(args, "O!|iO!:gv_raster_layer_new", &PyGvRaster_Type,
-			  &py_raster, &mode, &PyList_Type, &py_properties )) {
-	return -1;
+    if (!PyArg_ParseTuple(args, "O!|iO!:_gv.RasterLayer.__init__", &PyGvRaster_Type,
+              &py_raster, &mode, &PyList_Type, &py_properties )) {
+    return -1;
+    }
+
+    pygobject_constructv(self, 0, NULL);
+    if (!self->obj) {
+        PyErr_SetString(PyExc_RuntimeError, "could not create _gv.RasterLayer object");
+        return -1;
     }
 
     raster = GV_RASTER(py_raster->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return -1;
+        PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+        return -1;
     }
 
     if( py_properties != NULL )
@@ -3999,15 +2937,13 @@ _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
         }
     }
 
-    layer = GV_RASTER_LAYER(gv_raster_layer_new( mode, raster, properties ));
-
+    gv_raster_layer_read(GV_RASTER_LAYER(self->obj), mode, raster, properties);
     gv_properties_destroy( &properties );
-
-    self->obj = (GObject *)layer;
-    pygobject_register_wrapper((PyObject *)self);
 
     return 0;
 }
+%%
+new-constructor GV_TYPE_RASTER_LAYER
 %%
 override gv_raster_layer_autoscale_view
 static PyObject *
@@ -4026,8 +2962,8 @@ _wrap_gv_raster_layer_autoscale_view(PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     success = gv_raster_layer_autoscale_view(rlayer, isrc, alg, alg_param,
@@ -4051,14 +2987,14 @@ _wrap_gv_raster_layer_get_mesh_lod(PyGObject *self, PyObject *args)
     GvRasterLayer *rlayer = NULL;
 
     if (!PyArg_ParseTuple(args, "O!:gv_raster_get_mesh_lod",
-			  &PyGvRasterLayer_Type, &py_rlayer)) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer)) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     return Py_BuildValue("i", rlayer->mesh->detail );
@@ -4082,8 +3018,8 @@ _wrap_gv_raster_layer_histogram_view(PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     histogram = g_new(int, hist_size);
@@ -4119,14 +3055,14 @@ _wrap_gv_raster_layer_view_to_pixel(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_layer_view_to_pixel",
-			  &x, &y )) {
-	return NULL;
+              &x, &y )) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if( gv_raster_layer_view_to_pixel(rlayer, &x, &y, NULL ) )
@@ -4149,14 +3085,14 @@ _wrap_gv_raster_layer_pixel_to_view(PyGObject *self, PyObject *args)
     double x, y;
 
     if (!PyArg_ParseTuple(args, "dd:gv_raster_layer_pixel_to_view",
-			  &x, &y )) {
-	return NULL;
+              &x, &y )) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if( gv_raster_layer_pixel_to_view(rlayer, &x, &y, NULL ) )
@@ -4187,16 +3123,16 @@ _wrap_gv_raster_layer_set_source( PyGObject *self, PyObject *args)
     if (!PyArg_ParseTuple( args, "iOffi|z#O:gv_raster_layer_set_source",
                            &isource, &py_raster, &min, &max,
                            &const_value, &lut, &lut_len, &nodata )) {
-	return NULL;
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
-    if( py_raster == NULL || py_raster == Py_None )
+    if( py_raster->obj == NULL || (PyObject *)py_raster == Py_None )
         raster = NULL;
     else if (PyObject_TypeCheck(py_raster, &PyGvRaster_Type))
         raster = GV_RASTER(py_raster->obj);
@@ -4228,10 +3164,10 @@ _wrap_gv_raster_layer_set_source( PyGObject *self, PyObject *args)
     }
 
     ret = gv_raster_layer_set_source(rlayer,
-				     isource, raster,
-				     min, max, const_value, lut,
-				     nodata_active,
-				     nodata_real, nodata_imaginary );
+                     isource, raster,
+                     min, max, const_value, lut,
+                     nodata_active,
+                     nodata_real, nodata_imaginary );
 
     return Py_BuildValue("i", ret);
 }
@@ -4245,19 +3181,19 @@ _wrap_gv_raster_layer_texture_mode_set(PyGObject *self, PyObject *args)
     GvColor color;
 
     if (!PyArg_ParseTuple(args, "i(ffff):gv_raster_layer_texture_mode_set",
-			  &texture_mode,
-			  &color[0], &color[1], &color[2], &color[3])) {
-	return NULL;
+              &texture_mode,
+              &color[0], &color[1], &color[2], &color[3])) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     return PyInt_FromLong(gv_raster_layer_texture_mode_set(rlayer,
-							   texture_mode, color));
+                               texture_mode, color));
 }
 %%
 override gv_raster_layer_texture_mode_get
@@ -4271,19 +3207,19 @@ _wrap_gv_raster_layer_texture_mode_get( PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if (gv_raster_layer_texture_mode_get(rlayer, &texture_mode, &color ))
     {
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_INCREF(Py_None);
+    return Py_None;
     } else {
-	py_color = Py_BuildValue( "(ffff)", color[0], color[1], color[2], color[3] );
-	py_retval = Py_BuildValue( "(iO)", texture_mode, py_color );
-	Py_DECREF( py_color );
-	return py_retval;
+    py_color = Py_BuildValue( "(ffff)", color[0], color[1], color[2], color[3] );
+    py_retval = Py_BuildValue( "(iO)", texture_mode, py_color );
+    Py_DECREF( py_color );
+    return py_retval;
     }
 }
 %%
@@ -4297,16 +3233,16 @@ _wrap_gv_raster_layer_alpha_get(PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if (gv_raster_layer_alpha_get(rlayer, &alpha_mode, &alpha_val ))
     {
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_INCREF(Py_None);
+    return Py_None;
     } else {
-	return Py_BuildValue("(if)", alpha_mode, alpha_val );
+    return Py_BuildValue("(if)", alpha_mode, alpha_val );
     }
 }
 %%
@@ -4321,16 +3257,16 @@ _wrap_gv_raster_layer_blend_mode_get( PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if (gv_raster_layer_blend_mode_get(rlayer, &blend_mode, &sfactor, &dfactor ))
     {
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_INCREF(Py_None);
+    return Py_None;
     } else {
-	return Py_BuildValue("(iii)", blend_mode, sfactor, dfactor );
+    return Py_BuildValue("(iii)", blend_mode, sfactor, dfactor );
     }
 }
 %%
@@ -4351,8 +3287,8 @@ _wrap_gv_raster_layer_lut_get( PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     lut = gv_raster_layer_lut_get(rlayer, &width, &height, rgba_complex );
@@ -4361,7 +3297,7 @@ _wrap_gv_raster_layer_lut_get( PyGObject *self, PyObject *args)
         Py_INCREF(Py_None);
         return Py_None;
     } else {
-	py_lut = PyString_FromStringAndSize( lut, width * height * 4 );
+    py_lut = PyString_FromStringAndSize( lut, width * height * 4 );
         if ( py_lut == NULL )
         {
             Py_INCREF(Py_None);
@@ -4390,8 +3326,8 @@ _wrap_gv_raster_layer_nodata_get( PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     ret = gv_raster_layer_nodata_get( rlayer, isource,
@@ -4419,14 +3355,14 @@ _wrap_gv_raster_layer_get_nodata(PyGObject *self, PyObject *args)
     int isource=0;
 
     if (!PyArg_ParseTuple(args, "O!i:gv_raster_layer_get_nodata",
-			  &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if( rlayer != NULL && isource >= 0 && isource < rlayer->source_count )
@@ -4458,14 +3394,14 @@ _wrap_gv_raster_layer_get_source_lut(PyGObject *self, PyObject *args)
     int isource=0;
 
     if (!PyArg_ParseTuple(args, "O!i:gv_raster_layer_get_source_lut",
-			  &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer, &isource)) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     lut = gv_raster_layer_source_get_lut(rlayer, isource);
@@ -4493,16 +3429,16 @@ _wrap_gv_raster_layer_zoom_get( PyGObject *self, PyObject *args)
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if( gv_raster_layer_zoom_get(rlayer, &mag, &min ) )
     {
-	Py_INCREF(Py_None);
-	return Py_None;
+    Py_INCREF(Py_None);
+    return Py_None;
     } else {
-	return Py_BuildValue( "(ii)", min, mag );
+    return Py_BuildValue( "(ii)", min, mag );
     }
 }
 %%
@@ -4516,14 +3452,14 @@ _wrap_gv_raster_layer_get_height(PyGObject *self, PyObject *args)
     int success;
 
     if (!PyArg_ParseTuple(args, "O!dd:gv_raster_layer_get_height",
-			  &PyGvRasterLayer_Type, &py_rlayer, &x, &y )) {
-	return NULL;
+              &PyGvRasterLayer_Type, &py_rlayer, &x, &y )) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(py_rlayer->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     result = gv_mesh_get_height(rlayer->mesh, x, y, &success );
@@ -4544,8 +3480,8 @@ _wrap_gv_manager_get_preferences(PyGObject *self, PyObject *args)
 
     manager = GV_MANAGER(self->obj);
     if (!GV_IS_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvManager");
+    return NULL;
     }
 
     properties = gv_manager_get_preferences(manager);
@@ -4658,7 +3594,7 @@ _wrap_gv_manager_get_dataset_raster(PyGObject *self, PyObject *args)
     }
     else
     {
-        return PyGtk_New((GObject*)raster);
+        return pygobject_new((GObject*)raster);
     }
 }
 %%
@@ -4679,13 +3615,13 @@ _wrap_gv_manager_queue_task(PyGObject *self, PyObject *args)
                           &task_name, &priority,
                           &(psProgressInfo->psPyCallback),
                           &(psProgressInfo->psPyCallbackData) ) ) {
-	return NULL;
+    return NULL;
     }
 
     manager = GV_MANAGER(self->obj);
     if (!GV_IS_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvManager");
+    return NULL;
     }
 
     if( manager == NULL )
@@ -4700,9 +3636,9 @@ _wrap_gv_manager_queue_task(PyGObject *self, PyObject *args)
     psProgressInfo->psThreadState = PyThreadState_Get();
 
     gv_manager_queue_task(manager,
-			  task_name, priority,
-			  PyIdleTaskProxy,
-			  psProgressInfo );
+              task_name, priority,
+              PyIdleTaskProxy,
+              psProgressInfo );
 
     Py_INCREF(Py_None);
 
@@ -4812,15 +3748,15 @@ _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
     GvShape  **shape_list;
 
     if (!PyArg_ParseTuple(args, "O!di:gv_raster_rasterize_shapes",
-			  &PyList_Type, &py_shapelist,
+              &PyList_Type, &py_shapelist,
                           &burn_value, &fill_short)) {
-	return NULL;
+    return NULL;
     }
 
     raster = GV_RASTER(self->obj);
     if (!GV_IS_RASTER(raster)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRaster");
+    return NULL;
     }
 
     shape_count = PyList_Size(py_shapelist);
@@ -4856,25 +3792,6 @@ _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
     return Py_BuildValue( "i", ret_value );
 }
 %%
-override gtk_color_well_get_d
-
-static PyObject * _wrap_gtk_color_well_get_d( PyGObject *self, PyObject *args)
-{
-    PyObject *py_color_well;
-    GtkColorWell *color_well;
-    gdouble r, g, b, a;
-
-    color_well = GTK_COLOR_WELL(self->obj);
-    if (!GTK_IS_COLOR_WELL(color_well)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GtkColorWell");
-	return NULL;
-    }
-
-    gtk_color_well_get_d(color_well, &r, &g, &b, &a );
-
-    return Py_BuildValue( "(dddd)", r, g, b, a );
-}
-%%
 override gv_view_area_format_point_query
 static PyObject *_wrap_gv_view_area_format_point_query( PyGObject *self, PyObject *args )
 {
@@ -4889,8 +3806,8 @@ static PyObject *_wrap_gv_view_area_format_point_query( PyGObject *self, PyObjec
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea object");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea object");
+    return NULL;
     }
 
     manager = gv_get_manager();
@@ -4942,8 +3859,8 @@ _wrap_gv_symbol_manager_save_vector_symbol(PyGObject *self, PyObject *args)
 
     manager = GV_SYMBOL_MANAGER(self->obj);
     if (!GV_IS_SYMBOL_MANAGER(manager)) {
-	PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "manager argument must be a GvSymbolManager");
+    return NULL;
     }
 
     if( symbol_name && new_name )
@@ -4981,19 +3898,19 @@ _wrap_gv_view_area_create_thumbnail(PyGObject *self, PyObject *args)
     int width, height;
 
     if (!PyArg_ParseTuple(args, "O!ii:gv_view_area_create_thumbnail",
-			  &PyGvLayer_Type, &py_layer, &width, &height)) {
-	return NULL;
+              &PyGvLayer_Type, &py_layer, &width, &height)) {
+    return NULL;
     }
 
     view = GV_VIEW_AREA(self->obj);
     if (!GV_IS_VIEW_AREA(view)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
+    return NULL;
     }
     layer = GV_LAYER(py_layer->obj);
     if (!GV_IS_LAYER(layer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvLayer");
+    return NULL;
     }
 
     pixmap = gv_view_area_create_thumbnail(view, layer, width, height);
@@ -5007,79 +3924,6 @@ _wrap_gv_view_area_create_thumbnail(PyGObject *self, PyObject *args)
 #endif
 }
 %%
-override gv_polylines_new_line
-static PyObject *
-_wrap_gv_polylines_new_line(PyGObject *self, PyObject *args)
-{
-    PyObject *pylist;
-    GvPolylines *pline;
-    GArray *line;
-    int index;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_polylines_new_line",
-			  &PyList_Type, &pylist)) {
-	return NULL;
-    }
-
-    pline = GV_POLYLINES(self->obj);
-    if (!GV_IS_POLYLINES(pline)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvPolylines");
-	return NULL;
-    }
-
-    line = build_gv_line(pylist, 2);
-    if (!line) return NULL;
-    index = gv_polylines_new_line_with_data(pline, 
-					    line->len, (GvVertex*)line->data);
-    g_array_free(line, TRUE);
-    return PyInt_FromLong(index);
-}
-%%
-override gv_areas_new_area
-static PyObject *
-_wrap_gv_areas_new_area(PyGObject *self, PyObject *args)
-{
-    PyObject *pyarea;
-    GvAreas *areas;
-    GvArea *area;
-    int index, ring, num_rings;
-
-    if (!PyArg_ParseTuple(args, "O!:gv_areas_new_area",
-			  &PyList_Type, &pyarea)) {
-	return NULL;
-    }
-
-    areas = GV_AREAS(self->obj);
-    if (!GV_IS_AREAS(areas)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvAreas");
-	return NULL;
-    }
-
-    num_rings = PyList_Size(pyarea);
-    if (num_rings < 1)
-    {
-	PyErr_SetString(PyExc_ValueError, "empty ring list");
-	return NULL;
-    }
-
-    area = gv_area_new(FALSE);
-    for (ring = 0; ring < num_rings; ring++)
-    {
-	GArray *line = build_gv_line(PyList_GET_ITEM(pyarea, ring), 3);
-	if (!line) break;
-	g_ptr_array_add(area->rings, line);
-    }
-    if (PyErr_Occurred())
-    {
-	gv_area_delete(area);
-	return NULL;
-    }
-
-    index = gv_areas_new_area_with_data(areas, area);
-    gv_area_delete(area);
-    return PyInt_FromLong(index);
-}
-%%
 override gv_raster_layer_lut_put
 static PyObject *
 _wrap_gv_raster_layer_lut_put( PyGObject *self, PyObject *args)
@@ -5089,14 +3933,14 @@ _wrap_gv_raster_layer_lut_put( PyGObject *self, PyObject *args)
     int  lut_len, height;
 
     if (!PyArg_ParseTuple( args, "z#:gv_raster_layer_lut_put",
-			   &lut, &lut_len )) {
-	return NULL;
+               &lut, &lut_len )) {
+    return NULL;
     }
 
     rlayer = GV_RASTER_LAYER(self->obj);
     if (!GV_IS_RASTER_LAYER(rlayer)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvRasterLayer");
+    return NULL;
     }
 
     if( lut != NULL && lut_len != 1024 && lut_len != 1024 * 256 )
@@ -5159,213 +4003,138 @@ static PyObject *_wrap_gv_shapes_to_dbf(PyObject *self, PyObject *args) {
 
     data = GV_DATA(py_data->obj);
     if (!GV_IS_DATA(data)) {
-	PyErr_SetString(PyExc_TypeError, "argument must be a GvData object");
-	return NULL;
+    PyErr_SetString(PyExc_TypeError, "argument must be a GvData object");
+    return NULL;
     }
 
     return PyInt_FromLong(gv_shapes_to_dbf(filename, data));
 }
 %%
-override gv_shapes_layer_new
+override gv_shapes_new kwargs
 static int
-_wrap_gv_shapes_layer_new(PyGObject *self, PyObject *args)
+_wrap_gv_shapes_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyGObject *shapes = NULL;
-    GvShapes *shapes_obj = NULL;
+    static char* kwlist[] = { "shapefilename", NULL };
+    char *filename;
 
-    if (!PyArg_ParseTuple(args, "|O:shapes_layer_new", &shapes)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     "|z:_gv.Shapes.__init__",
+                                     kwlist, &filename))
+        return -1;
+
+    pygobject_constructv(self, 0, NULL);
+    if (!self->obj) {
+        PyErr_SetString(
+            PyExc_RuntimeError, "could not create _gv.Shapes object");
         return -1;
     }
+    if (filename != NULL)
+        gv_shapes_read_from_file(filename, GV_SHAPES (self->obj));
+
+    return 0;
+}
+%%
+new-constructor GV_TYPE_SHAPES
+%%
+override-slot GvShapes.tp_as_sequence
+static int
+_wrap_gv_shapes_sq_length(PyGObject *self)
+{
+    return gv_shapes_num_shapes(GV_SHAPES(pygobject_get(self)));
+}
+
+//~ static int
+//~ _wrap_gv_shapes_sq_item(PyGObject *self)
+//~ {
+//~     return gv_shapes_get_shape(GV_SHAPES(pygobject_get(self)));
+//~ }
+
+//~ static int
+//~ _wrap_gv_shapes_sq_ass_item(PyGObject *self)
+//~ {
+//~     return gv_shapes_num_shapes(GV_SHAPES(pygobject_get(self)));
+//~ }
+
+static PySequenceMethods _wrap_gv_shapes_tp_as_sequence = {
+    (inquiry)_wrap_gv_shapes_sq_length,
+    0,
+    0,
+    0,
+//~     (intargfunc)_wrap_gv_shapes_sq_item,
+    0,
+    0,
+    0,
+//~         binaryfunc sq_concat;
+//~         intargfunc sq_repeat;
+//~         intargfunc sq_item;
+//~         intintargfunc sq_slice;
+//~         intobjargproc sq_ass_item;
+//~         intintobjargproc sq_ass_slice;
+//~         objobjproc sq_contains;
+//~         /* Added in release 2.0 */
+//~         binaryfunc sq_inplace_concat;
+//~         intargfunc sq_inplace_repeat;
+};
+%%
+override gv_shapes_layer_new kwargs
+static int
+_wrap_gv_shapes_layer_new(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "shapes", NULL };
+    PyGObject *py_shapes;
+//~     GvShapes *shapes_obj = NULL;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|O!:_gv.ShapesLayer.__init__",
+                                     kwlist, &PyGvShapes_Type, &py_shapes))
+        return -1;
 
     /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        shapes_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvShapes_Type)) {
-        shapes_obj = (GvShapes*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
+//~     if (shapes == NULL || (PyObject*)shapes == Py_None) {
+//~         shapes_obj = NULL;
+//~     }
+//~     else if (pygobject_check(shapes, &PyGvShapes_Type)) {
+//~         shapes_obj = GV_SHAPES (pygobject_get(shapes));
+//~     }
+//~     else {
+//~         PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
+//~         return -1;
+//~     }
 
     /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_shapes_layer_new(shapes_obj);
+    pygobject_constructv(self, 0, NULL);
+
     if (!self->obj) {
         PyErr_SetString(PyExc_RuntimeError, "could not create GvShapesLayer object");
         return -1;
     }
-
-    pygobject_register_wrapper((PyObject *)self);
+    if (py_shapes->obj != NULL) {
+        gv_shapes_layer_set_data(GV_SHAPES_LAYER(self->obj), GV_SHAPES(py_shapes->obj));
+//~         Py_XDECREF(shapes);
+    }
     return 0;
 }
 %%
-override gv_pquery_layer_new
+new-constructor GV_TYPE_SHAPES_LAYER
+%%
+override gv_track_tool_new kwargs
 static int
-_wrap_gv_pquery_layer_new(PyGObject *self, PyObject *args)
+_wrap_gv_track_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyGObject *shapes = NULL;
-    GvShapes *shapes_obj = NULL;
+    static char *kwlist[] = { "label", NULL };
+    PyGObject *label;
 
-    if (!PyArg_ParseTuple(args, "|O:pquery_layer_new", &shapes)) {
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|O!:GvTrackTool.__init__", kwlist, &PyGtkObject_Type, &label))
         return -1;
-    }
 
-    /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        shapes_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvShapes_Type)) {
-        shapes_obj = (GvShapes*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
+    pygobject_constructv(self, 0, NULL);
 
-    /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_pquery_layer_new(shapes_obj);
     if (!self->obj) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create GvPqueryLayer object");
+        PyErr_SetString(PyExc_RuntimeError, "could not create GvTrackTool object");
         return -1;
     }
 
-    pygobject_register_wrapper((PyObject *)self);
+    GV_TRACK_TOOL(self->obj)->label = GTK_OBJECT(label->obj);
     return 0;
 }
 %%
-override gv_point_layer_new
-static int
-_wrap_gv_point_layer_new(PyGObject *self, PyObject *args)
-{
-    PyGObject *shapes = NULL;
-    GvPoints *points_obj = NULL;
-
-    if (!PyArg_ParseTuple(args, "|O:point_layer_new", &shapes)) {
-        return -1;
-    }
-
-    /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        points_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvPoints_Type)) {
-        points_obj = (GvPoints*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
-
-    /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_point_layer_new(points_obj);
-    if (!self->obj) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create GvPointLayer object");
-        return -1;
-    }
-
-    pygobject_register_wrapper((PyObject *)self);
-    return 0;
-}
-%%
-override gv_areas_layer_new
-static int
-_wrap_gv_areas_layer_new(PyGObject *self, PyObject *args)
-{
-    PyGObject *shapes = NULL;
-    GvAreas *areas_obj = NULL;
-
-    if (!PyArg_ParseTuple(args, "|O:areas_layer_new", &shapes)) {
-        return -1;
-    }
-
-    /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        areas_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvAreas_Type)) {
-        areas_obj = (GvAreas*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
-
-    /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_areas_layer_new(areas_obj);
-    if (!self->obj) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create GvAreasLayer object");
-        return -1;
-    }
-
-    pygobject_register_wrapper((PyObject *)self);
-    return 0;
-}
-%%
-override gv_line_layer_new
-static int
-_wrap_gv_line_layer_new(PyGObject *self, PyObject *args)
-{
-    PyGObject *shapes = NULL;
-    GvPolylines *lines_obj = NULL;
-
-    if (!PyArg_ParseTuple(args, "|O:line_layer_new", &shapes)) {
-        return -1;
-    }
-
-    /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        lines_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvPolylines_Type)) {
-        lines_obj = (GvPolylines*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
-
-    /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_line_layer_new(lines_obj);
-    if (!self->obj) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create GvLineLayer object");
-        return -1;
-    }
-
-    pygobject_register_wrapper((PyObject *)self);
-    return 0;
-}
-%%
-override gv_app_cur_layer_new
-static int
-_wrap_gv_app_cur_layer_new(PyGObject *self, PyObject *args)
-{
-    PyGObject *shapes = NULL;
-    GvShapes *shapes_obj = NULL;
-
-    if (!PyArg_ParseTuple(args, "|O:app_cur_layer_new", &shapes)) {
-        return -1;
-    }
-
-    /* ---- Get shapes or NULL ---- */
-    if ((shapes == NULL) || ((PyObject*)shapes == Py_None)) {
-        shapes_obj = NULL;
-    }
-    else if (PyObject_TypeCheck(shapes, &PyGvShapes_Type)) {
-        shapes_obj = (GvShapes*) shapes->obj;
-    }
-    else {
-        PyErr_SetString(PyExc_ValueError, "Incorrect shapes argument type");
-        return -1;
-    }
-
-    /* ---- Create new layer with shapes ---- */
-    self->obj = (GObject *)gv_app_cur_layer_new(shapes_obj);
-    if (!self->obj) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create AppCurLayer object");
-        return -1;
-    }
-
-    pygobject_register_wrapper((PyObject *)self);
-    return 0;
-}
+new-constructor GV_TYPE_TRACK_TOOL

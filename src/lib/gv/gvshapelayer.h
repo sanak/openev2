@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapelayer.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for vector display layers (eventually this will
@@ -64,10 +64,12 @@
 #include "gvviewarea.h"
 
 #define GV_TYPE_SHAPE_LAYER            (gv_shape_layer_get_type ())
-#define GV_SHAPE_LAYER(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_SHAPE_LAYER, GvShapeLayer))
-#define GV_SHAPE_LAYER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_SHAPE_LAYER, GvShapeLayerClass))
-#define GV_IS_SHAPE_LAYER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_SHAPE_LAYER))
-#define GV_IS_SHAPE_LAYER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPE_LAYER))
+#define GV_SHAPE_LAYER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_SHAPE_LAYER,\
+                                                   GvShapeLayer))
+#define GV_SHAPE_LAYER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST((klass),GV_TYPE_SHAPE_LAYER,\
+                                                        GvShapeLayerClass))
+#define GV_IS_SHAPE_LAYER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_SHAPE_LAYER))
+#define GV_IS_SHAPE_LAYER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_SHAPE_LAYER))
 
 /* Access macro for selected buffer (for use by subclass) */
 #define GV_SHAPE_LAYER_SELBUF(layer) \
@@ -114,7 +116,7 @@ struct _GvShapeLayerClass
     void (* subselection_changed)(GvShapeLayer *layer);
 };
 
-GtkType    gv_shape_layer_get_type (void);
+GType    gv_shape_layer_get_type (void);
 
 void gv_shape_layer_select_shape(GvShapeLayer *layer, gint shape_id);
 void gv_shape_layer_deselect_shape(GvShapeLayer *layer, gint shape_id);

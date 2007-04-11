@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvshapelayer.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for vector display layers (eventually this will
@@ -97,7 +97,6 @@
 #include "gvshapelayer.h"
 #include "gvrenderinfo.h"
 #include "cpl_error.h"
-#include <gtk/gtksignal.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 
@@ -126,39 +125,41 @@ static void gv_shape_layer_finalize(GObject *gobject);
 static void gv_shape_layer_selection_changed(GvShapeLayer *layer);
 static void gv_shape_layer_subselection_changed(GvShapeLayer *layer);
 
+static GvLayerClass *parent_class = NULL;
 static guint shape_layer_signals[LAST_SIGNAL] = { 0 };
 
-GtkType
+GType
 gv_shape_layer_get_type(void)
 {
-    static GtkType shape_layer_type = 0;
+    static GType shape_layer_type = 0;
 
-    if (!shape_layer_type)
-    {
-    static const GtkTypeInfo shape_layer_info =
-    {
-        "GvShapeLayer",
-        sizeof(GvShapeLayer),
-        sizeof(GvShapeLayerClass),
-        (GtkClassInitFunc) gv_shape_layer_class_init,
-        (GtkObjectInitFunc) gv_shape_layer_init,
-        /* reserved_1 */ NULL,
-        /* reserved_2 */ NULL,
-        (GtkClassInitFunc) NULL,
-    };
-
-    shape_layer_type = gtk_type_unique(gv_layer_get_type(),
-                       &shape_layer_info);
+    if (!shape_layer_type) {
+        static const GTypeInfo shape_layer_info =
+        {
+            sizeof(GvShapeLayerClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_shape_layer_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvShapeLayer),
+            0,
+            (GInstanceInitFunc) gv_shape_layer_init,
+        };
+        shape_layer_type = g_type_register_static (GV_TYPE_LAYER,
+                                            "GvShapeLayer",
+                                            &shape_layer_info, 0);
     }
+
     return shape_layer_type;
 }
 
 static void
 gv_shape_layer_class_init(GvShapeLayerClass *klass)
 {
-    GtkObjectClass *object_class;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    object_class = (GtkObjectClass*) klass;
+    parent_class = g_type_class_peek_parent (klass);
 
     shape_layer_signals[DRAW_SELECTED] =
       g_signal_new ("draw-selected",
@@ -265,120 +266,8 @@ gv_shape_layer_class_init(GvShapeLayerClass *klass)
 		    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
 		    G_TYPE_POINTER);
 
-    /* GTK2 PORT...
-    shape_layer_signals[DRAW_SELECTED] =
-    gtk_signal_new ("draw-selected",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, draw_selected),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[DELETE_SELECTED] =
-    gtk_signal_new ("delete-selected",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, delete_selected),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    shape_layer_signals[TRANSLATE_SELECTED] =
-    gtk_signal_new ("translate-selected",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass,
-                       translate_selected),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[PICK_SHAPE] =
-    gtk_signal_new ("pick-shape",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, pick_shape),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    shape_layer_signals[PICK_NODE] =
-    gtk_signal_new ("pick-node",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, pick_node),
-            gtk_marshal_NONE__NONE,
-            GTK_TYPE_NONE, 0);
-
-    shape_layer_signals[GET_NODE] =
-    gtk_signal_new ("get-node",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, get_node),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[MOVE_NODE] =
-    gtk_signal_new ("move-node",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, move_node),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[INSERT_NODE] =
-    gtk_signal_new ("insert-node",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, insert_node),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[DELETE_NODE] =
-    gtk_signal_new ("delete-node",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, delete_node),
-            gtk_marshal_NONE__POINTER,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_POINTER);
-
-    shape_layer_signals[NODE_MOTION] =
-    gtk_signal_new ("node-motion",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET (GvShapeLayerClass, node_motion),
-            gtk_marshal_NONE__INT,
-            GTK_TYPE_NONE, 1,
-            GTK_TYPE_INT);
-
-    shape_layer_signals[SELECTION_CHANGED] =
-    gtk_signal_new ("selection-changed",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET(GvShapeLayerClass,selection_changed),
-            gtk_marshal_NONE__INT,
-            GTK_TYPE_NONE, 0);
-
-    shape_layer_signals[SUBSELECTION_CHANGED] =
-    gtk_signal_new ("subselection-changed",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET(GvShapeLayerClass,
-                                          subselection_changed),
-            gtk_marshal_NONE__INT,
-            GTK_TYPE_NONE, 0);
-
-    gtk_object_class_add_signals(object_class, shape_layer_signals,
-                 LAST_SIGNAL);
-    object_class->finalize = gv_shape_layer_finalize;
-    */
-
     /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_shape_layer_finalize;
-
+    object_class->finalize = gv_shape_layer_finalize;
 
     klass->draw_selected = NULL;
     klass->delete_selected = NULL;
@@ -511,7 +400,7 @@ gv_shape_layer_selected(GvShapeLayer *layer, gint what, void *retval)
 void
 gv_shape_layer_delete_selected(GvShapeLayer *layer)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[DELETE_SELECTED]);
+    g_signal_emit(layer, shape_layer_signals[DELETE_SELECTED], 0);
 }
 
 void
@@ -521,8 +410,7 @@ gv_shape_layer_translate_selected(GvShapeLayer *layer, gvgeocoord dx, gvgeocoord
 
     delta.x = dx;
     delta.y = dy;
-    gtk_signal_emit(GTK_OBJECT(layer),
-            shape_layer_signals[TRANSLATE_SELECTED], &delta);
+    g_signal_emit(layer, shape_layer_signals[TRANSLATE_SELECTED], 0, &delta);
 }
 
 void
@@ -546,8 +434,7 @@ gv_shape_layer_draw_selected(GvShapeLayer *layer, guint when, GvViewArea *view)
         break;
 
     case GV_NOW:
-        gtk_signal_emit(GTK_OBJECT(layer),
-                shape_layer_signals[DRAW_SELECTED], view);
+        g_signal_emit(layer, shape_layer_signals[DRAW_SELECTED], 0, view);
         break;
 
     default:
@@ -559,31 +446,30 @@ gv_shape_layer_draw_selected(GvShapeLayer *layer, guint when, GvViewArea *view)
 void
 gv_shape_layer_get_node(GvShapeLayer *layer, GvNodeInfo *info)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[GET_NODE], info);
+    g_signal_emit(layer, shape_layer_signals[GET_NODE], 0, info);
 }
 
 void
 gv_shape_layer_move_node(GvShapeLayer *layer, GvNodeInfo *info)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[MOVE_NODE], info);
+    g_signal_emit(layer, shape_layer_signals[MOVE_NODE], 0, info);
 }
 
 void
 gv_shape_layer_insert_node(GvShapeLayer *layer, GvNodeInfo *info)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[INSERT_NODE], info);
+    g_signal_emit(layer, shape_layer_signals[INSERT_NODE], 0, info);
 }
 
 void
 gv_shape_layer_delete_node(GvShapeLayer *layer, GvNodeInfo *info)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[DELETE_NODE], info);
+    g_signal_emit(layer, shape_layer_signals[DELETE_NODE], 0, info);
 }
 
 void gv_shape_layer_node_motion(GvShapeLayer *layer, gint shape_id)
 {
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[NODE_MOTION],
-            shape_id);
+    g_signal_emit(layer, shape_layer_signals[NODE_MOTION], 0, shape_id);
 }
 
 void
@@ -621,7 +507,7 @@ gv_shape_layer_select_region(GvShapeLayer *layer, GvViewArea *view,
     glInitNames();
     glPushName(-1);
 
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[PICK_SHAPE]);
+    g_signal_emit(layer, shape_layer_signals[PICK_SHAPE], 0);
 
     hits = glRenderMode(GL_RENDER);
 
@@ -690,7 +576,7 @@ gv_shape_layer_pick_shape(GvShapeLayer *layer, GvViewArea *view,
     glInitNames();
     glPushName(-1);
 
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[PICK_SHAPE]);
+    g_signal_emit(layer, shape_layer_signals[PICK_SHAPE], 0);
 
     hits = glRenderMode(GL_RENDER);
 
@@ -747,7 +633,7 @@ gv_shape_layer_pick_node(GvShapeLayer *layer, GvViewArea *view,
     glInitNames();
     glPushName(-1);
 
-    gtk_signal_emit(GTK_OBJECT(layer), shape_layer_signals[PICK_NODE]);
+    g_signal_emit(layer, shape_layer_signals[PICK_NODE], 0);
 
     hits = glRenderMode(GL_RENDER);
 
@@ -832,8 +718,7 @@ gv_shape_layer_selection_changed(GvShapeLayer *layer)
 
 {
     if( !(layer->flags & GV_SUPPRESS_SELCHANGED) )
-        gtk_signal_emit(GTK_OBJECT(layer),
-                        shape_layer_signals[SELECTION_CHANGED]);
+        g_signal_emit(layer, shape_layer_signals[SELECTION_CHANGED], 0);
 }
 
 static void
@@ -841,16 +726,14 @@ gv_shape_layer_subselection_changed(GvShapeLayer *layer)
 
 {
     if( !(layer->flags & GV_SUPPRESS_SELCHANGED) )
-    {
-        gtk_signal_emit(GTK_OBJECT(layer),
-                        shape_layer_signals[SUBSELECTION_CHANGED]);
-    }
+        g_signal_emit(layer, shape_layer_signals[SUBSELECTION_CHANGED], 0);
 }
 
 static void
 gv_shape_layer_finalize(GObject *gobject)
 {
-    GvLayerClass *parent_class;
+    CPLDebug( "OpenEV", "gv_shape_layer_finalize(%s)",
+              gv_data_get_name( GV_DATA(gobject) ) );
     GvShapeLayer *layer;
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
@@ -862,22 +745,15 @@ gv_shape_layer_finalize(GObject *gobject)
 
     if (layer->selected != NULL) {
         g_array_free(layer->selected, TRUE);
-	layer->selected = NULL;
+        layer->selected = NULL;
     }
     if( layer->scale_dep_flags != NULL ) {
         g_free( layer->scale_dep_flags );
         layer->scale_dep_flags = NULL;
     }
 
-
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_layer_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-
-    /*
-    parent_class = gtk_type_class(gv_layer_get_type());
-    GTK_OBJECT_CLASS(parent_class)->finalize(object);
-    */
 }
 
 /************************************************************************/

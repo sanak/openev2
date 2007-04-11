@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvdata.h,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for raster, vector and layer data containers.
@@ -55,49 +55,22 @@
 #ifndef __GV_DATA_H__
 #define __GV_DATA_H__
 
-/* Placed in this header...
-#include <gtk/gtkdata.h>*/
-
-/* TEMP - try locating gtkdata instead of defining it.. */
-
-/* Added instead... */
-#include <gtk/gtkobject.h>
 #include "gvtypes.h"
 #include "gvproperties.h"
 
 #define GV_TYPE_DATA            (gv_data_get_type ())
-#define GV_DATA(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_DATA, GvData))
-#define GV_DATA_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_DATA, GvDataClass))
-#define GV_IS_DATA(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_DATA))
-#define GV_IS_DATA_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_DATA))
+#define GV_DATA(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_DATA, GvData))
+#define GV_DATA_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_DATA, GvDataClass))
+#define GV_IS_DATA(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_DATA))
+#define GV_IS_DATA_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_DATA))
 
 typedef struct _GvData       GvData;
 typedef struct _GvDataClass  GvDataClass;
 typedef struct _GvDataMemento GvDataMemento;
 
-
-/* FROM_GTK_DATA_H... 
-typedef struct _GtkData       GtkData;
-typedef struct _GtkDataClass  GtkDataClass;
-
-struct _GtkData
-{
-  GtkObject object;
-};
-
-struct _GtkDataClass
-{
-  GtkObjectClass parent_class;
-
-  void (* disconnect) (GtkData *data);
-};
-*/
-
-/* FROM_GTK_DATA_H */
-
 struct _GvData
 {
-    GtkObject data;
+    GObject data;
 
     GvData *parent;
     gchar *name;
@@ -113,16 +86,17 @@ struct _GvData
 
 struct _GvDataClass
 {
-    GtkObjectClass parent_class;
+    GObjectClass parent_class;
 
     void (* changing) (GvData *data, gpointer change_info);
     void (* changed) (GvData *data, gpointer change_info);
     void (* meta_changed) (GvData *data);
     void (* child_changed) (GvData *data, GvData *child, gpointer change_info);
     void (* get_memento) (GvData *data, gpointer change_info,
-			  GvDataMemento **memento);
+                          GvDataMemento **memento);
     void (* set_memento) (GvData *data, GvDataMemento *memento);
     void (* del_memento) (GvData *data, GvDataMemento *memento);
+    void (*destroy)  (GvData *data);
 };
 
 struct _GvDataMemento
@@ -132,12 +106,12 @@ struct _GvDataMemento
     gint group;
 };
 
-GtkType    gv_data_get_type (void);
-
+GType    gv_data_get_type (void);
 void gv_data_set_parent(GvData *data, GvData *parent);
 GvData *gv_data_get_parent(GvData *data);
 void gv_data_set_name(GvData *data, const gchar *name);
 const gchar* gv_data_get_name(GvData *data);
+void gv_data_destroy(GvData *data);
 
 void gv_data_changing(GvData *data, gpointer change_info);
 void gv_data_changed(GvData *data, gpointer change_info);
