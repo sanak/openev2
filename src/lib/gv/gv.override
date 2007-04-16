@@ -57,6 +57,8 @@ ignore
   gv_data_del_memento
   gv_raster_pixel_to_georefCL
   gv_raster_georef_to_pixelCL
+  gv_shapes_add_shape
+  gv_shapes_add_shape_last
 
 %%
 include
@@ -557,18 +559,17 @@ override gv_symbol_manager_inject_vector_symbol
 static PyObject *
 _wrap_gv_symbol_manager_inject_vector_symbol(PyGObject *self, PyObject *args)
 {
-    PyGvShape *py_shape;
+    PyObject *py_shape;
     GvSymbolManager *manager;
     char     *symbol_name = NULL;
 
-    if (!PyArg_ParseTuple(args, "ss:GvSymbolManager.inject_vector_symbol",
-                          &symbol_name, &py_shape ))
+    if (!PyArg_ParseTuple(args, "sO!:GvSymbolManager.inject_vector_symbol",
+                          &symbol_name, &PyGvShape_Type, &py_shape))
         return NULL;
 
     manager = GV_SYMBOL_MANAGER(self->obj);
 
-    if (py_shape->_o)
-        gv_symbol_manager_inject_vector_symbol(manager, symbol_name, py_shape->_o);
+    gv_symbol_manager_inject_vector_symbol(manager, symbol_name, GV_SHAPE(py_shape));
 
     Py_INCREF(Py_None);
     return Py_None;
@@ -617,18 +618,16 @@ _wrap_gv_symbol_manager_get_symbol(PyGObject *self, PyObject *args)
     manager = GV_SYMBOL_MANAGER(self->obj);
     symbol = gv_symbol_manager_get_symbol(manager, symbol_name );
 
-    if( symbol == NULL )
+    if (symbol == NULL)
     {
         Py_INCREF(Py_None);
         return Py_None;
     }
 
-    if( symbol->type == GV_SYMBOL_VECTOR )
+    if (symbol->type == GV_SYMBOL_VECTOR)
     {
-
-        PyGvShape *py_shape = pygv_shape_from_shape((GvShape*)symbol->buffer);
-
-        return Py_BuildValue("(io)", symbol->type, &PyGvShape_Type);
+        PyObject *py_shape = pygv_shape_from_shape((GvShape*)symbol->buffer);
+        return Py_BuildValue("(iO)", symbol->type, &PyGvShape_Type);
     }
     else
     {
@@ -960,15 +959,13 @@ _wrap_gv_shapes_new(PyGObject *self, PyObject *args, PyObject *kwargs)
     static char* kwlist[] = { "shapefilename", NULL };
     char *filename;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
-                                     "|z:_gv.Shapes.__init__",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|z:_gv.Shapes.__init__",
                                      kwlist, &filename))
         return -1;
 
     pygobject_constructv(self, 0, NULL);
     if (!self->obj) {
-        PyErr_SetString(
-            PyExc_RuntimeError, "could not create _gv.Shapes object");
+        PyErr_SetString(PyExc_RuntimeError, "could not create _gv.Shapes object");
         return -1;
     }
     if (filename != NULL)
@@ -996,9 +993,8 @@ _wrap_gv_shapes_sq_item(PyGObject *self, int shp_index)
 
     GvShape *shape = gv_shapes_get_shape(GV_SHAPES(self->obj), shp_index);
     
-    if (shape) {
+    if (shape)
         return pygv_shape_from_shape(shape);
-    }
     else {
         Py_INCREF(Py_None);
         return Py_None;
@@ -1023,7 +1019,7 @@ _wrap_gv_shapes_sq_ass_item(PyGObject *self, int shp_index, PyObject *shape)
 
     shape_id = g_new(int, 1);
     shape_list = g_new(GvShape*, 1);
-    shape_list[0] = ((PyGvShape *)shape)->_o;
+    shape_list[0] = GV_SHAPE(shape);
 
     gv_shapes_replace_shapes(GV_SHAPES(self->obj), 1, shape_id, shape_list, FALSE);
     
@@ -1051,6 +1047,46 @@ static PySequenceMethods _wrap_gv_shapes_tp_as_sequence = {
 //~         binaryfunc sq_inplace_concat;
 //~         intargfunc sq_inplace_repeat;
 };
+%%
+define GvShapes.get_fid
+static PyObject *
+_wrap_gv_shapes_get_fid(PyGObject *self, PyObject *args)
+{
+    GvProperties *properties = NULL;
+    char *field = NULL;
+    int field_index, fid = 0;
+
+    if (!PyArg_ParseTuple(args, "s:GvShapes.get_fid", &field))
+        return NULL;
+
+    properties = gv_data_get_properties(GV_DATA(self->obj));
+    if (properties == NULL) {
+        PyErr_SetString(PyExc_ValueError, "no properties in GvShapes.get_fid()");
+        return NULL;
+    }
+
+    for (field_index = 1; TRUE; field_index++)
+    {
+        char name[64];
+        const char *prop_value;
+
+        sprintf(name, "_field_name_%d", field_index);
+        prop_value = gv_properties_get(properties, name);
+        if (prop_value == NULL)
+            break;
+        if ( g_strcasecmp(prop_value, field) == 0 ) {
+            fid = field_index;
+            break;
+        }
+    }
+
+    if (fid != 0)
+        return Py_BuildValue("i", fid);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
 %%
 override gv_shapes_to_dbf
 static PyObject *
@@ -1110,43 +1146,42 @@ _wrap_gv_shapes_get_shape(PyGObject *self, PyObject* args)
     }
 
     shape = gv_shapes_get_shape(GV_SHAPES(self->obj), shp_index);
-    if (shape) {
+    if (shape)
         return pygv_shape_from_shape(shape);
-    }
     else {
         Py_INCREF(Py_None);
         return Py_None;
     }
 }
 %%
-override gv_shapes_add_shape
+define GvShapes.append
 static PyObject *
-_wrap_gv_shapes_add_shape(PyGObject *self, PyObject *args)
+_wrap_gv_shapes_append(PyGObject *self, PyObject *args)
 {
-    PyGvShape *py_shape;
+    PyObject *py_shape;
     int       shp_index = -1;
 
-    if (!PyArg_ParseTuple(args, "o!:GvShapes.add_shape", &PyGvShape_Type, &py_shape))
+    if (!PyArg_ParseTuple(args, "O!:GvShapes.append", &PyGvShape_Type, &py_shape))
         return NULL;
 
-    if (py_shape->_o)
-        shp_index = gv_shapes_add_shape(GV_SHAPES(self->obj), py_shape->_o);
+    if (GV_SHAPE(py_shape))
+        shp_index = gv_shapes_add_shape(GV_SHAPES(self->obj), GV_SHAPE(py_shape));
 
     return Py_BuildValue("i", shp_index);
 }
 %%
-override gv_shapes_add_shape_last
+define GvShapes.append_last
 static PyObject *
-_wrap_gv_shapes_add_shape_last(PyGObject *self, PyObject *args)
+_wrap_gv_shapes_append_last(PyGObject *self, PyObject *args)
 {
-    PyGvShape *py_shape;
+    PyObject *py_shape;
     int       shp_index = -1;
 
-    if (!PyArg_ParseTuple(args, "s:GvShapes.add_shape_last", &py_shape))
+    if (!PyArg_ParseTuple(args, "O!:GvShapes.append_last", &PyGvShape_Type, &py_shape))
         return NULL;
 
-    if (py_shape->_o)
-        shp_index = gv_shapes_add_shape_last(GV_SHAPES(self->obj), py_shape->_o);
+    if (GV_SHAPE(py_shape))
+        shp_index = gv_shapes_add_shape_last(GV_SHAPES(self->obj), GV_SHAPE(py_shape));
 
     return Py_BuildValue("i", shp_index);
 }
@@ -1221,16 +1256,15 @@ _wrap_gv_shapes_replace_shapes(PyGObject *self, PyObject *args)
             return NULL;
         }
 
-        if( !PyArg_Parse( PyList_GET_ITEM(pyshape_list,i), "o", &py_shape ))
+        if( !PyArg_Parse( PyList_GET_ITEM(pyshape_list,i), "O", &py_shape ))
         {
             PyErr_SetString(PyExc_ValueError,
                         "expecting GvShape in GvShapes.replace_shapes argument");
             return NULL;
         }
 
-        shape_list[i] = py_shape->_o;
+        shape_list[i] = GV_SHAPE(py_shape);
     }
-
 
     gv_shapes_replace_shapes( GV_SHAPES(self->obj), shape_count,
                             shape_ids, shape_list, copy_flag );
@@ -1938,32 +1972,24 @@ _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
 
     shape_count = PyList_Size(py_shapelist);
     shape_list = g_new(GvShape*,shape_count);
-    for( i = 0; i < shape_count; i++ )
+    for (i = 0; i < shape_count; i++)
     {
-        GvShape *gv_shape;
-        char *swig_shape_ptr;
+        PyGvShape *py_shape;
 
-        if (!PyArg_Parse( PyList_GET_ITEM(py_shapelist,i), "s", &swig_shape_ptr ))
+        if (!PyArg_Parse( PyList_GET_ITEM(py_shapelist, i), "O", &py_shape ))
         {
-            g_free( shape_list );
+            g_free(shape_list);
             PyErr_SetString(PyExc_ValueError, "bad item in shapelist");
             return NULL;
         }
-        gv_shape = SWIG_SimpleGetPtr(swig_shape_ptr, "_GvShape");
-        if( gv_shape == NULL )
-        {
-            g_free( shape_list );
-            PyErr_SetString(PyExc_ValueError, "bad item in shapelist(2)");
-            return NULL;
-        }
 
-        shape_list[i] = gv_shape;
+        shape_list[i] = GV_SHAPE(py_shape);
     }
 
     ret_value = gv_raster_rasterize_shapes(GV_RASTER(self->obj), shape_count,
                                             shape_list, burn_value, fill_short);
 
-    return Py_BuildValue( "i", ret_value );
+    return Py_BuildValue("i", ret_value);
 }
 %%
 override gv_raster_layer_new
