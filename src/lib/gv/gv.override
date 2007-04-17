@@ -57,8 +57,75 @@ ignore
   gv_data_del_memento
   gv_raster_pixel_to_georefCL
   gv_raster_georef_to_pixelCL
+  gv_manager_dequeue_task
+  gv_raster_read
+  gv_raster_tile_get
+  gv_raster_tile_xy_get
+  gv_raster_get_nodata
+  gv_raster_collect_random_sample
+  gv_raster_collect_histogram
+  gv_raster_float_real_average_nodata
+  gv_raster_float_real_average
+  gv_raster_float_real_sample
+  gv_raster_float_complex_average
+  gv_raster_float_complex_sample
+  gv_raster_layer_read
+  gv_raster_layer_create_texture
+  gv_raster_layer_lut_interpolated_new
+  gv_raster_layer_apply_gdal_color_table
+  gv_shape_layer_get_part
+  gv_shape_layer_build_renderinfo
+  gv_shape_layer_selected
+  gv_shape_layer_translate_selected
+  gv_shape_layer_selected_motion
+  gv_shape_layer_get_node
+  gv_shape_layer_move_node
+  gv_shape_layer_insert_node
+  gv_shape_layer_delete_node
+  gv_shape_layer_select_region
+  gv_shape_layer_pick_node
+  gv_shapes_translate_shapes
+  gv_shapes_layer_select_new_shape
+  gv_tool_clamp_to_bounds
+  gv_tool_check_bounds
+  gv_view_area_get_world_extents
+  gv_view_area_set_state
+  gv_view_area_correct_for_transform
+  gv_view_area_bmfont_get_info
+  gv_view_area_bmfont_draw
+  gv_view_area_render_postscript
+  gv_view_area_render_to_func
+  gv_view_area_get_properties
+  gv_view_area_queue_cursor_draw
+  gv_view_area_get_gl_context
   gv_shapes_add_shape
   gv_shapes_add_shape_last
+  CRS_georef
+  CRS_compute_georef_equations
+  g_sort
+  g_compare_gint
+  gv_raster_cache_free
+  gv_raster_cache_get
+  gv_raster_cache_put
+  gv_raster_cache_get_best_lod
+  gv_raster_cache_flush_all
+  gv_raster_cache_del
+  llImageFilledPolygon
+  dllImageFilledPolygon
+  gv_raster_lut_create_from_byte_lut
+  gv_ogrfs_split_tools
+  gv_ogrfs_get_arg
+  gv_draw_info_aggregate_select_region
+  gv_shapes_layer_get_draw_info
+  gv_shapes_layer_draw_shape
+  gv_undo_push
+  gv_set_color_from_string
+  gv_format_point_query
+  gv_reproject_points
+  gv_complex_to_phase_mag
+  gv_shape_from_xml_tree
+  WIDInterpolate
+  gv_build_skirt
 
 %%
 include
@@ -513,24 +580,6 @@ static PyObject *
 _wrap_gv_shapes_num_shapes(PyGObject *self)
 {
     PyInt_FromLong(gv_shapes_num_shapes(GV_SHAPES(self->obj)));
-}
-%%
-%%
-override gv_build_skirt kwargs
-static PyObject *
-_wrap_gv_build_skirt(PyGObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "base_height", NULL };
-    GvRasterLayer *rlayer;
-    double base_z = 0.0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|d:GvRasterLayer.build_skirt",
-                                    kwlist, &base_z))
-        return NULL;
-
-    rlayer = GV_RASTER_LAYER(self->obj);
-
-    return pygobject_new((GObject *)gv_build_skirt(rlayer, base_z));
 }
 %%
 override gv_symbol_manager_get_names noargs
@@ -1992,6 +2041,60 @@ _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
     return Py_BuildValue("i", ret_value);
 }
 %%
+define GvRaster.wid_interpolate
+static PyObject *
+_wrap_gv_raster_wid_interpolate(PyGObject *self, PyObject *args)
+{
+    PyObject *poPyPoints;
+    PyProgressData sProgressInfo;
+    int nPoints, i, nErr;
+    double *padfXYVW;
+    double fExponent = 2.0;
+    GDALRasterBandH hBand;
+
+    sProgressInfo.psPyCallback = NULL;
+    sProgressInfo.psPyCallbackData = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!|dOO:GvRaster.wid_interpolate",
+                          &PyList_Type, &poPyPoints,
+                          &fExponent,
+                          &(sProgressInfo.psPyCallback),
+                          &(sProgressInfo.psPyCallbackData) ) )
+        return NULL;
+
+    hBand = GV_RASTER(self->obj)->gdal_band;
+
+    if (hBand == NULL)
+    {
+        PyErr_SetString(PyExc_ValueError, "Couldn't fetch GDAL band from GvRaster.");
+        return NULL;
+    }
+
+    nPoints = PyList_Size(poPyPoints);
+    padfXYVW = g_new(double,4*nPoints);
+    for (i = 0; i < nPoints; i++)
+    {
+        if (!PyArg_Parse( PyList_GET_ITEM(poPyPoints,i), "(dddd)",
+                          padfXYVW + i + 0*nPoints,
+                          padfXYVW + i + 1*nPoints,
+                          padfXYVW + i + 2*nPoints,
+                          padfXYVW + i + 3*nPoints ))
+        {
+            g_free(padfXYVW);
+            PyErr_SetString(PyExc_ValueError, "bad point format (x,y,value,weight)");
+            return NULL;
+        }
+    }
+
+    nErr = WIDInterpolate( nPoints, padfXYVW, padfXYVW+nPoints,
+                           padfXYVW+nPoints*2, padfXYVW+nPoints*3, hBand,
+                           fExponent, PyProgressProxy, &sProgressInfo );
+
+    g_free(padfXYVW);
+
+    return Py_BuildValue("i", nErr);
+}
+%%
 override gv_raster_layer_new
 static int
 _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
@@ -2571,6 +2674,23 @@ _wrap_gv_raster_layer_clamp_height(PyGObject *self, PyObject *args, PyObject *kw
     return Py_None;
 }
 %%
+define GvRasterLayer.build_skirt kwargs
+static PyObject *
+_wrap_gv_raster_layer_build_skirt(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "base_height", NULL };
+    GvRasterLayer *rlayer;
+    double base_z = 0.0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|d:GvRasterLayer.build_skirt",
+                                    kwlist, &base_z))
+        return NULL;
+
+    rlayer = GV_RASTER_LAYER(self->obj);
+
+    return pygobject_new((GObject *)gv_build_skirt(rlayer, base_z));
+}
+%%
 override gv_manager_get_preferences noargs
 static PyObject *
 _wrap_gv_manager_get_preferences(PyGObject *self)
@@ -2753,64 +2873,6 @@ _wrap_gv_rgba_to_rgb(PyObject *self, PyObject *args)
     return rgb_obj;
 }
 %%
-override WIDInterpolate
-static PyObject *
-_wrap_WIDInterpolate(PyObject *self, PyObject *args)
-{
-    PyObject *poPyPoints;
-    PyProgressData sProgressInfo;
-    char *pszSwigBand = NULL;
-    int nPoints, i, nErr;
-    double *padfXYVW;
-    double fExponent;
-    GDALRasterBandH hBand;
-
-    sProgressInfo.psPyCallback = NULL;
-    sProgressInfo.psPyCallbackData = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!s|dOO:WIDInterpolate",
-                          &PyList_Type, &poPyPoints,
-                          &pszSwigBand,
-                          &fExponent,
-                          &(sProgressInfo.psPyCallback),
-                          &(sProgressInfo.psPyCallbackData) ) )
-        return NULL;
-
-    hBand = (GDALRasterBandH) SWIG_SimpleGetPtr(pszSwigBand, "_GDALRasterBandH");
-
-    if( hBand == NULL )
-    {
-        PyErr_SetString( PyExc_ValueError,
-                         "Couldn't parse GDALRasterBandH argument." );
-        return NULL;
-    }
-
-    nPoints = PyList_Size(poPyPoints);
-    padfXYVW = g_new(double,4*nPoints);
-    for( i = 0; i < nPoints; i++ )
-    {
-        if( !PyArg_Parse( PyList_GET_ITEM(poPyPoints,i), "(dddd)",
-                          padfXYVW + i + 0*nPoints,
-                          padfXYVW + i + 1*nPoints,
-                          padfXYVW + i + 2*nPoints,
-                          padfXYVW + i + 3*nPoints ) )
-        {
-            g_free( padfXYVW );
-            PyErr_SetString(PyExc_ValueError,
-                            "bad point format (x,y,value,weight)");
-            return NULL;
-        }
-    }
-
-    nErr = WIDInterpolate( nPoints, padfXYVW, padfXYVW+nPoints,
-                           padfXYVW+nPoints*2, padfXYVW+nPoints*3, hBand,
-                           fExponent, PyProgressProxy, &sProgressInfo );
-
-    g_free( padfXYVW );
-
-    return Py_BuildValue( "i", nErr );
-}
-%%
 override MyGDALOperator
 static PyObject *
 _wrap_MyGDALOperator(PyObject *self, PyObject *args)
@@ -2871,6 +2933,155 @@ _wrap_gv_short_path_name(PyObject *self, PyObject *args)
     }
 
     return result;
+}
+%%
+define _gv.gv_shape_line_from_nodelists
+static PyObject *
+_wrap_gv_shape_line_from_nodelists(PyObject *self, PyObject *args)
+{
+    PyObject *pyxlist = NULL;
+    PyObject *pyylist = NULL;
+    PyObject *pyzlist = NULL;
+
+    int       node_count, i;
+    GvShape *shape;
+    gvgeocoord xnode, ynode, znode;
+    int ring = 0;
+
+    if (!PyArg_ParseTuple(args, "O!O!O!:gv_shape_line_from_nodelist",
+                          &PyList_Type,&pyxlist,
+                          &PyList_Type,&pyylist,
+                          &PyList_Type,&pyzlist) )
+    return NULL;
+
+    node_count = PyList_Size(pyxlist);
+    if (node_count < 1)
+    {
+        PyErr_SetString(PyExc_ValueError,
+              "require at least one node in list for gv_shape_line_from_nodelist");
+        return NULL;
+    }
+    if ((node_count != PyList_Size(pyylist)) ||
+        (node_count != PyList_Size(pyzlist)))
+    {
+        PyErr_SetString(PyExc_ValueError,
+              "x, y, and z node lists must have identical lengths for gv_shape_line_from_nodelist");
+        return NULL;
+    }
+
+    shape = gv_shape_new(GVSHAPE_LINE);
+
+    for( i = 0; i < node_count; i++ )
+    {
+        if ( ( !PyArg_Parse( PyList_GET_ITEM(pyxlist,i), 
+                Ccast ":gv_shape_line_from_nodelist" , &xnode ) ) ||
+             ( !PyArg_Parse( PyList_GET_ITEM(pyylist,i), 
+                Ccast ":gv_shape_line_from_nodelist" , &ynode ) ) ||
+             ( !PyArg_Parse( PyList_GET_ITEM(pyzlist,i), 
+                Ccast ":gv_shape_line_from_nodelist" , &znode ) ))
+        {
+            PyErr_SetString(PyExc_ValueError,
+                    "expecting floats in gv_shape_line_from_nodelist arguments");
+            gv_shape_delete(shape);
+            return NULL;
+        }
+        gv_shape_add_node(shape, ring, xnode, ynode, znode);
+    }
+
+    return pygv_shape_from_shape(shape);
+}
+
+%%
+define _gv.gv_shapes_lines_for_vecplot
+static PyObject *
+_wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
+{
+    PyObject *pyxlist=NULL;
+    PyObject *pyylist=NULL;
+    PyObject *pyzlist=NULL;
+    PyObject *pyoklist=NULL;
+
+    int       node_count, i, j, last_ok, shape_count,last_shape_nodes, oknode;
+    GvShape *shape;
+    GvShapes *shapes;
+    gvgeocoord xnode, ynode, znode;
+    int ring=0;
+    int *shape_ids=NULL;
+
+    if (!PyArg_ParseTuple(args, "O!O!O!O!:gv_shapes_lines_for_vecplot",
+                          &PyList_Type,&pyxlist,
+                          &PyList_Type,&pyylist,
+                          &PyList_Type,&pyzlist,
+                          &PyList_Type,&pyoklist) )
+    return NULL;
+
+    node_count=PyList_Size(pyxlist);
+    if (node_count < 1)
+    {
+        PyErr_SetString(PyExc_ValueError,
+              "require at least one node in list for gv_shapes_lines_for_vecplot");
+        return NULL;
+    }
+    if ((node_count != PyList_Size(pyylist)) ||
+        (node_count != PyList_Size(pyzlist)) ||
+        (node_count != PyList_Size(pyoklist)))
+    {
+        PyErr_SetString(PyExc_ValueError,
+              "x, y, z, ok lists must have identical lengths for gv_shapes_lines_for_vecplot");
+        return NULL;
+    }
+    shapes = (GvShapes *) gv_shapes_new();
+    shape = gv_shape_new(GVSHAPE_LINE);
+    gv_shapes_add_shape(shapes,shape);
+    last_ok = 1;
+    shape_count = 1;
+    last_shape_nodes = 0;
+    for( i = 0; i < node_count; i++ )
+    {
+        if(( !PyArg_Parse( PyList_GET_ITEM(pyxlist,i), 
+              Ccast ":gv_shapes_lines_for_vecplot" , &xnode ) ) ||
+           ( !PyArg_Parse( PyList_GET_ITEM(pyylist,i), 
+              Ccast ":gv_shapes_lines_for_vecplot" , &ynode ) ) ||
+           ( !PyArg_Parse( PyList_GET_ITEM(pyzlist,i), 
+              Ccast ":gv_shapes_lines_for_vecplot" , &znode ) ) ||
+           ( !PyArg_Parse( PyList_GET_ITEM(pyoklist,i), 
+              "i:gv_shapes_lines_for_vecplot" , &oknode ) ))
+        {
+            PyErr_SetString(PyExc_ValueError,
+          "expecting floats for nodes, ints for ok in gv_shapes_lines_for_vecplot arguments");
+            shape_ids = g_new(int, shape_count);
+            for ( j= 0 ; j < shape_count; j++ )
+            {
+                *(shape_ids+sizeof(int)) = j;
+            }
+            gv_shapes_delete_shapes(shapes, shape_count, shape_ids);
+            g_free(shape_ids);
+            return NULL;
+        }
+        if (oknode == 1)
+        {
+            gv_shape_add_node(shape,ring,xnode,ynode,znode);
+            last_ok = 1;
+            last_shape_nodes=last_shape_nodes+1;
+        }
+        else if (last_ok == 1)
+        {
+            shape = gv_shape_new(GVSHAPE_LINE);
+            gv_shapes_add_shape(shapes, shape);
+            shape_count = shape_count+1;
+            last_shape_nodes = 0;
+            last_ok = 0;
+        } 
+    }
+    if (last_shape_nodes == 0)
+    {
+        shape_ids = g_new(int,1);
+        *shape_ids = shape_count-1;
+        gv_shapes_delete_shapes(shapes, 1, shape_ids);
+        g_free(shape_ids);
+    }
+
+    return pygobject_new((GObject *) shapes);
 }
 %%
 override gv_track_tool_new kwargs
