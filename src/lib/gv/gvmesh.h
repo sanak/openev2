@@ -5,6 +5,7 @@
  * Purpose:  Geometric mesh mapping tile s/t coordinates to display x/y/z
  *           coordinates.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,42 +25,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvmesh.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:33  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.19  2002/04/12 14:40:36  gmwalter
- * Removed the gvmesh rescale function (not needed because of view area
- * rescaling).
- *
- * Revision 1.17  2002/03/07 02:31:56  warmerda
- * added default_height to add_height functions
- *
- * Revision 1.16  2001/08/22 16:20:38  warmerda
- * use gv_mesh_reset_to_identity for setting to raw
- *
- * Revision 1.15  2001/08/08 02:57:38  warmerda
- * implement gv_mesh_finalize(), remove unused normals code
- *
- * Revision 1.14  2001/07/13 22:13:35  warmerda
- * added function to get height from mesh
- *
- * Revision 1.13  2001/04/19 21:46:35  warmerda
- * don't include ourself
- *
- * Revision 1.12  2000/07/03 20:57:32  warmerda
- * moved tile selection for draw to gvrasterlayer
- *
- * Revision 1.11  2000/06/20 13:27:08  warmerda
- * added standard headers
  *
  */
 

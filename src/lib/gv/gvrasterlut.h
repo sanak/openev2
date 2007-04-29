@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvrasterlut.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Compute, and apply LUT to GvRaster.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,35 +25,11 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrasterlut.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.14  2004/06/23 14:35:05  gmwalter
- * Added support for multi-band complex imagery.
- *
- * Revision 1.13  2001/10/17 16:23:52  warmerda
- * added support for composing complex lut and pct
- *
- * Revision 1.12  2001/07/24 21:21:45  warmerda
- * added EV style phase colormap
- *
- * Revision 1.11  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef _GV_RASTER_LAYER_LUT_H_
 #define _GV_RASTER_LAYER_LUT_H_
 
-#include <gtk/gtk.h>
 #include "gvrasterlayer.h"
 
 enum {

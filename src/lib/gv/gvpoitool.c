@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvpoitool.c,v 1.2 2005/04/25 23:34:15 uid1018 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Point of interest editing mode.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2002, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,11 +25,9 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- *
  */
 
 #include "gvpoitool.h"
-#include <gtk/gtksignal.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
@@ -44,72 +43,58 @@ enum
 
 static void gv_poi_tool_class_init(GvPoiToolClass *klass);
 static void gv_poi_tool_init(GvPoiTool *tool);
-static void gv_poi_tool_draw(GvTool *tool);
-static void gv_poi_tool_button_release(GvTool *tool, GdkEventButton *event);
+static gboolean gv_poi_tool_draw(GvTool *tool);
+static gboolean gv_poi_tool_button_release(GvTool *tool, GdkEventButton *event);
 static void gv_poi_tool_deactivate(GvTool *tool, GvViewArea *view);
 
 static guint poitool_signals[LAST_SIGNAL] = { 0 };
 
-GtkType
+GType
 gv_poi_tool_get_type(void)
 {
-    static GtkType poi_tool_type = 0;
+    static GType poi_tool_type = 0;
 
-    if (!poi_tool_type)
-    {
-	static const GtkTypeInfo poi_tool_info =
-	{
-	    "GvPoiTool",
-	    sizeof(GvPoiTool),
-	    sizeof(GvPoiToolClass),
-	    (GtkClassInitFunc) gv_poi_tool_class_init,
-	    (GtkObjectInitFunc) gv_poi_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!poi_tool_type) {
+        static const GTypeInfo poi_tool_info =
+        {
+            sizeof(GvPoiToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_poi_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvPoiTool),
+            0,
+            (GInstanceInitFunc) gv_poi_tool_init,
+        };
+        poi_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                  "GvPoiTool",
+                                                  &poi_tool_info, 0);
+        }
 
-	poi_tool_type = gtk_type_unique(gv_tool_get_type(),
-					&poi_tool_info);
-    }
     return poi_tool_type;
 }
 
 static void
 gv_poi_tool_class_init(GvPoiToolClass *klass)
 {
-    GvToolClass *tool_class;
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
     poitool_signals[POI_CHANGED] =
       g_signal_new ("poi_changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvPoiToolClass, poi_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvPoiToolClass, poi_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
 
-    tool_class = (GvToolClass*)klass;
-    /* GTK2 PORT...
-    object_class = (GtkObjectClass*) klass;
-    tool_class = (GvToolClass*)klass;
-
-    poitool_signals[POI_CHANGED] =
-	gtk_signal_new ("poi_changed",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvPoiToolClass,poi_changed),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 0 );
-    gtk_object_class_add_signals(object_class, poitool_signals, LAST_SIGNAL);
-    */
-    
     klass->poi_changed = NULL;
 
     tool_class->deactivate = gv_poi_tool_deactivate;
     tool_class->draw = gv_poi_tool_draw;
     tool_class->button_release = gv_poi_tool_button_release;
-
 }
+
 static void
 gv_poi_tool_init(GvPoiTool *tool)
 {
@@ -121,23 +106,16 @@ gv_poi_tool_init(GvPoiTool *tool)
 GvTool *
 gv_poi_tool_new(void)
 {
-    GvTool *tool;
+    GvPoiTool *tool = g_object_new(GV_TYPE_POI_TOOL, NULL);
 
-    tool = GV_TOOL(gtk_type_new(GV_TYPE_POI_TOOL));
-
-    
-
-    return tool;
-    
+    return GV_TOOL(tool);
 }
 
 gint
 gv_poi_tool_get_point(GvPoiTool *tool, GvVertex *point)
 {
     if (!tool->poi_marked)
-    {
-	return FALSE;
-    }
+        return FALSE;
 
     point->x = tool->v_center.x;
     point->y = tool->v_center.y;
@@ -150,24 +128,23 @@ gv_poi_tool_new_point(GvPoiTool *tool, GvVertex *point)
 {
     /* Create new POI */
     tool->poi_marked = TRUE;
-    
+
     tool->v_center.x = point->x;
     tool->v_center.y = point->y;
 
     gv_tool_clamp_to_bounds( GV_TOOL(tool), 
                              &(tool->v_center.x), &(tool->v_center.y) );
 
-    gtk_signal_emit(GTK_OBJECT(tool), 
-                    poitool_signals[POI_CHANGED]);
+    g_signal_emit(tool, poitool_signals[POI_CHANGED], 0);
 
-    gv_view_area_queue_draw(GV_TOOL(tool)->view);	
+    gv_view_area_queue_draw(GV_TOOL(tool)->view);       
 
     return TRUE;
 }
 
 /**************************************************************/
 
-static void
+static gboolean
 gv_poi_tool_button_release(GvTool *ptool, GdkEventButton *event)
 {
     GvPoiTool *tool = GV_POI_TOOL(ptool);
@@ -176,42 +153,41 @@ gv_poi_tool_button_release(GvTool *ptool, GdkEventButton *event)
                               && !(event->state & GDK_SHIFT_MASK) )
     {
 
-	/* Set head and tail vertex to pointer position */
-	/* Map pointer position */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_center.x, &tool->v_center.y);
+        /* Set head and tail vertex to pointer position */
+        /* Map pointer position */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                     &tool->v_center.x, &tool->v_center.y);
 
         if( gv_tool_check_bounds( GV_TOOL(tool), 
                                   tool->v_center.x, tool->v_center.y ) )
         {
             tool->poi_marked = TRUE;
-	    gv_view_area_queue_draw(GV_TOOL(tool)->view);	
-            gtk_signal_emit(GTK_OBJECT(tool), 
-                        poitool_signals[POI_CHANGED]);
+            gv_view_area_queue_draw(GV_TOOL(tool)->view);       
+            g_signal_emit(tool, poitool_signals[POI_CHANGED], 0);
         }
     }
     if ((event->button == 2)  && !(event->state & GDK_CONTROL_MASK)
                               && !(event->state & GDK_SHIFT_MASK) )
     {
         /* If user presses 2nd button within the view window, */
-	/* clear the point and redraw view without it */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_center.x, &tool->v_center.y);
+        /* clear the point and redraw view without it */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                     &tool->v_center.x, &tool->v_center.y);
 
         if( gv_tool_check_bounds( GV_TOOL(tool), 
                                   tool->v_center.x, tool->v_center.y ) )
         {
             tool->poi_marked = FALSE;
-	    gv_view_area_queue_draw(GV_TOOL(tool)->view);	
+            gv_view_area_queue_draw(GV_TOOL(tool)->view);       
 
-            gtk_signal_emit(GTK_OBJECT(tool), 
-                        poitool_signals[POI_CHANGED]);
+            g_signal_emit(tool, poitool_signals[POI_CHANGED], 0);
         }
     }
 
+    return FALSE;
 }
 
-static void
+static gboolean
 gv_poi_tool_draw(GvTool *ptool)
 {
     GvPoiTool *tool = GV_POI_TOOL(ptool);
@@ -224,29 +200,31 @@ gv_poi_tool_draw(GvTool *ptool)
         gv_view_area_correct_for_transform(GV_TOOL(tool)->view, dx, dy, &dx, &dy);
         bx = by = tool->poi_size + 2;
         gv_view_area_correct_for_transform(GV_TOOL(tool)->view, bx, by, &bx, &by);
-     
+
         x = tool->v_center.x;
         y = tool->v_center.y;
 
         glRenderMode(GL_RENDER);
         glColor3f(1.0,0.5,0.0);
 
-	/* Draw crosshairs */
-	glBegin(GL_LINES);
-	glVertex2(x-dx, y-dy);
-	glVertex2(x+dx, y+dy);
-	glVertex2(x+dy, y-dx);
-	glVertex2(x-dy, y+dx);
-	glEnd();
+        /* Draw crosshairs */
+        glBegin(GL_LINES);
+        glVertex2(x-dx, y-dy);
+        glVertex2(x+dx, y+dy);
+        glVertex2(x+dy, y-dx);
+        glVertex2(x-dy, y+dx);
+        glEnd();
 
-	/* Draw box around crosshairs */
-	glBegin(GL_LINE_LOOP);
-	glVertex2(x-bx, y-by);
-	glVertex2(x+by, y-bx);
-	glVertex2(x+bx, y+by);
-	glVertex2(x-by, y+bx);
-	glEnd();	
+        /* Draw box around crosshairs */
+        glBegin(GL_LINE_LOOP);
+        glVertex2(x-bx, y-by);
+        glVertex2(x+by, y-bx);
+        glVertex2(x+bx, y+by);
+        glVertex2(x-by, y+bx);
+        glEnd();        
     }
+
+    return FALSE;
 }
 
 static void

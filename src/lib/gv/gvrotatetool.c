@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvrotatetool.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Rotation and Scaling editing mode in GvShapesLayer.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
@@ -24,27 +25,9 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrotatetool.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.2  2003/06/25 17:07:22  warmerda
- * moved a bunch of stuff to gvshape.c
- *
- * Revision 1.1  2003/06/25 16:40:44  warmerda
- * New
- *
  */
 
 #include <stdio.h>
-#include <gtk/gtksignal.h>
 #include <gdk/gdkkeysyms.h>
 #include "gvrotatetool.h"
 #include "gvundo.h"
@@ -77,37 +60,37 @@ enum
 #  define M_PI 3.14159265358979323846
 #endif
 
-GtkType
+GType
 gv_rotate_tool_get_type(void)
 {
-    static GtkType rotate_tool_type = 0;
+    static GType rotate_tool_type = 0;
 
-    if (!rotate_tool_type)
-    {
-	static const GtkTypeInfo rotate_tool_info =
-	{
-	    "GvRotateTool",
-	    sizeof(GvRotateTool),
-	    sizeof(GvRotateToolClass),
-	    (GtkClassInitFunc) gv_rotate_tool_class_init,
-	    (GtkObjectInitFunc) gv_rotate_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!rotate_tool_type) {
+        static const GTypeInfo rotate_tool_info =
+        {
+            sizeof(GvRotateToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_rotate_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvRotateTool),
+            0,
+            (GInstanceInitFunc) gv_rotate_tool_init,
+        };
+        rotate_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                  "GvRotateTool",
+                                                  &rotate_tool_info, 0);
+        }
 
-	rotate_tool_type = gtk_type_unique(gv_tool_get_type(),
-					 &rotate_tool_info);
-    }
     return rotate_tool_type;
 }
 
 static void
 gv_rotate_tool_class_init(GvRotateToolClass *klass)
 {
-    GvToolClass *tool_class;
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
-    tool_class = (GvToolClass*)klass;
     tool_class->deactivate = gv_rotate_tool_deactivate;
     tool_class->button_press = gv_rotate_tool_button_press;
     tool_class->button_release = gv_rotate_tool_button_release;
@@ -131,17 +114,18 @@ gv_rotate_tool_init(GvRotateTool *tool)
 GvTool *
 gv_rotate_tool_new(void)
 {
-    return GV_TOOL(gtk_type_new(GV_TYPE_ROTATE_TOOL));
+    GvRotateTool *tool = g_object_new(GV_TYPE_ROTATE_TOOL, NULL);
+
+    return GV_TOOL(tool);
 }
 
-static gint gv_rotate_tool_layer_destroy( GtkObject *layer, gpointer data )
-
+static gint gv_rotate_tool_layer_destroy(GvTool *rtool)
 {
-    GvRotateTool *tool = (GvRotateTool *) data;
+    GvRotateTool *tool = GV_ROTATE_TOOL(rtool);
 
-    if( tool->layer == GV_SHAPES_LAYER(layer) )
-        gv_rotate_tool_set_layer( tool, NULL );
-    
+    if (tool->layer)
+        gv_rotate_tool_set_layer(tool, NULL);
+
     return 0;
 }
 
@@ -153,7 +137,7 @@ static gint gv_rotate_tool_layer_destroy( GtkObject *layer, gpointer data )
 /************************************************************************/
 
 void 
-gv_rotate_tool_terminate( GvRotateTool *tool )
+gv_rotate_tool_terminate(GvRotateTool *tool)
 {
     if( tool->rrmode == RRMODE_DISPLAY )
         return;
@@ -188,8 +172,8 @@ gv_rotate_tool_set_layer(GvRotateTool *tool, GvShapeLayer *layer)
 {
     if (GV_TOOL(tool)->view == NULL)
     {
-	g_warning("gv_rotate_tool_set_layer(): inactive tool");
-	return;
+        g_warning("gv_rotate_tool_set_layer(): inactive tool");
+        return;
     }
 
     if( layer != NULL && gv_data_is_read_only( GV_DATA(layer) ) )
@@ -208,11 +192,12 @@ gv_rotate_tool_set_layer(GvRotateTool *tool, GvShapeLayer *layer)
 
         /** TODO: Not sure that we need to unselect ... try to remove later */
 
-	gv_shape_layer_clear_selection(GV_SHAPE_LAYER(tool->layer));
-	gtk_signal_disconnect_by_data(GTK_OBJECT(tool->layer), (gpointer)tool);
-	gv_view_area_queue_draw(GV_TOOL(tool)->view);
+        gv_shape_layer_clear_selection(GV_SHAPE_LAYER(tool->layer));
+        g_signal_handlers_disconnect_matched (tool->layer, G_SIGNAL_MATCH_DATA,
+                                                0, 0, NULL, NULL, tool);
+        gv_view_area_queue_draw(GV_TOOL(tool)->view);
     }
- 
+
     if( layer == NULL )
         tool->layer = NULL;
     else
@@ -220,17 +205,17 @@ gv_rotate_tool_set_layer(GvRotateTool *tool, GvShapeLayer *layer)
 
     if (layer)
     {
-	gv_view_area_set_active_layer(GV_TOOL(tool)->view, GTK_OBJECT(layer));
-	
+        gv_view_area_set_active_layer(GV_TOOL(tool)->view, G_OBJECT(layer));
+
         /* Redraw when the layer draws */
-	gtk_signal_connect_object_after(GTK_OBJECT(layer), "draw",
-					GTK_SIGNAL_FUNC(gv_rotate_tool_draw),
-					GTK_OBJECT(tool));
-        /* Recover if layer destroyed */
-        gtk_signal_connect(
-            GTK_OBJECT(layer), "destroy", 
-            GTK_SIGNAL_FUNC(gv_rotate_tool_layer_destroy),
-            GTK_OBJECT(tool));
+        g_signal_connect_object(layer, "draw",
+                                G_CALLBACK(gv_rotate_tool_draw),
+                                GV_TOOL(tool), G_CONNECT_SWAPPED | G_CONNECT_AFTER);
+
+        /* recover if layer destroyed */
+        g_signal_connect_swapped(layer, "teardown",
+                                G_CALLBACK(gv_rotate_tool_layer_destroy),
+                                tool);
     }
 }
 
@@ -243,13 +228,11 @@ gv_rotate_tool_set_named_layer(GvRotateTool *tool, gchar *name)
 {
     if (tool->named_layer)
     {
-	g_free(tool->named_layer);
-	tool->named_layer = NULL;
+        g_free(tool->named_layer);
+        tool->named_layer = NULL;
     }
     if (name)
-    {
-	tool->named_layer = g_strdup(name);	
-    }
+        tool->named_layer = g_strdup(name);     
     /* Tool layer will be updated next time it is configured */
 }
 
@@ -262,7 +245,6 @@ gv_rotate_tool_set_named_layer(GvRotateTool *tool, gchar *name)
 /************************************************************************/
 
 static gint gv_rotate_tool_setup_arrows( GvRotateTool *tool )
-
 {
     GvVertex3d pivot_3d;
     GvShape *shape = gv_shapes_get_shape( tool->layer->data, 
@@ -308,7 +290,6 @@ static gint gv_rotate_tool_setup_arrows( GvRotateTool *tool )
 /************************************************************************/
 
 int gv_rotate_tool_classify_hit( GvRotateTool *tool, gvgeocoord x, gvgeocoord y )
-
 {
     gvgeocoord x_focus, y_focus, x_ul, y_ul, x_lr, y_lr;
 
@@ -523,8 +504,8 @@ gv_rotate_tool_button_press(GvTool *r_tool, GdkEventButton *event)
 /* -------------------------------------------------------------------- */
     if( tool->rrmode == RRMODE_DISPLAY && tool->shape_id != -1 )
     {
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_head.x, &tool->v_head.y);
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_head.x, &tool->v_head.y);
 
         /*
         ** Is this location a hit on an arrow head?
@@ -557,11 +538,11 @@ gv_rotate_tool_button_press(GvTool *r_tool, GdkEventButton *event)
     {
         int        shape_id;
 
-	if (!gv_rotate_tool_configure(tool)) return FALSE;
+        if (!gv_rotate_tool_configure(tool)) return FALSE;
 
-	if (gv_shape_layer_pick_shape(GV_SHAPE_LAYER(tool->layer), 
+        if (gv_shape_layer_pick_shape(GV_SHAPE_LAYER(tool->layer), 
                                       GV_TOOL(tool)->view,
-				      event->x, event->y, &shape_id))
+                                      event->x, event->y, &shape_id))
         {
             GvShape *shape;
 
@@ -599,7 +580,7 @@ gv_rotate_tool_button_release(GvTool *r_tool, GdkEventButton *event)
     /* Put back original shape. */
     gv_shapes_replace_shapes( tool->layer->data, 1, &(tool->shape_id), 
                               &(tool->original), TRUE );
-    
+
     /* re-enable undo */
     gv_undo_enable();
     gv_undo_open();
@@ -617,7 +598,7 @@ gv_rotate_tool_button_release(GvTool *r_tool, GdkEventButton *event)
     gv_shapes_replace_shapes( tool->layer->data, 1, &(tool->shape_id), 
                               &(tool->original), TRUE );
     tool->original = NULL;
-        
+
     tool->rrmode = RRMODE_DISPLAY;
 
     return FALSE;
@@ -677,7 +658,7 @@ gv_rotate_tool_motion_notify(GvTool *r_tool, GdkEventMotion *event)
         dx = tool->v_tail.x - tool->v_pivot.x;
         dy = tool->v_tail.y - tool->v_pivot.y;
         new_length = sqrt(dx*dx + dy*dy);
-        
+
         dx = tool->v_head.x - tool->v_pivot.x;
         dy = tool->v_head.y - tool->v_pivot.y;
         old_length = sqrt(dx*dx + dy*dy);
@@ -686,7 +667,7 @@ gv_rotate_tool_motion_notify(GvTool *r_tool, GdkEventMotion *event)
 
         gv_shape_scale( wrk_shape, tool->scaling );
     }
-    
+
     /* Apply to the shapes object ... this will create an undo step */
     gv_shapes_replace_shapes( tool->layer->data, 1, &(tool->shape_id), 
                               &wrk_shape, FALSE );
@@ -709,9 +690,9 @@ gv_rotate_tool_key_press(GvTool *rtool, GdkEventKey *event)
 
     switch (event->keyval)
     {
-	case GDK_Delete:
-	case GDK_BackSpace:
-	case GDK_Escape:
+        case GDK_Delete:
+        case GDK_BackSpace:
+        case GDK_Escape:
           if( tool->rrmode != RRMODE_DISPLAY )
           {
               gv_rotate_tool_terminate( tool );
@@ -726,13 +707,11 @@ gv_rotate_tool_deactivate(GvTool *r_tool, GvViewArea *view)
     GvRotateTool *tool = GV_ROTATE_TOOL(r_tool);
 
     /* terminate any active modes */
-    gv_rotate_tool_terminate( tool );
+    gv_rotate_tool_terminate(tool);
 
     /* Disconnect from layer */
     if (tool->layer)
-    {
-	gv_rotate_tool_set_layer(tool, NULL);
-    }
+        gv_rotate_tool_set_layer(tool, NULL);
 
     /* Call the parent class func */
     GV_TOOL_DEACTIVATE(tool, view);
@@ -742,31 +721,31 @@ static gint
 gv_rotate_tool_configure(GvRotateTool *tool)
 {
     /* Check that we still are working on the active layer */
-    if (!tool->layer ||	GTK_OBJECT(tool->layer) !=
-	gv_view_area_active_layer(GV_TOOL(tool)->view))
+    if (!tool->layer || G_OBJECT(tool->layer) !=
+        gv_view_area_active_layer(GV_TOOL(tool)->view))
     {
-	GtkObject *layer;
+        GObject *layer;
 
-	if (tool->named_layer)
-	{
-	    /* Look for named layer if given */
-	    layer = gv_view_area_get_named_layer(GV_TOOL(tool)->view,
-						 tool->named_layer);
-	}
-	else
-	{
+        if (tool->named_layer)
+        {
+            /* Look for named layer if given */
+            layer = gv_view_area_get_named_layer(GV_TOOL(tool)->view,
+                             tool->named_layer);
+        }
+        else
+        {
             layer = gv_view_area_get_layer_of_type(GV_TOOL(tool)->view,
                                                    GV_TYPE_SHAPES_LAYER,
                                                    FALSE);
-	}
+        }
 
-	if (!layer)
-	{
-	    g_warning("gv_rotate_tool_configure(): no shapes layer in view");
-	    return FALSE;
-	}
+        if (!layer)
+        {
+            g_warning("gv_rotate_tool_configure(): no shapes layer in view");
+            return FALSE;
+        }
 
-	gv_rotate_tool_set_layer(tool, GV_SHAPE_LAYER(layer));
+        gv_rotate_tool_set_layer(tool, GV_SHAPE_LAYER(layer));
     }
     return tool->layer != NULL;
 }

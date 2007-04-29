@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Display layer for vector shapes.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,71 +25,6 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvshapeslayer.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.73  2004/04/08 18:03:18  gmwalter
- * Fix for line node editing, and for area
- * editing in the case where the first
- * and last nodes are different but share
- * either the x or y coordinate.
- *
- * Revision 1.72  2004/03/22 19:21:15  gmwalter
- * Fixed initialization problem.
- *
- * Revision 1.71  2004/03/08 18:23:43  gmwalter
- * Make sure layer's _point_size property is used.
- *
- * Revision 1.70  2004/02/12 22:11:21  gmwalter
- * Update selected shape display in Atlantis
- * build case.
- *
- * Revision 1.69  2004/01/21 01:13:44  sduclos
- * fix typo
- *
- * Revision 1.68  2004/01/20 16:13:01  warmerda
- * added render plugin support for S52 viewer
- *
- * Revision 1.67  2003/09/12 17:35:42  warmerda
- * Added logic to aggregate selection boxes in the drawinfo.selection_box
- * rectangle when draw_mode == NORMAL_GET_BOX.  This is intended to allow
- * us to draw a selection box around a complex shapes consisting of multiple
- * parts offset from the reference point.  In the past we only drew the
- * selection around the first part in such cases.  This seems to work though
- * the testing isn't ... extensive.
- *
- * Revision 1.66  2003/09/02 17:22:26  warmerda
- * added per-layer symbol manager support
- *
- * Revision 1.65  2003/08/27 20:03:05  warmerda
- * Added geo2screen_works to drawinfo structure.  It is set to false for text
- * drawn within symbols since symbol rescaling via glScale() will mess up
- * the bmfont_draw() logic for ensuring text is drawn "on screen".  True
- * otherwise.  It is passed on to gv_view_area_bmfont_draw().
- *
- * Revision 1.64  2003/07/03 16:12:05  pgs
- * fixed bug in y offset of symbols (typo in var name)
- *
- * Revision 1.63  2003/05/16 21:31:26  warmerda
- * added support for passing default color down to components of a symbol
- *
- * Revision 1.62  2003/05/16 18:26:33  pgs
- * added initial code for propogating colors to sub-symbols
- *
- * Revision 1.61  2003/05/16 17:42:39  warmerda
- * fix up pixel offsets for sub-symbols
- *
- * Revision 1.60  2003/05/08 19:51:05  warmerda
- * Fixed node picking for gv_shapes_layer_draw_pen().
- * Draw selection boxes as squares instead of diamonds.
  */
 
 #include "gvshapeslayer.h"
@@ -131,7 +67,6 @@ static void gv_shapes_layer_insert_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_delete_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_node_motion(GvShapeLayer *layer, gint area_id);
 static void gv_shapes_layer_finalize(GObject *gobject );
-static void gv_shapes_layer_dispose( GObject *gobject );
 
 static GvShapeLayerClass *parent_class = NULL;
 
@@ -492,13 +427,13 @@ static void gv_draw_info_grow_box( GvShapeDrawInfo *drawinfo, double factor )
 
     center_x = drawinfo->selection_box.x + drawinfo->selection_box.width * 0.5;
     center_y = drawinfo->selection_box.y + drawinfo->selection_box.height *0.5;
-    
+
     drawinfo->selection_box.width *= factor;
     drawinfo->selection_box.height *= factor;
 
     /* Don't let the width or height of a selection box be too much smaller
        than the other dimension. */
-    
+
     if( drawinfo->selection_box.width < drawinfo->selection_box.height/4.0 )
         drawinfo->selection_box.width = drawinfo->selection_box.height/4.0;
 
@@ -873,7 +808,7 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
                   draw_mode = NORMAL; /* disable later selection drawing */
 
                   gv_draw_info_grow_box( &sub_drawinfo, 1.2 );
-                  
+
                   glBegin(GL_LINE_LOOP);
                   glVertex2( 
                       sub_drawinfo.selection_box.x, 
@@ -1100,7 +1035,7 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
         if( draw_mode == SELECTED )
         {
             float   bx = base_vector * 1.2;
-            
+
             /* Draw box around crosshairs */
             glBegin(GL_LINE_LOOP);
             glVertex3(-bx, -bx,0.0);
@@ -1258,10 +1193,10 @@ gv_shapes_layer_draw_pen( GvViewArea *view, GvShape *shape,
             for (j=0; j < line->num_nodes; ++j)
             {
                 gvgeocoord x, y;
-                
+
                 x = line->xyz_nodes[j*3];
                 y = line->xyz_nodes[j*3+1];
-                
+
                 if( draw_mode == PICKING )
                     glBegin(GL_POLYGON);
                 else
@@ -2509,41 +2444,16 @@ gv_shapes_layer_display_change(GvLayer *data, gpointer change_info)
 }
 
 /************************************************************************/
-/*                      gv_shapes_layer_dispose()                       */
-/************************************************************************/
-
-static void gv_shapes_layer_dispose( GObject *gobject )
-
-{
-    GvShapesLayer *slayer = GV_SHAPES_LAYER(gobject);
-
-    CPLDebug( "OpenEV", "gv_shapes_layer_dispose(%s)", 
-              gv_data_get_name(GV_DATA(slayer)) );
-
-    /* Call parent class function */
-    G_OBJECT_CLASS(parent_class)->dispose(gobject);         
-}
-
-/************************************************************************/
 /*                      gv_shapes_layer_finalize()                      */
 /************************************************************************/
 static void
 gv_shapes_layer_finalize(GObject *gobject)
-
 {
     GvShapesLayer *layer = GV_SHAPES_LAYER(gobject);
 
-    /* GTK2 PORT... Override GObject finalize, test for and set NULLs
-       as finalize may be called more than once. */
-
-    CPLDebug( "OpenEV", "gv_shapes_layer_finalize(%s)",
-              gv_data_get_name( GV_DATA(gobject) ) );
-
+    /* MB: not sure if we need to do that */
     if( layer->data != NULL )
-    {
-//~         g_object_unref( layer->data );
         layer->data = NULL;
-    }
 
     if( layer->symbol_manager != NULL )
     {
@@ -2553,10 +2463,9 @@ gv_shapes_layer_finalize(GObject *gobject)
 
     /* delete the display list if it is valid */
     if (layer->display_list != -1) {
-      if (glIsList(layer->display_list)) {
-        glDeleteLists( layer->display_list, 1 );
-      }
-      layer->display_list = -1;
+        if (glIsList(layer->display_list))
+            glDeleteLists( layer->display_list, 1 );
+        layer->display_list = -1;
     }
 
     /* Call parent class function */

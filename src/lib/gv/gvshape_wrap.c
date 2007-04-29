@@ -1,6 +1,30 @@
-%%
-body
-#include <structmember.h>
+/******************************************************************************
+ * $Id$
+ *
+ * Project:  OpenEV
+ * Purpose:  GvShape Python wrapper
+ * Author:   Mario Beauchamp, starged@gmail.com
+ *
+ ******************************************************************************
+ * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ ******************************************************************************
+ *
+ */
 
 #define GV_SHAPE(op) (((PyGvShape *)(op))->_o)
 
@@ -11,6 +35,8 @@ typedef struct
 } PyGvShape;
 
 PyTypeObject G_GNUC_INTERNAL PyGvShape_Type;
+
+/* ----------- PyGvShape object methods ----------- */
 
 static PyObject *
 pygv_shape_from_shape(GvShape *shape)
@@ -25,13 +51,6 @@ pygv_shape_from_shape(GvShape *shape)
         PyErr_SetString(PyExc_RuntimeError, "could not create Shape object");
         return NULL;
     }
-}
-
-static void
-_PyGvShape_dealloc(PyGvShape* self)
-{
-    gv_shape_delete(self->_o);
-    self->ob_type->tp_free((PyObject*)self);
 }
 
 static int
@@ -96,51 +115,7 @@ _PyGvShape_setattro(PyGvShape *self, PyObject *name, PyObject *value)
     return 0;
 }
 
-static PyObject *
-_wrap_gv_shape_from_xml(PyGvShape *self, PyObject *args)
-{
-    GvShape     *shape;
-    CPLXMLNode  *cpl_tree;
-    PyObject    *py_tree = NULL;
-
-    if (!PyArg_ParseTuple(args, "O!:GvShape.from_xml", &PyList_Type, &py_tree))
-        return NULL;
-
-    cpl_tree = PyListToXMLTree(py_tree);
-    
-    shape = gv_shape_from_xml_tree(cpl_tree);
-    if (shape != NULL)
-        return pygv_shape_from_shape(shape);
-    else {
-        PyErr_SetString(PyExc_ValueError, "XML translation to GvShape filed.");
-        return NULL;
-    }
-}
-
-static PyObject *
-_wrap_gv_shape_to_xml(PyGvShape *self)
-{
-    CPLXMLNode *psTree;
-    PyObject *py_xml = NULL;
-
-    if (self->_o == NULL)
-        return NULL;
-
-    psTree = gv_shape_to_xml_tree(self->_o);
-    py_xml = XMLTreeToPyList(psTree);
-    CPLDestroyXMLNode(psTree);
-
-    return py_xml;
-}
-
-static PyObject *
-_wrap_gv_shape_destroy(PyGvShape *self)
-{
-    gv_shape_delete(self->_o);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
+/* ----------- GvShape methods ----------- */
 
 static PyObject *
 _wrap_gv_shape_ref(PyGvShape *self)
@@ -181,22 +156,125 @@ _wrap_gv_shape_copy(PyGvShape *self)
 }
 
 static PyObject *
-_wrap_gv_shape_get_property(PyGvShape *self, PyObject *args, PyObject *kwargs)
+_wrap_gv_shape_get_shape_type(PyGvShape *self)
+{
+    return Py_BuildValue("i", gv_shape_type(self->_o));
+}
+
+static PyObject *
+_wrap_gv_shape_get_rings(PyGvShape *self)
+{
+    return Py_BuildValue("i", gv_shape_get_rings(self->_o));
+}
+
+static PyObject *
+_wrap_gv_shape_get_nodes(PyGvShape *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "ring", NULL };
+    int      ring = 0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:GvShape.get_nodes",
+                                    kwlist, &ring))
+        return NULL;
+
+    return Py_BuildValue("i", gv_shape_get_nodes(self->_o, ring));
+}
+
+static PyObject *
+_wrap_gv_shape_add_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
+{
+    static char *kwlist[] = { "x", "y", "z", "ring", NULL };
+    int        ring = 0;
+    double x=0.0, y=0.0, z=0.0;
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd|di:GvShape.add_node",
+                                    kwlist, &x, &y, &z, &ring))
+        return NULL;
+
+    return Py_BuildValue("i", gv_shape_add_node(self->_o, ring, x, y, z));
+}
+
+static PyObject *
+_wrap_gv_shape_point_in_polygon(PyGvShape *self, PyObject *args)
+{
+    double  x, y;
+
+    if (!PyArg_ParseTuple(args, "dd:GvShape.point_in_polygon", &x, &y))
+        return NULL;
+
+    return Py_BuildValue("i", gv_shape_point_in_polygon(self->_o, x, y));
+}
+
+static PyObject *
+_wrap_gv_shape_distance_from_polygon(PyGvShape *self, PyObject *args)
+{
+    double  x, y;
+
+    if (!PyArg_ParseTuple(args, "dd:GvShape.distance_from_polygon", &x, &y))
+        return NULL;
+
+    return Py_BuildValue("d", gv_shape_distance_from_polygon(self->_o, x, y));
+}
+
+static PyObject *
+_wrap_gv_shape_clip_to_rect(PyGvShape *self, PyObject *args)
+{
+    double  x, y, width, height;
+    GvRect      rect;
+    GvShape *new_shape;
+
+    if (!PyArg_ParseTuple(args, "dddd:GvShape.clip_to_rect", &x, &y, &width, &height))
+        return NULL;
+
+    rect.x = x;
+    rect.y = y;
+    rect.width = width;
+    rect.height = height;
+
+    new_shape = gv_shape_clip_to_rect(self->_o, &rect);
+
+    if (new_shape != NULL)
+        return pygv_shape_from_shape(new_shape);
+    else {
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
+}
+
+static PyObject *
+_wrap_gv_shape_collection_get_count(PyGvShape *self)
+{
+    return Py_BuildValue( "i", gv_shape_collection_get_count(self->_o) );
+}
+
+/* ----------- PyGvShape methods ----------- */
+
+static PyObject *
+pygv_shape_destroy(PyGvShape *self)
+{
+    gv_shape_delete(self->_o);
+
+    Py_INCREF(Py_None);
+    return Py_None;
+}
+
+static PyObject *
+pygv_shape_get_property(PyGvShape *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "property_name", "default_value", NULL };
     char *key;
-    PyObject *default_value;
+    char *default_value = NULL;
     const char *value = NULL;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|O:GvShape.get_property",
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|s:GvShape.get_property",
                                     kwlist, &key, &default_value))
         return NULL;
 
     value = gv_properties_get( gv_shape_get_properties(self->_o), key );
     if (value != NULL)
-        return Py_BuildValue("s", value);
+        return PyString_FromString(value);
     else if (default_value != NULL)
-        return default_value;
+        return PyString_FromString(default_value);
     else
     {
         Py_INCREF(Py_None);
@@ -205,7 +283,7 @@ _wrap_gv_shape_get_property(PyGvShape *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-_wrap_gv_shape_get_properties(PyGvShape *self)
+pygv_shape_get_properties(PyGvShape *self)
 {
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
@@ -239,7 +317,7 @@ _wrap_gv_shape_get_properties(PyGvShape *self)
 }
 
 static PyObject *
-_wrap_gv_shape_get_typed_property(PyGvShape *self, PyObject *args)
+pygv_shape_get_typed_property(PyGvShape *self, PyObject *args)
 {
     GvProperties *properties = NULL;
     char *field = NULL, *ftype = "string";
@@ -267,7 +345,7 @@ _wrap_gv_shape_get_typed_property(PyGvShape *self, PyObject *args)
 }
 
 static PyObject *
-_wrap_gv_shape_get_typed_properties(PyGvShape *self, PyObject *args)
+pygv_shape_get_typed_properties(PyGvShape *self, PyObject *args)
 {
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
@@ -323,23 +401,7 @@ _wrap_gv_shape_get_typed_properties(PyGvShape *self, PyObject *args)
 }
 
 static PyObject *
-_wrap_gv_shape_set_property(PyGvShape *self, PyObject *args)
-{
-    char *name=NULL, *value=NULL;
-    GvProperties *properties = NULL;
-
-    if (!PyArg_ParseTuple(args, "ss:GvShape.set_property", &name, &value))
-        return NULL;
-
-    properties = gv_shape_get_properties(self->_o);
-    gv_properties_set(properties, name, value);
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gv_shape_set_properties(PyGvShape *self, PyObject *args)
+pygv_shape_set_properties(PyGvShape *self, PyObject *args)
 {
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
@@ -371,60 +433,23 @@ _wrap_gv_shape_set_properties(PyGvShape *self, PyObject *args)
 }
 
 static PyObject *
-_wrap_gv_shape_get_shape_type(PyGvShape *self)
+pygv_shape_set_property(PyGvShape *self, PyObject *args)
 {
-    return Py_BuildValue("i", gv_shape_type(self->_o));
-}
+    char *name=NULL, *value=NULL;
+    GvProperties *properties = NULL;
 
-static PyObject *
-_wrap_gv_shape_get_rings(PyGvShape *self)
-{
-    return Py_BuildValue("i", gv_shape_get_rings(self->_o));
-}
-
-static PyObject *
-_wrap_gv_shape_get_nodes(PyGvShape *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "ring", NULL };
-    int      ring = 0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|i:GvShape.get_nodes",
-                                    kwlist, &ring))
+    if (!PyArg_ParseTuple(args, "ss:GvShape.set_property", &name, &value))
         return NULL;
 
-    return Py_BuildValue("i", gv_shape_get_nodes(self->_o, ring));
+    properties = gv_shape_get_properties(self->_o);
+    gv_properties_set(properties, name, value);
+
+    Py_INCREF(Py_None);
+    return Py_None;
 }
 
 static PyObject *
-_wrap_gv_shape_add_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "x", "y", "z", "ring", NULL };
-    int        ring = 0;
-    double x=0.0, y=0.0, z=0.0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd|di:GvShape.add_node",
-                                    kwlist, &x, &y, &z, &ring))
-        return NULL;
-
-    return Py_BuildValue("i", gv_shape_add_node(self->_o, ring, x, y, z));
-}
-
-static PyObject *
-_wrap_gv_shape_set_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "x", "y", "z", "node", "ring", NULL };
-    int        ring = 0, node = 0;
-    double x=0.0, y=0.0, z=0.0;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd|dii:GvShape.set_node",
-                                    kwlist, &x, &y, &z, &node, &ring))
-        return NULL;
-
-    return Py_BuildValue("i", gv_shape_set_xyz(self->_o, ring, node, x, y, z));
-}
-
-static PyObject *
-_wrap_gv_shape_get_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
+pygv_shape_get_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "node", "ring", NULL };
     int ring = 0, node = 0;
@@ -440,55 +465,21 @@ _wrap_gv_shape_get_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
 }
 
 static PyObject *
-_wrap_gv_shape_point_in_polygon(PyGvShape *self, PyObject *args)
+pygv_shape_set_node(PyGvShape *self, PyObject *args, PyObject *kwargs)
 {
-    double  x, y;
+    static char *kwlist[] = { "x", "y", "z", "node", "ring", NULL };
+    int        ring = 0, node = 0;
+    double x=0.0, y=0.0, z=0.0;
 
-    if (!PyArg_ParseTuple(args, "dd:GvShape.point_in_polygon", &x, &y))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "dd|dii:GvShape.set_node",
+                                    kwlist, &x, &y, &z, &node, &ring))
         return NULL;
 
-    return Py_BuildValue("i", gv_shape_point_in_polygon(self->_o, x, y));
+    return Py_BuildValue("i", gv_shape_set_xyz(self->_o, ring, node, x, y, z));
 }
 
 static PyObject *
-_wrap_gv_shape_distance_from_polygon(PyGvShape *self, PyObject *args)
-{
-    double  x, y;
-
-    if (!PyArg_ParseTuple(args, "dd:GvShape.distance_from_polygon", &x, &y))
-        return NULL;
-
-    return Py_BuildValue("d", gv_shape_distance_from_polygon(self->_o, x, y));
-}
-
-static PyObject *
-_wrap_gv_shape_clip_to_rect(PyGvShape *self, PyObject *args)
-{
-    double  x, y, width, height;
-
-    if (!PyArg_ParseTuple(args, "dddd:GvShape.clip_to_rect", &x, &y, &width, &height))
-        return NULL;
-
-    GvRect      rect;
-    GvShape *new_shape;
-
-    rect.x = x;
-    rect.y = y;
-    rect.width = width;
-    rect.height = height;
-
-    new_shape = gv_shape_clip_to_rect(self->_o, &rect);
-
-    if (new_shape != NULL)
-        return pygv_shape_from_shape(new_shape);
-    else {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-}
-
-static PyObject *
-_wrap_gv_shape_add_shape(PyGvShape *self, PyObject *args)
+pygv_shape_add_shape(PyGvShape *self, PyObject *args)
 {
     PyObject *py_sub_shape;
 
@@ -502,13 +493,7 @@ _wrap_gv_shape_add_shape(PyGvShape *self, PyObject *args)
 }
 
 static PyObject *
-_wrap_gv_shape_collection_get_count(PyGvShape *self)
-{
-    return Py_BuildValue( "i", gv_shape_collection_get_count(self->_o) );
-}
-
-static PyObject *
-_wrap_gv_shape_get_shape(PyGvShape *self, PyObject *args)
+pygv_shape_get_shape(PyGvShape *self, PyObject *args)
 {
     int shape_index;
     GvShape *shape;
@@ -525,23 +510,49 @@ _wrap_gv_shape_get_shape(PyGvShape *self, PyObject *args)
     }
 }
 
-/* 
- * static PySequenceMethods _wrap_gv_shape_tp_as_sequence = {
- *     0,
- *     0,
- *     0,
- *     0,
- *     0,
- *     0,
- *     0,
- *     0,
- * };
- */
+static PyObject *
+pygv_shape_serialize(PyGvShape *self)
+{
+    CPLXMLNode *psTree;
+    PyObject *py_xml = NULL;
+
+    if (self->_o == NULL)
+        return NULL;
+
+    psTree = gv_shape_to_xml_tree(self->_o);
+    py_xml = XMLTreeToPyList(psTree);
+    CPLDestroyXMLNode(psTree);
+
+    return py_xml;
+}
+
+static PyObject *
+pygv_shape_from_xml(PyGvShape *self, PyObject *args)
+{
+    GvShape     *shape;
+    CPLXMLNode  *cpl_tree;
+    PyObject    *py_tree = NULL;
+
+    if (!PyArg_ParseTuple(args, "O!:GvShape.from_xml", &PyList_Type, &py_tree))
+        return NULL;
+
+    cpl_tree = PyListToXMLTree(py_tree);
+    
+    shape = gv_shape_from_xml_tree(cpl_tree);
+    if (shape != NULL)
+        return pygv_shape_from_shape(shape);
+    else {
+        PyErr_SetString(PyExc_ValueError, "XML translation to GvShape filed.");
+        return NULL;
+    }
+}
+
+/* ----------- PyGvShape object definitions ----------- */
 
 static const PyMethodDef _PyGvShape_methods[] = {
     { "add_node", (PyCFunction)_wrap_gv_shape_add_node, METH_VARARGS|METH_KEYWORDS,
       NULL },
-    { "add_shape", (PyCFunction)_wrap_gv_shape_add_shape, METH_VARARGS,
+    { "add_shape", (PyCFunction)pygv_shape_add_shape, METH_VARARGS,
       NULL },
     { "clip_to_rect", (PyCFunction)_wrap_gv_shape_clip_to_rect, METH_VARARGS,
       NULL },
@@ -549,61 +560,47 @@ static const PyMethodDef _PyGvShape_methods[] = {
       NULL },
     { "copy", (PyCFunction)_wrap_gv_shape_copy, METH_NOARGS,
       NULL },
-    { "destroy", (PyCFunction)_wrap_gv_shape_destroy, METH_NOARGS,
+    { "destroy", (PyCFunction)pygv_shape_destroy, METH_NOARGS,
       NULL },
     { "distance_from_polygon", (PyCFunction)_wrap_gv_shape_distance_from_polygon, METH_VARARGS,
       NULL },
-    { "from_xml", (PyCFunction)_wrap_gv_shape_from_xml, METH_VARARGS,
+    { "from_xml", (PyCFunction)pygv_shape_from_xml, METH_VARARGS,
       NULL },
-    { "get_node", (PyCFunction)_wrap_gv_shape_get_node, METH_VARARGS|METH_KEYWORDS,
+    { "get_node", (PyCFunction)pygv_shape_get_node, METH_VARARGS|METH_KEYWORDS,
       NULL },
     { "get_nodes", (PyCFunction)_wrap_gv_shape_get_nodes, METH_VARARGS|METH_KEYWORDS,
       NULL },
-    { "get_properties", (PyCFunction)_wrap_gv_shape_get_properties, METH_NOARGS,
+    { "get_properties", (PyCFunction)pygv_shape_get_properties, METH_NOARGS,
       NULL },
-    { "get_property", (PyCFunction)_wrap_gv_shape_get_property, METH_VARARGS|METH_KEYWORDS,
+    { "get_property", (PyCFunction)pygv_shape_get_property, METH_VARARGS|METH_KEYWORDS,
       NULL },
     { "get_ref", (PyCFunction)_wrap_gv_shape_get_ref, METH_NOARGS,
       NULL },
     { "get_rings", (PyCFunction)_wrap_gv_shape_get_rings, METH_NOARGS,
       NULL },
-    { "get_shape", (PyCFunction)_wrap_gv_shape_get_shape, METH_VARARGS,
+    { "get_shape", (PyCFunction)pygv_shape_get_shape, METH_VARARGS,
       NULL },
     { "get_shape_type", (PyCFunction)_wrap_gv_shape_get_shape_type, METH_NOARGS,
       NULL },
-    { "get_typed_properties", (PyCFunction)_wrap_gv_shape_get_typed_properties, METH_VARARGS,
+    { "get_typed_properties", (PyCFunction)pygv_shape_get_typed_properties, METH_VARARGS,
       NULL },
-    { "get_typed_property", (PyCFunction)_wrap_gv_shape_get_typed_property, METH_VARARGS,
+    { "get_typed_property", (PyCFunction)pygv_shape_get_typed_property, METH_VARARGS,
       NULL },
     { "ref", (PyCFunction)_wrap_gv_shape_ref, METH_NOARGS,
       NULL },
     { "point_in_polygon", (PyCFunction)_wrap_gv_shape_point_in_polygon, METH_VARARGS,
       NULL },
-    { "set_node", (PyCFunction)_wrap_gv_shape_set_node, METH_VARARGS|METH_KEYWORDS,
+    { "serialize", (PyCFunction)pygv_shape_serialize, METH_NOARGS,
       NULL },
-    { "set_properties", (PyCFunction)_wrap_gv_shape_set_properties, METH_VARARGS,
+    { "set_node", (PyCFunction)pygv_shape_set_node, METH_VARARGS|METH_KEYWORDS,
       NULL },
-    { "set_property", (PyCFunction)_wrap_gv_shape_set_property, METH_VARARGS,
+    { "set_properties", (PyCFunction)pygv_shape_set_properties, METH_VARARGS,
       NULL },
-    { "to_xml", (PyCFunction)_wrap_gv_shape_to_xml, METH_NOARGS,
+    { "set_property", (PyCFunction)pygv_shape_set_property, METH_VARARGS,
       NULL },
     { "unref", (PyCFunction)_wrap_gv_shape_unref, METH_NOARGS,
       NULL },
     { NULL, NULL, 0, NULL }
-};
-
-static PyObject *
-_PyGvShape_get_o(PyGvShape *self, void *closure)
-{
-    g_print("%p", self->_o);
-//~     Py_INCREF(self->_o);
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static const PyGetSetDef _PyGvShape_getsets[] = {
-    { "_o", (getter)_PyGvShape_get_o, (setter)0 },
-    { NULL, (getter)0, (setter)0 },
 };
 
 PyTypeObject G_GNUC_INTERNAL PyGvShape_Type = {

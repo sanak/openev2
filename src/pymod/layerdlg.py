@@ -165,7 +165,7 @@ class LayerDlg(gtk.Window,Signaler):
         """ Form a view for the ListModel """
         self.tree_view = gtk.TreeView( model )
 
-	self.renderer0 = gtk.CellRendererPixbuf()
+        self.renderer0 = gtk.CellRendererPixbuf()
         self.renderer1 = gtk.CellRendererText()
         self.renderer1.set_property( 'editable', False )
         self.renderer0.set_fixed_size( EYE_W, THUMB_H + 4)

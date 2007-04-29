@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  manage file-based symbols
  * Author:   Paul Spencer (pgs@magma.ca)
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2002, Paul Spencer
@@ -24,41 +25,15 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvsymbolmanager.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.5  2003/09/02 17:25:08  warmerda
- * Added _has_symbol(), and _get_names() methods.  Use outside GvShape
- * serialize/deserialize code.  Don't store symbols with absolute paths in
- * the hash.
- *
- * Revision 1.4  2003/04/08 11:56:32  andrey_kiselev
- * Implemented gv_symbol_manager_save_vector_symbol() function.
- *
- * Revision 1.3  2003/02/28 16:46:46  warmerda
- * added partial support for vector symbols
- *
- * Revision 1.2  2003/01/08 03:25:40  warmerda
- * fiddle with include files for win build
- *
- * Revision 1.1  2002/11/14 20:10:41  warmerda
- * New
- *
- *
  */
 
 #ifndef __GV_SYMBOL_H__
 #define __GV_SYMBOL_H__
 
 #include <gtk/gtkgl.h>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 #include <GL/gl.h>
 #include "gvtypes.h"
 #include "gvshapes.h"

@@ -1,10 +1,11 @@
 /******************************************************************************
- * $Id: gvrasterize.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  CIETMAP / OpenEV
  * Purpose:  Vector rasterization code high level API (initially GvAreaShapes
  *           to GDAL raster).
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Frank Warmerdam
@@ -24,32 +25,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvrasterize.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.5  2004/11/19 23:59:37  gmwalter
- * Check in Aude's rasterization updates.
- *
- * Revision 1.4  2001/03/29 14:59:56  warmerda
- * added fill_short flag to control handling of slivers
- *
- * Revision 1.3  2000/12/04 01:21:48  warmerda
- * fixed allocation of panParts
- *
- * Revision 1.2  2000/09/15 02:21:10  warmerda
- * Fixed off by one error in gvrasterize.c
- *
- * Revision 1.1  2000/09/15 01:29:04  warmerda
- * New
  *
  */
 
@@ -95,7 +70,7 @@ void gvBurnScanline( void *pCBData, int nY, int nXStart, int nXEnd )
     }
     else
     {
-        int	nPixels = nXEnd - nXStart + 1;
+        int     nPixels = nXEnd - nXStart + 1;
         float   *pafInsert;
 
         pafInsert = ((float *) psInfo->pabyChunkBuf) 
@@ -140,7 +115,7 @@ gv_rasterize_one_shape( unsigned char * pabyChunkBuf, int nYOff, int nYSize,
     }
 
     pasPoints = (llPoint *) CPLMalloc(sizeof(llPoint) * nPoints);
-    
+
 /* -------------------------------------------------------------------- */
 /*      Transform points, taking into account our chunk buffer offset.  */
 /* -------------------------------------------------------------------- */
@@ -151,14 +126,14 @@ gv_rasterize_one_shape( unsigned char * pabyChunkBuf, int nYOff, int nYSize,
 
         for( node = 0; node < panPartSize[i]; node++ )
         {
-            double	dfX, dfY, dfZ;
-            int		nX, nY;
+            double      dfX, dfY, dfZ;
+            int         nX, nY;
 
             dfX = gv_shape_get_x( shape, i, node );
             dfY = gv_shape_get_y( shape, i, node );
             dfZ = 0.0;
             gv_raster_georef_to_pixel( raster, &dfX, &dfY, &dfZ );
-            
+
             nX = (int) dfX;
             nY = ((int) dfY) - nYOff;
 
@@ -223,7 +198,7 @@ gv_rasterize_new_one_shape( unsigned char * pabyChunkBuf, int nYOff, int nYSize,
     }
 
     pasPoints = (dllPoint *) CPLMalloc(sizeof(dllPoint) * nPoints);
-    
+
 /* -------------------------------------------------------------------- */
 /*      Transform points, taking into account our chunk buffer offset.  */
 /* -------------------------------------------------------------------- */
@@ -234,14 +209,14 @@ gv_rasterize_new_one_shape( unsigned char * pabyChunkBuf, int nYOff, int nYSize,
 
         for( node = 0; node < panPartSize[i]; node++ )
         {
-            double	dfX, dfY, dfZ;
+            double      dfX, dfY, dfZ;
 
 
             dfX = gv_shape_get_x( shape, i, node );
             dfY = gv_shape_get_y( shape, i, node );
             dfZ = 0.0;
             gv_raster_georef_to_pixel( raster, &dfX, &dfY, &dfZ );
-    
+
 
             if( node == 0
                 || pasPoints[nPoints-1].x != dfX 
@@ -314,7 +289,7 @@ int gv_raster_rasterize_shapes( GvRaster *raster,
 /* ==================================================================== */
     for( iY = 0; iY < raster->height; iY += nYChunkSize )
     {
-        int	nThisYChunkSize;
+        int     nThisYChunkSize;
         int     iShape;
 
         nThisYChunkSize = nYChunkSize;
@@ -344,7 +319,7 @@ int gv_raster_rasterize_shapes( GvRaster *raster,
                       pabyChunkBuf, raster->width, nThisYChunkSize, eType, 
                       0, 0 );
     }
-    
+
     VSIFree( pabyChunkBuf );
 
 /* -------------------------------------------------------------------- */
@@ -360,4 +335,3 @@ int gv_raster_rasterize_shapes( GvRaster *raster,
 
     return TRUE;
 }
-

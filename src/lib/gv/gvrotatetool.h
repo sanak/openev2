@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvrotatetool.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Rotation and Scaling editing mode.
  * Author:   Frank Warmerdam, warmerdam@pobox.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2003, Frank Warmerdam <warmerdam@pobox.com>
@@ -24,20 +25,6 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrotatetool.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.1  2003/06/25 16:40:44  warmerda
- * New
- *
  */
 
 #ifndef __GV_ROTATE_TOOL_H__
@@ -47,10 +34,10 @@
 #include "gvshapeslayer.h"
 
 #define GV_TYPE_ROTATE_TOOL            (gv_rotate_tool_get_type ())
-#define GV_ROTATE_TOOL(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_ROTATE_TOOL, GvRotateTool))
-#define GV_ROTATE_TOOL_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_ROTATE_TOOL, GvRotateToolClass))
-#define GV_IS_ROTATE_TOOL(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_ROTATE_TOOL))
-#define GV_IS_ROTATE_TOOL_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_ROTATE_TOOL))
+#define GV_ROTATE_TOOL(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_ROTATE_TOOL, GvRotateTool))
+#define GV_ROTATE_TOOL_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_ROTATE_TOOL, GvRotateToolClass))
+#define GV_IS_ROTATE_TOOL(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_ROTATE_TOOL))
+#define GV_IS_ROTATE_TOOL_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_ROTATE_TOOL))
 
 typedef struct _GvRotateTool       GvRotateTool;
 typedef struct _GvRotateToolClass  GvRotateToolClass;
@@ -81,12 +68,9 @@ struct _GvRotateToolClass
     GvToolClass parent_class;
 };
 
-GtkType gv_rotate_tool_get_type(void);
+GType gv_rotate_tool_get_type(void);
 GvTool* gv_rotate_tool_new(void);
 void gv_rotate_tool_set_layer(GvRotateTool *tool, GvShapeLayer *layer);
 void gv_rotate_tool_set_named_layer(GvRotateTool *tool, gchar *name);
 
 #endif /* __GV_ROTATE_TOOL_H__ */
-
-
-

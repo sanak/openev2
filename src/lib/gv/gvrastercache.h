@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvrastercache.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  GvRaster tile caching.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,27 +25,12 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrastercache.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.10  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef __GV_RASTER_CACHE_H__
 #define __GV_RASTER_CACHE_H__
 
-#include <gtk/gtk.h>
-
+#include <glib.h>
 
 typedef struct _gv_raster_cache gv_raster_cache;
 typedef struct _gv_raster_cache_tile gv_raster_cache_tile;

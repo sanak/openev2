@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Vector shape container class.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -23,73 +24,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvshapes.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.20  2005/01/14 16:51:51  gmwalter
- * Checked in Aude's gv_shapes_add_shape_last function
- * (allows shapes to be added without repeating
- * indices if others have been deleted).
- *
- * Revision 1.19  2004/02/20 10:40:36  andrey_kiselev
- * Use gv_raster_get_nodata() instead of GDALGetNoDataValue().
- *
- * Revision 1.18  2003/02/27 03:55:06  warmerda
- * improved debug calls
- *
- * Revision 1.17  2003/01/06 21:20:03  warmerda
- * added gv_shapes_from_ogr_layer
- *
- * Revision 1.16  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.15  2002/03/07 02:31:56  warmerda
- * added default_height to add_height functions
- *
- * Revision 1.14  2001/08/08 17:45:48  warmerda
- * GvShape now referenced counted
- *
- * Revision 1.13  2001/08/07 20:48:05  warmerda
- * report the creation of GvShapes
- *
- * Revision 1.12  2001/03/29 03:39:33  warmerda
- * improved add_height() to look around a bit when facing nodata values
- *
- * Revision 1.11  2001/01/26 13:57:13  warmerda
- * fixed serious bugs in add_height code (x/y transformed)
- *
- * Revision 1.10  2001/01/18 16:48:14  warmerda
- * added gv_shapes_add_height() and wrappers
- *
- * Revision 1.9  2000/08/08 20:09:41  warmerda
- * added finalize debug statement
- *
- * Revision 1.8  2000/08/04 18:38:00  warmerda
- * make some operations safer with illegal shapeids
- *
- * Revision 1.7  2000/08/04 14:14:12  warmerda
- * GvShapes shape ids now persistent
- *
- * Revision 1.6  2000/07/14 14:51:01  warmerda
- * fixed insert, and delete node support
- *
- * Revision 1.5  2000/07/13 19:08:37  warmerda
- * added coping optional for gv_shapes_replace_shapes
- *
- * Revision 1.4  2000/06/28 13:10:42  warmerda
- * added preliminary OGR support
- *
- * Revision 1.3  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -115,7 +49,6 @@ static void gv_shapes_set_memento(GvData *points, GvDataMemento *memento);
 static void gv_shapes_del_memento(GvData *points, GvDataMemento *memento);
 static void gv_shapes_changed(GvData *points, gpointer data);
 static void gv_shapes_finalize(GObject *gobject);
-static void gv_shapes_dispose(GObject *gobject);
 
 static GvDataClass *parent_class = NULL;
 
@@ -161,7 +94,7 @@ gv_shapes_class_init(GvShapesClass *klass)
 
     parent_class = g_type_class_peek_parent (klass);
 
-    object_class->dispose = gv_shapes_dispose;
+    object_class->finalize = gv_shapes_finalize;
 
     data_class->changed = gv_shapes_changed;
     data_class->get_memento = gv_shapes_get_memento;
@@ -172,11 +105,7 @@ gv_shapes_class_init(GvShapesClass *klass)
 GvData *
 gv_shapes_new(void)
 {
-    GvShapes *shapes;
-
-    shapes = g_object_new(GV_TYPE_SHAPES, NULL);
-
-    CPLDebug( "OpenEV", "gv_shapes_new(%p)", shapes );
+    GvShapes *shapes = g_object_new(GV_TYPE_SHAPES, NULL);
 
     return GV_DATA(shapes);
 }
@@ -217,7 +146,7 @@ gv_shapes_add_shape(GvShapes *shapes, GvShape *new_shape)
 
     /* notify of completed change */
     gv_data_changed(GV_DATA(shapes), &change_info);
-    
+
     return shape_id;
 }
 
@@ -247,7 +176,7 @@ gv_shapes_add_shape_last(GvShapes *shapes, GvShape *new_shape)
 
     /* notify of completed change */
     gv_data_changed(GV_DATA(shapes), &change_info);
-    
+
     return shape_id;
 }
 
@@ -310,7 +239,7 @@ gv_shapes_translate_shapes(GvShapes *shapes, gint num_shapes, gint *id_list,
         shape = gv_shapes_get_shape(shapes,id_list[i]);
         if( shape == NULL )
             continue;
-        
+
         for( ring = gv_shape_get_rings(shape)-1; ring >= 0; ring-- )
         {
             int    node;
@@ -569,9 +498,6 @@ gv_shapes_finalize(GObject *gobject)
     GvShapes *shapes = GV_SHAPES(gobject);
     int          i;
 
-    CPLDebug( "OpenEV", "gv_shapes_finalize(%s/%p)", 
-              gv_data_get_name( GV_DATA(gobject) ), gobject );
-
     if (shapes->shapes != NULL) {
       for( i = 0; i < gv_shapes_num_shapes(shapes); i++ )
         {
@@ -585,16 +511,6 @@ gv_shapes_finalize(GObject *gobject)
 
     /* Call parent class finalize */
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
-}
-
-static void
-gv_shapes_dispose(GObject *gobject)
-{
-    CPLDebug( "OpenEV", "gv_shapes_dispose(%s/%p)", 
-              gv_data_get_name( GV_DATA(gobject) ), gobject );
-
-    /* Call parent class dispose */
-    G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
 
 #ifndef HAVE_OGR
@@ -655,7 +571,7 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
     {
         GvShape *shape = gv_shapes_get_shape(shapes,i);
         int     ring, ring_count = gv_shape_get_rings( shape );
-        
+
         if( shape == NULL )
             continue;
 

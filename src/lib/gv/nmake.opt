@@ -1,9 +1,0 @@
-NM_ROOT=$(GVIEW_ROOT)\..\PKGSRC
-
-!INCLUDE $(NM_ROOT)/nmake.opt
-
-GV_OPTFLAGS = /nologo /Ox
-#GV_OPTFLAGS = /nologo /Zi /MD /Fd$(GVIEW_ROOT)\openev.pdb
-
-#GV_OPTFLAGS = $(NM_OPTFLAGS)
-

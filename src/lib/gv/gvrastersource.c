@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Code related to handling of GvRasterSource on a GvRasterLayer.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -23,68 +24,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvrastersource.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.16  2004/06/23 14:35:05  gmwalter
- * Added support for multi-band complex imagery.
- *
- * Revision 1.15  2004/04/02 17:01:02  gmwalter
- * Updated nodata support for complex and
- * rgb data.
- *
- * Revision 1.14  2004/02/20 12:32:23  andrey_kiselev
- * Use turn on alfa blending in gv_raster_layer_nodata_set().
- *
- * Revision 1.13  2004/02/18 16:55:32  andrey_kiselev
- * Don't change the min/max levels in gv_raster_layer_set_source().
- *
- * Revision 1.12  2004/02/17 14:28:43  warmerda
- * check for NULL data in layer
- *
- * Revision 1.11  2004/01/22 20:45:27  andrey_kiselev
- * Added methods gv_raster_layer_nodata_set() and gv_raster_layer_nodata_get() to
- * work with nodata_* layer properties and method gv_raster_layer_type_get() to
- * query raster data type.
- *
- * Revision 1.10  2003/03/06 22:55:58  gmwalter
- * Fix pure phase display to remove residual dependence on magnitude.
- *
- * Revision 1.9  2001/10/19 13:30:58  warmerda
- * include gvrasterlut.h for compose call
- *
- * Revision 1.8  2001/10/17 16:23:52  warmerda
- * added support for composing complex lut and pct
- *
- * Revision 1.7  2001/01/30 19:34:11  warmerda
- * added gv_raster_layer_purge_all_textures calls
- *
- * Revision 1.6  2000/08/25 20:11:07  warmerda
- * added preliminary nodata support
- *
- * Revision 1.5  2000/08/16 20:58:46  warmerda
- * produce proper constant complex images
- *
- * Revision 1.4  2000/08/09 17:38:23  warmerda
- * keep reference on source GvRasters
- *
- * Revision 1.3  2000/08/02 19:17:21  warmerda
- * return NULL on illegal source in get_data()
- *
- * Revision 1.2  2000/06/27 21:26:24  warmerda
- * removed use of invalidated
- *
- * Revision 1.1  2000/06/23 12:51:07  warmerda
- * New
  *
  */
 
@@ -180,7 +119,7 @@ gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
                 temp_q *= 0.5 / fabs( temp_i );
                 temp_i = 0.5 * sign( temp_i );
             }
-            
+
             if( fabs( temp_q ) > 0.5 )
             {
                 temp_i *= 0.5 / fabs( temp_q );
@@ -400,7 +339,7 @@ gv_raster_layer_srctile_check_nodata( GvRasterSource *source, int pixels,
         g_warning( "unhandled type in gv_raster_layer_srctile_check_nodata()");
     }
 }
-                                      
+
 
 unsigned char *
 gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
@@ -437,7 +376,7 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
             || source->max != 255.0 )
         {
             *needs_free = TRUE;
-            
+
             if (( layer->mode == GV_RLM_COMPLEX ) &&
                 (gv_data_get_property( GV_DATA(layer),"last_complex_lut" ) != NULL) &&
                 (strcmp(gv_data_get_property( GV_DATA(layer),"last_complex_lut" ),"phase") == 0))
@@ -771,8 +710,9 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
 
     /* Manage a reference for each source */
 
-    if( source->data != NULL )
+    if( source->data != NULL ) {
         g_object_unref( source->data );
+    }
 
     source->data = data;
     if( data != NULL )
@@ -786,7 +726,7 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
     source->nodata_active = nodata_active;
     source->nodata_real = nodata_real;
     source->nodata_imaginary = nodata_imaginary;
-    
+
     if( source->lut != NULL )
     {
         g_free( source->lut );
@@ -804,7 +744,7 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
         g_free( source->lut_rgba_composed );
         source->lut_rgba_composed = NULL;
     }
-        
+
     gv_raster_layer_purge_all_textures( layer );
     gv_layer_display_change( GV_LAYER(layer), NULL );
 
@@ -822,4 +762,3 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
 
     return 0;
 }
-

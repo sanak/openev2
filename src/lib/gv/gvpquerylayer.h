@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvpquerylayer.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Point query layer.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,23 +25,6 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvpquerylayer.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.5  2004/08/20 13:53:48  warmerda
- * allow GvShapes to be passed into constructor
- *
- * Revision 1.4  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef __GV_PQUERY_LAYER_H__
@@ -49,10 +33,10 @@
 #include "gvshapeslayer.h"
 
 #define GV_TYPE_PQUERY_LAYER            (gv_pquery_layer_get_type ())
-#define GV_PQUERY_LAYER(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_PQUERY_LAYER, GvPqueryLayer))
-#define GV_PQUERY_LAYER_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_PQUERY_LAYER, GvPqueryLayerClass))
-#define GV_IS_PQUERY_LAYER(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_PQUERY_LAYER))
-#define GV_IS_PQUERY_LAYER_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_PQUERY_LAYER))
+#define GV_PQUERY_LAYER(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_PQUERY_LAYER, GvPqueryLayer))
+#define GV_PQUERY_LAYER_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_PQUERY_LAYER, GvPqueryLayerClass))
+#define GV_IS_PQUERY_LAYER(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_PQUERY_LAYER))
+#define GV_IS_PQUERY_LAYER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_PQUERY_LAYER))
 
 /*
  * Properties for storing label shift from point
@@ -75,11 +59,11 @@ struct _GvPqueryLayerClass
     GvShapesLayerClass parent_class;
 };
 
-GtkType gv_pquery_layer_get_type(void);
-GtkObject* gv_pquery_layer_new(GvShapes *shapes);
+GType gv_pquery_layer_get_type(void);
+GObject* gv_pquery_layer_new(GvShapes *shapes);
 void gv_pquery_layer_draw_shape(GvViewArea *view, GvShapesLayer *layer,
-				int part_index, GvShape *shape_obj, 
-				gv_draw_mode draw_mode,
-				GvShapeDrawInfo *drawinfo);
+                                int part_index, GvShape *shape_obj, 
+                                gv_draw_mode draw_mode,
+                                GvShapeDrawInfo *drawinfo);
 
 #endif /* __GV_PQUERY_LAYER_H__ */

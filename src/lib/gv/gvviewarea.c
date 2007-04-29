@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  GTK/OpenGL View Canvas
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * New GTK2 GL Usage:
@@ -50,276 +51,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvviewarea.c,v $
- * Revision 1.2  2005/04/21 19:40:18  uid1026
- * removed create_thumbnail for all platforms, not just win, pending multiplatform gtk2 solution
- *
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.125  2005/01/14 15:27:26  warmerda
- * added flip flag access
- *
- * Revision 1.124  2004/08/20 18:01:14  warmerda
- * Ensure that adding a first layer results in the flip_y flag being reset
- * to 1.0 even if some previous raw image had resulted it in being set to
- * -1.0.
- *
- * Revision 1.123  2004/04/28 01:27:08  sduclos
- * GDK_GL_STENCIL_SIZE moved into S52 viewer glcontext
- *
- * Revision 1.122  2004/01/20 16:11:09  warmerda
- * Default GDK_GL_STENCIL_SIZE to 1 for S52 viewer
- *
- * Revision 1.121  2003/08/27 19:58:43  warmerda
- * added force_simple flag for gv_view_area_bmfont_draw
- *
- * Revision 1.120  2003/05/08 19:51:13  pgs
- * modified adjustment logic forpage size
- *
- * Revision 1.119  2003/03/07 22:18:26  warmerda
- * const correctness fix for get_layer_by_name
- *
- * Revision 1.118  2003/02/20 19:27:18  gmwalter
- * Updated link tool to include Diana's ghost cursor code, and added functions
- * to allow the cursor and link mechanism to use different gcps
- * than the display for georeferencing.  Updated raster properties
- * dialog for multi-band case.  Added some signals to layerdlg.py and
- * oeattedit.py to make it easier for tools to interact with them.
- * A few random bug fixes.
- *
- * Revision 1.117  2002/12/12 03:42:14  warmerda
- * verified Gillians change, and cleaned old cruft
- *
- * Revision 1.116  2002/12/12 01:04:26  gmwalter
- * Fix to deal with upside-down symbol bug, symbol migration in non-georeferenced mode.
- *
- * Revision 1.115  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.114  2002/09/29 18:40:28  warmerda
- * ensure new_x and new_y in gv_view_area_get_volume are float not int
- * as per bug report from Sylvain Duclos.
- *
- * Revision 1.113  2002/09/16 17:20:02  warmerda
- * ensure depth buffer cleared in 3d render_to_func
- *
- * Revision 1.112  2002/09/12 20:26:51  warmerda
- * changed near clipping plane calc to improve depth resolution
- *
- * Revision 1.111  2002/09/11 18:58:33  warmerda
- * dmsg bug 475: disable depth testing in 2D mode
- *
- * Revision 1.110  2002/09/10 13:26:43  warmerda
- * added get_height_scale method
- *
- * Revision 1.109  2002/07/19 14:06:38  warmerda
- * Fixed bug reported by Gillian with switching between raw and georeferenced
- * mode for images with GCPs that effectively do x or y flips of the image
- * (such as some esrin ceos scenes).   Changes all in gv_view_area_set_raw().
- *
- * Revision 1.108  2002/07/16 14:17:05  warmerda
- * added support for getting background color
- *
- * Revision 1.107  2002/07/08 19:44:39  warmerda
- * added properties on GvViewArea
- *
- * Revision 1.106  2002/05/02 19:16:26  gmwalter
- * Updated key press function to allow smaller height and zoom increments in 3d
- * (original step sizes now require that shift be pressed as well).
- *
- * Revision 1.105  2002/03/20 19:19:14  warmerda
- * added exact_render flag
- *
- * Revision 1.104  2002/01/30 17:25:19  warmerda
- * added set_state and get_primary_raster functions
- *
- * Revision 1.103  2001/12/13 03:29:17  warmerda
- * avoid purging textures used in this render
- *
- * Revision 1.102  2001/12/12 15:32:39  warmerda
- * ensure volume is computed for fit_all_layers
- *
- * Revision 1.101  2001/10/23 02:29:07  warmerda
- * call gv_view_area_state_changed() in _add_layer()
- *
- * Revision 1.100  2001/10/19 13:26:47  warmerda
- * fixed up checkf or mesa windows
- *
- * Revision 1.99  2001/10/12 17:44:18  warmerda
- * avoid extra redraws when many raster layers displayed
- *
- * Revision 1.98  2001/10/12 02:11:45  warmerda
- * Always render on non-win32, swapbuffer doesnt do what we want on X/OpenGL
- *
- * Revision 1.97  2001/10/12 01:58:19  warmerda
- * avoid re-rendering if backing store OK
- *
- * Revision 1.96  2001/07/18 03:34:44  warmerda
- * fixed flipping problem
- *
- * Revision 1.95  2001/07/09 20:21:28  warmerda
- * fixed raw mesh info
- *
- * Revision 1.94  2001/07/03 14:26:05  warmerda
- * added set/get raw ability
- *
- * Revision 1.93  2001/06/15 00:01:53  warmerda
- * added GDK_GLX_RED/GREEN/BLUE_SIZE attribs for visual
- *
- * Revision 1.92  2001/05/07 19:14:02  warmerda
- * removed a bunch of debugging cruft
- *
- * Revision 1.91  2001/05/07 19:08:03  warmerda
- * draw text with origin off viewport properly
- *
- * Revision 1.90  2001/04/26 18:36:40  warmerda
- * added glFinish() before swapbuffers
- *
- * Revision 1.89  2001/04/09 18:20:14  warmerda
- * added ability to query list of available fonts
- *
- * Revision 1.88  2001/03/28 15:03:02  warmerda
- * Added direct_render flag within gv_view_area_render_to_func().  This flag
- * kicks in for 1:1 prints, and prevents any attempt to reapply the view
- * transformation since the naive code loses rotations, and 3D perspectives.
- * This relates to CIETMap bug 89, and OpenEV bug 212486.
- *
- * Revision 1.87  2001/03/27 18:38:05  warmerda
- * fixed return value
- *
- * Revision 1.86  2001/03/26 19:18:35  warmerda
- * restructure bmfont handling to preserve GdkFont handle
- *
- * Revision 1.85  2001/03/22 22:34:24  warmerda
- * fixed bug in gv_view_load_bmfont() with reporting load errors
- *
- * Revision 1.84  2001/02/15 16:35:32  warmerda
- * turned g_warning into CPLDebug call
- *
- * Revision 1.83  2001/02/03 22:21:08  warmerda
- * added gv_view_area_get_mode() and python covers
- *
- * Revision 1.82  2001/01/30 19:33:58  warmerda
- * removed printf
- *
- * Revision 1.81  2001/01/26 13:56:15  warmerda
- * ensure fit_all_layers(), Home, and fit_extents all produce compatible results.
- * Route all view setting through gv_viewarea_set_3d_view().
- * Fix up default view.
- * Remove view setting in get_volume() function.
- *
- * Revision 1.80  2001/01/19 15:19:49  warmerda
- * improve near range calculation when over scene
- *
- * Revision 1.79  2000/10/06 16:48:56  warmerda
- * added GvViewArea background color
- *
- * Revision 1.78  2000/09/29 16:09:17  srawlin
- * added Goto function requring fuction to map lat/long to view coordinates
- *
- * Revision 1.77  2000/09/21 02:57:20  warmerda
- * reorganized bitmap font support to allow any gdk supported font at runtime
- *
- * Revision 1.76  2000/09/13 15:58:55  srawlin
- * added python bindings for gv_view_area_get_zoom
- *
- * Revision 1.75  2000/09/07 21:02:26  warmerda
- * ensure projection string is cleared when last layer removed
- *
- * Revision 1.74  2000/08/25 19:58:00  warmerda
- * Fixed problems with setting slider adjustments out of bounds. This sometimes
- * caused a feedback loop as the slider itself tried to keep things legal.
- *
- * Revision 1.73  2000/08/24 17:05:01  srawlin
- * fixed 3D eye_pos passed to vec_near_far_range() (near/far clipping plane
- * calculation) to account for image flipping
- *
- * Revision 1.72  2000/08/24 15:44:30  srawlin
- * fixed flip about y axis in 3D mode
- *
- * Revision 1.71  2000/08/24 02:22:46  warmerda
- * fixed scrollbar step and page increments
- *
- * Revision 1.70  2000/08/23 15:45:45  warmerda
- * updated adjustments after user scrolls
- *
- * Revision 1.69  2000/08/17 16:50:51  warmerda
- * fixed leak of lock_adjustment flag
- *
- * Revision 1.68  2000/08/17 16:45:00  warmerda
- * get_world_extents works without layers now
- *
- * Revision 1.67  2000/08/16 22:14:36  warmerda
- * fixed scrolling for raw and projected views
- *
- * Revision 1.66  2000/08/16 14:07:47  warmerda
- * added prototype scrollbar support
- *
- * Revision 1.65  2000/08/02 17:47:01  warmerda
- * don't allow further processing of arrows or we will lose focus
- *
- * Revision 1.64  2000/07/25 17:51:48  warmerda
- * added finalize, and debug statements
- *
- * Revision 1.63  2000/07/24 14:26:30  warmerda
- * use up to char 126 in gdk_gl_use_gdk_font
- *
- * Revision 1.62  2000/07/21 01:31:11  warmerda
- * added read_only flag for GvData, and utilize for vector layers
- *
- * Revision 1.61  2000/07/17 19:10:00  warmerda
- * added tentative support for scaling wait between redraws to actual redraw time
- *
- * Revision 1.60  2000/07/13 18:04:33  srawlin
- * removed use of view.state.eye_az and .eye_el, contained same information as view.state.eye_dir
- *
- * Revision 1.59  2000/07/11 20:56:23  srawlin
- * added methods to get and set viewing direction relative to z-plane in 3D
- *
- * Revision 1.58  2000/07/10 22:13:39  srawlin
- * Added motion scaling based on distance to z-plane
- *
- * Revision 1.57  2000/07/10 20:45:00  srawlin
- * Added 3D Translate controls
- *
- * Revision 1.56  2000/07/10 16:20:33  srawlin
- * fixed bug when zooming in 3D and panning, also removed debug printfs
- *
- * Revision 1.55  2000/07/10 13:36:55  srawlin
- * updated 3D controls to be more like 2D
- *
- * Revision 1.54  2000/07/07 17:53:32  warmerda
- * ifdef out debug statement
- *
- * Revision 1.53  2000/07/05 11:26:26  srawlin
- * 3D - changed initial view, some mouse movement directions, set angle boundaries
- *
- * Revision 1.52  2000/07/04 15:47:18  warmerda
- * removed debug lines in 3d mode
- *
- * Revision 1.51  2000/07/03 20:58:31  warmerda
- * eye_pos in georef coordinates now
- *
- * Revision 1.50  2000/06/29 16:14:58  warmerda
- * added one more set_busy call
- *
- * Revision 1.49  2000/06/29 14:38:37  warmerda
- * use GvManager for idle tasks
- *
- * Revision 1.48  2000/06/23 12:56:52  warmerda
- * added multiple GvRasterSource support
- *
- * Revision 1.47  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -850,9 +581,7 @@ gint gv_view_area_gl_begin(GvViewArea *view)
  */
 void gv_view_area_gl_end(GvViewArea *view)
 {
-
-    return gdk_gl_drawable_gl_end
-        (gtk_widget_get_gl_drawable(GTK_WIDGET(view)));
+    gdk_gl_drawable_gl_end(gtk_widget_get_gl_drawable(GTK_WIDGET(view)));
 }
 
 gint
@@ -1223,9 +952,6 @@ gv_view_area_add_layer(GvViewArea *view, GObject *layer_obj)
         }
     }
 
-    /* Maintain reference to layer */
-    g_object_ref(layer);
-
     g_assert( layer->view == NULL );
 
     view->volume_current = FALSE;
@@ -1291,7 +1017,6 @@ gv_view_area_remove_layer(GvViewArea *view, GObject *layer_obj)
 
     g_signal_handlers_disconnect_matched (layer_obj, G_SIGNAL_MATCH_DATA,
                                             0, 0, NULL, NULL, G_OBJECT(view));
-    g_object_unref(layer_obj);
 
     g_signal_emit(view, view_area_signals[ACTIVE_CHANGED], 0);
 
@@ -1888,7 +1613,7 @@ static PangoFontDescription *gv_view_XLFD_to_pango(gchar *XLFD_name) {
   if (pango_desc == NULL) {
 
     /* >>>> Try scaled down description <<<< */
-  
+
     /* ---- Start with font family ---- */
     tempptr = g_stpcpy(pango_name, XLFD_tokens[1]);
 
@@ -4252,7 +3977,7 @@ const char *gv_view_area_format_point_query(GvViewArea *view,
 
             g_snprintf(buf+strlen(buf), 64, "%g hue %g intensity ",
                        psci[0], psci[1] );
-            
+
             if ( g_strcasecmp( nodata_mode, "on") == 0 )
             {
                 if( (gv_raster_layer_nodata_get(raster_layer, 0, &nodata[0], NULL) 
@@ -4288,4 +4013,3 @@ const char *gv_view_area_format_point_query(GvViewArea *view,
 
     return buf;
 }
-

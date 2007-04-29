@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvmanager.c,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Preferences (and other?) manager.  Singleton object.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,60 +25,11 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvmanager.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:33  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.14  2004/02/10 15:38:30  andrey_kiselev
- * Added gv_manager_add_dataset() function.
- *
- * Revision 1.13  2001/07/24 02:21:54  warmerda
- * added 8bit phase averaging
- *
- * Revision 1.12  2001/01/30 14:29:33  warmerda
- * added gv_manager_dump
- *
- * Revision 1.11  2000/09/29 20:32:27  warmerda
- * made decimation the default instead of averaging
- *
- * Revision 1.10  2000/09/27 19:17:13  warmerda
- * use prefs for GvRaster sample method
- *
- * Revision 1.9  2000/08/23 14:16:06  warmerda
- * avoid error message opening for update
- *
- * Revision 1.8  2000/08/09 17:36:50  warmerda
- * update lists when GvRaster destroyed
- *
- * Revision 1.7  2000/07/25 14:18:19  warmerda
- * added task dequeuing support
- *
- * Revision 1.6  2000/06/29 19:50:17  warmerda
- * Initialize busy_changed signal handler.
- *
- * Revision 1.5  2000/06/29 14:38:22  warmerda
- * added busy status, and idle task list
- *
- * Revision 1.4  2000/06/26 15:12:00  warmerda
- * Added dataset/gvraster management
- *
- * Revision 1.3  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include "gvmanager.h"
-#include <gtk/gtksignal.h>
 #include <stdio.h>
 #include <string.h>
-
 
 enum
 {
@@ -92,69 +44,49 @@ static guint manager_signals[LAST_SIGNAL] = { 0 };
 static void gv_manager_init( GvManager *manager );
 static gint gv_manager_idle_handler( gpointer );
 
-GtkType
+GType
 gv_manager_get_type(void)
 {
-    static GtkType manager_type = 0;
+    static GType manager_type = 0;
 
-    if (!manager_type)
-    {
-	static const GtkTypeInfo manager_info =
-	{
-	    "GvManager",
-	    sizeof(GvManager),
-	    sizeof(GvManagerClass),
-	    (GtkClassInitFunc) gv_manager_class_init,
-	    (GtkObjectInitFunc) gv_manager_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!manager_type) {
+        static const GTypeInfo manager_info =
+        {
+            sizeof(GvManagerClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_manager_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvManager),
+            0,
+            (GInstanceInitFunc) gv_manager_init,
+        };
+        manager_type = g_type_register_static (G_TYPE_OBJECT,
+                                                "GvManager",
+                                                &manager_info, 0);
+        }
 
-	manager_type = gtk_type_unique(gtk_object_get_type(),
-				    &manager_info);
-    }
     return manager_type;
 }
 
 static void
 gv_manager_class_init(GvManagerClass *klass)
 {
-
     manager_signals[PREFERENCES_CHANGED] =
       g_signal_new ("preferences-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvManagerClass, preferences_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvManagerClass, preferences_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
     manager_signals[BUSY_CHANGED] =
       g_signal_new ("busy-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvManagerClass, busy_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
-
-    /* GTK2 PORT...
-    GtkObjectClass *object_class;
-    object_class = (GtkObjectClass*) klass;
-    manager_signals[PREFERENCES_CHANGED] =
-	gtk_signal_new ("preferences-changed",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvManagerClass,preferences_changed),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 0 );
-    manager_signals[BUSY_CHANGED] =
-	gtk_signal_new ("busy-changed",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvManagerClass,busy_changed),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 0 );
-    gtk_object_class_add_signals(object_class, manager_signals, LAST_SIGNAL);
-    */
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvManagerClass, busy_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
 
     klass->preferences_changed = NULL;
     klass->busy_changed = NULL;
@@ -162,7 +94,6 @@ gv_manager_class_init(GvManagerClass *klass)
 
 static void 
 gv_manager_init( GvManager *manager )
-
 {
     manager->preferences = NULL;
     manager->datasets = g_ptr_array_new();
@@ -173,11 +104,10 @@ gv_manager_init( GvManager *manager )
 
 GvManager *gv_manager_new()
 {
-    return GV_MANAGER(gtk_type_new(GV_TYPE_MANAGER));
+    return g_object_new(GV_TYPE_MANAGER, NULL);
 }
 
 GvManager *gv_get_manager()
-
 {
     static GvManager *main_manager = NULL;
 
@@ -189,9 +119,9 @@ GvManager *gv_get_manager()
 
 void gv_manager_dump( GvManager *manager )
 {
-    FILE	*fp = stderr;
-    int		i;
-    GvIdleTask	*task;
+    FILE        *fp = stderr;
+    int         i;
+    GvIdleTask  *task;
 
     fprintf( fp, "GvManager Status Report\n" );
     fprintf( fp, "=======================\n" );
@@ -204,7 +134,7 @@ void gv_manager_dump( GvManager *manager )
                  gv_properties_get_name_by_index( &(manager->preferences), i),
                  gv_properties_get_value_by_index( &(manager->preferences),i));
     }
-    
+
     fprintf( fp, "\n" );
     fprintf( fp, "Datasets:\n" );
     for( i = 0; i < manager->datasets->len; i++ )
@@ -213,7 +143,7 @@ void gv_manager_dump( GvManager *manager )
         int band;
 
         fprintf( fp, "  %s:", GDALGetDescription( ds->dataset ) );
-        
+
         for( band = 0; band < GDALGetRasterCount(ds->dataset); band++ )
         {
             if( ds->rasters[band] != NULL )
@@ -223,10 +153,10 @@ void gv_manager_dump( GvManager *manager )
         }
         fprintf( fp, "\n" );
     }
-    
+
     fprintf( fp, "\n" );
     fprintf( fp, "Idle Tasks:\n" );
-    
+
     for( task = manager->idle_tasks; task != NULL; task = task->next )
     {
         fprintf( fp, "  %s: priority=%d, cb=%p, cb_data=%p\n",
@@ -235,20 +165,17 @@ void gv_manager_dump( GvManager *manager )
 }
 
 GvProperties *gv_manager_get_preferences(GvManager *manager)
-
 {
     return &(manager->preferences);
 }
 
 const char *gv_manager_get_preference(GvManager *manager, const char *name)
-
 {
     return gv_properties_get(&(manager->preferences),name);
 }
 
 void gv_manager_set_preference(GvManager *manager, 
                                const char *name, const char *value )
-
 {
     /* don't do anything if it is already set */
 
@@ -258,8 +185,7 @@ void gv_manager_set_preference(GvManager *manager,
 
     gv_properties_set( &(manager->preferences), name, value );
 
-    gtk_signal_emit(GTK_OBJECT(manager), 
-                    manager_signals[PREFERENCES_CHANGED]);
+    g_signal_emit(manager, manager_signals[PREFERENCES_CHANGED], 0);
 }
 
 /************************************************************************/
@@ -280,7 +206,6 @@ void gv_manager_set_preference(GvManager *manager,
  */
 
 GDALDatasetH gv_manager_add_dataset( GvManager *manager, GDALDatasetH dataset )
-
 {
     int       i;
     GvDataset *ds;
@@ -310,14 +235,13 @@ GDALDatasetH gv_manager_add_dataset( GvManager *manager, GDALDatasetH dataset )
     ds = g_new(GvDataset,1);
     ds->dataset = dataset;
     ds->rasters = g_new0(GvRaster *, GDALGetRasterCount(dataset));
-    
+
     g_ptr_array_add( manager->datasets, ds );
 
     return dataset;
 }
 
 GDALDatasetH gv_manager_get_dataset( GvManager *manager, const char * filename)
-
 {
     int       i;
     GvDataset *ds;
@@ -343,7 +267,7 @@ GDALDatasetH gv_manager_get_dataset( GvManager *manager, const char * filename)
      * want to report update access errors so we supress error reporting
      * temporarily. 
      */
-    
+
     CPLErrorReset();
     CPLPushErrorHandler( CPLQuietErrorHandler );
     dataset = GDALOpen( filename, GA_Update );
@@ -363,15 +287,14 @@ GDALDatasetH gv_manager_get_dataset( GvManager *manager, const char * filename)
     ds = g_new(GvDataset,1);
     ds->dataset = dataset;
     ds->rasters = g_new0(GvRaster *, GDALGetRasterCount(dataset));
-    
+
     g_ptr_array_add( manager->datasets, ds );
 
     return dataset;
 }
 
-static gint gv_manager_raster_destroy_cb( GtkObject * raster_in, 
+static gint gv_manager_raster_destroy_cb( GObject * raster_in, 
                                           gpointer cb_data )
-
 {
     GvManager *manager = GV_MANAGER(cb_data);
     GvRaster  *raster = GV_RASTER(raster_in);
@@ -401,8 +324,11 @@ static gint gv_manager_raster_destroy_cb( GtkObject * raster_in,
 
     for( i = 0; i < GDALGetRasterCount(ds->dataset); i++ )
     {
-        if( ds->rasters[i] == raster )
+        if( ds->rasters[i] == raster ) {
+            if (G_OBJECT(raster)->ref_count > 2)
+                g_object_unref(ds->rasters[i]);
             ds->rasters[i] = NULL;
+        }
         else if( ds->rasters[i] != NULL )
             active_rasters++;
     }
@@ -411,14 +337,14 @@ static gint gv_manager_raster_destroy_cb( GtkObject * raster_in,
      * We apparently no longer need this GDALDataset.  Dereference it, and
      * remove from the list. 
      */
-    if( active_rasters == 0 )
+    if (active_rasters == 0)
     {
-        if( GDALDereferenceDataset( ds->dataset ) < 1 )
-            GDALClose( ds->dataset );
-        
-        g_free( ds->rasters );
-        g_free( ds );
-        g_ptr_array_remove_fast( manager->datasets, ds );
+        if (GDALDereferenceDataset(ds->dataset) < 1)
+            GDALClose(ds->dataset);
+
+        g_free(ds->rasters);
+        g_free(ds);
+        g_ptr_array_remove_fast(manager->datasets, ds);
     }
 
     return FALSE;
@@ -426,7 +352,6 @@ static gint gv_manager_raster_destroy_cb( GtkObject * raster_in,
 
 GvRaster *gv_manager_get_dataset_raster( GvManager *manager, 
                                          GDALDatasetH dataset, int band )
-
 {
     int       i;
     GvDataset *ds = NULL;
@@ -477,38 +402,33 @@ GvRaster *gv_manager_get_dataset_raster( GvManager *manager,
             sm = GvSMSample;
 
         ds->rasters[band-1] = GV_RASTER(gv_raster_new( ds->dataset, band, sm));
-        gtk_signal_connect(
-            GTK_OBJECT(ds->rasters[band-1]), "destroy", 
-            GTK_SIGNAL_FUNC(gv_manager_raster_destroy_cb),
-            GTK_OBJECT(manager));
+        g_signal_connect(GV_DATA(ds->rasters[band-1]), "destroy", 
+                        G_CALLBACK(gv_manager_raster_destroy_cb),
+                        manager);
     }
 
     return ds->rasters[band-1];
 }
 
 void gv_manager_set_busy( GvManager *manager, int busy_flag )
-
 {
     if( !manager->busy_flag == !busy_flag )
         return;
 
     if( !manager->busy_flag )
-        gtk_idle_add( gv_manager_idle_handler, NULL );
+        g_idle_add( gv_manager_idle_handler, NULL );
 
     manager->busy_flag = busy_flag;
 
-    gtk_signal_emit(GTK_OBJECT(manager), 
-                    manager_signals[BUSY_CHANGED]);
+    g_signal_emit(manager, manager_signals[BUSY_CHANGED], 0);
 }
 
 int gv_manager_get_busy( GvManager *manager )
-
 {
     return manager->busy_flag;
 }
 
 static gint gv_manager_idle_handler( gpointer cb_data )
-
 {
     GvManager *manager = gv_get_manager();
     GvIdleTask *task;
@@ -537,7 +457,6 @@ static gint gv_manager_idle_handler( gpointer cb_data )
 void gv_manager_queue_task( GvManager *manager, const char *task_name, 
                             int priority, GtkFunction callback, 
                             void *task_info)
-
 {
     GvIdleTask *task = g_new0( GvIdleTask, 1 );
 
@@ -576,7 +495,6 @@ void gv_manager_queue_task( GvManager *manager, const char *task_name,
 }
 
 void gv_manager_dequeue_task( GvManager *manager, GvIdleTask *task )
-
 {
     GvIdleTask **prev_ptr = &(manager->idle_tasks);
 
@@ -585,7 +503,7 @@ void gv_manager_dequeue_task( GvManager *manager, GvIdleTask *task )
         if( *prev_ptr == task )
         {
             *prev_ptr = task->next;
-            
+
             g_free( task->name );
             g_free( task );
         }

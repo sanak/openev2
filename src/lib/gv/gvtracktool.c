@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvtracktool.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Tracking display of raster values and position of cursor.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,23 +25,6 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvtracktool.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.8  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.7  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include "gvtracktool.h"
@@ -54,44 +38,46 @@ static void gv_track_tool_class_init(GvTrackToolClass *klass);
 static void gv_track_tool_init(GvTrackTool *tool);
 static gboolean gv_track_tool_motion_notify(GvTool *tool, GdkEventMotion *event);
 static gboolean gv_track_tool_leave_notify(GvTool *tool, GdkEventCrossing *event);
-static void gv_track_tool_destroy(GtkObject *object);
+static void gv_track_tool_dispose(GObject *object);
 
-GtkType
+static GvToolClass *parent_class = NULL;
+
+GType
 gv_track_tool_get_type(void)
 {
-    static GtkType track_tool_type = 0;
+    static GType track_tool_type = 0;
 
-    if (!track_tool_type)
-    {
-	static const GtkTypeInfo track_tool_info =
-	{
-	    "GvTrackTool",
-	    sizeof(GvTrackTool),
-	    sizeof(GvTrackToolClass),
-	    (GtkClassInitFunc) gv_track_tool_class_init,
-	    (GtkObjectInitFunc) gv_track_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!track_tool_type) {
+        static const GTypeInfo track_tool_info =
+        {
+            sizeof(GvTrackToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_track_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvTrackTool),
+            0,
+            (GInstanceInitFunc) gv_track_tool_init,
+        };
+        track_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                  "GvTrackTool",
+                                                  &track_tool_info, 0);
+        }
 
-	track_tool_type = gtk_type_unique(gv_tool_get_type(),
-					  &track_tool_info);
-    }
     return track_tool_type;
 }
 
 static void
 gv_track_tool_class_init(GvTrackToolClass *klass)
 {
-    GtkObjectClass *object_class;
-    GvToolClass *tool_class;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
-    object_class = (GtkObjectClass*)klass;
-    tool_class = (GvToolClass*)klass;
+    parent_class = g_type_class_peek_parent (klass);
 
-    object_class->destroy = gv_track_tool_destroy;
-    
+    object_class->dispose = gv_track_tool_dispose;
+
     tool_class->motion_notify = gv_track_tool_motion_notify;
     tool_class->leave_notify = gv_track_tool_leave_notify;
 }
@@ -109,9 +95,8 @@ gv_track_tool_new(GtkObject *label)
 
     g_return_val_if_fail(GTK_IS_LABEL(label), NULL);
 
-    tool = GV_TRACK_TOOL(gtk_type_new(GV_TYPE_TRACK_TOOL));
-    tool->label = label;
-    gtk_object_ref(label);
+    tool = g_object_new(GV_TYPE_TRACK_TOOL, NULL);
+    tool->label = g_object_ref(label);
 
     return GV_TOOL(tool);
 }
@@ -127,7 +112,7 @@ gv_track_tool_motion_notify(GvTool *tool_in, GdkEventMotion *event)
     GvProperties *properties = gv_manager_get_preferences( gv_get_manager() );
 
     gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-			     &geo_x, &geo_y);
+                             &geo_x, &geo_y);
 
     text = gv_view_area_format_point_query(GV_TOOL(tool)->view, 
                                            properties, geo_x, geo_y);
@@ -144,17 +129,13 @@ gv_track_tool_leave_notify(GvTool *tool, GdkEventCrossing *event)
 }
 
 static void
-gv_track_tool_destroy(GtkObject *object)
+gv_track_tool_dispose(GObject *object)
 {
-    GvToolClass *parent_class;
-    GvTrackTool *tool;
+    GvTrackTool *tool = GV_TRACK_TOOL(object);
 
-    tool = GV_TRACK_TOOL(object);
-
-    gtk_object_unref(tool->label);
+    g_object_unref(tool->label);
     tool->label = NULL;
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_tool_get_type());
-    GTK_OBJECT_CLASS(parent_class)->destroy(object);         
+    G_OBJECT_CLASS(parent_class)->dispose(object);         
 }

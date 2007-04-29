@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvproperties.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Generic string properties list.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -23,29 +24,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvproperties.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.5  2002/09/09 16:22:45  warmerda
- * use int instead of gint to avoid glib.h dependency
- *
- * Revision 1.4  2002/07/24 18:06:26  warmerda
- * reimplement properties using quarks
- *
- * Revision 1.3  2000/09/21 02:55:11  warmerda
- * added gv_properties_clear
- *
- * Revision 1.2  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -80,7 +58,7 @@
 
 #include <glib.h>
 
-#define	G_QUARK_BLOCK_SIZE			(512)
+#define G_QUARK_BLOCK_SIZE                      (512)
 
 static GHashTable   *gvpk_keyid_ht = NULL;
 static gchar       **gvpk_keyids = NULL;
@@ -125,7 +103,7 @@ static guint gvpk_str_hash (gconstpointer key)
         v = tolower(*p);
         h = (h << 5) - h + v;
     }
-    
+
     return h;
 }
 
@@ -181,7 +159,7 @@ void gv_properties_set( GvProperties *properties,
     guint keyid  = gvpk_keyid_from_string( name );
     GQuark valueq = g_quark_from_string( value );
     int   i;
-   
+
 /* -------------------------------------------------------------------- */
 /*      Initial allocation of properties.                               */
 /* -------------------------------------------------------------------- */
@@ -212,8 +190,8 @@ void gv_properties_set( GvProperties *properties,
     if( PROP_MAXCOUNT(properties) == PROP_COUNT(properties) )
     {
         int new_max = (int)(PROP_MAXCOUNT(properties) * 1.5);
-	new_max = (new_max < 6 ? 6 : new_max);
-        
+        new_max = (new_max < 6 ? 6 : new_max);
+
         *properties = g_renew( guint32, *properties, new_max * 2 + 2 );
         PROP_MAXCOUNT(properties) = new_max; 
     }
@@ -287,7 +265,7 @@ const char * gv_properties_get_name_by_index( GvProperties * properties,
         return NULL;
 
     keyid = PROP_KEYID(properties,prop_index);
-    
+
     g_assert( keyid >= 1 && keyid <= gvpk_keyid_seq_id );
 
     return gvpk_keyids[keyid-1];
@@ -500,4 +478,3 @@ void gv_properties_copy( GvProperties *source, GvProperties *target )
     *target = CSLDuplicate( *source );
 }
 #endif /* notdef USE_HASH_BASED_GVPROPERTIES */
-

@@ -1,0 +1,51 @@
+GDAL_HOME = \devel\gdal-1.3.1
+INC_HOME = \devel\include
+LIB_HOME = \devel\lib
+
+INC = /I$(INC_HOME)\glib-2.0 /I$(INC_HOME)\gtk-2.0 /I$(INC_HOME)\atk-1.0 /I$(INC_HOME)\cairo \
+    /I$(INC_HOME)\pango-1.0 /I$(INC_HOME)\gtkglext-1.0 /I$(LIB_HOME)\glib-2.0\include \
+    /I$(LIB_HOME)\gtk-2.0\include /I$(LIB_HOME)\gtkglext-1.0\include \
+    /I$(GDAL_HOME)\port /I$(GDAL_HOME)\gcore /I$(GDAL_HOME)\ogr \
+    /I$(GDAL_HOME)\ogr\ogrsf_frmts /I$(GVIEW_ROOT)\..\tess $(PYTHON_INCS)
+
+LIBS = $(GDAL_HOME)\gdal_i.lib $(LIB_HOME)\glib-2.0.lib $(LIB_HOME)\gobject-2.0.lib \
+    $(LIB_HOME)\atk-1.0.lib $(LIB_HOME)\gtk-win32-2.0.lib $(LIB_HOME)\pango-1.0.lib \
+    $(LIB_HOME)\gdk-win32-2.0.lib $(LIB_HOME)\gdkglext-win32-1.0.lib $(LIB_HOME)\cairo.lib \
+    $(LIB_HOME)\gtkglext-win32-1.0.lib $(LIB_HOME)\gdk_pixbuf-2.0.lib $(GVIEW_ROOT)\..\tess\evtess.lib \
+    comdlg32.lib GLU32.lib opengl32.lib gdi32.lib user32.lib shell32.lib $(PYTHON_LIBSL)\$(PYTHON_LIBS) 
+
+# set only if GDAL was build with CPL_DISABLE_STDCALL
+GV_OPTFLAGS = /DCPL_DISABLE_STDCALL
+CFLAGS = $(INC) $(GV_OPTFLAGS) /nologo /Ox /MD /GX /DHAVE_OGR
+CC  =   cl
+CXX =   cl
+
+.c.obj: 
+    $(CC) $(CFLAGS) /c $*.c
+
+.cpp.obj:   
+    $(CC) $(CFLAGS) /c $*.cpp
+
+PYTHON_VER = 24
+PYTHON_ROOT = c:\Python$(PYTHON_VER)
+PYGTK = $(PYTHON_ROOT)\share\pygtk
+PYGTK_VER = 2.0
+PYTHON = $(PYTHON_ROOT)\python
+
+PYTHON_INC = $(PYTHON_ROOT)\include
+PYTHON_INCS = /I$(PYTHON_INC) /I$(PYTHON_INC)\pygtk-$(PYGTK_VER) \
+            /I$(PYTHON_INC)\pygtk-$(PYGTK_VER)\pygtk
+
+PYTHON_LIBSL = c:\Python$(PYTHON_VER)\libs
+
+PYTHON_LIBS = python$(PYTHON_VER).lib
+
+#
+# Python module library vars
+#
+
+PYGTK_DEFS = $(PYGTK)\$(PYGTK_VER)\defs
+PYH2DEF = $(PYGTK)\$(PYGTK_VER)\codegen\h2def.py
+PYCODEGEN = $(PYTHON_ROOT)\Lib\site-packages\gtk-$(PYGTK_VER)\codegen\codegen.py
+PYREGISTER = --register $(PYGTK_DEFS)\gdk-types.defs \
+       --register $(PYGTK_DEFS)\gtk-types.defs

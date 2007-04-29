@@ -59,7 +59,7 @@
   INSTINCS = $(addprefix $(SYSINCDIR)/,$(CHEADERS))
   MOVEOBJS = $(ALLOBJS) $(LOCALLIB) $(TAGFILE) $($(USHAREDTYPE)FILES)
   MOVEOBJS += $(PYMODOBJS)
-  ULIB = $(call ucase, $(LIB))
+#  ULIB = $(call ucase, $(LIB))
   ifeq ($(LIB),)
     LIB:=$(EXE_NAME)
   endif
@@ -765,10 +765,10 @@ $(PYMODSRC): $(PYMODDEFS) $(PYENUMSRC) $(PYMODMOD) $(PYOVERRIDE) $(PYINCS)
           --override $(PYOVERRIDE) $(PYMODDEFS) > $@; \
 	fi
 
-$(PYMODDEFS): $(CHEADERS) $(OTHERINCS)
-	@ if [ -f $(PYOVERRIDE) ]; then \
-	  $(PYTHON) $(PYH2DEF) $(CHEADERS) $(OTHERINCS) > $(PYMODDEFS); \
-	fi
+#$(PYMODDEFS): $(CHEADERS) $(OTHERINCS)
+#	@ if [ -f $(PYOVERRIDE) ]; then \
+#	  $(PYTHON) $(PYH2DEF) $(CHEADERS) $(OTHERINCS) > $(PYMODDEFS); \
+#	fi
 
 $(LIB)-enum-types.h: $(CHEADERS) $(PYMODDEFS)
 	@ if [ -f $(PYOVERRIDE) ]; then \

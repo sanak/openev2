@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvpointtool.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Point editing mode.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,34 +25,19 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvpointtool.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.4  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef __GV_POINT_TOOL_H__
 #define __GV_POINT_TOOL_H__
 
 #include "gvtool.h"
-#include "gvpointlayer.h"
 #include "gvshapeslayer.h"
 
 #define GV_TYPE_POINT_TOOL            (gv_point_tool_get_type ())
-#define GV_POINT_TOOL(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_POINT_TOOL, GvPointTool))
-#define GV_POINT_TOOL_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_POINT_TOOL, GvPointToolClass))
-#define GV_IS_POINT_TOOL(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_POINT_TOOL))
-#define GV_IS_POINT_TOOL_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_POINT_TOOL))
+#define GV_POINT_TOOL(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_POINT_TOOL, GvPointTool))
+#define GV_POINT_TOOL_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_POINT_TOOL, GvPointToolClass))
+#define GV_IS_POINT_TOOL(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_POINT_TOOL))
+#define GV_IS_POINT_TOOL_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_POINT_TOOL))
 
 typedef struct _GvPointTool       GvPointTool;
 typedef struct _GvPointToolClass  GvPointToolClass;
@@ -69,7 +55,7 @@ struct _GvPointToolClass
     GvToolClass parent_class;
 };
 
-GtkType gv_point_tool_get_type(void);
+GType gv_point_tool_get_type(void);
 GvTool* gv_point_tool_new(void);
 void gv_point_tool_set_layer(GvPointTool *tool, GvShapeLayer *layer);
 void gv_point_tool_set_named_layer(GvPointTool *tool, gchar *name);

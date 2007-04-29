@@ -1,91 +1,100 @@
 GVIEW_ROOT=.
 
-!INCLUDE nmake.opt
+!INCLUDE ..\..\nmake.opt
 
-GV_INSTALL_HOME = $(NM_BIN_DIR)\..
+GV_INSTALL_HOME = \openev2
 GV_INSTALL_HTML = $(GV_INSTALL_HOME)\html
 GV_INSTALL_PICS = $(GV_INSTALL_HOME)\pics
 GV_INSTALL_TOOLS = $(GV_INSTALL_HOME)\tools
 GV_INSTALL_RAMPS = $(GV_INSTALL_HOME)\ramps
 
-CC	=	cl
-CXX	=	cl
+OBJ =  crs.obj dbfopen.obj gextra.obj \
+    gvareatool.obj   gvdata.obj  gvlayer.obj \
+    gvlinetool.obj  gvmanager.obj  gvmarshal.obj  gvmesh.obj \
+    gvnodetool.obj  gvogr.obj  gv_override.obj gvpquerylayer.obj \
+    gvpoitool.obj gvpointtool.obj \
+    gvprint.obj gvproperties.obj gvraster.obj gvrasteraverage.obj \
+    gvrastercache.obj gvrasterconvert.obj gvrasterize.obj \
+    gvrasterlayer.obj gvrasterlut.obj gvrastersource.obj \
+    gvrecttool.obj gvrenderinfo.obj gvroitool.obj gvrotatetool.obj gvselecttool.obj \
+    gvshape.obj gvshapefile.obj gvshapelayer.obj gvshapes.obj gvshapeslayer.obj \
+    gvskirt.obj gvsymbolmanager.obj gvtessshape.obj \
+    gvtexturecache.obj gvtool.obj gvtoolbox.obj gvtracktool.obj \
+    gvundo.obj gvutils.obj gvviewarea.obj gvviewlink.obj \
+    gvwinprint.obj gvzoompantool.obj invdistance.obj \
+    llrasterize.obj shpopen.obj
 
-INC = /I$(NM_GLIB_DIR) /I$(NM_GLIB_DIR)/gmodule /I$(NM_GTK_DIR) /I$(NM_GTK_DIR)\gdk \
-	/I$(NM_GTKGLAREA_DIR) \
-	/I$(GDAL_HOME)\port /I$(GDAL_HOME)\gcore /I$(GDAL_HOME)\ogr \
-	/I$(GDAL_HOME)\ogr\ogrsf_frmts
+CHEADERS = crs.h dllfct.h gextra.h \
+           gv_config.h gvareatool.h gvdata.h gview.h \
+           gvlayer.h gvlinetool.h gvmanager.h gvmarshal.h gvmesh.h \
+           gvmodule.h gvnodetool.h gvpointtool.h gvpquerylayer.h \
+           gvproperties.h gvraster.h gvrasteraverage.h \
+           gvrastercache.h gvrasterize.h gvrasterlayer.h gvrasterlut.h gvrastertypes.h \
+           gvrecttool.h gvrenderinfo.h gvroitool.h gvrotatetool.h \
+           gvselecttool.h gvshapelayer.h gvshapes.h gvshapeslayer.h gvsymbolmanager.h \
+           gvtool.h gvtoolbox.h gvtracktool.h gvtypes.h gvundo.h gvutils.h \
+           gvviewarea.h gvzoompantool.h invdistance.h gvshape.h
 
-CFLAGS = $(INC) $(GV_OPTFLAGS) /DHAVE_OGR
+LIB = gv
+ULIB = GV
+GVLIB = $(LIB).lib
 
-OBJ =	gvviewarea.obj  gvdata.obj gvlayer.obj \
-	gvpolylines.obj  gvlinelayer.obj  gvtool.obj  gvlinetool.obj \
-	gvtoolbox.obj   gvshapelayer.obj  gvselecttool.obj  gextra.obj \
-	gvareas.obj  gvarealayer.obj  gvareatool.obj  gvtess.obj \
-	gvnodetool.obj  gvundo.obj  gvpoints.obj  gvpointlayer.obj \
-  	gvpointtool.obj gvpquerylayer.obj gvviewlink.obj gvroitool.obj \
-	gvmesh.obj gvrasterlayer.obj gvraster.obj gvrasterlut.obj \
-	gvrasteraverage.obj gvrasterconvert.obj gvrastercache.obj \
-	gvtracktool.obj gtkcolorwell.obj gvsymbolmanager.obj gvprint.obj \
-	crs.obj gvproperties.obj gvshapes.obj gvshape.obj gvshapeslayer.obj \
-	gvshapefile.obj shpopen.obj dbfopen.obj gvutils.obj gvtessshape.obj \
-	gvzoompantool.obj gvmanager.obj gvrastersource.obj gvtexturecache.obj \
-	ipgcplayer.obj gvrecttool.obj gvwinprint.obj appcurlayer.obj \
-	invdistance.obj gvrasterize.obj llrasterize.obj gvogr.obj \
-	gvrenderinfo.obj gvskirt.obj gvpoitool.obj gvrecords.obj \
-	gvrotatetool.obj
+default: $(GVLIB) pymodule
 
-GVLIB = gv.lib
+PYPREFIX = _
+PYENUMSRC = $(LIB)-enum-types.c
+PYOVERRIDE = $(LIB).override
+PYMODSRC = $(LIB)_pwrap.c
+PYMODMOD = $(LIB)module.c
+PYMODDEFS = $(LIB).defs
+PYMODSRCS = $(PYMODSRC) $(PYENUMSRC) $(PYMODMOD)
+PYMODOBJS = $(LIB)-enum-types.obj $(LIB)_pwrap.obj $(LIB)module.obj
+PYMODFILES = $(PYMODDEFS) $(PYPREFIX)$(LIB).dll \
+           lib$(PYPREFIX)$(LIB)dll.a $(LIB)-enum-types.h \
+           $(LIB)-enum-types.c
+#PYMODINST = $($(USHAREDTYPE)LIBDIR)/$(PYPREFIX)$($(USHAREDTYPE)) \
+#          $($(USHAREDTYPE)LIBDIR)/lib$(PYPREFIX)$(LIB)dll.a
+PYINCS = $(LIB)-enum-types.h
 
-LIBS = $(GDAL_HOME)/gdal_i.lib $(NM_GTKGLAREA_DIR)/gtkglarea.lib \
-	$(NM_GTK_DIR)/gtk/gtk-1.3.lib \
-	$(NM_GTK_DIR)/gdk/gdk-1.3.lib $(NM_GLIB_DIR)/glib-1.3.lib \
-	GLU32.lib opengl32.lib gdi32.lib user32.lib shell32.lib
+# you may have to add /LIBPATH to link command (I had to, dunno why)
+pymodule: $(PYMODSRC) $(PYMODOBJS)
+    link /dll $(PYMODOBJS) $(GVLIB) $(LIBS) /out:$(PYPREFIX)$(LIB).dll
 
-default: $(GVLIB) gvtest.exe py_modules
-
-py_modules:
-	cd pymod
-	nmake /f makefile.vc 
-	cd ..
-
-.c.obj:	
-	$(CC) $(CFLAGS) /c $*.c
-
-.cpp.obj:	
-	$(CC) $(CFLAGS) /c $*.cpp
+$(PYMODSRC): $(PYMODDEFS) $(PYENUMSRC) $(PYMODMOD) $(PYOVERRIDE) $(PYINCS)
+          $(PYTHON) $(PYCODEGEN) --prefix $(PYPREFIX)$(LIB) $(PYREGISTER) \
+          --override $(PYOVERRIDE) $(PYMODDEFS) > $(PYMODSRC)
 
 $(GVLIB): gv_config.h $(OBJ)
-	if exist $(GVLIB) del $(GVLIB)
-	lib /out:$(GVLIB) $(OBJ)
+    if exist $(GVLIB) del $(GVLIB)
+    lib /out:$(GVLIB) $(OBJ)
 
-gvtest.exe:	testmain.obj $(GVLIB)
-	link /debug testmain.obj $(GVLIB) $(LIBS) /out:gvtest.exe
+gvtest.exe: testmain.obj $(GVLIB)
+    link /debug testmain.obj $(GVLIB) $(LIBS) /out:gvtest.exe
 
-gv_config.h:	gv_config.h_win32
-	copy gv_config.h_win32 gv_config.h
+gv_config.h:    gv_config.h_win32
+    copy gv_config.h_win32 gv_config.h
 
 clean:
-	cd pymod
-	nmake /f makefile.vc clean
-	cd ..
-	-del gvtest.exe
-	-del *.obj
-	-del *.lib
-	-del *.dll
+    cd pymod
+    nmake /f makefile.vc clean
+    cd ..
+    -del gvtest.exe
+    -del *.obj
+    -del *.lib
+    -del *.dll
 
-full_install:	install
-	if not exist $(GV_INSTALL_HTML) mkdir $(GV_INSTALL_HTML)
-	if not exist $(GV_INSTALL_PICS) mkdir $(GV_INSTALL_PICS)
-	if not exist $(GV_INSTALL_TOOLS) mkdir $(GV_INSTALL_TOOLS)
-	if not exist $(GV_INSTALL_RAMPS) mkdir $(GV_INSTALL_RAMPS)
-	copy html\*.* $(GV_INSTALL_HTML)
-	copy pics\*.* $(GV_INSTALL_PICS)
-	copy tools\*.* $(GV_INSTALL_TOOLS)
-	copy ramps\*.* $(GV_INSTALL_RAMPS)
+full_install:   install
+    if not exist $(GV_INSTALL_HTML) mkdir $(GV_INSTALL_HTML)
+    if not exist $(GV_INSTALL_PICS) mkdir $(GV_INSTALL_PICS)
+    if not exist $(GV_INSTALL_TOOLS) mkdir $(GV_INSTALL_TOOLS)
+    if not exist $(GV_INSTALL_RAMPS) mkdir $(GV_INSTALL_RAMPS)
+    copy html\*.* $(GV_INSTALL_HTML)
+    copy pics\*.* $(GV_INSTALL_PICS)
+    copy tools\*.* $(GV_INSTALL_TOOLS)
+    copy ramps\*.* $(GV_INSTALL_RAMPS)
 
-install:	default
-	copy gvtest.exe $(NM_BIN_DIR)
-	cd pymod
-	nmake /f makefile.vc install
-	cd ..
+install:    default
+    copy gvtest.exe $(NM_BIN_DIR)
+    cd pymod
+    nmake /f makefile.vc install
+    cd ..

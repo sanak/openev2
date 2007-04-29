@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvraster.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Raster data container. 
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,167 +25,7 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvraster.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.75  2004/09/20 13:15:35  pgs
- * added patch for isnan on win32
- *
- * Revision 1.74  2004/09/07 15:21:34  gmwalter
- * Check for nan's as well as nodata
- * when calculating scaling min/max
- * values.
- *
- * Revision 1.73  2004/07/03 07:39:11  andrey_kiselev
- * Grab double floats from the GDAL in gv_raster_get_sample().
- *
- * Revision 1.72  2004/01/22 19:57:10  andrey_kiselev
- * Use gv_raster_get_nodata() function to fetch the NODATA value from the image
- * using GDALGetRasterNoDataValue().
- *
- * Revision 1.71  2003/11/06 14:26:24  gmwalter
- * Avoid mismatch between tiles being downsampled from higher-resolution
- * tiles and tiles being loaded for the first time at lower resolution
- * when overview downsampling method does not match openev's.
- *
- * Revision 1.70  2003/09/11 20:00:29  gmwalter
- * Add ability to specify a preferred polynomial order for warping a raster,
- * and add "safe mode" (only used if ATLANTIS_BUILD is defined).
- *
- * Revision 1.69  2003/06/25 14:45:07  gmwalter
- * Fixed a bug in gv_georef_to_pixel in geotransform case (was ignoring
- * rotational terms).
- *
- * Revision 1.68  2003/03/02 04:43:58  warmerda
- * CInt32 and CFloat64 are complex too!
- *
- * Revision 1.67  2003/02/20 19:27:15  gmwalter
- * Updated link tool to include Diana's ghost cursor code, and added functions
- * to allow the cursor and link mechanism to use different gcps
- * than the display for georeferencing.  Updated raster properties
- * dialog for multi-band case.  Added some signals to layerdlg.py and
- * oeattedit.py to make it easier for tools to interact with them.
- * A few random bug fixes.
- *
- * Revision 1.66  2003/02/07 20:06:50  andrey_kiselev
- * Memory leaks fixed.
- *
- * Revision 1.65  2002/10/29 22:28:26  warmerda
- * fill out tile in reads that are not full resolution
- *
- * Revision 1.64  2002/10/29 05:44:05  warmerda
- * always flood image values to right edge and bottom of tile on load
- *
- * Revision 1.63  2002/10/08 22:56:18  warmerda
- * Modified gv_raster_build_poly_transform() to back off using the highest
- * possible order polynomial if the CRS_compute_georef_equations() call fails.
- * This ensures that underdetermined sets of GCPs (ie. those with linear
- * dependencies) can still produce useful polynomials, even if they are only
- * 1st order.
- *
- * Revision 1.62  2002/02/15 22:10:09  warmerda
- * ensure that setting zero gcps clear the poly transform
- *
- * Revision 1.61  2001/11/29 15:53:42  warmerda
- * added autoscale_samples preference
- *
- * Revision 1.60  2001/11/28 19:18:29  warmerda
- * Added set_gcps(), and get_gcps() methods on GvRaster, and the
- * geotransform-changed signal generated when the gcps change.
- *
- * Revision 1.59  2001/10/17 16:22:38  warmerda
- * added unhandled raster type check
- *
- * Revision 1.58  2001/10/16 18:50:06  warmerda
- * now possible to pass sample set into autoscale
- *
- * Revision 1.57  2001/08/22 02:34:52  warmerda
- * fixed failure to sort samples in some cases for autoscale
- *
- * Revision 1.56  2001/08/15 13:05:57  warmerda
- * modified default autoscale std_dev to 2.5
- *
- * Revision 1.55  2001/08/14 17:03:24  warmerda
- * added standard deviation autoscaling support
- *
- * Revision 1.54  2001/07/24 02:21:54  warmerda
- * added 8bit phase averaging
- *
- * Revision 1.53  2001/07/13 22:15:36  warmerda
- * added nodata aware averaging
- *
- * Revision 1.52  2001/04/02 18:10:46  warmerda
- * expose gv_raster_autoscale() to python
- *
- * Revision 1.51  2001/01/08 17:47:23  warmerda
- * fixed additional window edge conditions in gv_raster_tile_get_gdal
- *
- * Revision 1.50  2000/11/28 02:49:51  warmerda
- * fixed edge handling bugs with rasters smaller than one tile
- *
- * Revision 1.49  2000/11/01 03:47:45  warmerda
- * Fixed serious bug with memory corruption that is mostly likely to occur
- * with large images.  See Bug 120968 on SourceForge.
- *
- * Revision 1.48  2000/09/27 19:18:50  warmerda
- * Honour GvSMSample for real and complex images.
- * Add GvRaster.sm field.  If set to GvSMSample always let GDAL do the
- * decimation for faster loads.
- *
- * Revision 1.47  2000/08/25 20:06:34  warmerda
- * Added support for GDAL bands with arbitrary overviews (ie. OGDI)
- * Avoid having scaling min and max the same.
- *
- * Revision 1.46  2000/08/24 03:37:52  warmerda
- * added PIXEL as a coordinate system
- *
- * Revision 1.45  2000/08/16 14:08:23  warmerda
- * report data name, not file name
- *
- * Revision 1.44  2000/08/09 17:37:13  warmerda
- * debug on finalize
- *
- * Revision 1.43  2000/08/02 19:17:30  warmerda
- * added debug statement
- *
- * Revision 1.42  2000/07/27 20:33:12  warmerda
- * set max lod to 7 instead of 4 for 4x4 textures
- *
- * Revision 1.41  2000/07/18 14:53:54  warmerda
- * go directly to gdal in sample call, if full res raster not available
- *
- * Revision 1.40  2000/07/12 19:26:32  warmerda
- * try to avoid using gcps if geotransform is set
- *
- * Revision 1.39  2000/07/10 14:27:53  warmerda
- * use GRASS derived CRS code instead of Numerical Recipes gvgcpfit code
- *
- * Revision 1.38  2000/06/27 15:46:47  warmerda
- * added gv_closest_gdal_lod to make optimal use of overviews
- *
- * Revision 1.37  2000/06/26 15:12:33  warmerda
- * set name automatically
- *
- * Revision 1.36  2000/06/20 15:26:21  warmerda
- * fixed more free/g_free problems
- *
- * Revision 1.35  2000/06/20 14:37:26  warmerda
- * fixed free/g_free() problem
- *
- * Revision 1.34  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
-
-
 
 #include <stdlib.h>
 #include <assert.h>
@@ -211,6 +52,7 @@
 enum
 {
     GEOTRANSFORM_CHANGED,
+    DISCONNECTED,
     LAST_SIGNAL
 };
 
@@ -228,6 +70,7 @@ typedef struct _GvRasterMemento
 
 static void gv_raster_class_init(GvRasterClass *klass);
 static void gv_raster_init(GvRaster *raster);
+static void gv_raster_dispose(GObject *object);
 static void gv_raster_finalize(GObject *object);
 static void gv_raster_changed( GvRaster *raster, void * raw_change_info );
 static gint gv_raster_build_poly_transform( GvRaster *raster );
@@ -239,29 +82,32 @@ static void gv_raster_del_memento(GvData *raster, GvDataMemento *memento);
 
 static int gv_raster_check_poly_order( GvRaster *raster, int poly_order );
 
+static GvDataClass *parent_class = NULL;
 static guint raster_signals[LAST_SIGNAL] = { 0 };
 
-GtkType
+GType
 gv_raster_get_type(void)
 {
-    static GtkType raster_type = 0;
+    static GType raster_type = 0;
 
-    if (!raster_type)
-    {
-    static const GtkTypeInfo raster_info =
-    {
-        "GvRaster",
-        sizeof(GvRaster),
-        sizeof(GvRasterClass),
-        (GtkClassInitFunc) gv_raster_class_init,
-        (GtkObjectInitFunc) gv_raster_init,
-        /* reserved_1 */ NULL,
-        /* reserved_2 */ NULL,
-        (GtkClassInitFunc) NULL,
-    };
-
-    raster_type = gtk_type_unique(gv_data_get_type(), &raster_info);
+    if (!raster_type) {
+        static const GTypeInfo raster_info =
+        {
+            sizeof(GvRasterClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_raster_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvRaster),
+            0,
+            (GInstanceInitFunc) gv_raster_init,
+        };
+        raster_type = g_type_register_static (GV_TYPE_DATA,
+                                                    "GvRaster",
+                                                    &raster_info, 0);
     }
+
     return raster_type;
 }
 
@@ -300,67 +146,63 @@ gv_raster_init(GvRaster *raster)
 static void
 gv_raster_class_init(GvRasterClass *klass)
 {
-    GvDataClass *data_class;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
+    GvDataClass *data_class = GV_DATA_CLASS (klass);
+
+    parent_class = g_type_class_peek_parent (klass);
 
     raster_signals[GEOTRANSFORM_CHANGED] =
       g_signal_new ("geotransform-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvRasterClass, geotransform_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvRasterClass, geotransform_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 0);
 
-    /* ---- Override finalize ---- */
-    (G_OBJECT_CLASS(klass))->finalize = gv_raster_finalize;
+    raster_signals[DISCONNECTED] =
+      g_signal_new ("disconnected",
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvRasterClass, disconnected),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
-    /* GTK2 PORT...
-    GtkObjectClass *object_class;
-
-    object_class = (GtkObjectClass*) klass;
-
-    raster_signals[GEOTRANSFORM_CHANGED] =
-    gtk_signal_new ("geotransform-changed",
-            GTK_RUN_FIRST,
-            object_class->type,
-            GTK_SIGNAL_OFFSET(GvRasterClass,
-                                          geotransform_changed),
-            gtk_marshal_NONE__INT,
-            GTK_TYPE_NONE, 0);
-    gtk_object_class_add_signals(object_class, raster_signals,
-                 LAST_SIGNAL);
-
-    object_class->finalize = gv_raster_finalize;
-    */
-
-    data_class = (GvDataClass *) klass;
     data_class->get_memento = gv_raster_get_memento;
     data_class->set_memento = gv_raster_set_memento;
     data_class->del_memento = gv_raster_del_memento;
 
+    object_class->dispose = gv_raster_dispose;
+    object_class->finalize = gv_raster_finalize;
 
+    klass->disconnected = NULL;
+}
 
+static void
+gv_raster_dispose(GObject *gobject)
+{
+    GvRaster *raster = GV_RASTER(gobject);
+
+    if( raster->dataset != NULL && GDALDereferenceDataset( raster->dataset ) < 1 ) {
+        GDALClose( raster->dataset );
+        raster->dataset = NULL;
+    }
+
+//~     g_signal_emit(gobject, raster_signals[DISCONNECTED], 0);
+
+    G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
 
 static void
 gv_raster_finalize(GObject *gobject)
 {
     GvRaster    *raster = GV_RASTER(gobject);
-    GvRasterClass *parent_class;
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
        as finalize may be called more than once. */
 
-    CPLDebug( "OpenEV", "gv_raster_finalize(%s)\n", 
-              gv_data_get_name(GV_DATA(gobject)) );
-
     if( raster->cache != NULL ) {
         gv_raster_cache_free( raster->cache );
-	raster->cache = NULL;
-    }
-
-    if( raster->dataset != NULL && GDALDereferenceDataset( raster->dataset ) < 1 ) {
-        GDALClose( raster->dataset );
-	raster->dataset = NULL;
+        raster->cache = NULL;
     }
 
     if( raster->poly_order > -1 )
@@ -371,7 +213,7 @@ gv_raster_finalize(GObject *gobject)
         g_free( raster->poly_y_coeff );
         g_free( raster->poly_z_coeff );
 
-	raster->poly_order = -1;
+        raster->poly_order = -1;
     }
 
     if( raster->poly_orderCL > -1 )
@@ -382,7 +224,7 @@ gv_raster_finalize(GObject *gobject)
         g_free( raster->poly_y_coeffCL );
         g_free( raster->poly_z_coeffCL );
 
-	raster->poly_orderCL = -1;
+        raster->poly_orderCL = -1;
     }
 
     if( raster->gcp_count > 0 )
@@ -390,8 +232,8 @@ gv_raster_finalize(GObject *gobject)
         GDALDeinitGCPs( raster->gcp_count, raster->gcp_list );
         CPLFree( raster->gcp_list );
 
-	raster->gcp_list = NULL;
-	raster->gcp_count = 0;
+        raster->gcp_list = NULL;
+        raster->gcp_count = 0;
     }
 
     if( raster->gcp_countCL > 0 )
@@ -399,15 +241,13 @@ gv_raster_finalize(GObject *gobject)
         GDALDeinitGCPs( raster->gcp_countCL, raster->gcp_listCL );
         CPLFree( raster->gcp_listCL );
 
-	raster->gcp_listCL = NULL;
-	raster->gcp_countCL = 0;
+        raster->gcp_listCL = NULL;
+        raster->gcp_countCL = 0;
     }
 
     /* Call parent class function */
-    parent_class = gtk_type_class(gv_data_get_type());
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
 }
-
 
 static void gv_raster_changed( GvRaster *raster,
                                void * raw_change_info )
@@ -428,10 +268,10 @@ gv_raster_new( GDALDatasetH dataset, int real_band,
                GvSampleMethod sm )
 {
     char     *name;
-    GvRaster *raster = GV_RASTER(gtk_type_new(gv_raster_get_type()));
+    GvRaster *raster = g_object_new (GV_TYPE_RASTER, NULL);
 
-    gtk_signal_connect( GTK_OBJECT(raster), "changed",
-            (GtkSignalFunc)gv_raster_changed, NULL );
+    g_signal_connect(raster, "changed",
+                    G_CALLBACK (gv_raster_changed), NULL);
 
     raster->dataset = dataset;
     GDALReferenceDataset( dataset );
@@ -562,6 +402,143 @@ gv_raster_new( GDALDatasetH dataset, int real_band,
     }
 
     return GV_DATA(raster);
+}
+
+void
+gv_raster_read( GvRaster *raster, GDALDatasetH dataset, int real_band, 
+               GvSampleMethod sm )
+{
+    char     *name;
+
+    g_signal_connect(raster, "changed",
+                    G_CALLBACK (gv_raster_changed), NULL);
+
+    raster->dataset = dataset;
+    GDALReferenceDataset( dataset );
+
+    raster->gdal_band = GDALGetRasterBand(dataset,real_band);
+
+    raster->sm = sm;
+
+    /* set the name */
+    name = (char *) g_malloc(strlen(GDALGetDescription(dataset))+8);
+    sprintf( name, "%s:%d", GDALGetDescription(dataset), real_band );
+    gv_data_set_name( GV_DATA(raster), name );
+    g_free( name );
+
+    switch( GDALGetRasterDataType(raster->gdal_band) )
+    {
+    case GDT_Byte:
+          if( sm == GvSMAverage )
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_byte_real_average;
+          else if( sm == GvSMAverage8bitPhase )
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_byte_realphase_average;
+          else
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_byte_real_sample;
+          raster->type = GV_RASTER_BYTE_REAL;
+          raster->gdal_type = GDT_Byte;
+          break;
+
+        case GDT_CInt16:
+        case GDT_CInt32:
+        case GDT_CFloat32:
+        case GDT_CFloat64:
+          if( sm == GvSMAverage )
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_float_complex_average;
+          else
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_float_complex_sample;
+          raster->type = GV_RASTER_FLOAT_COMPLEX;
+          raster->gdal_type = GDT_CFloat32;
+          break;
+          
+        default:
+          if( sm == GvSMAverage && gv_raster_get_nodata( raster, NULL ) )
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_float_real_average_nodata;
+          else if( sm == GvSMAverage )
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_float_real_average;
+          else
+              raster->average = (void *(*)(GvRaster*,void*,int,int))
+                  gv_raster_float_real_sample;
+          raster->type = GV_RASTER_FLOAT_REAL;
+          raster->gdal_type = GDT_Float32;
+          break;
+    }
+
+    if( raster->type == GV_RASTER_BYTE_REAL 
+        || !gv_raster_autoscale(raster,GvASAAutomatic,-1.0,0,NULL,NULL,NULL) )
+    {
+        raster->min = 0;
+        raster->max = 255;
+    }
+
+    raster->tile_x = 256;
+    raster->tile_y = 256;
+    raster->width = GDALGetRasterXSize(dataset);
+    raster->height = GDALGetRasterYSize(dataset);
+    raster->tiles_across = (raster->width + raster->tile_x-GV_TILE_OVERLAP-1)
+        / (raster->tile_x-GV_TILE_OVERLAP);
+    raster->tiles_down = (raster->height + raster->tile_y-GV_TILE_OVERLAP-1)
+        / (raster->tile_y-GV_TILE_OVERLAP);
+    raster->max_lod = 7;
+    raster->item_size = GDALGetDataTypeSize(raster->gdal_type) / 8;
+    
+    if( GDALGetGeoTransform(dataset, raster->geotransform) != CE_None )
+    {
+        raster->geotransform[0] = 0.0;
+        raster->geotransform[1] = 1.0;
+        raster->geotransform[2] = 0.0;
+        raster->geotransform[3] = 0.0;
+        raster->geotransform[4] = 0.0;
+        raster->geotransform[5] = 1.0;
+    }
+
+    if( GDALGetGCPCount(dataset) > 0
+        && raster->geotransform[0] == 0.0
+        && raster->geotransform[1] == 1.0
+        && raster->geotransform[2] == 0.0
+        && raster->geotransform[3] == 0.0
+        && raster->geotransform[4] == 0.0
+        && raster->geotransform[5] == 1.0 )
+    {
+        gv_data_set_projection( GV_DATA(raster), 
+                                GDALGetGCPProjection( dataset ) );
+
+        gv_raster_set_gcps( raster, 
+                            GDALGetGCPCount(dataset), 
+                            GDALGetGCPs(dataset) );
+    }
+    else
+    {
+        if( EQUAL(GDALGetProjectionRef( dataset ),"") 
+            && raster->geotransform[0] == 0.0
+            && raster->geotransform[1] == 1.0
+            && raster->geotransform[2] == 0.0
+            && raster->geotransform[3] == 0.0
+            && raster->geotransform[4] == 0.0
+            && raster->geotransform[5] == 1.0 )
+        {
+            gv_data_set_projection( GV_DATA(raster), "PIXEL" );
+        }
+        else
+        {
+            gv_data_set_projection( GV_DATA(raster), 
+                                    GDALGetProjectionRef( dataset ) );
+        }
+    }
+
+    raster->max_tiles = raster->tiles_across * raster->tiles_down;
+    if( ( raster->cache = gv_raster_cache_new( raster->max_tiles,
+                                               raster->max_lod ) ) == NULL )
+    {
+        g_free( raster->cache );
+    }
 }
 
 gint *
@@ -1823,8 +1800,7 @@ int gv_raster_set_gcps( GvRaster *raster, int gcp_count,
     if( gcp_count == 0 )
     {
         raster->poly_order = -1;
-        gtk_signal_emit(GTK_OBJECT(raster), 
-                        raster_signals[GEOTRANSFORM_CHANGED]);
+        g_signal_emit(raster, raster_signals[GEOTRANSFORM_CHANGED], 0);
         return TRUE;
     }
 
@@ -1833,8 +1809,7 @@ int gv_raster_set_gcps( GvRaster *raster, int gcp_count,
     success = gv_raster_build_poly_transform( raster );
 
     if( !success )
-        gtk_signal_emit(GTK_OBJECT(raster), 
-                        raster_signals[GEOTRANSFORM_CHANGED]);
+        g_signal_emit(raster, raster_signals[GEOTRANSFORM_CHANGED], 0);
 
     return success;
 }
@@ -2032,8 +2007,7 @@ static gint gv_raster_build_poly_transform( GvRaster *raster )
     g_free( line );
     g_free( status );
 
-    gtk_signal_emit(GTK_OBJECT(raster), 
-                    raster_signals[GEOTRANSFORM_CHANGED]);
+    g_signal_emit(raster, raster_signals[GEOTRANSFORM_CHANGED], 0);
 
     return TRUE;
 }
@@ -2354,8 +2328,7 @@ static gint gv_raster_build_poly_transform( GvRaster *raster )
     g_free( pixel );
     g_free( line );
 
-    gtk_signal_emit(GTK_OBJECT(raster), 
-                    raster_signals[GEOTRANSFORM_CHANGED]);
+    g_signal_emit(raster, raster_signals[GEOTRANSFORM_CHANGED], 0);
 
     return TRUE;
 }
@@ -2648,8 +2621,6 @@ void gv_raster_set_poly_order_preference( GvRaster *raster, int poly_order )
         success = gv_raster_build_poly_transform( raster );
 
         if( !success )
-            gtk_signal_emit(GTK_OBJECT(raster), 
-                            raster_signals[GEOTRANSFORM_CHANGED]);
+            g_signal_emit(raster, raster_signals[GEOTRANSFORM_CHANGED], 0);
     }
-
 }

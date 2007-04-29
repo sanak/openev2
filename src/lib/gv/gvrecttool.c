@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvrecttool.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Rectangle editing mode in GvShapesLayer.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,42 +25,9 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrecttool.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.7  2002/11/04 21:42:06  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.6  2001/08/08 17:44:12  warmerda
- * use gv_shape_type() macro
- *
- * Revision 1.5  2000/08/08 20:58:47  warmerda
- * recover from layer destruction
- *
- * Revision 1.4  2000/08/03 18:11:51  warmerda
- * don't create zero sized rectangles
- *
- * Revision 1.3  2000/07/27 20:06:23  warmerda
- * added boundary constraints
- *
- * Revision 1.2  2000/07/27 17:52:09  warmerda
- * allow edit of existing rectangles
- *
- * Revision 1.1  2000/07/25 23:34:03  warmerda
- * New
- *
  */
 
 #include <stdio.h>
-#include <gtk/gtksignal.h>
 #include <gdk/gdkkeysyms.h>
 #include "gvrecttool.h"
 #include "gvundo.h"
@@ -89,37 +57,37 @@ enum
     PICK_SIDE_LEFT
 };
 
-GtkType
+GType
 gv_rect_tool_get_type(void)
 {
-    static GtkType rect_tool_type = 0;
+    static GType rect_tool_type = 0;
 
-    if (!rect_tool_type)
-    {
-	static const GtkTypeInfo rect_tool_info =
-	{
-	    "GvRectTool",
-	    sizeof(GvRectTool),
-	    sizeof(GvRectToolClass),
-	    (GtkClassInitFunc) gv_rect_tool_class_init,
-	    (GtkObjectInitFunc) gv_rect_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!rect_tool_type) {
+        static const GTypeInfo rect_tool_info =
+        {
+            sizeof(GvRectToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_rect_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvRectTool),
+            0,
+            (GInstanceInitFunc) gv_rect_tool_init,
+        };
+        rect_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                  "GvRectTool",
+                                                  &rect_tool_info, 0);
+        }
 
-	rect_tool_type = gtk_type_unique(gv_tool_get_type(),
-					 &rect_tool_info);
-    }
     return rect_tool_type;
 }
 
 static void
 gv_rect_tool_class_init(GvRectToolClass *klass)
 {
-    GvToolClass *tool_class;
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
-    tool_class = (GvToolClass*)klass;
     tool_class->deactivate = gv_rect_tool_deactivate;
     tool_class->button_press = gv_rect_tool_button_press;
     tool_class->button_release = gv_rect_tool_button_release;
@@ -139,17 +107,18 @@ gv_rect_tool_init(GvRectTool *tool)
 GvTool *
 gv_rect_tool_new(void)
 {
-    return GV_TOOL(gtk_type_new(GV_TYPE_RECT_TOOL));
+    GvRectTool *tool = g_object_new(GV_TYPE_RECT_TOOL, NULL);
+
+    return GV_TOOL(tool);
 }
 
-static gint gv_rect_tool_layer_destroy( GtkObject *layer, gpointer data )
-
+static gint gv_rect_tool_layer_destroy(GvTool *rtool)
 {
-    GvRectTool *tool = (GvRectTool *) data;
+    GvRectTool *tool = GV_RECT_TOOL(rtool);
 
-    if( tool->layer == GV_SHAPES_LAYER(layer) )
-        gv_rect_tool_set_layer( tool, NULL );
-    
+    if (tool->layer)
+        gv_rect_tool_set_layer(tool, NULL);
+
     return 0;
 }
 
@@ -158,8 +127,8 @@ gv_rect_tool_set_layer(GvRectTool *tool, GvShapeLayer *layer)
 {
     if (GV_TOOL(tool)->view == NULL)
     {
-	g_warning("gv_rect_tool_set_layer(): inactive tool");
-	return;
+        g_warning("gv_rect_tool_set_layer(): inactive tool");
+        return;
     }
 
     if( layer != NULL && gv_data_is_read_only( GV_DATA(layer) ) )
@@ -171,15 +140,15 @@ gv_rect_tool_set_layer(GvRectTool *tool, GvShapeLayer *layer)
     /* Disconnect from the previous layer (for draw) */
     if (tool->layer)
     {
-	if (tool->drawing)
-	{
+        if (tool->drawing)
             tool->drawing = FALSE;
-	}
-	gv_shape_layer_clear_selection(GV_SHAPE_LAYER(tool->layer));
-	gtk_signal_disconnect_by_data(GTK_OBJECT(tool->layer), (gpointer)tool);
-	gv_view_area_queue_draw(GV_TOOL(tool)->view);
+
+        gv_shape_layer_clear_selection(GV_SHAPE_LAYER(tool->layer));
+        g_signal_handlers_disconnect_matched (tool->layer, G_SIGNAL_MATCH_DATA,
+                                                0, 0, NULL, NULL, tool);
+        gv_view_area_queue_draw(GV_TOOL(tool)->view);
     }
- 
+
     if( layer == NULL )
         tool->layer = NULL;
     else
@@ -187,17 +156,17 @@ gv_rect_tool_set_layer(GvRectTool *tool, GvShapeLayer *layer)
 
     if (layer)
     {
-	gv_view_area_set_active_layer(GV_TOOL(tool)->view, GTK_OBJECT(layer));
-	
+        gv_view_area_set_active_layer(GV_TOOL(tool)->view, G_OBJECT(layer));
+
         /* Redraw when the layer draws */
-	gtk_signal_connect_object_after(GTK_OBJECT(layer), "draw",
-					GTK_SIGNAL_FUNC(gv_rect_tool_draw),
-					GTK_OBJECT(tool));
-        /* Recover if layer destroyed */
-        gtk_signal_connect(
-            GTK_OBJECT(layer), "destroy", 
-            GTK_SIGNAL_FUNC(gv_rect_tool_layer_destroy),
-            GTK_OBJECT(tool));
+        g_signal_connect_object(layer, "draw",
+                                G_CALLBACK(gv_rect_tool_draw),
+                                GV_TOOL(tool), G_CONNECT_SWAPPED | G_CONNECT_AFTER);
+
+        /* recover if layer destroyed */
+        g_signal_connect_swapped(layer, "teardown",
+                                G_CALLBACK(gv_rect_tool_layer_destroy),
+                                tool);
     }
 }
 
@@ -206,13 +175,11 @@ gv_rect_tool_set_named_layer(GvRectTool *tool, gchar *name)
 {
     if (tool->named_layer)
     {
-	g_free(tool->named_layer);
-	tool->named_layer = NULL;
+        g_free(tool->named_layer);
+        tool->named_layer = NULL;
     }
     if (name)
-    {
-	tool->named_layer = g_strdup(name);	
-    }
+        tool->named_layer = g_strdup(name);     
     /* Tool layer will be updated next time it is configured */
 }
 
@@ -223,16 +190,16 @@ gv_rect_tool_draw(GvRectTool *tool)
 {
     if (tool->drawing)
     {
-	/* Color is set when the layer is drawn,
-	   so we don't need to repeat it here */
+        /* Color is set when the layer is drawn,
+           so we don't need to repeat it here */
 
-	glBegin(GL_LINE_LOOP);
-	glVertex2(tool->v_head.x, tool->v_head.y);
-	glVertex2(tool->v_head.x, tool->v_tail.y);
-	glVertex2(tool->v_tail.x, tool->v_tail.y);
-	glVertex2(tool->v_tail.x, tool->v_head.y);
-	glVertex2(tool->v_head.x, tool->v_head.y);
-	glEnd();
+        glBegin(GL_LINE_LOOP);
+        glVertex2(tool->v_head.x, tool->v_head.y);
+        glVertex2(tool->v_head.x, tool->v_tail.y);
+        glVertex2(tool->v_tail.x, tool->v_tail.y);
+        glVertex2(tool->v_tail.x, tool->v_head.y);
+        glVertex2(tool->v_head.x, tool->v_head.y);
+        glEnd();
     }
     return FALSE;
 }
@@ -251,7 +218,7 @@ gv_rect_tool_reshape( GvRectTool *r_tool, gvgeocoord x, gvgeocoord y )
         return;
 
     shape = gv_shape_copy( shape );
-    
+
     x1 = gv_shape_get_x(shape,0,0);
     y1 = gv_shape_get_y(shape,0,0);
     x2 = gv_shape_get_x(shape,0,2);
@@ -306,11 +273,11 @@ gv_rect_tool_button_press(GvTool *r_tool, GdkEventButton *event)
         GvNodeInfo edit_node;
         int        before, shape_id, is_rectangle = FALSE;
 
-	if (!gv_rect_tool_configure(tool)) return FALSE;
+        if (!gv_rect_tool_configure(tool)) return FALSE;
 
-	if (gv_shape_layer_pick_shape(GV_SHAPE_LAYER(tool->layer), 
+        if (gv_shape_layer_pick_shape(GV_SHAPE_LAYER(tool->layer), 
                                       GV_TOOL(tool)->view,
-				      event->x, event->y, &shape_id))
+                                      event->x, event->y, &shape_id))
         {
             GvShape *shape;
 
@@ -351,19 +318,19 @@ gv_rect_tool_button_press(GvTool *r_tool, GdkEventButton *event)
                 {
                     gv_shape_layer_clear_selection(
                         GV_SHAPE_LAYER(tool->layer));
-		    gv_shape_layer_select_shape(
+                    gv_shape_layer_select_shape(
                         GV_SHAPE_LAYER(tool->layer), shape_id);
                 }
             }
         }
 
         /* Is the user selecting an existing rectangles edge/corner? */
-	if (is_rectangle 
+        if (is_rectangle 
             && gv_shape_layer_pick_node(GV_SHAPE_LAYER(tool->layer), 
                                         GV_TOOL(tool)->view,
                                         event->x, event->y, &before,
                                         &edit_node) )
-	{
+        {
             if( tool->winding == 0 )
             {
                 if( before )
@@ -398,7 +365,7 @@ gv_rect_tool_button_press(GvTool *r_tool, GdkEventButton *event)
 
             tool->reshaping = TRUE;
             tool->shape_id = edit_node.shape_id;
-            
+
             /* Close down undo.  A single operation describing the new
                ring will be pushed to undo when drawing stops. */
             gv_undo_close();
@@ -407,11 +374,11 @@ gv_rect_tool_button_press(GvTool *r_tool, GdkEventButton *event)
             return FALSE;
         }
 
-	/* Map pointer position to tail vertex */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_tail.x, &tool->v_tail.y);
+        /* Map pointer position to tail vertex */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_tail.x, &tool->v_tail.y);
 
-	if( gv_tool_check_bounds( GV_TOOL(tool),
+        if( gv_tool_check_bounds( GV_TOOL(tool),
                                   tool->v_tail.x, tool->v_tail.y ) )
         {
             /* Start a new rect */
@@ -430,29 +397,28 @@ gv_rect_tool_button_release(GvTool *r_tool, GdkEventButton *event)
     if (event->button == 1 && tool->drawing )
     {
         GvShape *shape;
-	
-	if (!gv_rect_tool_configure(tool)) return FALSE;
+
+        if (!gv_rect_tool_configure(tool)) return FALSE;
 
         /* Map pointer position to tail vertex */
         gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
                                  &tool->v_tail.x, &tool->v_tail.y);
-	
-        gv_tool_clamp_to_bounds( GV_TOOL(tool),
-				 &tool->v_tail.x, &tool->v_tail.y );
 
+        gv_tool_clamp_to_bounds( GV_TOOL(tool),
+                                 &tool->v_tail.x, &tool->v_tail.y );
 
         if( tool->v_tail.x != tool->v_head.x 
             && tool->v_tail.y != tool->v_head.y )
         {
             /* create the new rectangle */
             shape = gv_shape_new( GVSHAPE_AREA );
-            
+
             gv_shape_add_node( shape, 0, tool->v_tail.x, tool->v_tail.y, 0 );
             gv_shape_add_node( shape, 0, tool->v_tail.x, tool->v_head.y, 0 );
             gv_shape_add_node( shape, 0, tool->v_head.x, tool->v_head.y, 0 );
             gv_shape_add_node( shape, 0, tool->v_head.x, tool->v_tail.y, 0 );
             gv_shape_add_node( shape, 0, tool->v_tail.x, tool->v_tail.y, 0 ); 
-            
+
             gv_shapes_layer_select_new_shape( GV_SHAPES_LAYER(tool->layer), 
                                               shape );
         }
@@ -463,15 +429,15 @@ gv_rect_tool_button_release(GvTool *r_tool, GdkEventButton *event)
 
     if (event->button == 1 && tool->reshaping )
     {
-	if (!gv_rect_tool_configure(tool)) return FALSE;
+        if (!gv_rect_tool_configure(tool)) return FALSE;
 
         /* Reopen undo.  Push a memento describing the ring addition */
         gv_undo_enable();
         gv_undo_open();
 
-	/* Map pointer position to tail vertex */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_tail.x, &tool->v_tail.y);
+        /* Map pointer position to tail vertex */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_tail.x, &tool->v_tail.y);
         gv_rect_tool_reshape( tool, tool->v_tail.x, tool->v_tail.y );
 
         tool->reshaping = FALSE;
@@ -486,21 +452,21 @@ gv_rect_tool_motion_notify(GvTool *r_tool, GdkEventMotion *event)
 
     if (tool->drawing)
     {
-	/* Map pointer position to tail vertex */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_tail.x, &tool->v_tail.y);
+        /* Map pointer position to tail vertex */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_tail.x, &tool->v_tail.y);
 
         gv_tool_clamp_to_bounds( GV_TOOL(tool),
-				 &tool->v_tail.x, &tool->v_tail.y );
+                                 &tool->v_tail.x, &tool->v_tail.y );
 
-	gv_view_area_queue_draw(GV_TOOL(tool)->view);
+        gv_view_area_queue_draw(GV_TOOL(tool)->view);
     }
 
     if (tool->reshaping)
     {
-	/* Map pointer position to tail vertex */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_tail.x, &tool->v_tail.y);
+        /* Map pointer position to tail vertex */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_tail.x, &tool->v_tail.y);
         gv_rect_tool_reshape( tool, tool->v_tail.x, tool->v_tail.y );
     }
     return FALSE;
@@ -512,12 +478,12 @@ gv_rect_tool_key_press(GvTool *rtool, GdkEventKey *event)
     GvRectTool *tool = GV_RECT_TOOL(rtool);
 
     if (!gv_rect_tool_configure(tool)) return;
-    
+
     switch (event->keyval)
     {
-	case GDK_Delete:
-	case GDK_BackSpace:
-	case GDK_Escape:
+        case GDK_Delete:
+        case GDK_BackSpace:
+        case GDK_Escape:
           if( tool->drawing )
           {
               tool->drawing = FALSE;
@@ -543,9 +509,7 @@ gv_rect_tool_deactivate(GvTool *r_tool, GvViewArea *view)
 
     /* Disconnect from layer */
     if (tool->layer)
-    {
-	gv_rect_tool_set_layer(tool, NULL);
-    }
+        gv_rect_tool_set_layer(tool, NULL);
 
     /* Call the parent class func */
     GV_TOOL_DEACTIVATE(tool, view);
@@ -555,31 +519,31 @@ static gint
 gv_rect_tool_configure(GvRectTool *tool)
 {
     /* Check that we still are working on the active layer */
-    if (!tool->layer ||	GTK_OBJECT(tool->layer) !=
-	gv_view_area_active_layer(GV_TOOL(tool)->view))
+    if (!tool->layer || G_OBJECT(tool->layer) !=
+        gv_view_area_active_layer(GV_TOOL(tool)->view))
     {
-	GtkObject *layer;
+        GObject *layer;
 
-	if (tool->named_layer)
-	{
-	    /* Look for named layer if given */
-	    layer = gv_view_area_get_named_layer(GV_TOOL(tool)->view,
-						 tool->named_layer);
-	}
-	else
-	{
+        if (tool->named_layer)
+        {
+            /* Look for named layer if given */
+            layer = gv_view_area_get_named_layer(GV_TOOL(tool)->view,
+                             tool->named_layer);
+        }
+        else
+        {
             layer = gv_view_area_get_layer_of_type(GV_TOOL(tool)->view,
                                                    GV_TYPE_SHAPES_LAYER,
                                                    FALSE);
-	}
+        }
 
-	if (!layer)
-	{
-	    g_warning("gv_rect_tool_configure(): no shapes layer in view");
-	    return FALSE;
-	}
+        if (!layer)
+        {
+            g_warning("gv_rect_tool_configure(): no shapes layer in view");
+            return FALSE;
+        }
 
-	gv_rect_tool_set_layer(tool, GV_SHAPE_LAYER(layer));
+        gv_rect_tool_set_layer(tool, GV_SHAPE_LAYER(layer));
     }
     return tool->layer != NULL;
 }

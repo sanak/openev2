@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvzoompantool.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Zoom/Pan editing mode (most zoompan code in gvviewarea.c)
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,27 +25,9 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvzoompantool.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.7  2000/07/10 13:37:05  srawlin
- * updated 3D controls to be more like 2D
- *
- * Revision 1.6  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include "gvzoompantool.h"
-#include <gtk/gtksignal.h>
 #include <gdk/gdkkeysyms.h>
 #include <GL/gl.h>
 
@@ -55,37 +38,37 @@ static gboolean gv_zoompan_tool_button_release(GvTool *tool, GdkEventButton *eve
 static gboolean gv_zoompan_tool_motion_notify(GvTool *tool, GdkEventMotion *event);
 static void gv_zoompan_tool_deactivate(GvTool *tool, GvViewArea *view);
 
-GtkType
+GType
 gv_zoompan_tool_get_type(void)
 {
-    static GtkType zoompan_tool_type = 0;
+    static GType zoompan_tool_type = 0;
 
-    if (!zoompan_tool_type)
-    {
-	static const GtkTypeInfo zoompan_tool_info =
-	{
-	    "GvZoompanTool",
-	    sizeof(GvZoompanTool),
-	    sizeof(GvZoompanToolClass),
-	    (GtkClassInitFunc) gv_zoompan_tool_class_init,
-	    (GtkObjectInitFunc) gv_zoompan_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!zoompan_tool_type) {
+        static const GTypeInfo zoompan_tool_info =
+        {
+            sizeof(GvZoompanToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_zoompan_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvZoompanTool),
+            0,
+            (GInstanceInitFunc) gv_zoompan_tool_init,
+        };
+        zoompan_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                      "GvZoompanTool",
+                                                      &zoompan_tool_info, 0);
+        }
 
-	zoompan_tool_type = gtk_type_unique(gv_tool_get_type(),
-					      &zoompan_tool_info);
-    }
     return zoompan_tool_type;
 }
 
 static void
 gv_zoompan_tool_class_init(GvZoompanToolClass *klass)
 {
-    GvToolClass *tool_class;
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
-    tool_class = (GvToolClass*)klass;
     tool_class->deactivate = gv_zoompan_tool_deactivate;
     tool_class->button_press = gv_zoompan_tool_button_press;
     tool_class->button_release = gv_zoompan_tool_button_release;
@@ -100,7 +83,9 @@ gv_zoompan_tool_init(GvZoompanTool *tool)
 GvTool *
 gv_zoompan_tool_new(void)
 {
-    return GV_TOOL(gtk_type_new(GV_TYPE_ZOOMPAN_TOOL));
+    GvZoompanTool *tool = g_object_new(GV_TYPE_ZOOMPAN_TOOL, NULL);
+
+    return GV_TOOL(tool);
 }
 
 static gboolean
@@ -154,5 +139,3 @@ gv_zoompan_tool_deactivate(GvTool *tool, GvViewArea *view)
     if( tool->view )
         tool->view->last_button = 0;
 }
-
-

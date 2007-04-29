@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvundo.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Generic undo management.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,28 +25,10 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvundo.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.6  2002/09/30 20:50:32  warmerda
- * fixed serious bug in gv_undo_end_group
- *
- * Revision 1.5  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include "gvundo.h"
 #include "gextra.h"
-#include <gtk/gtksignal.h>
 
 #define DEFAULT_STACK_MAX   64
 
@@ -85,11 +68,11 @@ gv_undo_register_data(GvData *data)
 {
     if (!undo) gv_undo_init();
 
-    gtk_signal_connect(GTK_OBJECT(data), "changing",
-		       GTK_SIGNAL_FUNC(gv_undo_data_changing), NULL);
+    g_signal_connect(data, "changing",
+                    G_CALLBACK(gv_undo_data_changing), NULL);
 
-    gtk_signal_connect(GTK_OBJECT(data), "destroy",
-		       GTK_SIGNAL_FUNC(gv_undo_data_destroy), NULL);
+    /*g_signal_connect(data, "destroy",
+                    G_CALLBACK(gv_undo_data_destroy), NULL);*/
 }
 
 void
@@ -122,15 +105,15 @@ gv_undo_push(GvDataMemento *memento)
     /* discard oldest undo step if we are at the limit */
     if (++undo->undo_stack_count > undo->stack_max)
     {
-	GList *remove;
-	GvDataMemento *memento;
+        GList *remove;
+        GvDataMemento *memento;
 
-	remove = g_list_last(undo->undo_stack);
-	memento = (GvDataMemento*)remove->data;
-	undo->undo_stack = g_list_remove_link(undo->undo_stack, remove);
-	undo->undo_stack_count--;
+        remove = g_list_last(undo->undo_stack);
+        memento = (GvDataMemento*)remove->data;
+        undo->undo_stack = g_list_remove_link(undo->undo_stack, remove);
+        undo->undo_stack_count--;
 
-	gv_data_del_memento(memento->data, memento);
+        gv_data_del_memento(memento->data, memento);
     }
 }
 
@@ -172,11 +155,11 @@ gv_undo_clear(void)
     if (!undo) gv_undo_init();    
     while (undo->undo_stack_count)
     {
-	memento = (GvDataMemento*)undo->undo_stack->data;
-	undo->undo_stack = g_list_pop(undo->undo_stack);
-	undo->undo_stack_count--;
-	
-	gv_data_del_memento(memento->data, memento);
+        memento = (GvDataMemento*)undo->undo_stack->data;
+        undo->undo_stack = g_list_pop(undo->undo_stack);
+        undo->undo_stack_count--;
+
+        gv_data_del_memento(memento->data, memento);
     }
 
     undo->group_locked = FALSE;
@@ -204,7 +187,6 @@ gv_undo_can_undo(void)
 }
 
 gint gv_undo_start_group(void)
-
 {
     if (!undo) gv_undo_init();
 
@@ -220,7 +202,6 @@ gint gv_undo_start_group(void)
 
 void 
 gv_undo_end_group(gint group)
-
 {
     if (!undo) gv_undo_init();
 
@@ -234,7 +215,6 @@ gv_undo_end_group(gint group)
     undo->next_group++;
 }
 
-
 static void
 gv_undo_data_changing(GvData *data, gpointer change_info)
 {
@@ -245,7 +225,7 @@ gv_undo_data_changing(GvData *data, gpointer change_info)
     memento = gv_data_get_memento(data, change_info);
     if (memento)
     {
-	gv_undo_push(memento);
+        gv_undo_push(memento);
     }
 }
 

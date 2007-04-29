@@ -28,6 +28,7 @@ include $(MKINCLDIR)/generic
 #
 
   LIB = gv
+  ULIB = GV
 
 #
 # Default to shared library
@@ -39,35 +40,27 @@ include $(MKINCLDIR)/generic
 # Default to python module AND shared library (for testmain)
 #
 
-  USEPYMOD = both
+  USEPYMOD = yes
 
 #
 # Source files managed by this makefile
 #
 
-  CSRCS = appcurlayer.c \
-          crs.c \
+  CSRCS = crs.c \
           dbfopen.c \
           gextra.c \
-          gtkcolorwell.c \
-          gvarealayer.c \
-          gvareas.c \
           gvareatool.c \
           gvdata.c \
           gvlayer.c \
-          gvlinelayer.c \
           gvlinetool.c \
           gvmanager.c \
           gvmarshal.c \
           gvmesh.c \
           gvnodetool.c \
           gvogr.c \
-	  gv_override.c \
-          gvpointlayer.c \
-          gvpoints.c \
+          gv_override.c \
           gvpointtool.c \
           gvpoitool.c \
-          gvpolylines.c \
           gvpquerylayer.c \
           gvprint.c \
           gvproperties.c \
@@ -79,7 +72,6 @@ include $(MKINCLDIR)/generic
           gvrasterlayer.c \
           gvrasterlut.c \
           gvrastersource.c \
-          gvrecords.c \
           gvrecttool.c \
           gvrenderinfo.c \
           gvroitool.c \
@@ -92,7 +84,6 @@ include $(MKINCLDIR)/generic
           gvshapeslayer.c \
           gvskirt.c \
           gvsymbolmanager.c \
-          gvtess.c \
           gvtessshape.c \
           gvtexturecache.c \
           gvtool.c \
@@ -105,7 +96,6 @@ include $(MKINCLDIR)/generic
           gvwinprint.c \
           gvzoompantool.c \
           invdistance.c \
-          ipgcplayer.c \
           llrasterize.c \
           shpopen.c
 
@@ -113,32 +103,20 @@ include $(MKINCLDIR)/generic
 # Header files managed by this makefile
 #
 
-  CHEADERS = appcurlayer.h \
-             crs.h \
-             dllfct.h \
+  CHEADERS = crs.h \
              gextra.h \
-             glu.h \
-             gluos.h \
-             gtkcolorwell.h \
              gv_config.h \
-             gvarealayer.h \
-             gvareas.h \
              gvareatool.h \
              gvdata.h \
              gview.h \
              gvlayer.h \
-             gvlinelayer.h \
              gvlinetool.h \
              gvmanager.h \
              gvmarshal.h \
              gvmesh.h \
-             gvmodule.h \
              gvnodetool.h \
-             gvpointlayer.h \
-             gvpoints.h \
              gvpointtool.h \
              gvpoitool.h \
-             gvpolylines.h \
              gvpquerylayer.h \
              gvproperties.h \
              gvraster.h \
@@ -148,7 +126,6 @@ include $(MKINCLDIR)/generic
              gvrasterlayer.h \
              gvrasterlut.h \
              gvrastertypes.h \
-             gvrecords.h \
              gvrecttool.h \
              gvrenderinfo.h \
              gvroitool.h \
@@ -158,7 +135,6 @@ include $(MKINCLDIR)/generic
              gvshapes.h \
              gvshapeslayer.h \
              gvsymbolmanager.h \
-             gvtess.h \
              gvtool.h \
              gvtoolbox.h \
              gvtracktool.h \
@@ -169,15 +145,14 @@ include $(MKINCLDIR)/generic
              gvviewlink.h \
              gvzoompantool.h \
              invdistance.h \
-             ipgcplayer.h \
-		 gvshape.h
+             gvshape.h
 #
 # Headers which when added to CHEADERS are all headers managed
 # by this makefile.  These headers differ from CHEADERS in that
 # they will not be used by python module automatic code generation
 #
 
-  LOCALINCS = glu.h gluos.h shapefil.h gv_override.h
+  LOCALINCS = shapefil.h gv_override.h
 
 #
 # Locations of needed header files

@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Raster display layer (managed textures, redraw, etc)
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,79 +25,15 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrasterlayer.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.32  2004/06/23 14:35:05  gmwalter
- * Added support for multi-band complex imagery.
- *
- * Revision 1.31  2004/01/22 20:45:27  andrey_kiselev
- * Added methods gv_raster_layer_nodata_set() and gv_raster_layer_nodata_get() to
- * work with nodata_* layer properties and method gv_raster_layer_type_get() to
- * query raster data type.
- *
- * Revision 1.30  2002/04/12 14:40:37  gmwalter
- * Removed the gvmesh rescale function (not needed because of view area
- * rescaling).
- *
- * Revision 1.28  2002/03/07 02:31:56  warmerda
- * added default_height to add_height functions
- *
- * Revision 1.27  2001/12/13 03:29:17  warmerda
- * avoid purging textures used in this render
- *
- * Revision 1.26  2001/11/28 19:23:04  warmerda
- * Added logic to keep track if the mesh is dirty (out of date), and to
- * refresh it before a redraw.  It is marked dirty when the prototype data
- * emits a geotransform-changed signal.
- *
- * Revision 1.25  2001/10/17 16:23:52  warmerda
- * added support for composing complex lut and pct
- *
- * Revision 1.24  2001/10/16 18:50:29  warmerda
- * added autoscale and histogram functions
- *
- * Revision 1.23  2001/07/13 22:16:03  warmerda
- * disard unused pc_lut_{x,y} fields
- *
- * Revision 1.22  2001/07/03 14:26:05  warmerda
- * added set/get raw ability
- *
- * Revision 1.21  2001/01/30 19:34:29  warmerda
- * make gv_raster_layer_purge_all_textures() public
- *
- * Revision 1.20  2000/08/25 20:11:52  warmerda
- * added preliminary nodata support
- *
- * Revision 1.19  2000/07/18 15:04:25  warmerda
- * added texture dump prototype
- *
- * Revision 1.18  2000/07/03 20:58:31  warmerda
- * eye_pos in georef coordinates now
- *
- * Revision 1.17  2000/06/27 21:25:41  warmerda
- * rewrote texture caching completely
- *
- * Revision 1.16  2000/06/23 12:56:18  warmerda
- * added multiple GvRasterSource support
- *
- * Revision 1.15  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef __GV_RASTER_LAYER_H__
 #define __GV_RASTER_LAYER_H__
 
 #include <gtk/gtkgl.h>
+#ifdef _WIN32
+#include <Windows.h>
+#endif
 #include <GL/gl.h>
 #include "gvlayer.h"
 #include "gvraster.h"

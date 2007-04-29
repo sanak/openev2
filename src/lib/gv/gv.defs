@@ -34,6 +34,13 @@
   (gtype-id "GV_TYPE_MESH")
 )
 
+(define-object PqueryLayer
+  (in-module "Gv")
+  (parent "GvShapesLayer")
+  (c-name "GvPqueryLayer")
+  (gtype-id "GV_TYPE_PQUERY_LAYER")
+)
+
 (define-object Raster
   (in-module "Gv")
   (parent "GvData")
@@ -87,6 +94,9 @@
   (parent "GObject")
   (c-name "GvTool")
   (gtype-id "GV_TYPE_TOOL")
+  (fields
+    '("GvViewArea*" "view")
+  )
 )
 
 (define-object SelectionTool
@@ -94,6 +104,9 @@
   (parent "GvTool")
   (c-name "GvSelectionTool")
   (gtype-id "GV_TYPE_SELECTION_TOOL")
+  (fields
+    '("GvShapeLayer*" "layer")
+  )
 )
 
 (define-object RotateTool
@@ -150,6 +163,10 @@
   (parent "GvTool")
   (c-name "GvAreaTool")
   (gtype-id "GV_TYPE_AREA_TOOL")
+  (fields
+    '("GvShapeLayer*" "layer")
+    '("gchar*" "named_layer")
+  )
 )
 
 (define-object Toolbox
@@ -157,6 +174,9 @@
   (parent "GvTool")
   (c-name "GvToolbox")
   (gtype-id "GV_TYPE_TOOLBOX")
+  (fields
+    '("GvTool*" "active_tool")
+  )
 )
 
 (define-object TrackTool
@@ -288,6 +308,17 @@
 
 ;; From gextra.h
 
+(define-function g_sort
+  (c-name "g_sort")
+  (return-type "none")
+  (parameters
+    '("gpointer" "mem")
+    '("guint" "nmemb")
+    '("gsize" "size")
+    '("GCompareValFunc" "compare")
+  )
+)
+
 (define-function g_compare_gint
   (c-name "g_compare_gint")
   (return-type "gint")
@@ -388,6 +419,12 @@
   (of-object "GvData")
   (c-name "gv_data_get_name")
   (return-type "const-gchar*")
+)
+
+(define-method destroy
+  (of-object "GvData")
+  (c-name "gv_data_destroy")
+  (return-type "none")
 )
 
 (define-method changing
@@ -866,459 +903,6 @@
     '("double" "x")
     '("double" "y")
     '("int*" "success")
-  )
-)
-
-
-
-;; From gvmodule.h
-
-(define-function copy_obj
-  (c-name "copy_obj")
-  (return-type "none")
-  (parameters
-    '("GObject*" "obj")
-    '("GObject*" "sub")
-  )
-)
-
-(define-function gv_data_set_properties
-  (c-name "gv_data_set_properties")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_view_area_get_width
-  (c-name "gv_view_area_get_width")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_view_area_get_height
-  (c-name "gv_view_area_get_height")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shapes_layer_new
-  (c-name "gv_shapes_layer_new")
-  (is-constructor-of "GvShapesLayer")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shapes_num_shapes
-  (c-name "gv_shapes_num_shapes")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shapes_get_shape
-  (c-name "gv_shapes_get_shape")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_get_min
-  (c-name "gv_raster_get_min")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_get_max
-  (c-name "gv_raster_get_max")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_view_area_get_translation
-  (c-name "gv_view_area_get_translation")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-  )
-)
-
-(define-function gv_have_ogr_support
-  (c-name "gv_have_ogr_support")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-  )
-)
-
-(define-function gv_shapes_get_change_info
-  (c-name "gv_shapes_get_change_info")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shapes_lines_for_vecplot
-  (c-name "gv_shapes_lines_for_vecplot")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_get_change_info
-  (c-name "gv_raster_get_change_info")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_force_load
-  (c-name "gv_raster_force_load")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_get_gdal_band
-  (c-name "gv_raster_get_gdal_band")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_layer_get_height
-  (c-name "gv_raster_layer_get_height")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_layer_get_mesh_lod
-  (c-name "gv_raster_layer_get_mesh_lod")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_layer_get_nodata
-  (c-name "gv_raster_layer_get_nodata")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_layer_get_source_lut
-  (c-name "gv_raster_layer_get_source_lut")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_raster_layer_get_source_const_value
-  (c-name "gv_raster_layer_get_source_const_value")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_view_area_get_eye_dir
-  (c-name "gv_view_area_get_eye_dir")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_view_area_get_eye_pos
-  (c-name "gv_view_area_get_eye_pos")
-  (return-type "PyObject*")
-  (parameters
-    '("PyGObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_rgba_to_rgb
-  (c-name "gv_rgba_to_rgb")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_create
-  (c-name "gv_shape_create")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_from_xml
-  (c-name "gv_shape_from_xml")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_to_xml
-  (c-name "gv_shape_to_xml")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_destroy
-  (c-name "gv_shape_destroy")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_ref
-  (c-name "gv_shape_ref")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_unref
-  (c-name "gv_shape_unref")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_ref
-  (c-name "gv_shape_get_ref")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_copy
-  (c-name "gv_shape_copy")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_shape_type
-  (c-name "gv_shape_get_shape_type")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_line_from_nodelists
-  (c-name "gv_shape_line_from_nodelists")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_property
-  (c-name "gv_shape_get_property")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_properties
-  (c-name "gv_shape_get_properties")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_typed_properties
-  (c-name "gv_shape_get_typed_properties")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_set_property
-  (c-name "gv_shape_set_property")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_set_properties
-  (c-name "gv_shape_set_properties")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_rings
-  (c-name "gv_shape_get_rings")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_nodes
-  (c-name "gv_shape_get_nodes")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_add_node
-  (c-name "gv_shape_add_node")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_set_node
-  (c-name "gv_shape_set_node")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_node
-  (c-name "gv_shape_get_node")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_point_in_polygon
-  (c-name "gv_shape_point_in_polygon")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_distance_from_polygon
-  (c-name "gv_shape_distance_from_polygon")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_clip_to_rect
-  (c-name "gv_shape_clip_to_rect")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_add_shape
-  (c-name "gv_shape_add_shape")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_get_shape
-  (c-name "gv_shape_get_shape")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
-  )
-)
-
-(define-function gv_shape_collection_get_count
-  (c-name "gv_shape_collection_get_count")
-  (return-type "PyObject*")
-  (parameters
-    '("PyObject*" "self")
-    '("PyObject*" "args")
   )
 )
 
@@ -3190,6 +2774,16 @@
     '("gv_draw_mode" "draw_mode")
     '("GvShapeDrawInfo*" "drawinfo")
   )
+)
+
+
+
+;; From gvpquerylayer.h
+
+(define-function gv_pquery_layer_new
+  (c-name "gv_pquery_layer_new")
+  (is-constructor-of "GvPqueryLayer")
+  (return-type "GObject*")
 )
 
 

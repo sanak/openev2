@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvtessshape.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Tesselation for GvAreaShape.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,56 +25,10 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvtessshape.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.11  2003/02/25 19:41:23  warmerda
- * avoid warning
- *
- * Revision 1.10  2002/12/10 02:57:34  sduclos
- * update tess callback cast for WIN_CALLBACK
- *
- * Revision 1.9  2002/11/05 18:56:26  sduclos
- * fix gcc warning
- *
- * Revision 1.8  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.7  2001/05/01 21:48:01  warmerda
- * fixed Mesa3.3 compatibility fixes
- *
- * Revision 1.6  2001/04/24 16:22:12  warmerda
- * fixed mesa3.3 incompatibility
- *
- * Revision 1.5  2000/07/13 22:25:43  warmerda
- * detect tesselations w/1 fill_object and no vertices, and reset to 0 objects
- *
- * Revision 1.4  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
-#include "gluos.h"
-#include "glu.h"
-
+#include "tess.h"
 #include "gvshapes.h"
-
-/* gtkgl.h is to satisfy some Windows definition requirements
-#include <gtk/gtkgl.h>
-*/
-
-/*
-#include <GL/glu.h>
-*/
-
 #include <string.h>
 
 /* Backward compatibility with glu ver. 1.1 */
@@ -108,8 +63,8 @@ static void WIN_CALLBACK tess_end(void);
 static void WIN_CALLBACK tess_vertex(void *data, void *in_area);
 static void WIN_CALLBACK tess_error(GLenum err, void *in_area);
 static void WIN_CALLBACK tess_combine(GLdouble coords[3], 
-				      gvgeocoord *vertex_data[4],
-				      GLfloat weight[4], void **dataOut);
+                                      gvgeocoord *vertex_data[4],
+                                      GLfloat weight[4], void **dataOut);
 static gint check_ring_lengths(GvAreaShape *area);
 static void check_winding(GvAreaShape *area);
 static gint find_winding(gvgeocoord *, int);
@@ -128,20 +83,20 @@ gv_area_shape_tessellate(GvAreaShape *in_area)
        or fill because we are in the midst of editing. */
     if( in_area->fill_objects == -2 )
         return FALSE;
-    
+
     if (!tess)
     {
-	tess = gluNewTess();
-	g_return_val_if_fail(tess, FALSE);
+        tess = gluNewTess();
+        g_return_val_if_fail(tess, FALSE);
         gluTessProperty(tess, GLU_TESS_TOLERANCE, .01);
 
-	gluTessCallback(tess, GLU_TESS_BEGIN_DATA, (f) tess_begin);
+        gluTessCallback(tess, GLU_TESS_BEGIN_DATA, (f) tess_begin);
 
-	gluTessCallback(tess, GLU_TESS_VERTEX_DATA,(f) tess_vertex);
+        gluTessCallback(tess, GLU_TESS_VERTEX_DATA,(f) tess_vertex);
 
-	gluTessCallback(tess, GLU_TESS_COMBINE,(f) tess_combine);
+        gluTessCallback(tess, GLU_TESS_COMBINE,(f) tess_combine);
 
-	gluTessCallback(tess, GLU_TESS_ERROR_DATA, (f) tess_error);
+        gluTessCallback(tess, GLU_TESS_ERROR_DATA, (f) tess_error);
     }
 
     /* Check for short ring lengths, or unclosed rings */
@@ -149,52 +104,52 @@ gv_area_shape_tessellate(GvAreaShape *in_area)
 
     /* Fix ring winding before tesselation */
     check_winding(in_area);
-    
+
     in_area->fill_objects = 0;
     if (in_area->fill)
     {
-	g_array_set_size(in_area->fill, 0);
-	g_array_set_size(in_area->mode_offset, 0);
+        g_array_set_size(in_area->fill, 0);
+        g_array_set_size(in_area->mode_offset, 0);
     }
     else
     {
-	//g_print("Creating..\n");
+        //g_print("Creating..\n");
 
-	in_area->fill = g_array_sized_new(FALSE, FALSE, sizeof(GvVertex3d), 1000);
-	in_area->mode_offset = 
-	  g_array_sized_new(FALSE, FALSE, sizeof(gint), 1000);
+        in_area->fill = g_array_sized_new(FALSE, FALSE, sizeof(GvVertex3d), 1000);
+        in_area->mode_offset = 
+          g_array_sized_new(FALSE, FALSE, sizeof(gint), 1000);
     }
     gluTessBeginPolygon(tess, (void *)in_area);
     for (i=0; i < gv_shape_get_rings((GvShape *) in_area); ++i)
     {
-	node_count = in_area->num_ring_nodes[i];
+        node_count = in_area->num_ring_nodes[i];
         xyz_nodes = in_area->xyz_ring_nodes[i];
 
-  	gluTessBeginContour(tess);
+        gluTessBeginContour(tess);
 
-	for (j=0; j < node_count; ++j)
-	{
+        for (j=0; j < node_count; ++j)
+        {
             coords[0] = xyz_nodes[j*3+0];
             coords[1] = xyz_nodes[j*3+1];
             coords[2] = xyz_nodes[j*3+2];
 
-	    /*
+        /*
             g_print("Adding vertex, ptr %p\n", (xyz_nodes + j*3));
             g_print("   x, y, z: %6.3lf, %6.3lf, %6.3lf\n",
-		    (xyz_nodes + j * 3)[0],(xyz_nodes + j * 3)[1],
-		    (xyz_nodes + j * 3)[2]);
-	    */
+                    (xyz_nodes + j * 3)[0],(xyz_nodes + j * 3)[1],
+                    (xyz_nodes + j * 3)[2]);
+        */
 
-	    gluTessVertex(tess, coords, xyz_nodes + j*3);
-	}
+            gluTessVertex(tess, coords, xyz_nodes + j*3);
+        }
         if ((coords[0] != xyz_nodes[0]) || 
-	    (coords[1] != xyz_nodes[1]) ||
-	    (coords[2] != xyz_nodes[2])) {
-	    g_print("area not closed!!\n");
-	    return FALSE;
-	}
+            (coords[1] != xyz_nodes[1]) ||
+            (coords[2] != xyz_nodes[2])) {
+            g_print("area not closed!!\n");
+            /*return FALSE;*/
+        }
 
-  	gluTessEndContour(tess);
+        gluTessEndContour(tess);
     }
     gluTessEndPolygon(tess);
 
@@ -202,7 +157,7 @@ gv_area_shape_tessellate(GvAreaShape *in_area)
         in_area->fill_objects = 0;
 
     return (in_area->fill_objects > 0 
-	    && g_array_index(in_area->mode_offset,gint,0) != GV_TESS_NONE);
+            && g_array_index(in_area->mode_offset,gint,0) != GV_TESS_NONE);
 }
 
 static void WIN_CALLBACK
@@ -227,7 +182,7 @@ tess_vertex(void *data, void *in_area)
 
   /* for some unknown reason, we somes get called with a NULL 
      if the object doesn't tesselate properly (with libMesa). */
-   
+
     GvAreaShape *area = (GvAreaShape *)in_area;
 
     /*
@@ -236,31 +191,31 @@ tess_vertex(void *data, void *in_area)
 
     if( data != NULL ) {
 
-	/*
-	g_print("   x, y, z: %6.3lf, %6.3lf, %6.3lf\n",
-		(double)((gvgeocoord *)data)[0],
-		(double)((gvgeocoord *)data)[1],
-		(double)((gvgeocoord *)data)[2]);
-	*/
+        /*
+        g_print("   x, y, z: %6.3lf, %6.3lf, %6.3lf\n",
+                (double)((gvgeocoord *)data)[0],
+                (double)((gvgeocoord *)data)[1],
+                (double)((gvgeocoord *)data)[2]);
+        */
 
-	g_array_append_vals(area->fill, data, 1);
+        g_array_append_vals(area->fill, data, 1);
     }
     else {
-	tess_error( 0, in_area );
+        tess_error( 0, in_area );
     }
 }
 
 static void WIN_CALLBACK
 tess_combine(GLdouble coords[3], 
-	     gvgeocoord *vertex_data[4],
-	     GLfloat weight[4], void **dataOut)
+             gvgeocoord *vertex_data[4],
+             GLfloat weight[4], void **dataOut)
 {
     GLdouble *vertex;
     int ii;
 
     /*
     g_print("tess_combine x, y, z: %6.3lf, %6.3lf, %6.3lf\n",
-	    coords[0], coords[1], coords[2]);
+            coords[0], coords[1], coords[2]);
     */
 
     vertex = g_new(GLdouble, 3);
@@ -270,27 +225,27 @@ tess_combine(GLdouble coords[3],
 
     /*
     g_print("tess_combine x, y, z (%d%%): %6.3lf, %6.3lf, %6.3lf\n",
-	    (int)(weight[0] * 100), vertex_data[0][0],
-	    vertex_data[0][1], vertex_data[0][2]);
+            (int)(weight[0] * 100), vertex_data[0][0],
+            vertex_data[0][1], vertex_data[0][2]);
     */
 
     for (ii = 1; ii < 4; ii++) {
-	if (vertex_data[ii] != NULL) {
+        if (vertex_data[ii] != NULL) {
             vertex[0] += vertex_data[ii][0] * weight[ii];
             vertex[1] += vertex_data[ii][1] * weight[ii];
             vertex[2] += vertex_data[ii][2] * weight[ii];
 
-	    /*
-	    g_print("tess_combine x, y, z (%d%%): %6.3lf, %6.3lf, %6.3lf\n",
-	            (int)(weight[ii] * 100), vertex_data[ii][0],
-	            vertex_data[ii][1], vertex_data[ii][2]);
-	    */
-	}
+            /*
+            g_print("tess_combine x, y, z (%d%%): %6.3lf, %6.3lf, %6.3lf\n",
+                    (int)(weight[ii] * 100), vertex_data[ii][0],
+                    vertex_data[ii][1], vertex_data[ii][2]);
+            */
+        }
     }
 
     /*
     g_print("tess_combine returning x, y, z: %6.3lf, %6.3lf, %6.3lf\n",
-	    vertex[0], vertex[1], vertex[2]);
+            vertex[0], vertex[1], vertex[2]);
     */
 
     *dataOut = vertex; 
@@ -320,7 +275,7 @@ check_ring_lengths(GvAreaShape *area)
     {
         int nodes = area->num_ring_nodes[r];
 
-	if ( nodes < 3) 
+        if ( nodes < 3) 
             return FALSE;
     }
 
@@ -334,14 +289,14 @@ check_winding(GvAreaShape *area)
 
     for (r=0; r < area->num_rings; ++r)
     {
-	winding = find_winding(area->xyz_ring_nodes[r], 
+        winding = find_winding(area->xyz_ring_nodes[r], 
                                area->num_ring_nodes[r]);
 
-	if ((r == 0 && winding == GV_CW) || (r > 0 && winding == GV_CCW))
-	{
-	    reverse_array(area->xyz_ring_nodes[r], 
+        if ((r == 0 && winding == GV_CW) || (r > 0 && winding == GV_CCW))
+        {
+            reverse_array(area->xyz_ring_nodes[r], 
                           area->num_ring_nodes[r]);
-	}
+        }
     }
 }
 
@@ -363,7 +318,7 @@ find_winding(gvgeocoord *xyz_nodes, int node_count)
     b = xyz_nodes + 3;
     for (i=1; i < node_count; ++i, a += 3, b += 3)
     {
-	sum += a[0] * b[1] - a[1] * b[0];
+        sum += a[0] * b[1] - a[1] * b[0];
     }
     b = xyz_nodes;
     sum += a[0] * b[1] - a[1] * b[0];

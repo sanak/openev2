@@ -3,10 +3,6 @@
  *
  * These functions are not themselves wrapped!
  *
- * To create a new wrapper function that does not correspond to a c function,
- * add a prototype to gvmodule.h and then override that function with an
- * override../_wrap.. block in gv.override
- *
  * If a c function does exist but did not autowrap, it can be wrapped by
  * just adding an override block in gv.override.  The autowrap code is
  * finicky, you might first try to clean up the prototype (no spaces next

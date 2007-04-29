@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvroitool.c,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Region of interest (box in raster coordinates) editing mode.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,42 +25,9 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvroitool.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.11  2002/11/04 21:42:06  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.10  2000/07/27 20:06:23  warmerda
- * added boundary constraints
- *
- * Revision 1.9  2000/06/30 18:04:55  srawlin
- * added ability to set ROI constraints
- *
- * Revision 1.8  2000/06/30 14:05:36  srawlin
- * fixed bug where ROI selected then zoom in
- *
- * Revision 1.7  2000/06/29 21:18:10  srawlin
- * Added CHANGED and CHANGING Signals
- *
- * Revision 1.6  2000/06/29 16:15:55  srawlin
- * added function to create new ROI
- *
- * Revision 1.5  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include "gvroitool.h"
-#include <gtk/gtksignal.h>
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <stdio.h>
@@ -100,76 +68,53 @@ static gint gv_roi_tool_pick_border(GvRoiTool *tool, gvgeocoord x, gvgeocoord y)
 
 static guint roitool_signals[LAST_SIGNAL] = { 0 };
 
-GtkType
+GType
 gv_roi_tool_get_type(void)
 {
-    static GtkType roi_tool_type = 0;
+    static GType roi_tool_type = 0;
 
-    if (!roi_tool_type)
-    {
-	static const GtkTypeInfo roi_tool_info =
-	{
-	    "GvRoiTool",
-	    sizeof(GvRoiTool),
-	    sizeof(GvRoiToolClass),
-	    (GtkClassInitFunc) gv_roi_tool_class_init,
-	    (GtkObjectInitFunc) gv_roi_tool_init,
-	    /* reserved_1 */ NULL,
-	    /* reserved_2 */ NULL,
-	    (GtkClassInitFunc) NULL,
-	};
+    if (!roi_tool_type) {
+        static const GTypeInfo roi_tool_info =
+        {
+            sizeof(GvRoiToolClass),
+            (GBaseInitFunc) NULL,
+            (GBaseFinalizeFunc) NULL,
+            (GClassInitFunc) gv_roi_tool_class_init,
+            /* reserved_1 */ NULL,
+            /* reserved_2 */ NULL,
+            sizeof(GvRoiTool),
+            0,
+            (GInstanceInitFunc) gv_roi_tool_init,
+        };
+        roi_tool_type = g_type_register_static (GV_TYPE_TOOL,
+                                                  "GvRoiTool",
+                                                  &roi_tool_info, 0);
+        }
 
-	roi_tool_type = gtk_type_unique(gv_tool_get_type(),
-					&roi_tool_info);
-    }
     return roi_tool_type;
 }
 
 static void
 gv_roi_tool_class_init(GvRoiToolClass *klass)
 {
-    GvToolClass *tool_class;
-    GtkObjectClass *object_class;
-
-    object_class = (GtkObjectClass*) klass;
-    tool_class = (GvToolClass*)klass;
+    GvToolClass *tool_class = GV_TOOL_CLASS (klass);
 
     roitool_signals[ROI_CHANGED] =
       g_signal_new ("roi_changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvRoiToolClass, roi_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvRoiToolClass, roi_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
 
     roitool_signals[ROI_CHANGING] =
       g_signal_new ("roi_changing",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvRoiToolClass, roi_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvRoiToolClass, roi_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 0);
 
-    /* GTK2 PORT...
-    roitool_signals[ROI_CHANGED] =
-	gtk_signal_new ("roi_changed",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvRoiToolClass,roi_changed),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 0 );
-
-    roitool_signals[ROI_CHANGING] =
-	gtk_signal_new ("roi_changing",
-			GTK_RUN_FIRST,
-			object_class->type,
-			GTK_SIGNAL_OFFSET (GvRoiToolClass,roi_changed),
-			gtk_marshal_NONE__POINTER,
-			GTK_TYPE_NONE, 0 );
-
-    gtk_object_class_add_signals(object_class, roitool_signals, LAST_SIGNAL);
-    */
-    
     klass->roi_changed = NULL;
     klass->roi_changing = NULL;
 
@@ -183,7 +128,7 @@ static void
 gv_roi_tool_init(GvRoiTool *tool)
 {
     tool->pick = PICK_NONE;
-    
+
     tool->roi_marked = FALSE;
     tool->banding = FALSE;
 }
@@ -191,14 +136,9 @@ gv_roi_tool_init(GvRoiTool *tool)
 GvTool *
 gv_roi_tool_new(void)
 {
-    GvTool *tool;
+    GvRoiTool *tool = g_object_new(GV_TYPE_ROI_TOOL, NULL);
 
-    tool = GV_TOOL(gtk_type_new(GV_TYPE_ROI_TOOL));
-
-    
-
-    return tool;
-    
+    return GV_TOOL(tool);
 }
 
 gint
@@ -206,7 +146,7 @@ gv_roi_tool_get_rect(GvRoiTool *tool, GvRect *rect)
 {
     if (!tool->roi_marked)
     {
-	return FALSE;
+        return FALSE;
     }
 
     rect->x = MIN(tool->v_head.x, tool->v_tail.x);
@@ -224,7 +164,7 @@ gv_roi_tool_new_rect(GvRoiTool *tool, GvRect *rect)
 {
     /* Create new ROI */
     tool->roi_marked = TRUE;
-    
+
     tool->v_head.x = rect->x;
     tool->v_head.y = rect->y;
     tool->v_tail.x = rect->x + ABS(rect->width);
@@ -242,10 +182,9 @@ gv_roi_tool_new_rect(GvRoiTool *tool, GvRect *rect)
         return FALSE;
     }
 
-    gtk_signal_emit(GTK_OBJECT(tool), 
-                    roitool_signals[ROI_CHANGED]);
+    g_signal_emit(tool, roitool_signals[ROI_CHANGED], 0);
 
-    gv_view_area_queue_draw(GV_TOOL(tool)->view);	
+    gv_view_area_queue_draw(GV_TOOL(tool)->view);       
 
     return TRUE;
 }
@@ -260,30 +199,30 @@ gv_roi_tool_button_press(GvTool *rtool, GdkEventButton *event)
     if ((event->button == 1)  && !(event->state & GDK_CONTROL_MASK)
                               && !(event->state & GDK_SHIFT_MASK) )
     {
-	if (tool->roi_marked)
-	{
-	    /* Check for contact with ROI border */
-	    gint pick;
-	    gvgeocoord pointer_x, pointer_y;
+        if (tool->roi_marked)
+        {
+            /* Check for contact with ROI border */
+            gint pick;
+            gvgeocoord pointer_x, pointer_y;
 
-	    pick = gv_roi_tool_pick_border(tool, event->x, event->y);
+            pick = gv_roi_tool_pick_border(tool, event->x, event->y);
 
-	    if (pick != PICK_NONE)		
-	    {
-		/* Start ROI resize dragging operation */
-		gv_view_area_map_pointer(GV_TOOL(tool)->view,
-					 event->x, event->y,
-					 &pointer_x, &pointer_y);
-		gv_roi_tool_start_resize(tool, pick, pointer_x, pointer_y);
-		return FALSE;
-	    }
-	}
+            if (pick != PICK_NONE)              
+            {
+                /* Start ROI resize dragging operation */
+                gv_view_area_map_pointer(GV_TOOL(tool)->view,
+                                         event->x, event->y,
+                                         &pointer_x, &pointer_y);
+                gv_roi_tool_start_resize(tool, pick, pointer_x, pointer_y);
+                return FALSE;
+            }
+        }
 
-	/* Set head and tail vertex to pointer position */
-	/* Map pointer position */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &tool->v_tail.x, &tool->v_tail.y);
-	tool->v_head = tool->v_tail;
+        /* Set head and tail vertex to pointer position */
+        /* Map pointer position */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &tool->v_tail.x, &tool->v_tail.y);
+        tool->v_head = tool->v_tail;
 
         if( gv_tool_check_bounds( GV_TOOL(tool), 
                                   tool->v_tail.x, tool->v_tail.y ) )
@@ -307,39 +246,38 @@ gv_roi_tool_button_release(GvTool *rtool, GdkEventButton *event)
 
     if (event->button == 1 && tool->banding)
     {
-	gvgeocoord pointer_x, pointer_y;
-	
-	/* End rubber band */
-	tool->banding = FALSE;
+        gvgeocoord pointer_x, pointer_y;
 
-	/* Map pointer position */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &pointer_x, &pointer_y);
+        /* End rubber band */
+        tool->banding = FALSE;
 
-	/* Reposition tail vertex */
-	if (tool->drag_right)
-	{
-	    tool->v_tail.x = pointer_x + tool->v_drag_offset.x;
-	}
-	if (tool->drag_bottom)
-	{
-	    tool->v_tail.y = pointer_y + tool->v_drag_offset.y;
-	}
+        /* Map pointer position */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &pointer_x, &pointer_y);
+
+        /* Reposition tail vertex */
+        if (tool->drag_right)
+        {
+            tool->v_tail.x = pointer_x + tool->v_drag_offset.x;
+        }
+        if (tool->drag_bottom)
+        {
+            tool->v_tail.y = pointer_y + tool->v_drag_offset.y;
+        }
 
         gv_tool_clamp_to_bounds( rtool, 
                                  &(tool->v_tail.x), &(tool->v_tail.y) );
 
-	/* Reject empty regions */
-	if (tool->v_tail.x == tool->v_head.x ||
-	    tool->v_tail.y == tool->v_head.y)
-	{
-	    tool->roi_marked = FALSE;
-	}
-	
-	gv_view_area_queue_draw(GV_TOOL(tool)->view);	
+        /* Reject empty regions */
+        if (tool->v_tail.x == tool->v_head.x ||
+            tool->v_tail.y == tool->v_head.y)
+        {
+            tool->roi_marked = FALSE;
+        }
 
-        gtk_signal_emit(GTK_OBJECT(tool), 
-                        roitool_signals[ROI_CHANGED]);
+        gv_view_area_queue_draw(GV_TOOL(tool)->view);   
+
+        g_signal_emit(tool, roitool_signals[ROI_CHANGED], 0);
     }
     return FALSE;
 }
@@ -351,42 +289,41 @@ gv_roi_tool_motion_notify(GvTool *rtool, GdkEventMotion *event)
 
     if (tool->banding)
     {
-	gvgeocoord pointer_x, pointer_y;
-	
-	/* Resize rubber band */
-	/* Map pointer position */
-	gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
-				 &pointer_x, &pointer_y);
+        gvgeocoord pointer_x, pointer_y;
 
-	/* Reposition tail vertex */
-	if (tool->drag_right)
-	{
-	    tool->v_tail.x = pointer_x + tool->v_drag_offset.x;
-	}
-	if (tool->drag_bottom)
-	{
-	    tool->v_tail.y = pointer_y + tool->v_drag_offset.y;
-	}
+        /* Resize rubber band */
+        /* Map pointer position */
+        gv_view_area_map_pointer(GV_TOOL(tool)->view, event->x, event->y,
+                                 &pointer_x, &pointer_y);
+
+        /* Reposition tail vertex */
+        if (tool->drag_right)
+        {
+            tool->v_tail.x = pointer_x + tool->v_drag_offset.x;
+        }
+        if (tool->drag_bottom)
+        {
+            tool->v_tail.y = pointer_y + tool->v_drag_offset.y;
+        }
 
         gv_tool_clamp_to_bounds( rtool, 
                                  &(tool->v_tail.x), &(tool->v_tail.y) );
 
-        gtk_signal_emit(GTK_OBJECT(tool), 
-                        roitool_signals[ROI_CHANGING]);	
+        g_signal_emit(tool, roitool_signals[ROI_CHANGING], 0); 
 
-	gv_view_area_queue_draw(GV_TOOL(tool)->view);	
+        gv_view_area_queue_draw(GV_TOOL(tool)->view);   
     }
     else if (tool->roi_marked)
     {
-	/* Highlight roi sides to indicate the effect of a click & drag */
-	gint pick;
+        /* Highlight roi sides to indicate the effect of a click & drag */
+        gint pick;
 
-	pick = gv_roi_tool_pick_border(tool, event->x, event->y);
-	if (pick != tool->pick)
-	{
-	    tool->pick = pick;
-	    gv_view_area_queue_draw(GV_TOOL(tool)->view);
-	}
+        pick = gv_roi_tool_pick_border(tool, event->x, event->y);
+        if (pick != tool->pick)
+        {
+            tool->pick = pick;
+            gv_view_area_queue_draw(GV_TOOL(tool)->view);
+        }
     }
     return FALSE;
 }
@@ -398,70 +335,70 @@ gv_roi_tool_draw(GvTool *rtool)
 
     if (tool->roi_marked)
     {
-	glColor3f(1.0, 0.5, 0.0);
-	glBegin(GL_LINE_LOOP);
-	glVertex2(tool->v_head.x, tool->v_head.y);
-	glVertex2(tool->v_head.x, tool->v_tail.y);
-	glVertex2(tool->v_tail.x, tool->v_tail.y);
-	glVertex2(tool->v_tail.x, tool->v_head.y);
-	glEnd();
+        glColor3f(1.0, 0.5, 0.0);
+        glBegin(GL_LINE_LOOP);
+        glVertex2(tool->v_head.x, tool->v_head.y);
+        glVertex2(tool->v_head.x, tool->v_tail.y);
+        glVertex2(tool->v_tail.x, tool->v_tail.y);
+        glVertex2(tool->v_tail.x, tool->v_head.y);
+        glEnd();
 
-	if (tool->pick != PICK_NONE)
-	{
-	    glColor3f(1.0, 0.0, 0.0);
-	    glBegin(GL_LINES);
-	    switch (tool->pick)
-	    {
-		case PICK_CORNER_TOPLEFT:
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    break;
+        if (tool->pick != PICK_NONE)
+        {
+            glColor3f(1.0, 0.0, 0.0);
+            glBegin(GL_LINES);
+            switch (tool->pick)
+            {
+                case PICK_CORNER_TOPLEFT:
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    break;
 
-		case PICK_CORNER_BOTTOMLEFT:
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    break;
+                case PICK_CORNER_BOTTOMLEFT:
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    break;
 
-		case PICK_CORNER_BOTTOMRIGHT:
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    break;
+                case PICK_CORNER_BOTTOMRIGHT:
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    break;
 
-		case PICK_CORNER_TOPRIGHT:
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    break;		    
-		
-		case PICK_SIDE_TOP:
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    break;
+                case PICK_CORNER_TOPRIGHT:
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    break;                  
 
-		case PICK_SIDE_RIGHT:
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_head.y);
-		    break;
+                case PICK_SIDE_TOP:
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    break;
 
-		case PICK_SIDE_BOTTOM:
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    glVertex2(tool->v_tail.x, tool->v_tail.y);
-		    break;
+                case PICK_SIDE_RIGHT:
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_head.y);
+                    break;
 
-		case PICK_SIDE_LEFT:
-		    glVertex2(tool->v_head.x, tool->v_head.y);
-		    glVertex2(tool->v_head.x, tool->v_tail.y);
-		    break;
-	    }
-	    glEnd();
-	}
+                case PICK_SIDE_BOTTOM:
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    glVertex2(tool->v_tail.x, tool->v_tail.y);
+                    break;
+
+                case PICK_SIDE_LEFT:
+                    glVertex2(tool->v_head.x, tool->v_head.y);
+                    glVertex2(tool->v_head.x, tool->v_tail.y);
+                    break;
+            }
+            glEnd();
+        }
     }
     return FALSE;
 }
@@ -482,56 +419,56 @@ gv_roi_tool_deactivate(GvTool *rtool, GvViewArea *view)
 
 static void
 gv_roi_tool_start_resize(GvRoiTool *tool, gint pick, gvgeocoord pointer_x,
-			 gvgeocoord pointer_y)
+                         gvgeocoord pointer_y)
 {
     gvgeocoord temp;
 #define SWAP(a,b) {temp=a; a=b; b=temp;}
-    
+
     /* Reposition the head and tail vertexes so we are always dragging
        the bottom right corner */
     switch (pick)
     {
-	case PICK_CORNER_TOPLEFT:
-	case PICK_SIDE_TOP:
-	case PICK_SIDE_LEFT:
-	    /* Swap head and tail */
-	    SWAP(tool->v_head.x, tool->v_tail.x);
-	    SWAP(tool->v_head.y, tool->v_tail.y);
-	    break;
+        case PICK_CORNER_TOPLEFT:
+        case PICK_SIDE_TOP:
+        case PICK_SIDE_LEFT:
+            /* Swap head and tail */
+            SWAP(tool->v_head.x, tool->v_tail.x);
+            SWAP(tool->v_head.y, tool->v_tail.y);
+            break;
 
-	case PICK_CORNER_TOPRIGHT:
-	    /* Swap y coords only */
-	    SWAP(tool->v_head.y, tool->v_tail.y);
-	    break;
+        case PICK_CORNER_TOPRIGHT:
+            /* Swap y coords only */
+            SWAP(tool->v_head.y, tool->v_tail.y);
+            break;
 
-	case PICK_CORNER_BOTTOMLEFT:
-	    /* Swap x coords only */
-	    SWAP(tool->v_head.x, tool->v_tail.x);
-	    break;
+        case PICK_CORNER_BOTTOMLEFT:
+            /* Swap x coords only */
+            SWAP(tool->v_head.x, tool->v_tail.x);
+            break;
     }
 
     /* Set the drag flags for side or corner dragging */
     switch (pick)
     {
-	case PICK_SIDE_TOP:
-	case PICK_SIDE_BOTTOM:
-	    tool->drag_right = FALSE;
-	    tool->drag_bottom = TRUE;
-	    tool->pick = PICK_SIDE_BOTTOM;
-	    break;
+        case PICK_SIDE_TOP:
+        case PICK_SIDE_BOTTOM:
+            tool->drag_right = FALSE;
+            tool->drag_bottom = TRUE;
+            tool->pick = PICK_SIDE_BOTTOM;
+            break;
 
-	case PICK_SIDE_LEFT:
-	case PICK_SIDE_RIGHT:
-	    tool->drag_right = TRUE;
-	    tool->drag_bottom = FALSE;
-	    tool->pick = PICK_SIDE_RIGHT;
-	    break;
+        case PICK_SIDE_LEFT:
+        case PICK_SIDE_RIGHT:
+            tool->drag_right = TRUE;
+            tool->drag_bottom = FALSE;
+            tool->pick = PICK_SIDE_RIGHT;
+            break;
 
-	default:
-	    tool->drag_right = TRUE;
-	    tool->drag_bottom = TRUE;
-	    tool->pick = PICK_CORNER_BOTTOMRIGHT;
-	    break;
+        default:
+            tool->drag_right = TRUE;
+            tool->drag_bottom = TRUE;
+            tool->pick = PICK_CORNER_BOTTOMRIGHT;
+            break;
     }
 
     /* Set the drag offset vector */
@@ -558,7 +495,7 @@ gv_roi_tool_pick_border(GvRoiTool *tool, gvgeocoord x, gvgeocoord y)
     vp[0] = vp[1]  = 0;
     vp[2] = (GLint)view->state.shape_x;
     vp[3] = (GLint)view->state.shape_y;
-    
+
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -570,7 +507,7 @@ gv_roi_tool_pick_border(GvRoiTool *tool, gvgeocoord x, gvgeocoord y)
     glLoadIdentity();
     glRotate(view->state.rot, 0.0, 0.0, 1.0);
     glScale(view->state.linear_zoom * view->state.flip_x,
-	     view->state.linear_zoom * view->state.flip_y, 1.0);
+             view->state.linear_zoom * view->state.flip_y, 1.0);
     glTranslate(view->state.tx, view->state.ty, 0.0);
 
     glSelectBuffer(16, buf);
@@ -608,7 +545,7 @@ gv_roi_tool_pick_border(GvRoiTool *tool, gvgeocoord x, gvgeocoord y)
     glEnd();
 
     hits = glRenderMode(GL_RENDER);
-    
+
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
     glMatrixMode(GL_MODELVIEW);
@@ -616,20 +553,20 @@ gv_roi_tool_pick_border(GvRoiTool *tool, gvgeocoord x, gvgeocoord y)
 
     if (hits > 1)
     {
-	/* We've picked a corner */
-	if (buf[3] == 0 && buf[7] == 1)
-	    return PICK_CORNER_TOPRIGHT;
-	if (buf[3] == 1)
-	    return PICK_CORNER_BOTTOMRIGHT;
-	if (buf[3] == 2)
-	    return PICK_CORNER_BOTTOMLEFT;
-	if (buf[3] == 0 && buf[7] == 3)
-	    return PICK_CORNER_TOPLEFT;
+        /* We've picked a corner */
+        if (buf[3] == 0 && buf[7] == 1)
+            return PICK_CORNER_TOPRIGHT;
+        if (buf[3] == 1)
+            return PICK_CORNER_BOTTOMRIGHT;
+        if (buf[3] == 2)
+            return PICK_CORNER_BOTTOMLEFT;
+        if (buf[3] == 0 && buf[7] == 3)
+            return PICK_CORNER_TOPLEFT;
     }
     else if (hits == 1)
     {
-	/* We've picked a side */
-	return PICK_SIDE_TOP + buf[3];
+        /* We've picked a side */
+        return PICK_SIDE_TOP + buf[3];
     }
 
     /* No hits */

@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Base class for all display layers.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -23,29 +24,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvlayer.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:33  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.13  2001/10/12 17:44:18  warmerda
- * avoid extra redraws when many raster layers displayed
- *
- * Revision 1.12  2001/04/09 18:14:49  warmerda
- * added view field to GvLayer
- *
- * Revision 1.11  2001/03/28 15:13:59  warmerda
- * added view to GvLayer
- *
- * Revision 1.10  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -98,7 +76,7 @@ gv_layer_get_type(void)
 static void
 gv_layer_class_init(GvLayerClass *klass)
 {
-    GObjectClass *object_class = G_OBJECT_CLASS (klass);;
+    GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
     parent_class = g_type_class_peek_parent (klass);
 
@@ -160,14 +138,12 @@ gv_layer_class_init(GvLayerClass *klass)
 void
 gv_layer_finalize(GObject *gobject)
 {
-    CPLDebug( "OpenEV", "gv_layer_finalize(%s)",
-              gv_data_get_name( GV_DATA(gobject) ) );
     GvLayer *layer = GV_LAYER(gobject);
     g_return_if_fail(GV_IS_LAYER(layer));
 
     if (layer->projection != NULL) {
-      g_free (layer->projection);
-      layer->projection = NULL;
+        g_free (layer->projection);
+        layer->projection = NULL;
     }
 
     G_OBJECT_CLASS(parent_class)->finalize(gobject);

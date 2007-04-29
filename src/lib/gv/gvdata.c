@@ -24,6 +24,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
+ *
  */
 
 #include "gvdata.h"
@@ -394,12 +395,10 @@ gv_data_child_changed(GvData *data, GvData *child, gpointer change_info)
 static void
 gv_data_dispose(GObject *gobject)
 {
-    CPLDebug( "OpenEV", "gv_data_dispose(%s)",
-              gv_data_get_name( GV_DATA(gobject) ) );
-    
     /* MB: not sure what should go in finalize and vice-versa */
     /* Remove reference to parent */
     gv_data_set_parent(GV_DATA(gobject), NULL);
+    g_signal_emit(GV_DATA(gobject), data_signals[DESTROY], 0);
 
     G_OBJECT_CLASS (parent_class)->dispose (gobject);
 }
@@ -409,7 +408,7 @@ gv_data_destroy(GvData *data)
 {
     CPLDebug( "OpenEV", "gv_data_destroy(%s)",
               gv_data_get_name(data) );
-    
+
     g_signal_emit(data, data_signals[DESTROY], 0);
 }
 
@@ -461,4 +460,3 @@ gv_data_set_read_only(GvData *data, int read_only)
 {
     data->read_only = read_only;
 }
-

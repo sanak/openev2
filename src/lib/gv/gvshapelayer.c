@@ -5,6 +5,7 @@
  * Purpose:  Base class for vector display layers (eventually this will
  *           merge with GvShapesLayer).
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,73 +25,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvshapelayer.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.26  2003/05/16 18:26:33  pgs
- * added initial code for propogating colors to sub-symbols
- *
- * Revision 1.25  2003/04/17 13:56:12  warmerda
- * added more assserts
- *
- * Revision 1.24  2003/04/09 16:52:23  pgs
- * added shadow, halo and bgcolor to LABELs
- *
- * Revision 1.23  2003/04/07 15:10:14  pgs
- * added pattern support to pen objects
- *
- * Revision 1.22  2003/02/28 16:47:25  warmerda
- * split up render part handling to support vector symbols
- *
- * Revision 1.21  2003/02/27 04:00:18  warmerda
- * added scale_dep flag handling
- *
- * Revision 1.20  2003/02/14 20:12:43  pgs
- * added support for line widths in PENs
- *
- * Revision 1.19  2002/11/15 05:04:43  warmerda
- * added LABEL anchor point support
- *
- * Revision 1.18  2002/11/14 20:11:22  warmerda
- * preliminary support for gvsymbolmanager from Paul
- *
- * Revision 1.17  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.16  2002/09/30 20:50:18  warmerda
- * removed restart debug message
- *
- * Revision 1.15  2002/09/30 17:36:04  warmerda
- * Increate name buffer size in gv_shape_layer_pick_node(). This fixes an odd
- * crash on Linux/XiGraphics combo, and ensures that a hit is detected even if
- * there are overlapping nodes as occurs with the start node in a closed area.
- *
- * Revision 1.14  2002/02/22 20:16:07  warmerda
- * added brush tool support
- *
- * Revision 1.13  2002/02/22 19:27:16  warmerda
- * added support for pen tools
- *
- * Revision 1.12  2001/11/09 16:04:53  warmerda
- * default color to white in renderinfo
- *
- * Revision 1.11  2001/04/09 18:17:34  warmerda
- * added subselection, and renderinfo support
- *
- * Revision 1.10  2000/08/10 20:44:27  warmerda
- * don't try to select shapes in a zero sized rectangle
- *
- * Revision 1.9  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -163,108 +97,108 @@ gv_shape_layer_class_init(GvShapeLayerClass *klass)
 
     shape_layer_signals[DRAW_SELECTED] =
       g_signal_new ("draw-selected",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, draw_selected),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, draw_selected),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[DELETE_SELECTED] =
       g_signal_new ("delete-selected",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, delete_selected),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, delete_selected),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     shape_layer_signals[TRANSLATE_SELECTED] =
       g_signal_new ("translate-selected",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, translate_selected),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, translate_selected),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[PICK_SHAPE] =
       g_signal_new ("pick-shape",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, pick_shape),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, pick_shape),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     shape_layer_signals[PICK_NODE] =
       g_signal_new ("pick-node",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, pick_node),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, pick_node),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
     shape_layer_signals[GET_NODE] =
       g_signal_new ("get-node",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, get_node),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, get_node),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[MOVE_NODE] =
       g_signal_new ("move-node",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, move_node),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, move_node),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[INSERT_NODE] =
       g_signal_new ("insert-node",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, insert_node),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, insert_node),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[DELETE_NODE] =
       g_signal_new ("delete-node",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, delete_node),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, delete_node),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__POINTER, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[NODE_MOTION] =
       g_signal_new ("node-motion",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, node_motion),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
-		    G_TYPE_INT);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, node_motion),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
+                    G_TYPE_INT);
 
     shape_layer_signals[SELECTION_CHANGED] =
       g_signal_new ("selection-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, selection_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, selection_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     shape_layer_signals[SUBSELECTION_CHANGED] =
       g_signal_new ("subselection-changed",
-		    G_TYPE_FROM_CLASS (klass),
-		    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
-		    G_STRUCT_OFFSET (GvShapeLayerClass, subselection_changed),
-		    NULL, NULL,
-		    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
-		    G_TYPE_POINTER);
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION,
+                    G_STRUCT_OFFSET (GvShapeLayerClass, subselection_changed),
+                    NULL, NULL,
+                    g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1,
+                    G_TYPE_POINTER);
 
     /* ---- Override finalize ---- */
     object_class->finalize = gv_shape_layer_finalize;
@@ -358,8 +292,8 @@ gv_shape_layer_get_selected(GvShapeLayer *layer, GArray *shapes)
 
     for (ii=0; ii < layer->selected->len; ++ii) {
         if (g_array_index(layer->selected, gint, ii)) {
-	    hit = TRUE;
-	    g_array_append_val(shapes, ii);
+            hit = TRUE;
+            g_array_append_val(shapes, ii);
         }
     }
 
@@ -732,14 +666,7 @@ gv_shape_layer_subselection_changed(GvShapeLayer *layer)
 static void
 gv_shape_layer_finalize(GObject *gobject)
 {
-    CPLDebug( "OpenEV", "gv_shape_layer_finalize(%s)",
-              gv_data_get_name( GV_DATA(gobject) ) );
-    GvShapeLayer *layer;
-
-    /* GTK2 PORT... Override GObject finalize, test for and set NULLs
-       as finalize may be called more than once. */
-
-    layer = GV_SHAPE_LAYER(gobject);
+    GvShapeLayer *layer = GV_SHAPE_LAYER(gobject);
 
     gv_shape_layer_clear_all_renderinfo( layer );
 
@@ -1258,4 +1185,3 @@ void gv_shape_layer_set_scale_dep( GvShapeLayer *layer, gint shape_id,
     else
         layer->scale_dep_flags[shape_id >> 5] &= ~(1 << (shape_id & 0x1f) );
 }
-

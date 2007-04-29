@@ -4,6 +4,7 @@
  * Project:  OpenEV
  * Purpose:  Raster display layer (managed textures, redraw, etc)
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,182 +25,6 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvrasterlayer.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.86  2004/06/23 14:35:04  gmwalter
- * Added support for multi-band complex imagery.
- *
- * Revision 1.85  2004/02/20 10:40:36  andrey_kiselev
- * Use gv_raster_get_nodata() instead of GDALGetNoDataValue().
- *
- * Revision 1.84  2004/02/18 16:57:41  andrey_kiselev
- * Fixed setting min/max levels in gv_raster_layer_init().
- *
- * Revision 1.83  2003/09/11 20:00:31  gmwalter
- * Add ability to specify a preferred polynomial order for warping a raster,
- * and add "safe mode" (only used if ATLANTIS_BUILD is defined).
- *
- * Revision 1.82  2003/02/20 19:27:16  gmwalter
- * Updated link tool to include Diana's ghost cursor code, and added functions
- * to allow the cursor and link mechanism to use different gcps
- * than the display for georeferencing.  Updated raster properties
- * dialog for multi-band case.  Added some signals to layerdlg.py and
- * oeattedit.py to make it easier for tools to interact with them.
- * A few random bug fixes.
- *
- * Revision 1.81  2003/02/07 20:06:49  andrey_kiselev
- * Memory leaks fixed.
- *
- * Revision 1.80  2003/02/06 08:19:24  warmerda
- * Added support for force_load property on GvRasterLayer
- *
- * Revision 1.79  2003/01/24 16:54:52  warmerda
- * turn some g_warning()s into CPLDebug calls for CIETmap/Paul
- *
- * Revision 1.78  2002/11/04 21:42:06  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.77  2002/10/29 05:43:20  warmerda
- * added some debugging logic in texture load code
- *
- * Revision 1.76  2002/04/12 14:40:36  gmwalter
- * Removed the gvmesh rescale function (not needed because of view area
- * rescaling).
- *
- * Revision 1.74  2002/03/20 19:19:00  warmerda
- * add support for exact_render flag on GvViewArea
- *
- * Revision 1.73  2002/03/07 02:31:56  warmerda
- * added default_height to add_height functions
- *
- * Revision 1.72  2001/12/10 18:48:19  warmerda
- * ifdef out disconnect from prototype data in teardown
- *
- * Revision 1.71  2001/11/29 15:53:42  warmerda
- * added autoscale_samples preference
- *
- * Revision 1.70  2001/11/28 19:23:04  warmerda
- * Added logic to keep track if the mesh is dirty (out of date), and to
- * refresh it before a redraw.  It is marked dirty when the prototype data
- * emits a geotransform-changed signal.
- *
- * Revision 1.69  2001/10/25 20:30:46  warmerda
- * added interp_mode preference to control default subpixel interp
- *
- * Revision 1.68  2001/10/17 16:23:51  warmerda
- * added support for composing complex lut and pct
- *
- * Revision 1.67  2001/10/16 18:50:29  warmerda
- * added autoscale and histogram functions
- *
- * Revision 1.66  2001/10/12 17:44:18  warmerda
- * avoid extra redraws when many raster layers displayed
- *
- * Revision 1.65  2001/09/25 20:04:16  warmerda
- * cleanup idle tasks on finalize
- *
- * Revision 1.64  2001/08/22 16:20:38  warmerda
- * use gv_mesh_reset_to_identity for setting to raw
- *
- * Revision 1.63  2001/08/08 02:57:55  warmerda
- * removed unused support for normals
- *
- * Revision 1.62  2001/07/24 21:21:45  warmerda
- * added EV style phase colormap
- *
- * Revision 1.61  2001/07/16 15:20:12  warmerda
- * default to magnitude for complex images, instead of phase/magnitude
- *
- * Revision 1.60  2001/07/03 14:26:05  warmerda
- * added set/get raw ability
- *
- * Revision 1.59  2001/01/30 19:34:29  warmerda
- * make gv_raster_layer_purge_all_textures() public
- *
- * Revision 1.58  2001/01/30 14:32:32  warmerda
- * No longer purges textures on a display-change.  Added
- * gv_raster_layer_purge_all_textures(), to clear textures on in cases where
- * this is necessary.  Now can change alpha with texture_mode_set() without
- * throwing away textures.
- *
- * Revision 1.57  2000/10/06 15:35:33  warmerda
- * set nodata value by default if present on GDALRasterBand
- *
- * Revision 1.56  2000/08/31 20:20:19  warmerda
- * always destroy old textures before resizing them in ...texture_load
- *
- * Revision 1.55  2000/08/25 20:12:47  warmerda
- * added preliminary nodata support
- *
- * Revision 1.54  2000/08/24 17:00:45  srawlin
- * fixed 3D LOD calculation to account for image flip
- *
- * Revision 1.53  2000/08/24 15:48:39  srawlin
- * Added flip in 3D mode tile list calculation
- *
- * Revision 1.52  2000/08/18 21:32:29  warmerda
- * Fixed bug where tiles would pile up on the missing_tex list over multiple
- * calls to the gv_raster_layer_draw() if there were no intermediate calls
- * to the idle handler.
- *
- * Introduced a hack into gv_raster_layer_texture_load() to call glGetError()
- * every now and then to try and work around a flaw in Xi Graphics GL drivers.
- *
- * Revision 1.51  2000/08/09 17:37:58  warmerda
- * disconnect view callback on teardown, clear sources on destroy
- *
- * Revision 1.50  2000/07/25 17:51:07  warmerda
- * change debug to use CPLDebug
- *
- * Revision 1.49  2000/07/25 14:19:49  warmerda
- * dequeue old draw tasks before setting new ones in draw
- *
- * Revision 1.48  2000/07/24 21:25:37  warmerda
- * always set fragment color, even if modulate off
- *
- * Revision 1.47  2000/07/18 15:32:53  warmerda
- * set upper bound on redraw time to 2.0 seconds
- *
- * Revision 1.46  2000/07/18 15:04:50  warmerda
- * tuning of idle handler texture logic
- *
- * Revision 1.45  2000/07/17 19:47:56  warmerda
- * try to wait 3*redraw time
- *
- * Revision 1.44  2000/07/17 19:31:50  warmerda
- * added tentative support for scaling redraw wait to actual redraw time
- *
- * Revision 1.43  2000/07/07 17:54:42  warmerda
- * Modified 3D tile-in-view selection to use corners of tiles, and to compute
- * the view cone based on a windows corners.
- *
- * Revision 1.42  2000/07/03 20:58:31  warmerda
- * eye_pos in georef coordinates now
- *
- * Revision 1.40  2000/06/29 14:38:37  warmerda
- * use GvManager for idle tasks
- *
- * Revision 1.39  2000/06/28 12:09:40  warmerda
- * initial fragment color to all white
- *
- * Revision 1.38  2000/06/27 21:25:41  warmerda
- * rewrote texture caching completely
- *
- * Revision 1.37  2000/06/23 12:56:18  warmerda
- * added multiple GvRasterSource support
- *
- * Revision 1.36  2000/06/20 13:26:55  warmerda
- * added standard headers
- *
  */
 
 #include <stdio.h>
@@ -211,11 +36,9 @@
 #include "gvmanager.h"
 #include "ogr_srs_api.h"
 
-
 #if !defined(GL_CLAMP_TO_EDGE) && defined(GL_CLAMP)
 #  define GL_CLAMP_TO_EDGE GL_CLAMP
 #endif
-
 
 static void gv_raster_layer_class_init(GvRasterLayerClass *klass);
 static void gv_raster_layer_init(GvRasterLayer *layer);
@@ -399,7 +222,7 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
     /* Default GL parameters */
     layer->gl_info.blend_enable = 0;
     layer->gl_info.alpha_test = 0;
-    
+
     layer->gl_info.tex_env_mode = GL_REPLACE;
     layer->gl_info.fragment_color[0] = 1.0;
     layer->gl_info.fragment_color[1] = 1.0;
@@ -441,7 +264,7 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
     /* Setup texture related information */
     layer->tile_list = g_array_new( FALSE, FALSE, sizeof( int ) ) ;
     layer->missing_tex = g_array_new( FALSE, FALSE, sizeof( int ) );
-    
+
     /* Allocate texture structures */
 
     if( ( layer->textures = g_new0( GvRasterLayerTexObj *, 
@@ -545,7 +368,7 @@ gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data,
 
     layer->tile_x = prototype_data->tile_x;
     layer->tile_y = prototype_data->tile_y;
-    layer->prototype_data = prototype_data;
+    layer->prototype_data = g_object_ref(prototype_data);
     layer->pc_lut = NULL;
     layer->pc_lut_composed = NULL;
     layer->pc_lut_rgba_complex = NULL;
@@ -600,7 +423,7 @@ gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data,
     /* Default GL parameters */
     layer->gl_info.blend_enable = 0;
     layer->gl_info.alpha_test = 0;
-    
+
     layer->gl_info.tex_env_mode = GL_REPLACE;
     layer->gl_info.fragment_color[0] = 1.0;
     layer->gl_info.fragment_color[1] = 1.0;
@@ -629,7 +452,7 @@ gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data,
     /* Setup texture related information */
     layer->tile_list = g_array_new( FALSE, FALSE, sizeof( int ) ) ;
     layer->missing_tex = g_array_new( FALSE, FALSE, sizeof( int ) );
-    
+
     /* Allocate texture structures */
 
     if( ( layer->textures = g_new0( GvRasterLayerTexObj *, 
@@ -719,9 +542,6 @@ static void gv_raster_layer_dispose( GObject *gobject )
     GvRasterLayer *rlayer = GV_RASTER_LAYER(gobject);
     int          isource;
 
-    CPLDebug( "OpenEV", "gv_raster_layer_dispose(%s)\n", 
-              gv_data_get_name(GV_DATA(rlayer)) );
-
     /* clear any "source" references */
     for( isource = 0; isource < rlayer->source_count; isource++ ) {
         gv_raster_layer_set_source( rlayer, isource, NULL, 0, 0, 0, NULL,
@@ -770,13 +590,6 @@ static void gv_raster_layer_finalize( GObject *gobject )
 {
     GvRasterLayer *rlayer = GV_RASTER_LAYER(gobject);
 
-    /* GTK2 PORT... Override GObject finalize, test for and set NULLs
-       as finalize may be called more than once */
-
-    CPLDebug( "OpenEV", "gv_raster_layer_finalize(%s)\n", 
-              gv_data_get_name(GV_DATA(rlayer)) );
-
-    /* GTK2 PORT... test and nullify resources */
     if (rlayer->mesh != NULL) {
         g_object_unref(rlayer->mesh);
         rlayer->mesh = NULL;
@@ -788,7 +601,7 @@ static void gv_raster_layer_finalize( GObject *gobject )
     }
 
     if (rlayer->prototype_data != NULL) {
-//~         g_object_unref(rlayer->prototype_data);
+        g_object_unref(rlayer->prototype_data);
         rlayer->prototype_data = NULL;
     }
 
@@ -855,7 +668,7 @@ static void gv_raster_layer_raster_changed( GvRaster *raster,
         gv_raster_layer_purge_all_textures( layer );
     }
 }
-    
+
 static void 
 gv_raster_layer_raster_geotransform_changed( GvRaster *raster,
                                              int junk,
@@ -871,7 +684,7 @@ gv_raster_layer_raster_geotransform_changed( GvRaster *raster,
     gv_raster_layer_purge_all_textures( layer );
     gv_view_area_queue_draw( GV_LAYER(layer)->view );
 }
-    
+
 static void gv_raster_layer_setup( GvLayer *layer, GvViewArea *view )
 {
     g_signal_connect(view, "view-state-changed",
@@ -903,7 +716,7 @@ static void gv_raster_layer_state_changed( GvViewArea *view, GvRasterLayer *laye
     if( layer->tile_list )
     g_array_set_size( layer->tile_list, 0 );
 }
-    
+
 
 static void
 gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
@@ -935,7 +748,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
             gv_mesh_tilelist_get( raster_layer->mesh, area, raster_layer,
                                   raster_layer->tile_list );
     }
-    
+
     list = (gint *) raster_layer->tile_list->data;
 
     /* 2D - Mode Decide level of detail (LOD). Note: each tile gets same LOD */
@@ -992,7 +805,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
             double x_center, y_center, z_center;
             double temp_x, temp_y, temp_z, pixel_ratio;
             int   debug3d = 0;
-            
+
             if( gv_manager_get_preference(gv_get_manager(),"DEBUG3D") != NULL )
                 debug3d =
                   atoi(gv_manager_get_preference(gv_get_manager(),"DEBUG3D"));
@@ -1030,7 +843,7 @@ gv_raster_layer_draw( GvLayer *layer, GvViewArea *area )
 
             pixel_ratio = (ABS(tile_dist) / pixel_size)
                             / (area->state.shape_y*0.5);
-            
+
             lod = (int) (log(pixel_ratio)/log(2));
 
             if( debug3d )
@@ -1292,7 +1105,7 @@ gv_raster_layer_texture_load( GvRasterLayer *layer, gint tile_num, gint lod )
 #else
     {
         GLuint   tex_obj;
-        
+
         if( layer->textures[tile_num] != NULL )
             gv_raster_layer_purge_texture( layer, tile_num );
 
@@ -1302,7 +1115,7 @@ gv_raster_layer_texture_load( GvRasterLayer *layer, gint tile_num, gint lod )
         gv_raster_layer_create_texture( layer, tile_num, tex_obj, lod, size );
     }
 #endif
-    
+
     if( layer->textures[tile_num] == NULL )
     {
         CPLDebug( "OpenEV", 
@@ -1352,7 +1165,7 @@ gv_raster_layer_texture_load( GvRasterLayer *layer, gint tile_num, gint lod )
 
     if( needs_free )
         g_free( buffer );
-        
+
     return 0;
 }
 
@@ -1704,7 +1517,7 @@ gv_raster_layer_blend_mode_get( GvRasterLayer *layer, int *blend_mode, int *sfac
         *sfactor = i;
         break;
         }
-      
+
         if( factors[i] == layer->gl_info.blend_dst )
         {
         *dfactor = i;
@@ -1724,7 +1537,7 @@ int gv_raster_layer_mode_get( GvRasterLayer *layer )
     return layer->mode;
 }
 
-        
+
 /* the following function should move to gvmesh.h/c when Paul is done with
    them. */
 
@@ -1742,7 +1555,7 @@ gv_mesh_transform_with_func(GvMesh *mesh,
         int    xyz_offset;
 
     verts = g_array_index( mesh->vertices, GArray *, tile );
-        
+
         xyz_verts = (float *) verts->data;
         for( xyz_offset = 0; xyz_offset < verts->len; xyz_offset += 3 )
         {
@@ -1808,20 +1621,20 @@ gv_raster_layer_reproject( GvLayer *layer,
     {
         OSRDestroySpatialReference( hSRSOld );
         OSRDestroySpatialReference( hSRSNew ); 
-       
+
         return TRUE;
     }
 
     /*
      * Establish transformation.
      */
-    
+
     hTransform = OCTNewCoordinateTransformation( hSRSOld, hSRSNew );
     if( hTransform == NULL )
     {
         OSRDestroySpatialReference( hSRSOld );
         OSRDestroySpatialReference( hSRSNew ); 
-        
+
         return FALSE;
     }
 
@@ -1888,7 +1701,7 @@ void gv_raster_layer_refresh_mesh( GvRasterLayer *layer )
         return;
 
     gv_mesh_reset_to_identity( layer->mesh );
-    
+
     gv_mesh_transform_with_func( layer->mesh, gvrl_to_georef_cb, 
                                  prototype_data );
     layer->mesh_is_dirty = FALSE;
@@ -1985,7 +1798,7 @@ double gv_raster_layer_pixel_size( GvRasterLayer *raster )
 
     x2 = x1 + 1.0;
     y2 = y1 + 1.0;
-    
+
     gv_raster_layer_pixel_to_view( raster, &x1, &y1, NULL );
     gv_raster_layer_pixel_to_view( raster, &x2, &y2, NULL );
 
@@ -2154,13 +1967,13 @@ gv_mesh_tilelist_get_3d( GvMesh *mesh, GvViewArea *view,
                 /(view->state.shape_y*view->state.shape_y));
 
     cos_diag = 1.0 / sqrt(1+diag*diag);
-    
+
     if( debug3d )
     {
         printf( "diagonal angle = %.1f\n", 
                 acos(cos_diag) * RAD2DEG );
     }    
-    
+
     /* Allocate array of flags for each tile corner. */
     cornerInside = (int *) g_new(int,(tiles_across+1)*(tiles_down+1));
 
@@ -2189,9 +2002,9 @@ gv_mesh_tilelist_get_3d( GvMesh *mesh, GvViewArea *view,
             geo_x = tile_x * view->state.flip_x;
             geo_y = tile_y * view->state.flip_y;
             geo_z = 0.0;
-                
+
             gv_raster_layer_pixel_to_view(rlayer, &geo_x, &geo_y, &geo_z );
-            
+
             tile_vect[0] = geo_x - eye_pos[0];
             tile_vect[1] = geo_y - eye_pos[1];
             tile_vect[2] = geo_z - eye_pos[2];
@@ -2269,7 +2082,7 @@ gv_mesh_tilelist_get( GvMesh *mesh, GvViewArea *view,
         gv_mesh_tilelist_get_2d( mesh, view, rlayer, tilelist );
     else
         gv_mesh_tilelist_get_3d( mesh, view, rlayer, tilelist );
-        
+
     i = -1;
     g_array_append_val( tilelist, i );
 
@@ -2291,7 +2104,7 @@ gv_raster_layer_view_extents( GvRasterLayer *rlayer,
 
     raster = rlayer->prototype_data;
     view = GV_LAYER(rlayer)->view;
-    
+
     /*
     ** Compute a bounding rectangle.  In 3D we will just use all tiles
     ** identified in the tile list, but for 2D we try to restrict things
@@ -2307,7 +2120,7 @@ gv_raster_layer_view_extents( GvRasterLayer *rlayer,
     {
         gvgeocoord x, y;
         double  dx, dy;
-        
+
         *xsize = 1;
         *ysize = 1;
 
@@ -2385,7 +2198,7 @@ gv_raster_layer_autoscale_view( GvRasterLayer *rlayer, int isrc,
         return FALSE;
 
     view = GV_LAYER(rlayer)->view;
-    
+
     /*
     ** Build the tile list for the view.  Even works in 3D!
     */
@@ -2452,7 +2265,7 @@ gint gv_raster_layer_histogram_view( GvRasterLayer *rlayer, int isrc,
         return 0;
 
     view = GV_LAYER(rlayer)->view;
-    
+
     /*
     ** Build the tile list for the view.  Even works in 3D!
     */
@@ -2470,7 +2283,7 @@ gint gv_raster_layer_histogram_view( GvRasterLayer *rlayer, int isrc,
     /*
     ** Perform the histogram.
     */
-    
+
     return gv_raster_collect_histogram( raster, scale_min, scale_max, 
                                         bucket_count, histogram, 
                                         include_out_of_range,

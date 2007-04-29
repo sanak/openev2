@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvpoitool.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Pegion of interest editing mode.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -33,10 +34,10 @@
 #include "gvtool.h"
 
 #define GV_TYPE_POI_TOOL            (gv_poi_tool_get_type ())
-#define GV_POI_TOOL(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_POI_TOOL, GvPoiTool))
-#define GV_POI_TOOL_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_POI_TOOL, GvPoiToolClass))
-#define GV_IS_POI_TOOL(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_POI_TOOL))
-#define GV_IS_POI_TOOL_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_POI_TOOL))
+#define GV_POI_TOOL(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_POI_TOOL, GvPoiTool))
+#define GV_POI_TOOL_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_POI_TOOL, GvPoiToolClass))
+#define GV_IS_POI_TOOL(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_POI_TOOL))
+#define GV_IS_POI_TOOL_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_POI_TOOL))
 
 typedef struct _GvPoiTool       GvPoiTool;
 typedef struct _GvPoiToolClass  GvPoiToolClass;
@@ -58,7 +59,7 @@ struct _GvPoiToolClass
     void (* poi_changed)(GvPoiTool *tool);
 };
 
-GtkType gv_poi_tool_get_type(void);
+GType gv_poi_tool_get_type(void);
 GvTool* gv_poi_tool_new(void);
 
 gint gv_poi_tool_get_point(GvPoiTool *tool, GvVertex *point);

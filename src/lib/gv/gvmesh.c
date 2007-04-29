@@ -5,6 +5,7 @@
  * Purpose:  Geometric mesh mapping tile s/t coordinates to display x/y/z
  *           coordinates.
  * Author:   Frank Warmerdam, warmerda@home.com
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,74 +25,6 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
- *
- * $Log: gvmesh.c,v $
- * Revision 1.1.1.1  2005/04/18 16:38:33  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.36  2004/02/18 16:07:27  andrey_kiselev
- * Use gv_raster_get_nodata() instead of GDALGetRasterNoDataValue().
- *
- * Revision 1.35  2002/09/11 18:24:28  warmerda
- * fixed serious hosing in gv_mesh_get_height() for multi tile meshes
- *
- * Revision 1.34  2002/09/10 21:13:49  warmerda
- * fixed serious bugs in gv_mesh_get_height() esp for partial tiles
- *
- * Revision 1.33  2002/04/12 14:40:35  gmwalter
- * Removed the gvmesh rescale function (not needed because of view area
- * rescaling).
- *
- * Revision 1.31  2002/03/07 02:33:45  warmerda
- * Fixed add_height() function so that mesh nodes for which no value is ever
- * found are set to default_height instead of 1000.0.  Also, values falling
- * outside the source height raster are now set to default_height instead of 0.0.
- *
- * Revision 1.30  2001/08/22 16:20:38  warmerda
- * use gv_mesh_reset_to_identity for setting to raw
- *
- * Revision 1.29  2001/08/08 13:18:08  warmerda
- * fixed case of edge tiles not of reduced size
- *
- * Revision 1.28  2001/08/08 02:57:38  warmerda
- * implement gv_mesh_finalize(), remove unused normals code
- *
- * Revision 1.27  2001/07/13 22:13:35  warmerda
- * added function to get height from mesh
- *
- * Revision 1.26  2001/03/29 03:53:18  warmerda
- * use three iterations in nodata fill-in
- *
- * Revision 1.25  2001/03/29 03:38:58  warmerda
- * improved nodata propagation to go two steps
- *
- * Revision 1.24  2001/03/28 22:38:16  warmerda
- * fill in mesh nodata values with average of ajacent real mesh points
- *
- * Revision 1.23  2000/08/23 19:06:42  warmerda
- * fixed problems with overly large levels of detail
- *
- * Revision 1.22  2000/08/23 18:35:11  warmerda
- * avoid off-by-one errors and honour nodata in setting mesh from dem file
- *
- * Revision 1.21  2000/08/18 20:33:56  warmerda
- * don't return a mesh that is more resolved than the raster
- *
- * Revision 1.20  2000/08/16 20:28:31  warmerda
- * fixed calculation of corner tiles in get extents
- *
- * Revision 1.19  2000/07/03 20:57:32  warmerda
- * moved tile selection for draw to gvrasterlayer
- *
- * Revision 1.18  2000/06/20 13:26:55  warmerda
- * added standard headers
  *
  */
 
@@ -146,7 +79,7 @@ gv_mesh_get_type(void)
 static void
 gv_mesh_init(GvMesh *mesh)
 {
-    
+
     mesh->vertices = NULL;
     mesh->tex_coords = NULL;
 
@@ -237,7 +170,7 @@ gv_mesh_get_tile_corner_coords( GvMesh *mesh, int tile)
     }
 
     return coords;
-    
+
 }
 
 static void 
@@ -284,7 +217,7 @@ gv_mesh_build_tex_coord( GvMesh *mesh, GArray *tex_coords, gint lod,
         }
     }
 }
-                              
+
 
 GvMesh *
 gv_mesh_new_identity( GvRaster *raster, gint detail )
@@ -298,7 +231,7 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
     gint x = raster->width;
     gint y = raster->height;
     GArray *tex_coords;
-    
+
     GvMesh *mesh = g_object_new (GV_TYPE_MESH, NULL);
 
     mesh->raster = raster;
@@ -322,12 +255,12 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
     mesh->vertices = g_array_new( FALSE, FALSE, sizeof( GArray *) );
 
     /* Set top left coords */
-    
+
     mesh->corner_coords[0] = 0.0;
     mesh->corner_coords[1] = (float) y;
 
     /* Set top right coords */
-    
+
     mesh->corner_coords[2] = (float) x;
     mesh->corner_coords[3] = (float) y;
 
@@ -410,7 +343,7 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
                     t_x = begin_x + s*tile_x;
                     t_y = y - (begin_y + t*tile_y);
                     t_z = 0.0;
-                    
+
                     g_array_append_val( tile_vertices, t_x );
                     g_array_append_val( tile_vertices, t_y );
                     g_array_append_val( tile_vertices, t_z );
@@ -470,7 +403,7 @@ gv_mesh_reset_to_identity( GvMesh *mesh )
 
                     t_x = begin_x + s*tile_x;
                     t_y = begin_y + t*tile_y;
-                    
+
                     g_array_index(tile_vertices, float, out_vert++) = t_x;
                     g_array_index(tile_vertices, float, out_vert++) = t_y;
                     out_vert++;
@@ -504,7 +437,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
     for( i=0; i < mesh->vertices->len; i++)
     {
         GArray *tile_vertices;
-        
+
         tile_vertices = g_array_index( mesh->vertices, GArray *, i);
 
         /* Vertices in tile */
@@ -611,7 +544,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
                         sum += data[3*(t_i+1)+2];
                         count++;
                     }
-                                                   
+
                     /* check mesh entry above */
                     if( j > 0 
                         && data[3*(t_i-mesh_xsize)+2] != (float)nodata_value )
@@ -692,10 +625,10 @@ gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
 
                 if (( bclamp_min == 1 ) && ( data[3*t_i+2] < min_height ))
                     data[3*t_i+2] = min_height;
-                
+
                 if (( bclamp_max == 1 ) && ( data[3*t_i+2] > max_height ))
                     data[3*t_i+2] = max_height;
-                
+
             }
         }    
     }
@@ -724,7 +657,7 @@ gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize,
         int    xyz_offset;
 
         verts = g_array_index( mesh->vertices, GArray *, tile );
-        
+
         xyz_verts = (float *) verts->data;
         for( xyz_offset = 0; xyz_offset < verts->len; xyz_offset += 3 )
         {
@@ -766,7 +699,7 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
 
     if( detail < raster_lod )
         detail = raster_lod;
-    
+
     if( tile < mesh->max_tiles )
     {
         if( mesh->tex_coords )
@@ -785,7 +718,7 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
         {
             fprintf( stderr, "Missing vertices information\n" );
         }
-        
+
         tile_info->vertices = (float *)verts->data;
 
         /* Figure out the spacing for the index */
@@ -804,7 +737,7 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
         /* Note: overwrites above calculations */
         step = 1;
         detail = mesh->detail;
-       
+
 
         /* Now we build the indices and get ready to return the tile */
 
@@ -851,14 +784,14 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
                 tile_info->range = dimensions*2;
                 break;
         }
-        
+
         tile_info->restarts--;
         tile_info->indices = (gint *) g_indices->data;
     } else {
         return NULL;
     }
     return tile_info;
-    
+
 }
 
 void gv_mesh_extents( GvMesh *mesh, GvRect *rect )
@@ -908,7 +841,7 @@ void gv_mesh_extents( GvMesh *mesh, GvRect *rect )
 
         x[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1)) );
         y[2] = g_array_index( verts, float, 3*(dimensions*(dimensions-1))+1);
-        
+
         /* The we do the last tile */
 
         if( ( verts = g_array_index( mesh->vertices, GArray *, mesh->max_tiles-1 ) ) == NULL )
@@ -918,7 +851,7 @@ void gv_mesh_extents( GvMesh *mesh, GvRect *rect )
 
         x[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1) );
         y[3] = g_array_index( verts, float, 3*(dimensions*dimensions-1)+1 );
-        
+
     }
 
     rect->x = MIN( MIN( MIN( x[0], x[1] ), x[2] ), x[3] );
@@ -952,13 +885,13 @@ float gv_mesh_get_height( GvMesh *mesh,
 
     if( success != NULL )
         *success = FALSE;
-    
+
 /* -------------------------------------------------------------------- */
 /*      What pixel/line location are we looking for.  Provide a         */
 /*      little bit of fudging if necessary to avoid stuff on the        */
 /*      edge falling out of bounds.                                     */
 /* -------------------------------------------------------------------- */
-    
+
     pl_x = x;
     pl_y = y;
 
@@ -987,9 +920,9 @@ float gv_mesh_get_height( GvMesh *mesh,
 /* -------------------------------------------------------------------- */
     tile_in_x = ((int) pl_x) / (raster->tile_x-GV_TILE_OVERLAP);
     tile_in_y = ((int) pl_y) / (raster->tile_y-GV_TILE_OVERLAP);
-    
+
     tile = tile_in_x + tile_in_y * raster->tiles_across;
-    
+
 /* -------------------------------------------------------------------- */
 /*      Where does our request fall within the tile.                    */
 /* -------------------------------------------------------------------- */
@@ -1026,7 +959,7 @@ float gv_mesh_get_height( GvMesh *mesh,
 /* -------------------------------------------------------------------- */
     g_assert( tile >= 0 && tile < mesh->vertices->len );
     tile_vertices = g_array_index( mesh->vertices, GArray *, tile );
-    
+
     if( vert_off < 0 || vert_off*3 >= tile_vertices->len )
     {
         CPLDebug( "OpenEV", 
@@ -1051,7 +984,7 @@ float gv_mesh_get_height( GvMesh *mesh,
         y_vert[1] = y_vert[0];
         z_vert[1] = z_vert[0];
     }
-        
+
     if( vert_y+1 < mesh_pnts_per_column )
     {
         int     off = vert_off + mesh_pnts_per_line;
@@ -1066,7 +999,7 @@ float gv_mesh_get_height( GvMesh *mesh,
         y_vert[2] = y_vert[0];
         z_vert[2] = z_vert[0];
     }
-        
+
     if( vert_y+1 < mesh_pnts_per_column && vert_x+1 < mesh_pnts_per_line )
     {
         int     off = vert_off + mesh_pnts_per_line + 1;
@@ -1087,7 +1020,7 @@ float gv_mesh_get_height( GvMesh *mesh,
         y_vert[3] = y_vert[1];
         z_vert[3] = z_vert[1];
     }
-        
+
 /* -------------------------------------------------------------------- */
 /*      Interpolate the value within this grid square.                  */
 /* -------------------------------------------------------------------- */
@@ -1118,7 +1051,7 @@ float gv_mesh_get_height( GvMesh *mesh,
 
     if( success != NULL )
         *success = TRUE;
-    
+
     return z_vert[0] * (1.0-u) * (1.0-v)
         + z_vert[1] * (u) * (1.0-v)
         + z_vert[2] * (1.0-u) * (v)
@@ -1137,12 +1070,6 @@ gv_mesh_finalize(GObject *gobject)
     GvMesh    *mesh = GV_MESH(gobject);
     int        ii;
     GPtrArray  *tex_coords;
-    
-    CPLDebug( "OpenEV", "gv_mesh_finalize(%s)\n", 
-              gv_data_get_name(GV_DATA(gobject)) );
-
-    /* GTK2 PORT... Override GObject finalize, test for and set NULLs
-       as finalize may be called more than once. */
 
     mesh->raster = NULL;
 

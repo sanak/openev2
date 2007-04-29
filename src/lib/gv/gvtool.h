@@ -1,9 +1,10 @@
 /******************************************************************************
- * $Id: gvtool.h,v 1.1.1.1 2005/04/18 16:38:34 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Base class for editing mode tools.
  * Author:   OpenEV Team
+ * Maintainer: Mario Beauchamp, starged@gmail.com
  *
  ******************************************************************************
  * Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,55 +25,31 @@
  * Boston, MA 02111-1307, USA.
  ******************************************************************************
  *
- * $Log: gvtool.h,v $
- * Revision 1.1.1.1  2005/04/18 16:38:34  uid1026
- * Import reorganized openev tree with initial gtk2 port changes
- *
- * Revision 1.1.1.1  2005/03/07 21:16:36  uid1026
- * openev gtk2 port
- *
- * Revision 1.1.1.1  2005/02/08 00:50:26  uid1026
- *
- * Imported sources
- *
- * Revision 1.8  2005/01/17 18:37:43  gmwalter
- * Add ability to reset tool cursor type.
- *
- * Revision 1.7  2002/11/04 21:42:07  sduclos
- * change geometric data type name to gvgeocoord
- *
- * Revision 1.6  2000/07/27 20:06:23  warmerda
- * added boundary constraints
- *
- * Revision 1.5  2000/06/20 13:27:08  warmerda
- * added standard headers
- *
  */
 
 #ifndef __GV_TOOL_H__
 #define __GV_TOOL_H__
 
 #include <gdk/gdk.h>
-#include <gtk/gtkobject.h>
 #include "gvviewarea.h"
 #include "gvtypes.h"
 
 #define GV_TYPE_TOOL            (gv_tool_get_type ())
-#define GV_TOOL(obj)            (GTK_CHECK_CAST ((obj), GV_TYPE_TOOL, GvTool))
-#define GV_TOOL_CLASS(klass)    (GTK_CHECK_CLASS_CAST ((klass), GV_TYPE_TOOL, GvToolClass))
-#define GV_IS_TOOL(obj)         (GTK_CHECK_TYPE ((obj), GV_TYPE_TOOL))
-#define GV_IS_TOOL_CLASS(klass) (GTK_CHECK_CLASS_TYPE ((klass), GV_TYPE_TOOL))
+#define GV_TOOL(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GV_TYPE_TOOL, GvTool))
+#define GV_TOOL_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GV_TYPE_TOOL, GvToolClass))
+#define GV_IS_TOOL(obj)         (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GV_TYPE_TOOL))
+#define GV_IS_TOOL_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GV_TYPE_TOOL))
 
 /* Shortcuts to parent class functions */
-#define GV_TOOL_ACTIVATE(t,v)  (*((GvToolClass*)gtk_type_class(GV_TYPE_TOOL))->activate)(GV_TOOL(t),v)
-#define GV_TOOL_DEACTIVATE(t,v)  (*((GvToolClass*)gtk_type_class(GV_TYPE_TOOL))->deactivate)(GV_TOOL(t),v)
+#define GV_TOOL_ACTIVATE(t,v)  (*((GvToolClass*)g_type_class_peek (GV_TYPE_TOOL))->activate)(GV_TOOL(t),v)
+#define GV_TOOL_DEACTIVATE(t,v)  (*((GvToolClass*)g_type_class_peek (GV_TYPE_TOOL))->deactivate)(GV_TOOL(t),v)
 
 typedef struct _GvTool       GvTool;
 typedef struct _GvToolClass  GvToolClass;
 
 struct _GvTool
 {
-    GtkObject object;
+    GObject object;
 
     GvViewArea *view;
     GdkCursor *cursor;
@@ -83,7 +60,7 @@ struct _GvTool
 
 struct _GvToolClass
 {
-    GtkObjectClass parent_class;
+    GObjectClass parent_class;
 
     void (* activate)       (GvTool *tool, GvViewArea *view);
     void (* deactivate)     (GvTool *tool, GvViewArea *view);
@@ -96,7 +73,7 @@ struct _GvToolClass
     gboolean (* leave_notify)   (GvTool *tool, GdkEventCrossing *event);
 };
 
-GtkType gv_tool_get_type(void);
+GType gv_tool_get_type(void);
 
 void gv_tool_activate(GvTool *tool, GvViewArea *view);
 void gv_tool_deactivate(GvTool *tool, GvViewArea *view);

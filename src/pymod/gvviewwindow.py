@@ -134,13 +134,13 @@ class GvViewWindow(gtk.Window):
                                                   float(tokens[3])] )
 
         # Update Zoom ratio box in toolbar whenever view changes
-	# (actually, only when zoom changes)
+        # (actually, only when zoom changes)
         self.view_state_changed_id = \
-	    self.viewarea.connect("view-state-changed", self.update_zoom_cb)
+        self.viewarea.connect("view-state-changed", self.update_zoom_cb)
         self.viewarea.connect("active-changed", self.update_zoom_cb)
 
-	size = (620, 620)
-	if show_scrollbars:
+        size = (620, 620)
+        if show_scrollbars:
             self.scrolled_window = gtk.ScrolledWindow()
             self.set_size_request(size[0], size[1] + 60)
             self.scrolled_window.add(self.viewarea)
@@ -693,15 +693,15 @@ class GvViewWindow(gtk.Window):
     def file_open_cb(self, *args):
         self.make_active()
 
-	if gview.get_preference('save_recent_directory') == 'on':
-	    recent_dir = gview.get_preference('recent_directory')
-	else:
-	    recent_dir = None
+        if gview.get_preference('save_recent_directory') == 'on':
+            recent_dir = gview.get_preference('recent_directory')
+        else:
+            recent_dir = None
 
-	pgufilesel.SimpleFileSelect( ok_cb = self.file_open_name_check,
-                                     title = 'File Open',
-				     default_filename = recent_dir,
-                                     help_topic = 'files.html' )
+        pgufilesel.SimpleFileSelect( ok_cb = self.file_open_name_check,
+                                    title = 'File Open',
+                                    default_filename = recent_dir,
+                                    help_topic = 'files.html' )
 
 # buffer function to check for wild cards in filename and then expand them
     def file_open_name_check(self, filename, lut=None,*args):
@@ -759,21 +759,21 @@ class GvViewWindow(gtk.Window):
         link.enable()
 
     def open_gdal_dataset(self, dataset, lut=None, sds_check=1, \
-			  add_to_rfl=0, *args):
-	"""Opens existing GDAL dataset."""
+                            add_to_rfl=0, *args):
+        """Opens existing GDAL dataset."""
 
         self.make_active()
 
         dataset = gview.manager.add_dataset(dataset)
-	if dataset is None:
-	    return
+        if dataset is None:
+            return
 
         if sds_check and len(dataset.GetSubDatasets()) > 0:
             self.open_subdataset_check( dataset )
             return
 
-	if add_to_rfl:
-	    self.app.add_to_rfl(dataset.GetDescription())
+        if add_to_rfl:
+            self.app.add_to_rfl(dataset.GetDescription())
 
         md = dataset.GetMetadata()
         # special hack for displaying AP envisat specially.
@@ -872,8 +872,8 @@ class GvViewWindow(gtk.Window):
             if os.access(head,os.R_OK):
                 pgufilesel.simple_file_sel_dir = head+os.sep
 
-	if gview.get_preference('save_recent_directory') == 'on':
-	    gview.set_preference('recent_directory', head+os.sep)
+        if gview.get_preference('save_recent_directory') == 'on':
+            gview.set_preference('recent_directory', head+os.sep)
 
         if gvutils.is_shapefile(filename):
             self.file_open_shape_by_name(filename)
@@ -907,7 +907,7 @@ class GvViewWindow(gtk.Window):
                               + gdal.GetLastErrorMsg() )
                 return
 
-	self.open_gdal_dataset(dataset, lut, sds_check, add_to_rfl=1)
+        self.open_gdal_dataset(dataset, lut, sds_check, add_to_rfl=1)
 
     def init_custom_icons(self):
         pass
