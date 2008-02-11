@@ -247,8 +247,6 @@ gv_line_tool_button_press(GvTool *r_tool, GdkEventButton *event)
     {
         gv_line_tool_stop_drawing(tool);
     }
-
-    return FALSE;
 }
 
 static gboolean
@@ -341,6 +339,8 @@ gv_line_tool_stop_drawing(GvLineTool *tool)
 {
     gint sel, push_undo = TRUE;
     GvShapeChangeInfo change_info = {GV_CHANGE_ADD, 1, NULL};
+    GvShapes   *shapes = GV_SHAPES_LAYER(tool->layer)->data;
+    GvShape    *shape = NULL;
 
     change_info.shape_id = &sel;
 
@@ -349,9 +349,7 @@ gv_line_tool_stop_drawing(GvLineTool *tool)
     /* Reject lines with only one node */
     if (gv_shape_layer_selected(GV_SHAPE_LAYER(tool->layer), GV_FIRST, &sel))
     { 
-        GvShapes   *shapes = GV_SHAPES_LAYER(tool->layer)->data;
-        GvShape    *shape = gv_shapes_get_shape(shapes, sel);
-
+        shape = gv_shapes_get_shape(shapes, sel);
         if( shape != NULL && gv_shape_type(shape) == GVSHAPE_LINE 
             && gv_shape_get_nodes(shape,0) < 2 )
         {
@@ -364,7 +362,7 @@ gv_line_tool_stop_drawing(GvLineTool *tool)
     gv_undo_enable();
     gv_undo_open();
     if (push_undo)
-        gv_undo_push(gv_data_get_memento(GV_DATA(tool->layer), &change_info));
+        gv_undo_push(gv_data_get_memento(GV_DATA(shapes), &change_info));
 
     gv_view_area_queue_draw(GV_TOOL(tool)->view);    
 }
