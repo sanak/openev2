@@ -37,7 +37,6 @@
 #include "gvviewarea.h"
 #include "gvviewlink.h"
 #include "gvpquerylayer.h"
-#include "gvrecords.h"
 #include "gvrasterlayer.h"
 #include "gvrasterlut.h"
 #include "gvselecttool.h"
