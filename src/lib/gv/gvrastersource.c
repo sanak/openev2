@@ -171,7 +171,7 @@ static unsigned char *
 gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
                       GvRasterSource *source)
 {
-    float scale, ff, max, min;
+    float scale, max, min;
     unsigned char *ret_data;
     int ii, index, pixel_count = tile_x * tile_y;
 

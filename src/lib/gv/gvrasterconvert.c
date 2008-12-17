@@ -525,7 +525,7 @@ static unsigned char *
 gv_raster_layer_gltile_psci(GvRasterLayer *layer, int tile, int lod, 
                             int *format, int *type, int *needs_free)
 {
-    unsigned char *hue, *lut_hue, *intensity=NULL, *ret_data=NULL;
+    unsigned char *hue, *intensity=NULL, *ret_data=NULL;
     int free_hue, free_intensity;
     int ii, pixel_count, red, green, blue;
     float value;

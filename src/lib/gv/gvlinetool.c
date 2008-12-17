@@ -247,6 +247,7 @@ gv_line_tool_button_press(GvTool *r_tool, GdkEventButton *event)
     {
         gv_line_tool_stop_drawing(tool);
     }
+    return TRUE;
 }
 
 static gboolean

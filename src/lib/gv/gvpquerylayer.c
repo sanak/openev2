@@ -141,8 +141,7 @@ void gv_pquery_layer_draw_shape(GvViewArea *view, GvShapesLayer *layer,
                                 gv_draw_mode draw_mode,
                                 GvShapeDrawInfo *drawinfo)
 {
-    gint ii, points, width, height;
-    gint *selected, presentation;
+    gint width, height, presentation;
     gvgeocoord dx, dy, bx, by, x, y;
     float shift_x, shift_y;
 
@@ -151,7 +150,6 @@ void gv_pquery_layer_draw_shape(GvViewArea *view, GvShapesLayer *layer,
     GvBMFontInfo *font_info;
     const char *text;
     PangoContext *pango_context;
-    PangoRectangle rect;
     char key[64];
 
 
@@ -373,7 +371,6 @@ gv_pquery_layer_translate_selected(GvShapeLayer *layer, GvVertex *delta)
     const char *val;
     char prop[64], szPropName[64];
     GvProperties *layer_prop;
-    GvData *data;
 
     sel = g_array_new(FALSE, FALSE, sizeof(gint));
     if (gv_shape_layer_selected(GV_SHAPE_LAYER(layer), GV_ALL, sel))

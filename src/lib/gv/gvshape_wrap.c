@@ -321,7 +321,7 @@ pygv_shape_get_typed_property(PyGvShape *self, PyObject *args)
 {
     GvProperties *properties = NULL;
     char *field = NULL, *ftype = "string";
-    const char *value;
+    const char *value = NULL;
 
     if (!PyArg_ParseTuple(args, "s|s:GvShape.get_typed_property", &field, &ftype))
         return NULL;
@@ -406,7 +406,7 @@ pygv_shape_set_properties(PyGvShape *self, PyObject *args)
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
     PyObject    *pyKey = NULL, *pyValue = NULL;
-    int i;
+    Py_ssize_t i;
 
     if (!PyArg_ParseTuple(args, "O!:GvShape.set_properties", &PyDict_Type, &psDict))
         return NULL;

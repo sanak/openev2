@@ -295,6 +295,7 @@ gv_area_tool_button_press(GvTool *rtool, GdkEventButton *event)
     {
         gv_area_tool_stop_drawing(tool);
     }   
+    return TRUE;
 }
 
 static gboolean

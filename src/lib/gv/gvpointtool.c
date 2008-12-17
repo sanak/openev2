@@ -180,6 +180,7 @@ gv_point_tool_button_press(GvTool *tool, GdkEventButton *event)
                                         new_point );
         gv_view_area_queue_draw(GV_TOOL(tool)->view);
     }
+    return TRUE;
 }
 
 static void
