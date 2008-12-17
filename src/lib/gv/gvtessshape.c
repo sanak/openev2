@@ -27,9 +27,9 @@
  *
  */
 
-#include "tess.h"
 #include "gvshapes.h"
 #include <string.h>
+#include <GL/glu.h>
 
 /* Backward compatibility with glu ver. 1.1 */
 #if !defined(GLU_VERSION_1_2)
