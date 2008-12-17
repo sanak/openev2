@@ -182,12 +182,15 @@ gv_raster_dispose(GObject *gobject)
 {
     GvRaster *raster = GV_RASTER(gobject);
 
+    CPLDebug( "OpenEV", "gv_raster_dispose(%s)",
+              gv_data_get_name( GV_DATA(gobject) ) );
+
     if( raster->dataset != NULL && GDALDereferenceDataset( raster->dataset ) < 1 ) {
         GDALClose( raster->dataset );
         raster->dataset = NULL;
     }
 
-//~     g_signal_emit(gobject, raster_signals[DISCONNECTED], 0);
+    g_signal_emit(gobject, raster_signals[DISCONNECTED], 0);
 
     G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
@@ -196,6 +199,9 @@ static void
 gv_raster_finalize(GObject *gobject)
 {
     GvRaster    *raster = GV_RASTER(gobject);
+
+    CPLDebug( "OpenEV", "gv_raster_finalize(%s)",
+              gv_data_get_name( GV_DATA(gobject) ) );
 
     /* GTK2 PORT... Override GObject finalize, test for and set NULLs
        as finalize may be called more than once. */
