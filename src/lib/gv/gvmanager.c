@@ -325,8 +325,9 @@ static gint gv_manager_raster_destroy_cb( GObject * raster_in,
     for( i = 0; i < GDALGetRasterCount(ds->dataset); i++ )
     {
         if( ds->rasters[i] == raster ) {
-            if (G_OBJECT(raster)->ref_count > 2)
-                g_object_unref(ds->rasters[i]);
+            /* MB: still not sure if we need to unref here... */
+//            if (G_OBJECT(raster)->ref_count > 1)
+//                g_object_unref(ds->rasters[i]);
             ds->rasters[i] = NULL;
         }
         else if( ds->rasters[i] != NULL )
@@ -339,8 +340,9 @@ static gint gv_manager_raster_destroy_cb( GObject * raster_in,
      */
     if (active_rasters == 0)
     {
-        if (GDALDereferenceDataset(ds->dataset) < 1)
+        if (GDALDereferenceDataset(ds->dataset) < 1) {
             GDALClose(ds->dataset);
+        }
 
         g_free(ds->rasters);
         g_free(ds);
