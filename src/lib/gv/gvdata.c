@@ -185,10 +185,10 @@ gv_data_set_parent(GvData *data, GvData *parent)
 {
     if (data->parent)
     {
-        /* Remove reference to parent */
-        g_object_unref(data->parent);
         g_signal_handlers_disconnect_matched (data->parent, G_SIGNAL_MATCH_DATA,
                                                 0, 0, NULL, NULL, data);
+        /* Remove reference to parent */
+        g_object_unref(data->parent);
     }
 
     if (parent)
@@ -397,8 +397,8 @@ gv_data_dispose(GObject *gobject)
 {
     /* MB: not sure what should go in finalize and vice-versa */
     /* Remove reference to parent */
+    g_signal_emit(gobject, data_signals[DESTROY], 0);
     gv_data_set_parent(GV_DATA(gobject), NULL);
-    g_signal_emit(GV_DATA(gobject), data_signals[DESTROY], 0);
 
     G_OBJECT_CLASS (parent_class)->dispose (gobject);
 }
@@ -406,18 +406,12 @@ gv_data_dispose(GObject *gobject)
 void
 gv_data_destroy(GvData *data)
 {
-    CPLDebug( "OpenEV", "gv_data_destroy(%s)",
-              gv_data_get_name(data) );
-
     g_signal_emit(data, data_signals[DESTROY], 0);
 }
 
 static void
 gv_data_finalize(GObject *gobject)
 {
-    CPLDebug( "OpenEV", "gv_data_finalize(%s)",
-              gv_data_get_name( GV_DATA(gobject) ) );
-
     /* MB: not sure what should go in dispose and vice-versa */
     gv_data_set_name(GV_DATA(gobject), NULL);
     gv_data_set_projection(GV_DATA(gobject), NULL);
