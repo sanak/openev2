@@ -44,7 +44,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvData_Type;
 
 PyTypeObject G_GNUC_INTERNAL PyGvShape_Type;
 
-void gv_register_classes (PyObject *d);
+void _gv_register_classes (PyObject *d);
 
 extern PyMethodDef _gv_functions[];
 
