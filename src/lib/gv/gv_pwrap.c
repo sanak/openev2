@@ -9,6 +9,7 @@
 #include "pygobject.h"
 #include "gvareatool.h"
 #include "gvdata.h"
+#include "gextra.h"
 #include "gview.h"
 #include "gvlayer.h"
 #include "gvlinetool.h"
@@ -20,8 +21,10 @@
 #include "gvpquerylayer.h"
 #include "gvproperties.h"
 #include "gvraster.h"
+#include "gvrasterize.h"
 #include "gvrasterlayer.h"
 #include "gvrecttool.h"
+#include "gvrenderinfo.h"
 #include "gvroitool.h"
 #include "gvrotatetool.h"
 #include "gvselecttool.h"
@@ -408,7 +411,7 @@ _wrap_gv_data_set_properties(PyGObject *self, PyObject *args)
     GvProperties *properties = NULL;
     PyObject *psDict = NULL;
     PyObject    *pyKey = NULL, *pyValue = NULL;
-    int ii;
+    Py_ssize_t ii;
 
     if (!PyArg_ParseTuple(args, "O!:GvData.set_properties", &PyDict_Type, &psDict))
         return NULL;
@@ -977,17 +980,7 @@ _wrap_gv_manager_get_dataset_raster(PyGObject *self, PyObject *args)
 
     raster = gv_manager_get_dataset_raster(GV_MANAGER(self->obj), dataset, band);
 
-    if( raster == NULL )
-    {
-        Py_INCREF(Py_None);
-        return Py_None;
-    }
-    else
-    {
-        PyObject *py_raster = pygobject_new( G_OBJECT(raster) );
-        g_object_unref(raster);
-        return py_raster;
-    }
+    return pygobject_new( G_OBJECT(raster) );
 }
 #line 993 "gv.c"
 
@@ -1049,6 +1042,40 @@ _wrap_gv_manager_queue_task(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+
+static PyObject *
+_wrap_gv_manager_active_rasters(PyGObject *self, PyObject *args)
+{
+    char *dataset_string = NULL;
+    GvDataset *ds = NULL;
+    GDALDatasetH dataset = NULL;
+    int i, active_rasters = 0;
+    
+    if (!PyArg_ParseTuple(args, "s:GvManager.active_rasters",
+                          &dataset_string))
+        return NULL;
+
+    dataset = (GDALDatasetH) SWIG_SimpleGetPtr(dataset_string, "GDALDatasetH");
+
+    if (dataset != NULL) {
+        for( i = 0; i < GV_MANAGER(self->obj)->datasets->len; i++ )
+        {
+            ds = (GvDataset *) g_ptr_array_index(GV_MANAGER(self->obj)->datasets, i);
+
+            if( dataset == ds->dataset ) {
+                for( i = 0; i < GDALGetRasterCount(ds->dataset); i++ )
+                {
+                    if( ds->rasters[i] != NULL )
+                        active_rasters++;
+                }
+                break;
+            }
+        }
+    }
+
+    return PyInt_FromLong(active_rasters);
+}
+
 #line 1053 "gv.c"
 
 
@@ -1072,6 +1099,8 @@ static const PyMethodDef _PyGvManager_methods[] = {
     { "get_busy", (PyCFunction)_wrap_gv_manager_get_busy, METH_NOARGS,
       NULL },
     { "queue_task", (PyCFunction)_wrap_gv_manager_queue_task, METH_VARARGS,
+      NULL },
+    { "active_rasters", (PyCFunction)_wrap_gv_manager_active_rasters, METH_VARARGS,
       NULL },
     { NULL, NULL, 0, NULL }
 };
@@ -1921,18 +1950,19 @@ PyTypeObject G_GNUC_INTERNAL PyGvPqueryLayer_Type = {
 static int
 _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
-    PyObject * py_ret;
-    char *filename = NULL, *dataset_string = NULL, *name;
+    PyGObject *py_raster = NULL;
+    char *filename = NULL, *dataset_string = NULL;
     GDALDatasetH  dataset;
     static int gdal_initialized = 0;
     GvSampleMethod sm = GvSMAverage;
     int   rband = 1;
-    static char *kwlist[] = {"filename", "sample", "real",
+    static char *kwlist[] = {"filename", "sample", "real", "_obj",
                              "dataset", NULL};
-    GvRaster *raster;
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ziiz:_gv.Raster.__init__", kwlist,
-                                     &filename, &sm, &rband, &dataset_string))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|ziiO!z:_gv.Raster.__init__", kwlist,
+                                     &filename, &sm, &rband,
+                                     &PyGvRaster_Type, &py_raster,
+                                     &dataset_string))
         return -1;
 
     if( !gdal_initialized )
@@ -1964,9 +1994,12 @@ _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
         GDALDereferenceDataset( dataset );
     }
-    else if( self->obj != NULL )
+    else if( py_raster != NULL )
     {
         pygobject_constructv(self, 0, NULL);
+        // we need to unref here otherwise it will remain a floating GvRaster... 
+        g_object_unref(self->obj);
+        self->obj = py_raster->obj;
         return 0;
     }
     else
@@ -1984,10 +2017,6 @@ _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
     }
 
     gv_raster_read(GV_RASTER(self->obj), dataset, rband, sm);
-    /*pygobject_construct(self, "filename", filename,
-                        "sample", sm,
-                        "real", rband,
-                        "dataset", dataset, NULL);*/
 
     return 0;
 }
@@ -2737,12 +2766,8 @@ _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
     PyObject *py_properties = NULL;
     PyGObject *py_raster;
     GvRaster *raster;
-    GvRasterLayer *layer;
     GvProperties properties = NULL;
     int      mode = GV_RLM_AUTO;
-    double nodata_real=-1e8, nodata_imaginary=0.0;
-    int nodata_active = FALSE;
-    const char *interp_pref;
 
     if (!PyArg_ParseTuple(args, "O!iO!:_gv.RasterLayer.__init__", &PyGvRaster_Type,
                             &py_raster, &mode, &PyList_Type, &py_properties ))
@@ -3030,7 +3055,7 @@ _wrap_gv_raster_layer_set_source(PyGObject *self, PyObject *args)
 {
     PyGObject *py_raster;
     GvRaster *raster = NULL;
-    char *lut = NULL;
+    unsigned char *lut = NULL;
     int isource, const_value, ret, lut_len=0, nodata_active=FALSE;
     float min, max;
     PyObject *nodata = NULL;
@@ -3461,7 +3486,7 @@ static PyObject *
 _wrap_gv_raster_layer_lut_put(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "lut", NULL };
-    char *lut;
+    unsigned char *lut;
     int  lut_len, height;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "|z#:GvRasterLayer.lut_put",
@@ -3629,7 +3654,6 @@ _wrap_gv_raster_layer_get_height(PyGObject *self, PyObject *args)
 static PyObject *
 _wrap_gv_raster_layer_get_const_value(PyGObject *self, PyObject *args)
 {
-    PyObject *py_lut;
     int isource = 0;
 
     if (!PyArg_ParseTuple(args, "|i:GvRasterLayer.get_const_value", &isource))
@@ -3646,7 +3670,7 @@ static PyObject *
 _wrap_gv_raster_layer_get_source_lut(PyGObject *self, PyObject *args)
 {
     PyObject *py_lut;
-    char *lut;
+    unsigned char *lut;
     int isource = 0;
 
     if (!PyArg_ParseTuple(args, "|i:GvRasterLayer.get_source_lut", &isource))
@@ -3659,7 +3683,7 @@ _wrap_gv_raster_layer_get_source_lut(PyGObject *self, PyObject *args)
         return Py_None;
     }
 
-    if ( ( py_lut = PyString_FromStringAndSize( lut, 256 ) ) == NULL )
+    if ( ( py_lut = PyString_FromStringAndSize( (char*)lut, 256 ) ) == NULL )
     {
         Py_INCREF(Py_None);
         return Py_None;
@@ -4231,12 +4255,12 @@ _wrap_gv_shapes_sq_ass_item(PyGObject *self, int shp_index, PyObject *shape)
 }
 
 static PySequenceMethods _wrap_gv_shapes_tp_as_sequence = {
-    (inquiry)_wrap_gv_shapes_sq_length,
+    (lenfunc)_wrap_gv_shapes_sq_length,
     0,
     0,
-    (intargfunc)_wrap_gv_shapes_sq_item,
+    (ssizeargfunc)_wrap_gv_shapes_sq_item,
     0,
-    (intobjargproc)_wrap_gv_shapes_sq_ass_item,
+    (ssizeobjargproc)_wrap_gv_shapes_sq_ass_item,
     0,
     0,
 };
@@ -7090,7 +7114,7 @@ _wrap_gv_view_area__get_projection(PyObject *self, void *closure)
 }
 
 static const PyGetSetDef gv_view_area_getsets[] = {
-    { "active_layer", (getter)_wrap_gv_view_area__get_active_layer, (setter)0 },
+    { "active", (getter)_wrap_gv_view_area__get_active_layer, (setter)0 },
     { "projection", (getter)_wrap_gv_view_area__get_projection, (setter)0 },
     { NULL, (getter)0, (setter)0 },
 };
@@ -7518,7 +7542,6 @@ _wrap_gv_shapes_from_ogr_layer(PyObject *self, PyObject *args)
     GvData    *data = NULL;
     char      *ogrlayer_in = NULL;
     void      *hLayer;
-    PyObject *py_ret = NULL;
 
     if (!PyArg_ParseTuple(args, "s:GvShapes.from_ogr_layer",
                           &ogrlayer_in) )
@@ -7999,7 +8022,6 @@ _gv_register_classes(PyObject *d)
             "could not import gtk");
         return ;
     }
-
 
 #line 8005 "gv.c"
     pygobject_register_class(d, "GvData", GV_TYPE_DATA, &PyGvData_Type, Py_BuildValue("(O)", &PyGObject_Type));
