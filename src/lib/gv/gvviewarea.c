@@ -132,9 +132,7 @@ static void gv_view_area_fit_extents_3D(GvViewArea *view,
                                      gvgeocoord llx, gvgeocoord lly, gvgeocoord minz,
                                      gvgeocoord width, gvgeocoord height, gvgeocoord deltaz );
 static gint gv_view_area_zoompan_handler(gpointer data );
-/* PENDING
 static GdkGLContext* gv_view_area_get_share_list(GvViewArea *view);
-*/
 static PangoFontDescription *gv_view_XLFD_to_pango(gchar *XLFD_name);
 
 static GtkDrawingAreaClass *parent_class = NULL;
@@ -371,13 +369,9 @@ gv_view_area_init(GvViewArea *view)
     GdkGLContext *glcontext = NULL;
     GdkGLConfig *glconfig;
 
-    /* ---- Obtain shared GL context ---- PENDING - Does not work...
-    glcontext = gv_view_area_get_share_listview);
+    /* ---- Obtain shared GL context ---- */
+    glcontext = gv_view_area_get_share_list(view);
     glconfig = gdk_gl_context_get_gl_config(glcontext);
-    */
-    glconfig = gdk_gl_config_new_by_mode (GDK_GL_MODE_RGB    |
-                                          GDK_GL_MODE_DEPTH  |
-                                          GDK_GL_MODE_DOUBLE);
 
     /* ---- Enable GL capability ---- */
     gtk_widget_set_gl_capability (GTK_WIDGET(view), glconfig,
@@ -455,7 +449,6 @@ GtkWidget *gv_view_area_new()
     return GTK_WIDGET(view);
 }
 
-#ifdef REMOVED_PENDING
 /**
  * Get a global GdkGLContext that can be used to share
  * OpenGL display lists between multiple drawables with
@@ -500,7 +493,6 @@ static GdkGLContext* gv_view_area_get_share_list(GvViewArea *view)
    }
    return share_list;
 }
-#endif
 
 /**
  * Makes current and delimits beginning of OpenGL execution
@@ -956,6 +948,7 @@ gv_view_area_add_layer(GvViewArea *view, GObject *layer_obj)
 
     view->volume_current = FALSE;
     view->layers = g_list_append(view->layers, layer);
+    g_object_ref(layer_obj);
 
     layer->view = view;
 
@@ -1015,9 +1008,10 @@ gv_view_area_remove_layer(GvViewArea *view, GObject *layer_obj)
         }
     }
 
+
     g_signal_handlers_disconnect_matched (layer_obj, G_SIGNAL_MATCH_DATA,
                                             0, 0, NULL, NULL, G_OBJECT(view));
-
+    g_object_unref(layer);
     g_signal_emit(view, view_area_signals[ACTIVE_CHANGED], 0);
 
     gv_view_area_queue_draw(view);
@@ -1946,13 +1940,13 @@ gv_view_area_expose(GtkWidget *widget, GdkEventExpose *event)
                                   view->state.mpos_x, view->last_mpos_y,
                                   x+3, y+3 );
 
-    glColor3f(1.0, 0.5, 0.0);
-    glBegin(GL_LINE_LOOP);
-    glVertex2(x[0], y[0]);
-    glVertex2(x[1], y[1]);
-    glVertex2(x[2], y[2]);
-    glVertex2(x[3], y[3]);
-    glEnd();
+        glColor3f(1.0, 0.5, 0.0);
+        glBegin(GL_LINE_LOOP);
+        glVertex2(x[0], y[0]);
+        glVertex2(x[1], y[1]);
+        glVertex2(x[2], y[2]);
+        glVertex2(x[3], y[3]);
+        glEnd();
     }
 
     gv_view_area_swap_buffers(view);
@@ -2342,6 +2336,11 @@ gv_view_area_get_volume( GvViewArea *view, double *volume )
     int    first = TRUE;
     GList *list;
 
+    rect.x = 0;
+    rect.y = 0;
+    rect.width = 0;
+    rect.height = 0;
+
     if( view->volume_current )
     {
         if( volume != NULL )
@@ -2622,7 +2621,7 @@ gv_view_area_motion_notify(GtkWidget *widget, GdkEventMotion *event)
             || (event->state & GDK_BUTTON2_MASK)
             || (event->state & GDK_BUTTON3_MASK)))
     {
-        gvgeocoord eye_az, eye_el;
+        gvgeocoord eye_az = 0, eye_el;
         int return_value;
 
         return_value = inv_vec_point(view->state.eye_dir, &eye_az, &eye_el);
@@ -3130,7 +3129,7 @@ gv_view_area_destroy(GtkObject *object)
 {
     GvViewArea *view = GV_VIEW_AREA(object);
 
-    CPLDebug( "OpenEV", "gv_view_area_destroy" );
+    CPLDebug( "OpenEV", "gv_view_area destroy" );
 
     /* Remove all layers */
     view->active_layer = NULL;
