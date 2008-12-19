@@ -7,6 +7,8 @@
 #           set of utility classes in python.
 # Author:   Frank Warmerdam, warmerda@home.com
 #
+# Maintained by Mario Beauchamp (starged@gmail.com)
+#
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
 # 
@@ -32,6 +34,12 @@ import pgu
 import os
 import pgufilesel
 
+# differentiate between CIETMap and OpenEV
+if 'CIETMAP_HOME' in os.environ:
+    import cview as gview
+else:
+    import gview
+
 def is_of_class(class_obj,class_name):
     if class_obj.__name__ == class_name:
         return 1
@@ -40,25 +48,13 @@ def is_of_class(class_obj,class_name):
             return 1
     return 0
 
-class GvOptionMenu(_gtk.ComboBox):
+# DEPRECATED: please use pgu.ComboText
+class GvOptionMenu(pgu.ComboText):
     def __init__(self, contents, callback=None):
-        model = _gtk.ListStore(str)
-        _gtk.ComboBox.__init__(self, model)
-
+        pgu.ComboText.__init__(self, contents, model=None, action=callback)
         self.callback = callback
-
-        cell = _gtk.CellRendererText()
-        self.pack_start(cell, True)
-        self.add_attribute(cell, 'text', 0)
-
-        for item in contents:
-            model.append((item,))
-
         self.cur_selection = 0
         self.set_active(0)
-        if callback is not None:
-            self.connect('changed', callback)
-        self.show()
 
     def set_history(self, item):
         if item == self.cur_selection:
@@ -67,85 +63,67 @@ class GvOptionMenu(_gtk.ComboBox):
         self.cur_selection = item
         self.set_active(item)
 
-        if self.callback is not None:
+        if self.callback:
             self.callback(self)
 
     def get_history(self):
-        return self.cur_selection
+        return self.get_active()
 
     def set_om_selection(self, widget, data):
         if widget.get_active():
             self.set_history(data)
 
-pgu.gtk_register('GvOptionMenu',GvOptionMenu)
-
 #
-# Copied from GtkExtra
+# borrowed from CIETmap cietutils.py and adapted for OpenEV
 #
 class _MessageBox(_gtk.Dialog):
-        def __init__(self, message="", buttons=(), pixmap=None,
-                     modal=True):
-                _gtk.Dialog.__init__(self)
-                self.connect("destroy", self.quit)
-                self.connect("delete_event", self.quit)
-                self.set_modal(modal)
-                if modal:
-                    self.set_modal(True)
-                hbox = _gtk.HBox(spacing=5)
-                hbox.set_border_width(5)
-                self.vbox.pack_start(hbox)
-                hbox.show()
-                if pixmap:
-                        self.realize()
-                        pm = _gtk.Image()
-                        pm.set_from_file(pixmap)
-                        hbox.pack_start(pm, expand=False)
-                        pm.show()
-                label = _gtk.Label(message)
-                label.set_justify( _gtk.JUSTIFY_LEFT )
-                hbox.pack_start(label)
-                label.show()
+    def __init__(self, message='', buttons=(), stock=None):
+        _gtk.Dialog.__init__(self, title='', parent=None, flags=_gtk.DIALOG_MODAL, buttons=buttons)
+        self.set_border_width(5)
 
-                for text in buttons:
-                        b = _gtk.Button(text)
-                        b.set_flags(_gtk.CAN_DEFAULT)
-                        b.set_data("user_data", text)
-                        b.connect("clicked", self.click)
-                        self.action_area.pack_start(b)
-                        b.show()
-                self.ret = None
+        hbox = _gtk.HBox(spacing=5)
+        hbox.set_border_width(5)
+        self.vbox.pack_start(hbox)
 
-        def quit(self, *args):
-                self.hide()
-                self.destroy()
-                if self.modal:
-                    _gtk.main_quit()
+        if stock:
+            img = _gtk.image_new_from_stock(stock, _gtk.ICON_SIZE_DIALOG)
+            hbox.pack_start(img, expand=False)
 
-        def click(self, button):
-                self.ret = button.get_data("user_data")
-                self.quit()
+        label = _gtk.Label(message)
+        label.set_justify(_gtk.JUSTIFY_LEFT)
+        hbox.pack_start(label)
 
-def warning( text ):
-    import gview
-    import os.path
+        self.vbox.show_all()
+        # TODO: fix grab_focus
+##        default.grab_focus()
 
-    warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
-    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=False )
-    win.set_title('Warning')
-    win.show()
-    return
+def gv_message(title, text, stock=None, buttons=(_gtk.STOCK_OK,1)):
+    """display a message dialog in a standardized way (modal, pixmap etc)"""
+    win = _MessageBox(text, buttons, stock)
+    win.set_title(title)
+    id = win.run()
+    win.hide()
+    win.destroy()
 
-def error( text ):
-    import gview
-    import os.path
+    return id
 
-    warning_pixmap = os.path.join(gview.home_dir,'pics','warning.xpm')
-    win = _MessageBox(text, ('OK',), pixmap=warning_pixmap, modal=True )
-    win.set_title('ERROR')
-    win.show()
-    _gtk.main()
+def warning(text):
+    return gv_message("Warning", text, _gtk.STOCK_DIALOG_WARNING)
 
-    return
+def error(text):
+    return gv_message("ERROR", text, _gtk.STOCK_DIALOG_ERROR)
+
+def yesno(title="Confirm Action", text="Do you wish to do this?"):
+    id = gv_message(title, text, _gtk.STOCK_DIALOG_QUESTION, (_gtk.STOCK_YES,1,_gtk.STOCK_NO,0))
+    return ('No','Yes')[id]
+
+def noyes(title="Confirm Action", text="Do you wish to do this?"):
+    id = gv_message(title, text, _gtk.STOCK_DIALOG_QUESTION, (_gtk.STOCK_NO,0,_gtk.STOCK_YES,1))
+    return ('No','Yes')[id]
+
+def okcancel(title="Continue", text="Continue or cancel action?"):
+    return gv_message(title, text, _gtk.STOCK_DIALOG_QUESTION, (_gtk.STOCK_OK, _gtk.RESPONSE_OK,
+                                                                _gtk.STOCK_CANCEL, _gtk.RESPONSE_CANCEL))
 
 def is_shapefile( filename ):
     try:
@@ -440,340 +418,8 @@ def FindExecutable( exe_name ):
 
     return None
 
-def XMLFindValue( node, path, default = None ):
-    import gdal
-    if path == '' or path == None:
-        tnode = node
-    else:
-        tnode = XMLFind( node, path )
-        if tnode is None:
-            return default
-
-    for child in tnode[2:]:
-        if child[0] == gdal.CXT_Text:
-            return child[1]
-
-    return default
-
-def XMLFind( node, path, maxfind=1, attr=None,value=None ):
-    import gdal
-    broken_up = path.split('.', 1)
-    found_list=[]
-    if len(broken_up) == 2:
-        component, rest_of_path = broken_up
-    else:
-        component, rest_of_path = broken_up[0], None
-
-    for subnode in node[2:]:
-        if subnode[1] == component and \
-          (subnode[0] == gdal.CXT_Element or subnode[0] == gdal.CXT_Attribute):
-            if rest_of_path is None:
-                if ((attr is None) and (value is None)):
-                    found_list.append(subnode)
-                    if ((maxfind is not None) and (len(found_list) >= maxfind)):
-                        break
-                else:
-                    if XMLFindValue(subnode,attr) == value:
-                        found_list.append(subnode)
-                    if ((maxfind is not None) and (len(found_list) >= maxfind)):
-                        break                        
-            else:
-                if maxfind is None:
-                    submaxfind=maxfind
-                else:
-                    submaxfind=maxfind-len(found_list)
-
-                sub_list = XMLFind( subnode, rest_of_path, submaxfind,attr, value )
-                if sub_list is not None:
-                    if submaxfind > 1:
-                        # If maxfind > 1, a list of lists is returned...
-                        found_list.extend(sub_list)
-                    else:
-                        found_list.append(sub_list)
-
-    if len(found_list) == 0:
-        return None
-    elif maxfind == 1:
-        return found_list[0]
-    else:
-        return found_list
-
-def XMLInstantiate( node, parent, filename=None ):
-    import gdal
-
-    if len(node) < 2 or node[0] != gdal.CXT_Element:
-        raise AttributeError,'corrupt value passed to XMLInstantiate.'
-        return None
-
-    classname = node[1]
-    module = XMLFindValue( node, 'module', 'gview' )
-
-    try:
-        exec "import " + module
-        exec "func = %s.%sFromXML" % (module, classname)
-        instance = func( node, parent, filename=filename )
-        return instance
-    except:
-        warning( 'Failed to instantiate a %s:%s' % (module, classname) )
-        #raise
-        return None
-
-def XMLSerializeSimpleObjAttributes( obj, attrib_list, xml_list = [] ):
-    """
-    This method is used to serlialize a list of simple object attributes
-    as elements in a gdal compatible "pseudo-xml-list-tree".  Each attribute
-    found on the source attribute will be converted to string type using the
-    str() function, and added to the XML tree as an element with the
-    element name being the attribute name, and the value being the
-    contents of the element.
-
-    This serialization approach (along with XMLDeserializeSimpleObjAttributes
-    is intended to make saving and restoring objects with lots of simple
-    attributes to and from a project file fairly easy.
-
-    obj -- the object instance from which attributes will be extracted.
-    attrib_list -- a list of attribute tuples.  Each tuple contains the
-    attribute name and a function for converting a string into the
-    appropriate type (normally one of str, int or float).
-    xml_list -- the existing tree to which the new elements will be added.
-
-    Returns the modified xml_list.
-
-    Example attribute list:
-
-    attrib_list = [ (filename, str), (xsize, int), (ysize, int) ]
-
-
-    """ 
-    import gdal
-
-    for item in attrib_list:
-        if obj.__dict__.has_key( item[0] ):
-            text_value = str(obj.__dict__[item[0]])
-            xml_list.append( [gdal.CXT_Element, item[0],
-                              [gdal.CXT_Text, text_value] ] )
-
-    return xml_list
-
-def XMLDeserializeSimpleObjAttributes( obj, attrib_list, xml_tree ):
-    failures = 0
-
-    for item in attrib_list:
-        text_value = XMLFindValue( xml_tree, item[0], None )
-        if text_value is not None:
-            try:
-                func = item[1]
-                typed_value = func( text_value )
-                obj.__dict__[item[0]] = typed_value
-            except:
-                failures = failures + 1
-                print 'Failed to decode %s attribute with text value (%s).' \
-                      % ( item[0], text_value )
-
-    return failures
-
-# XMLPop, XMLInsert, XMLReplaceAttr: tools for manipulating xml files-
-# Might be changed or removed later.
-
-def XMLPop(node,path,maxpop=1,attr=None,value=None,overwrite='n'):
-    # Pop path from node if path has attr=value.
-    # pop up to maxpop instances, where maxpop is
-    # 1 by default.  Set maxpop to None to return all
-    # instances.
-    # Returns (cnode,list of popped nodes), where cnode
-    # is a copy of node with the excess stuff removed
-    # if overwrite is set to 'y', node is altered and returned
-
-    import gdal
-
-
-    # avoid overwriting the contents of node
-    if overwrite=='n':
-        import copy
-        cnode=copy.deepcopy(node)
-    else:
-        cnode=node
-
-    broken_up = path.split('.', 1)
-    popped_list=[]
-    subpopped=[]
-    if len(broken_up) == 2:
-        component, rest_of_path = broken_up
-    else:
-        component, rest_of_path = broken_up[0], None
-
-    if ((maxpop is not None) and (maxpop < 1)):
-        return (cnode,[])
-
-    indx=1
-    indxlist=[]
-    count=0
-
-    for subnode in cnode[2:]:
-        indx=indx+1
-        if subnode[1] == component and \
-          (subnode[0] == gdal.CXT_Element or subnode[0] == gdal.CXT_Attribute):
-            if rest_of_path is None:
-                if ((attr is None) and (value is None)):
-                    # Store index for later popping
-                    indxlist.append(indx)
-                    count=count+1
-                    if ((maxpop is not None) and (count >= maxpop)):
-                        break
-                else:
-                    if XMLFindValue(subnode,attr) == value:
-                        indxlist.append(indx)
-                        count=count+1
-                        if ((maxpop is not None) and (count >= maxpop)):
-                            break
-            else:
-                if maxpop is None:
-                    submaxpop=None
-                else:
-                    submaxpop=maxpop-count
-                junk,sub_list = XMLPop(subnode,rest_of_path,submaxpop,attr,value,overwrite='y')
-                if len(sub_list) > 0:
-                    count=count+len(sub_list)
-                    subpopped.extend(sub_list)
-
-                if count >= maxpop:
-                    break
-
-    # pop the top-level values now
-    pcount=0
-    for indx in indxlist:
-        popped_list.append(cnode.pop(indx-pcount))
-        # index should decrease with each pop...
-        pcount=pcount+1
-
-
-    return (cnode,popped_list)
-
-
-def XMLInsert(node,path,newnode,maxinsert=1,attr=None,value=None,overwrite='n'):
-    # Append newnode to all instances of path found within node
-    # that have attr=value, up to a maximum of maxinsert instances.
-    # Set maxinsert to None to insert in all path instances.
-    # Return the number of items inserted.
-    import gdal
-
-    # avoid overwriting the contents of node
-    if overwrite=='n':
-        import copy
-        cnode=copy.deepcopy(node)
-    else:
-        cnode=node
-
-    broken_up = path.split('.', 1)
-    if ((maxinsert is not None) and (maxinsert < 1)):
-        return (cnode,0)
-
-    insert_num=0
-    if len(broken_up) == 2:
-        component, rest_of_path = broken_up
-    else:
-        component, rest_of_path = broken_up[0], None
-
-    indx=1
-
-    if path == '' and attr is None:
-        # Insert at top level and return
-        cnode.append(newnode)
-        return (cnode,1)
-
-    for subnode in cnode[2:]:
-        indx=indx+1
-        if subnode[1] == component and \
-          (subnode[0] == gdal.CXT_Element or subnode[0] == gdal.CXT_Attribute):
-            if rest_of_path is None:
-                if ((attr is None) and (value is None)):
-                    subnode.append(newnode)
-                    insert_num=insert_num+1
-                    if ((maxinsert is not None) and (insert_num >= maxinsert)):
-                        return (cnode,insert_num)
-                else:
-                    if XMLFindValue(subnode,attr) == value:
-                        subnode.append(newnode)
-                        insert_num=insert_num+1
-                        if ((maxinsert is not None) and (insert_num >= maxinsert)):
-                            return (cnode,insert_num) 
-            else:
-                if maxinsert is None:
-                    submaxinsert=None
-                else:
-                    submaxinsert=maxinsert-insert_num
-                junk,subinsert=XMLInsert( subnode, rest_of_path,newnode,submaxinsert,attr,value,overwrite='y' )
-                insert_num=insert_num+subinsert
-                if ((maxinsert is not None) and (insert_num >= maxinsert)):
-                    return (cnode,insert_num)
-    return (cnode,insert_num)
-
-def XMLReplaceAttr( node, path, pathvalue, maxreplace=1, attr=None, value=None, overwrite='n' ):
-    # path should end with the attribute to be replaced.  attr and value, if entered, should be
-    # at the same level as the attribute to be replaced.
-    import gdal
-
-    if overwrite == 'n':
-        import copy
-        cnode=copy.deepcopy(node)
-    else:
-        cnode=node
-    replaced=0
-    if ((maxreplace is not None) and (maxreplace < 1)):
-        return (cnode,replaced)
-
-    if path == '' or path == None:
-        print 'Error- No attribute to replace was entered...'
-        return
-    elif ((attr is None) and (value is None)):
-        tnode = XMLFind( cnode, path, maxreplace)
-        if tnode is None:
-            return (cnode,replaced)
-    else:
-        top_path,replace_attr=os.path.splitext(path)
-        if replace_attr == '':
-            replace_attr = top_path
-            top_path=''
-        else:
-            replace_attr=replace_attr[1:] # Get rid of .
-        inode = XMLFind( cnode, top_path, None,attr, value )
-        if inode is None:
-            return (cnode,replaced)
-        # Of the paths that have attr=value, see which ones also
-        # contain the replace_attr to be replaced.
-        tnode=[]
-        for item in inode:
-            temp=XMLFind( item, replace_attr)
-            if temp is not None:
-                if maxreplace is None:
-                    tnode.append(temp)
-                elif (len(tnode)<maxreplace):
-                    tnode.append(temp)
-
-        if len(tnode) < 1:
-            return (cnode, replaced)
-
-        if maxreplace == 1:
-            tnode=tnode[0]
-
-    if maxreplace == 1:
-        for child in tnode[2:]:
-            if child[0] == gdal.CXT_Text:
-                child[1] = pathvalue
-                replaced=replaced+1
-                return (cnode,replaced)
-    else:
-        for item in tnode:
-            for child in item[2:]:
-                if child[0] == gdal.CXT_Text:
-                    child[1] = pathvalue
-                    replaced=replaced+1
-                    if ((maxreplace is not None) and (replaced >= maxreplace)):
-                        return (cnode,replaced)
-
-    return (cnode,replaced)
-
-
+# XML stuff moved to gvxml.py, import it here for backwards compatibility
+from gvxml import *
 
 #-----------------------------------------------------------------
 # GvDataFilesFrame- function to create data file frame and entries
@@ -1023,6 +669,62 @@ class GvEntryFrame(_gtk.Frame):
     def set_spacings(self, rowspc, colspc):
         self.table.set_row_spacings(rowspc)
         self.table.set_col_spacings(colspc)
+
+home_dir = gview.home_dir
+pics_dir = os.path.join(home_dir, 'pics')
+
+# borrowed from cietutils
+def set_layer_color(layer, type, color):
+    """set a color property on a layer"""
+    prop = " ".join([str(col) for col in color])
+
+    old_prop = layer.get_property(type)
+    if old_prop is None or old_prop != prop:
+        layer.set_property(type, prop)
+        layer.display_change()
+
+def add_stock_icons():
+    factory = _gtk.IconFactory()
+    for xpm in os.listdir(pics_dir):
+        pix = pixbuf_new_from_file(os.path.join(pics_dir, xpm))
+        factory.add(os.path.basename(xpm)[:-4], _gtk.IconSet(pix))
+
+    factory.add_default()
+
+def create_pixmap(filename):
+    """load an xpm from a filename and create an image
+
+        filename - string, the filename to load the xpm from
+
+    """
+    full_filename = os.path.join(pics_dir, filename)
+    if not os.path.isfile(full_filename):
+        full_filename = os.path.join(pics_dir, 'default.xpm')
+
+    return _gtk.image_new_from_file(full_filename)
+
+def create_pixbuf(filename):
+    """load an xpm from a filename and create a pixbuf
+
+        filename - string, the filename to load the xpm from
+
+    """
+    if not filename.endswith('.xpm'):
+        filename += '.xpm'
+    full_filename = os.path.join(pics_dir, filename)
+    if not os.path.isfile(full_filename):
+        full_filename = os.path.join(pics_dir, 'default.xpm')
+
+    return pixbuf_new_from_file(full_filename)
+
+def create_stock_button(stock, cb, *args):
+    image = _gtk.image_new_from_stock(stock, _gtk.ICON_SIZE_BUTTON)
+    button = _gtk.Button()
+    button.add(image)
+    if cb:
+        apply(button.connect, ('clicked', cb) + args)
+
+    return button
 
 
 if __name__ == '__main__':
