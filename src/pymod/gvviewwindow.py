@@ -212,6 +212,7 @@ class GvViewWindow(gtk.Window):
             ('File', None, "File"),
             ('ImportFile', gtk.STOCK_OPEN, "Import", None, "Import and Display Raster File", self.file_import_cb),
             ('OpenFile', gtk.STOCK_OPEN, "Open", '<control>O', "Open and Display Raster/Vector File", self.file_open_cb),
+            ('OpenRGB', None, "Open RGB", None, None, self.rgb_open_cb),
             ('Open3D', None, "Open 3D", None, None, self.open_3D_request),
             ('SaveVector', gtk.STOCK_SAVE, "Save Vector Layer", None, None, self.save_vector_layer_request),
             ('SaveProject', gtk.STOCK_SAVE, "Save Project", None, None, self.menu_save_project),
@@ -564,10 +565,10 @@ class GvViewWindow(gtk.Window):
         # Make this a selection menu - doesn't work, yet!
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
-        box.pack_start(gtk.Label('Coordinate System:'),expand=False)
-        self.coord_system_om = gvutils.GvOptionMenu(('Row/Col','Native'),
-                                                    self.set_coord_system)
-        box.pack_start(self.coord_system_om,expand=False)
+        box.pack_start(pgu.Label('Coordinate System:'), expand=False)
+        self.coord_system_om = pgu.ComboText(('Row/Col','Native','lat-long'),
+                                            action=self.set_coord_system)
+        box.pack_start(self.coord_system_om, expand=False)
 
         # Get current position in view native projection
         #   - changing Option Menu updates this in entry fields
@@ -601,7 +602,7 @@ class GvViewWindow(gtk.Window):
         self.y_pos_entry = y_pos_entry
 
         # set default to be native system - must be after x/y_pos_entry are setup
-        self.coord_system_om.set_history(1)
+        self.coord_system_om.set_active(1)
 
         window.show_all()
 
@@ -609,14 +610,31 @@ class GvViewWindow(gtk.Window):
         """ Set coordinate system goto coordinates entered in GoTo dialog from
         option menu. """
         current_pos = self.viewarea.get_translation()
+        x_pos = str(-current_pos[0])
+        y_pos = str(-current_pos[1])
 
-        if om.get_history() == 0:
-            self.goto_coord_system = 'pixel'
-        # Lat/Long Not Working Yet!
-        elif om.get_history() == 9:
+        active = om.get_active()
+        if active == 0:
+            layer = self.viewarea.active_layer()
+            if isinstance(layer, gview.GvRasterLayer):
+                self.goto_coord_system = 'pixel'
+                pos = layer.view_to_pixel(-current_pos[0],-current_pos[1])
+                x_pos = str(pos[0])
+                y_pos = str(pos[1])
+        elif active == 2:
             self.goto_coord_system = 'lat-long'
-        elif  om.get_history() == 1:
-            self.goto_coord_system = 'native'
+            # must be a better way...
+            geo = self.viewarea.format_point_query(-current_pos[0],-current_pos[1])
+            lon = geo[1:geo.find(',')]
+            if lon[-1] == 'W':
+                x_pos = '-' + lon[:-1]
+            else:
+                x_pos = lon[:-1]
+            lat = geo[geo.find(',')+2:geo.find(')')]
+            if lat[-1] == 'S':
+                y_pos = '-' + lat[:-1]
+            else:
+                y_pos = lat[:-1]
         else:
             self.goto_coord_system = 'native'
 
@@ -635,32 +653,30 @@ class GvViewWindow(gtk.Window):
             # Get current raster
             layer = self.viewarea.active_layer()
 
-            if (layer is None) or (gvutils.is_of_class( layer.__class__, 'GvRasterLayer' ) == 0):
+            if not layer or not isinstance(layer, gview.GvRasterLayer):
                 gvutils.warning('Please select a raster layer using the layer dialog.\n')
                 return
 
-            raster = layer.get_parent()
-            if ((raster is not None) and (self.viewarea.get_raw(layer) == 0)):
+            if layer.parent and not self.viewarea.get_raw(layer):
                 # layer is georeferenced, coordinates are pixel/line
-                position = raster.pixel_to_georef(x,y)
-            elif (raster is not None):
+                position = layer.parent.pixel_to_georef(x, y)
+            elif raster is not None:
                 # layer is in pixel/line coordinates, coordinates are pixel/line
-                position = (x,y)
+                position = (x, y)
             else:
                 return
-
-        # Doesn't work Yet!
+            
         elif coord_system == 'lat-long':
-            position = self.viewarea.map_location((x,y))
+            position = self.viewarea.map_location((x, y))
 
         elif coord_system == 'native':
             # native - do nothing
-            position = (x,y)
+            position = (x, y)
 
         else:
             print 'Error in gvviewwindow.py function goto_location() passed invalid coordinate system'
             # native - do nothing
-            position = (x,y)
+            position = (x, y)
 
         self.viewarea.set_translation(-position[0],-position[1])
 
@@ -671,6 +687,10 @@ class GvViewWindow(gtk.Window):
         self.app.save_project_as()
 
     def menu_new_view(self, *args):
+        self.app.new_view()
+
+    def menu_new_project(self, *args):
+        self.app.clear_project()
         self.app.new_view()
 
     def save_vector_layer_request(self, *args):
@@ -820,6 +840,13 @@ class GvViewWindow(gtk.Window):
         filter = ['all','gdalr','ogrr']
         file_open("File Open", get_pref('recent_directory'), filter=filter,
                   cb=self.file_open_name_check, app=self.app, ms=True)
+
+    def rgb_open_cb(self, *args):
+        self.make_active()
+
+        filter = ['all','gdalr']
+        file_open("RGB File Open", get_pref('recent_directory'), filter=filter,
+                  cb=self.rgb_files_open_by_name, app=self.app, ms=True)
 
     def file_open_name_check(self, filename, cwd, *args):
         if get_pref('save_recent_directory') == 'on':
@@ -973,6 +1000,32 @@ class GvViewWindow(gtk.Window):
         self.viewarea.set_active_layer(raster_layer)
         self.rawgeo_update()
 
+    def open_rgb_gdal_dataset(self, datasets):
+        import vrtutils
+        
+        self.make_active()
+
+        vrt_opts = vrtutils.VRTCreationOptions(3)
+        vrt_tree = vrtutils.serializeCombinedDatasets(datasets, vrt_opts)
+        ds = gdal.OpenShared(gdal.SerializeXMLTree(vrt_tree))
+        rgbDS = gview.manager.add_dataset(ds)
+        rgbDS.SetDescription('VRTDataset')
+
+        red_raster = gview.manager.get_dataset_raster(rgbDS, 1)
+        green_raster = gview.manager.get_dataset_raster(rgbDS, 2)
+        blue_raster = gview.manager.get_dataset_raster(rgbDS, 3)
+
+        rgb_layer = gview.GvRasterLayer(red_raster, rl_mode=gview.RLM_RGBA)
+        rgb_layer.set_source(1, green_raster)
+        rgb_layer.set_source(2, blue_raster)
+        rgb_layer.set_name('RGB layer')
+
+        self.viewarea.add_layer(rgb_layer)
+        self.viewarea.set_active_layer(rgb_layer)
+        self.rawgeo_update()
+        if len(self.viewarea.list_layers()) == 1: # zoom to 1:1 only if first layer
+            self.onetoone_cb()
+
     def get_gdal_raster_by_gci_type(self, dataset, gci_type):
         band_index = 0
         while band_index < dataset.RasterCount:
@@ -1016,6 +1069,16 @@ class GvViewWindow(gtk.Window):
                 return
 
         self.open_gdal_dataset(dataset, lut, sds_check, add_to_rfl=1)
+
+    def rgb_files_open_by_name(self, filenames, cwd, *args):
+        if len(filenames) != 3:
+            gvutils.error('3 files needed for band merging')
+            return
+        datasets = []
+        for file in filenames:
+           datasets.append(gview.manager.get_dataset(file))
+        
+        self.open_rgb_gdal_dataset(datasets)
 
     def init_custom_icons(self):
         pass
@@ -1123,6 +1186,7 @@ class GvViewWindow(gtk.Window):
               <menu action='File'>
                 <menuitem action='ImportFile'/>
                 <menuitem action='OpenFile'/>
+                <menuitem action='OpenRGB'/>
                 <menuitem action='Open3D'/>
                 <menuitem action='SaveVector'/>
                 <menuitem action='SaveProject'/>
@@ -1195,46 +1259,28 @@ class GvViewWindow(gtk.Window):
             self.viewarea.active_layer().show_legend()
 
     def restretch_cb(self, *args):
-        self.make_active()
-        try:
-            self.viewarea.active_layer().window_restretch()
-        except:
-            gvutils.warning('This can only be applied to a raster layer.\n' \
-                          + 'Select a raster layer for this view in the \nlayers dialog.' )
+        self.do_enhance('window_restretch')
 
     def equalize_cb(self, *args):
-        self.make_active()
-        try:
-            self.viewarea.active_layer().equalize()
-        except:
-            gvutils.warning('This can only be applied to a raster layer.\n' \
-                          + 'Select a raster layer for this view in the \nlayers dialog.' )
-            #import traceback
-            #traceback.print_exc()
+        self.do_enhance('equalize')
 
     def linear_cb(self, *args):
-        self.make_active()
-        try:
-            self.viewarea.active_layer().linear()
-        except:
-            gvutils.warning('This can only be applied to a raster layer.\n' \
-                          + 'Select a raster layer for this view in the \nlayers dialog.' )
+        self.do_enhance('linear')
 
     def log_cb(self, *args):
-        self.make_active()
-        try:
-            self.viewarea.active_layer().log()
-        except:
-            gvutils.warning('This can only be applied to a raster layer.\n' \
-                          + 'Select a raster layer for this view in the \nlayers dialog.' )
+        self.do_enhance('log')
 
     def nonelut_cb(self, *args):
+        self.do_enhance('none_lut')
+
+    def do_enhance(self, func):
         self.make_active()
-        try:
-            self.viewarea.active_layer().none_lut()
-        except:
-            gvutils.warning('This can only be applied to a raster layer.\n' \
-                          + 'Select a raster layer for this view in the \nlayers dialog.' )
+        layer = self.viewarea.active_layer()
+        if layer and isinstance(layer, gview.GvRasterLayer):
+            exec 'layer.%s()' % func
+        else:
+            gvutils.warning("This can only be applied to a raster layer.\n" +
+                            "Select a raster layer for this view in the layers list.")
 
     def seeall_cb(self,*args):
         self.make_active()
