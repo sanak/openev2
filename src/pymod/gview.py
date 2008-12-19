@@ -38,27 +38,6 @@ import pathutils
 Classes for viewing and interacting with geographic image and vector data.
 """
 
-###############################################################################
-# A few notes on gview.py
-#
-# obj2inst():
-#
-# The GtkObject derived OpenEV classes are automatically registered with
-# the gtk name2cls mechanism by some startup code at the bottom of this
-# module (search for name2cls).  Basically any class in this module starting
-# with Gv is assumed to:
-#  - Be derived from GtkObject
-#  - Have a get_type attribute which is the _gv get type method.
-#
-# Based on this, the _gtk._obj2inst() method can be used to create a
-# Python shadow class for any of the raw object handles (_o).  It will
-# create the correct type based on the name to class translation and the
-# name returned by the get_type attribute.
-#
-# Note that two obj2inst() calls with one GtkObject will result in two
-# Python shadow objects for the same underlying GtkObject.
-###############################################################################
-
 SMAverage = 0
 SMSample = 1
 SMAverage8bitPhase = 2
@@ -1630,52 +1609,37 @@ class GvShapes(GvData, _gv.Shapes):
 
 
 ###############################################################################
-class GvPoints(GvData, _gv.Points):
+# GvPoints, GvPolylines and GvAreas deprecated
+class GvPoints(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
-        if (_obj == None):
-            _gv.Points.__init__(self)
-            _obj = self
-        GvData.__init__(self, _obj)
-        if name: self.set_name(name)
-    def __len__(self):
-        return _gv.gv_points_num_points(self)
-    def __getitem__(self, index):
-        return _gv.gv_points_get_point(self, index)
-    def append(self, point):
-        return _gv.Points.new_point(self, point)
+        if _obj is None:
+            _gv.Shapes.__init__(self, None)
+        else:
+            _gv.Shapes.__init__(_obj, None)
+        if name:
+            self.set_name(name)
 
 ###############################################################################
-class GvPolylines(GvData, _gv.Polylines):
+class GvPolylines(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
-        if (_obj == None):
-            _gv.Polylines.__init__(self)
-            _obj = self
-        GvData.__init__(self, _obj)
-        if name: self.set_name(name)
-    def __len__(self):
-        return _gv.gv_polylines_num_lines(self)
-    def __getitem__(self, index):
-        return _gv.gv_polylines_get_line(self, index)
-    def append(self, line):
-        return _gv.Polylines.new_line(self, line)
+        if _obj is None:
+            _gv.Shapes.__init__(self, None)
+        else:
+            _gv.Shapes.__init__(_obj, None)
+        if name:
+            self.set_name(name)
 
 ###############################################################################
-class GvAreas(GvData, _gv.Areas):
+class GvAreas(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
-        if (_obj == None):
-            _gv.Areas.__init__(self)
-            _obj = self
-        GvData.__init__(self, _obj)
-        if name: self.set_name(name)
-    def __len__(self):
-        return _gv.gv_areas_num_areas(self)
-    def __getitem__(self, index):
-        return _gv.gv_areas_get_area(self, index)
-    def append(self, area):
-        return _gv.Areas.new_area(self, area)
+        if _obj is None:
+            _gv.Shapes.__init__(self, None)
+        else:
+            _gv.Shapes.__init__(_obj, None)
+        if name:
+            self.set_name(name)
 
 ###############################################################################
-
 def GvRasterFromXML( node, parent, filename=None ):
     band = int(XMLFindValue(node,"band","1"))
     portable_path = XMLFindValue( node, 'portable_path' )
@@ -2380,28 +2344,38 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
         GvShapeLayer.initialize_from_xml( self, tree, filename=filename )
 
 ###############################################################################
-class GvPointLayer(GvShapeLayer, _gv.PointLayer):
+# GvPointLayer, GvLineLayer and GvAreaLayer deprecated
+class GvPointLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, points=None, _obj=None):
-        if (_obj == None):
-            _gv.PointLayer.__init__(self, points)
+        if _obj is None:
+            _gv.ShapesLayer.__init__(self, points)
             _obj = self
+        else:
+            _gv.ShapesLayer.__init__(_obj, points)
         GvShapeLayer.__init__(self, _obj)
+        self.layer_type = GVSHAPE_POINT
 
 ###############################################################################
-class GvLineLayer(GvShapeLayer, _gv.LineLayer):
+class GvLineLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, plines=None, _obj=None):
-        if (_obj == None):
-            _gv.LineLayer.__init__(self, plines)
+        if _obj is None:
+            _gv.ShapesLayer.__init__(self, plines)
             _obj = self
+        else:
+            _gv.ShapesLayer.__init__(_obj, plines)
         GvShapeLayer.__init__(self, _obj)
+        self.layer_type = GVSHAPE_LINE
 
 ###############################################################################
-class GvAreaLayer(GvShapeLayer, _gv.AreaLayer):
+class GvAreaLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, areas=None, _obj=None):
-        if (_obj == None):
-            _gv.AreaLayer.__init__(self, areas)
+        if _obj is None:
+            _gv.ShapesLayer.__init__(self, areas)
             _obj = self
+        else:
+            _gv.ShapesLayer.__init__(_obj, areas)
         GvShapeLayer.__init__(self, _obj)
+        self.layer_type = GVSHAPE_AREA
 
 ###############################################################################
 def GvPqueryLayerFromXML( base, parent, filename=None ):
@@ -2473,26 +2447,6 @@ class GvPqueryLayer(GvShapesLayer, _gv.PqueryLayer):
         GvShapesLayer.serialize( self, base, filename=filename )
 
         return base
-
-###############################################################################
-class IpGcpLayer(GvShapesLayer, _gv.GcpLayer):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.GcpLayer.__init__(self)
-            _obj = self
-        GvShapesLayer.__init__(self, _obj=_obj)
-
-        #self.sink()
-
-###############################################################################
-class AppCurLayer(GvShapesLayer, _gv.CurLayer):
-    def __init__(self, _obj=None, shapes=None):
-        if (_obj == None):
-            _gv.CurLayer.__init__(self, shapes)
-            _obj = self
-        GvShapesLayer.__init__(self, _obj=_obj)
-
-        #self.sink()
 
 ###############################################################################
 def GvRasterLayerFromXML( node, parent, filename=None ):
@@ -3328,6 +3282,19 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                 raster.changed()
 
 ###############################################################################
+# most tools now in _gv, what's left here only for backward compatibility
+# and for the docstrings
+GvSelectionTool = _gv.SelectionTool
+GvZoompanTool = _gv.ZoompanTool
+GvPointTool = _gv.PointTool
+GvLineTool = _gv.LineTool
+GvRectTool = _gv.RectTool
+GvRotateTool = _gv.RotateTool
+GvAreaTool = _gv.AreaTool
+GvNodeTool = _gv.NodeTool
+GvTrackTool = _gv.TrackTool
+GvToolbox = _gv.Toolbox
+
 class GvTool(_gv.Tool):
     def __init__(self):
         _gv.Tool.__init__(self)
@@ -3347,76 +3314,7 @@ class GvTool(_gv.Tool):
         return _gv.Tool.set_cursor(self, cursor_type)
 
 ###############################################################################
-class GvSelectionTool(GvTool, _gv.SelectionTool):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.SelectionTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-
-###############################################################################
-class GvZoompanTool(GvTool, _gv.ZoompanTool):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.ZoompanTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-
-###############################################################################
-class GvPointTool(GvTool, _gv.PointTool):
-    def __init__(self, layer=None, _obj=None):
-        if (_obj == None):
-            _gv.PointTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if layer: self.set_named_layer(layer)
-
-###############################################################################
-class GvLineTool(GvTool, _gv.LineTool):
-    def __init__(self, layer=None, _obj=None):
-        if (_obj == None):
-            _gv.LineTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if layer: self.set_named_layer(layer)
-
-###############################################################################
-class GvRectTool(GvTool, _gv.RectTool):
-    def __init__(self, layer=None, _obj=None):
-        if (_obj == None):
-            _gv.RectTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if layer: self.set_named_layer(layer)
-
-###############################################################################
-class GvRotateTool(GvTool, _gv.RotateTool):
-    def __init__(self, layer=None, _obj=None):
-        if (_obj == None):
-            _gv.RotateTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if layer: self.set_named_layer(layer)
-
-###############################################################################
-class GvAreaTool(GvTool, _gv.AreaTool):
-    def __init__(self, layer=None, _obj=None):
-        if (_obj == None):
-            _gv.AreaTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if layer: self.set_named_layer(layer)
-
-###############################################################################
-class GvNodeTool(GvTool, _gv.NodeTool):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.NodeTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-
-###############################################################################
-class GvRoiTool(GvTool, _gv.RoiTool):
+class GvRoiTool(_gv.RoiTool):
     """Region of Interest Selection Tool
 
     Signals:
@@ -3428,26 +3326,14 @@ class GvRoiTool(GvTool, _gv.RoiTool):
     being modified.
     """
 
-    def __init__(self, boundary=None, _obj=None):
-        if (_obj == None):
-            _gv.RoiTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
-        if boundary: self.set_boundary(boundary)
-
-    def get_rect(self):
-        """ Returns the current ROI """
-        return _gv.RoiTool.get_rect(self)
-
-    def append(self, rect):
-        """ Creates an ROI.
-
-        rect -- a tuple (column, row, width, height)
-        """
-        return _gv.RoiTool.new_rect(self, rect)
+    def __init__(self, boundary=(0,0,0,0), _obj=None):
+        if _obj is None:
+            _gv.RoiTool.__init__(self, boundary)
+        else:
+            _gv.RoiTool.__init__(_obj, boundary)
 
 ###############################################################################
-class GvPoiTool(GvTool, _gv.PoiTool):
+class GvPoiTool(_gv.PoiTool):
     """Point of Interest Selection Tool
 
     Signals:
@@ -3456,10 +3342,10 @@ class GvPoiTool(GvTool, _gv.PoiTool):
     """
 
     def __init__(self, _obj=None):
-        if (_obj == None):
+        if _obj is None:
             _gv.PoiTool.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
+        else:
+            _gv.PoiTool.__init__(_obj)
 
     def get_point(self):
         """ Returns the current POI """
@@ -3471,24 +3357,6 @@ class GvPoiTool(GvTool, _gv.PoiTool):
         point -- a tuple (column, row)
         """
         return _gv.PoiTool.new_point(self, point)
-
-###############################################################################
-class GvTrackTool(GvTool, _gv.TrackTool):
-    def __init__(self, label=None, _obj=None):
-        if label is None:
-            raise ValueError, "expecting GtkLabel instance"
-        if (_obj == None):
-            _gv.TrackTool.__init__(self, label)
-            _obj = self
-        GvTool.__init__(self, _obj)
-
-###############################################################################
-class GvToolbox(GvTool, _gv.Toolbox):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.Toolbox.__init__(self)
-            _obj = self
-        GvTool.__init__(self, _obj)
 
 ###############################################################################
 class GvViewLink(_gv.ViewLink):
@@ -3872,30 +3740,6 @@ def rgba_to_rgb(rgba):
     return _gv.gv_rgba_to_rgb(rgba)
 
 ###############################################################################
-
-def gtk_object_deref_and_destroy(object):
-    # _gtkmissing.gtk_object_deref_and_destroy(object._o)
-    pass
-
-def gtk_object_get_ref_count(object):
-    pass
-    # return _gtkmissing.gtk_object_get_ref_count(object._o)
-
-def gtk_object_sink(object):
-    # return _gtkmissing.gtk_object_sink(object._o)
-    pass
-
-def gtk_object_ref(object):
-    pass
-    # return _gtkmissing.gtk_object_ref(object._o)
-
-def gtk_object_unref(object):
-    pass
-    # return _gtkmissing.gtk_object_ref(object._o)
-
-def py_object_get_ref_count(object):
-    pass
-    # return _gtkmissing.py_object_get_ref_count(object)
 
 manager = GvManager()
 
