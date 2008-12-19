@@ -1210,19 +1210,18 @@ class ViewManager(Signaler):
 class PrefDialog(gtk.Window):
     def __init__(self):
         gtk.Window.__init__(self)
-        self.set_title('Preferences')
+        self.set_title("Preferences")
 
-        gvhtml.set_help_topic( self, "preferences.html" );
+        gvhtml.set_help_topic(self, "preferences.html");
 
         self.default_color = (0.5, 1.0, 0.5, 1.0)
         self.default_font = 'Sans 12'
 
         self.tips = gtk.Tooltips()
 
-
         self.set_border_width(3)
         self.notebook = gtk.Notebook()
-        self.add( self.notebook )
+        self.add(self.notebook)
 
         self.create_tracking_tool_prefs()
         self.create_raster_prefs()
@@ -1230,403 +1229,305 @@ class PrefDialog(gtk.Window):
         self.create_paths_and_windows_prefs()
         #self.create_temporaryfile_prefs()
 
-        self.notebook.append_page(self.page_legend(), 
-                                  gtk.Label( 'Legend' ))
+        self.notebook.append_page(self.page_legend(), gtk.Label("Legend"))
 
         self.show_all()
 
-    def gvplot_cb(self, *args):
-        fname = self.gvplot_tempfile_entry.get_text()
-        gview.set_preference('gvplot_tempfile',fname)
+    def gvplot_cb(self, entry, *args):
+        set_pref('gvplot_tempfile', entry.get_text())
 
     def create_cache_prefs(self):
-        self.cachep = gtk.VBox(spacing=10)
-        self.cachep.set_border_width(10)
-        self.notebook.append_page(self.cachep, gtk.Label('Caching'))
+        vbox = gtk.VBox(spacing=10)
+        vbox.set_border_width(10)
+        self.notebook.append_page(vbox, gtk.Label("Caching"))
         table = gtk.Table(rows=2, columns=2)
         table.set_border_width(5)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
-        self.cachep.pack_start(table, expand=False)
+        vbox.pack_start(table, expand=False)
 
         # File Cache
-        gdal_cache_label = gtk.Label('File Cache (bytes):')
-        gdal_cache_label.set_alignment(0, 0.5)
-        table.attach(gdal_cache_label, 0, 1, 0, 1)
+        label = pgu.Label("File Cache (bytes):")
+        table.attach(label, 0, 1, 0, 1)
 
-        self.gdal_cache = gtk.Entry()
-        self.gdal_cache.set_max_length(9)
-        self.gdal_cache.connect('activate',self.gdal_cb)
-        self.gdal_cache.connect('leave-notify-event',self.gdal_cb)
-        table.attach(self.gdal_cache, 1, 2, 0, 1)
+        entry = gtk.Entry()
+        entry.set_max_length(9)
+        entry.connect('activate', self.gdal_cb)
+        entry.connect('leave-notify-event', self.gdal_cb)
+        table.attach(entry, 1, 2, 0, 1)
 
-        self.gdal_cache.set_text(str(gdal.GetCacheMax() \
-                                     +gview.raster_cache_get_max()))
+        entry.set_text(str(gdal.GetCacheMax()+gview.raster_cache_get_max()))
 
         # Texture Cache
-        texture_cache_label = gtk.Label('GL Texture (bytes):')
-        texture_cache_label.set_alignment(0, 0.5)
-        table.attach(texture_cache_label, 0, 1, 1, 2)
+        label = pgu.Label("GL Texture (bytes):")
+        table.attach(label, 0, 1, 1, 2)
 
-        self.texture_cache = gtk.Entry()
-        self.texture_cache.set_max_length(9)
-        self.texture_cache.connect('activate',self.tcache_cb)
-        self.texture_cache.connect('leave-notify-event',self.tcache_cb)
-        table.attach(self.texture_cache, 1, 2, 1, 2)
+        entry = gtk.Entry()
+        entry.set_max_length(9)
+        entry.connect('activate', self.tcache_cb)
+        entry.connect('leave-notify-event', self.tcache_cb)
+        table.attach(entry, 1, 2, 1, 2)
 
-        self.texture_cache.set_text(str(gview.texture_cache_get_max()))
+        entry.set_text(str(gview.texture_cache_get_max()))
 
     def create_raster_prefs(self):
-
-        self.rpp = gtk.VBox(spacing=10)
-        self.rpp.set_border_width(10)
-        self.notebook.append_page( self.rpp, gtk.Label('Raster'))
+        vbox = gtk.VBox(spacing=10)
+        vbox.set_border_width(10)
+        self.notebook.append_page(vbox, gtk.Label("Raster"))
         table = gtk.Table(rows=6, columns=2)
         table.set_border_width(5)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
-        self.rpp.pack_start(table, expand=False)
+        vbox.pack_start(table, expand=False)
 
         # Warp with GCPs
-        gcp_warp_label = gtk.Label('Display Georeferenced:')
-        gcp_warp_label.set_alignment(0, 0.5)
-        table.attach(gcp_warp_label, 0, 1, 0, 1)
+        label = pgu.Label("Display Georeferenced:")
+        table.attach(label, 0, 1, 0, 1)
 
-        self.gcp_warp_om = \
-               gvutils.GvOptionMenu(('Yes','No'), self.set_gcp_warp_mode)
-        table.attach(self.gcp_warp_om, 1, 2, 0, 1)
-
-        if gview.get_preference('gcp_warp_mode') is not None \
-           and gview.get_preference('gcp_warp_mode') == 'no':
-            self.gcp_warp_om.set_history(1)
+        combo = pgu.ComboText(("Yes","No"))
+        table.attach(combo, 1, 2, 0, 1)
+        pref = get_pref('gcp_warp_mode','no').capitalize()
+        combo.set_active_text(pref)
+        combo.connect('changed', self.set_gcp_warp_mode)
 
         # Sample Method
-        sm_label = gtk.Label('Overview Sampling:')
-        sm_label.set_alignment(0, 0.5)
-        table.attach(sm_label, 0, 1, 1, 2)
+        label = pgu.Label("Overview Sampling:")
+        table.attach(label, 0, 1, 1, 2)
 
-        self.sm_om = \
-               gvutils.GvOptionMenu(('Decimate','Average'),
-                                    self.set_sample_method)
-        table.attach(self.sm_om, 1, 2, 1, 2)
-
-        if gview.get_preference('default_raster_sample') is not None \
-           and gview.get_preference('default_raster_sample') == 'average':
-            self.sm_om.set_history(1)
+        combo = pgu.ComboText(("Decimate","Average"))
+        table.attach(combo, 1, 2, 1, 2)
+        pref = get_pref('default_raster_sample','average')
+        combo.set_active(['sample','average'].index(pref))
+        combo.connect('changed', self.set_sample_method)
 
         # Pixel Interpolation
-        im_label = gtk.Label('Subpixel Interpolation:')
-        im_label.set_alignment(0, 0.5)
-        table.attach(im_label, 0, 1, 2, 3)
+        label = pgu.Label("Subpixel Interpolation:")
+        table.attach(label, 0, 1, 2, 3)
 
-        self.im_om = \
-               gvutils.GvOptionMenu(('Bilinear','Off (Nearest)'),
-                                    self.set_interp_method)
-        table.attach(self.im_om, 1, 2, 2, 3)
-
-        if gview.get_preference('interp_mode') is not None \
-           and gview.get_preference('interp_mode') == 'nearest':
-            self.im_om.set_history(1)
+        combo = pgu.ComboText(("Bilinear","Off (Nearest)"))
+        pref = get_pref('interp_mode','nearest')
+        combo.set_active(['linear','nearest'].index(pref))
+        combo.connect('changed', self.set_interp_method)
+        table.attach(combo, 1, 2, 2, 3)
 
         # Default Autoscaling Method
-        scale_label = gtk.Label('Autoscaling Method:')
-        scale_label.set_alignment(0, 0.5)
-        table.attach(scale_label, 0, 1, 3, 4)
+        label = pgu.Label("Autoscaling Method:")
+        table.attach(label, 0, 1, 3, 4)
 
-        self.scale_om = \
-               gvutils.GvOptionMenu(('Percent Tail Trim',
-                                     'Standard Deviations'),
-                                    self.set_scaling_method)
-        table.attach(self.scale_om, 1, 2, 3, 4)
-
-        if gview.get_preference('scale_algorithm') is not None \
-           and gview.get_preference('scale_algorithm') == 'std_deviation':
-            self.scale_om.set_history(1)
+        combo = pgu.ComboText(("Percent Tail Trim","Standard Deviations"))
+        pref = get_pref('scale_algorithm','std_deviation')
+        combo.set_active(['percent_tail_trim','std_deviation'].index(pref))
+        combo.connect('changed', self.set_scaling_method)
+        table.attach(combo, 1, 2, 3, 4)
 
         # Tail Trim Percentage.
-        tt_label = gtk.Label('Tail Trim Percentage:')
-        tt_label.set_alignment(0, 0.5)
-        table.attach(tt_label, 0, 1, 4, 5)
+        label = pgu.Label("Tail Trim Percentage:")
+        table.attach(label, 0, 1, 4, 5)
 
-        self.tt_entry = gtk.Entry()
-        self.tt_entry.set_max_length(9)
-        self.tt_entry.connect('activate',self.tail_trim_cb)
-        self.tt_entry.connect('leave-notify-event',self.tail_trim_cb)
-        table.attach(self.tt_entry, 1, 2, 4, 5)
-
-        tt_val = gview.get_preference('scale_percent_tail')
-
-        if tt_val is None:
-            tt_val = '0.02'
-
-        self.tt_entry.set_text(str(float(tt_val)*100.0))
+        entry = gtk.Entry()
+        entry.set_max_length(9)
+        entry.connect('activate', self.tail_trim_cb)
+        entry.connect('leave-notify-event', self.tail_trim_cb)
+        tt_val = get_pref('scale_percent_tail','0.02')
+        entry.set_text(str(float(tt_val)*100.0))
+        table.attach(entry, 1, 2, 4, 5)
 
         # Scaling Standard Deviations.
-        sd_label = gtk.Label('Standard Deviations:')
-        sd_label.set_alignment(0, 0.5)
-        table.attach(sd_label, 0, 1, 5, 6)
+        label = pgu.Label("Standard Deviations:")
+        table.attach(label, 0, 1, 5, 6)
 
-        self.sd_entry = gtk.Entry()
-        self.sd_entry.set_max_length(9)
-        self.sd_entry.connect('activate',self.std_dev_cb)
-        self.sd_entry.connect('leave-notify-event',self.std_dev_cb)
-        table.attach(self.sd_entry, 1, 2, 5, 6)
-
-        sd_val = gview.get_preference('scale_std_deviations')
-
-        try:
-            if sd_val is None or float(sd_val) == 0.0:
-                sd_val = '2.5'
-        except:
-            sd_val = '2.5'
-
-        self.sd_entry.set_text(sd_val)
+        entry = gtk.Entry()
+        entry.set_max_length(9)
+        entry.connect('activate', self.std_dev_cb)
+        entry.connect('leave-notify-event', self.std_dev_cb)
+        entry.set_text(get_pref('scale_std_deviations', "2.5"))
+        table.attach(entry, 1, 2, 5, 6)
 
     def create_paths_and_windows_prefs(self):
-        self.pwp = gtk.VBox(spacing=10)
-        self.pwp.set_border_width(10)
-        self.notebook.append_page(self.pwp, gtk.Label('Program Paths'))
+        vbox = gtk.VBox(spacing=10)
+        vbox.set_border_width(10)
+        self.notebook.append_page(vbox, gtk.Label("Program Paths"))
         table = gtk.Table(rows=3, columns=2)
         table.set_border_width(5)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
-        self.pwp.pack_start(table, expand=False)
+        vbox.pack_start(table, expand=False)
 
         # HTML Browser
-        html_command_label = gtk.Label('Browser Command:')
-        html_command_label.set_alignment(0, 0.5)
-        table.attach(html_command_label, 0, 1, 0, 1)
+        label = pgu.Label("Browser Command:")
+        table.attach(label, 0, 1, 0, 1)
 
-        self.html_command = gtk.Entry()
-        self.html_command.connect('activate',self.html_cb)
-        self.html_command.connect('leave-notify-event',self.html_cb)
-        table.attach(self.html_command, 1, 2, 0, 1)
+        entry = gtk.Entry()
+        entry.connect('activate', self.html_cb)
+        entry.connect('leave-notify-event', self.html_cb)
+        table.attach(entry, 1, 2, 0, 1)
 
         if gvhtml.GetBrowseCommand() is not None:
-            self.html_command.set_text(gvhtml.GetBrowseCommand())
+            entry.set_text(gvhtml.GetBrowseCommand())
         else:
-            self.html_command.set_text('')
+            entry.set_text('')
 
         # Temporary paths
-        gvplot_tempfile_label = gtk.Label('Plot file (full path):')
-        gvplot_tempfile_label.set_alignment(0, 0.5)
-        table.attach(gvplot_tempfile_label, 0, 1, 1, 2)
+        label = pgu.Label("Plot file (full path):")
+        table.attach(label, 0, 1, 1, 2)
 
-        self.gvplot_tempfile_entry = gtk.Entry()
-        self.gvplot_tempfile_entry.set_max_length(100)
-        self.gvplot_tempfile_entry.connect('activate',self.gvplot_cb)
-        self.gvplot_tempfile_entry.connect('leave-notify-event',self.gvplot_cb)
-        table.attach(self.gvplot_tempfile_entry, 1, 2, 1, 2)
-
-        if gview.get_preference('gvplot_tempfile') is not None:
-            gvtext = str(gview.get_preference('gvplot_tempfile'))
-            self.gvplot_tempfile_entry.set_text(gvtext) 
-        else:
-            self.gvplot_tempfile_entry.set_text('')
+        entry = gtk.Entry()
+        entry.set_max_length(100)
+        entry.connect('activate', self.gvplot_cb)
+        entry.connect('leave-notify-event', self.gvplot_cb)
+        table.attach(entry, 1, 2, 1, 2)
+        entry.set_text(get_pref('gvplot_tempfile','')) 
 
         # Save last visited directory
-        save_recent_dir_label = gtk.Label('Save last visited directory:')
-        save_recent_dir_label.set_alignment(0, 0.5)
-        table.attach(save_recent_dir_label, 0, 1, 2, 3)
+        label = pgu.Label("Save last visited directory:")
+        table.attach(label, 0, 1, 2, 3)
 
-        self.save_recent_dir_om = \
-               gvutils.GvOptionMenu(('Off','On'), self.set_save_recent_dir)
-        table.attach(self.save_recent_dir_om, 1, 2, 2, 3)
+        combo = pgu.ComboText(("Off","On"))
+        pref = get_pref('save_recent_directory','off').capitalize()
+        combo.set_active_text(pref)
+        combo.connect('changed', self.set_save_recent_dir)
+        table.attach(combo, 1, 2, 2, 3)
 
-        if gview.get_preference('save_recent_directory') is not None \
-           and gview.get_preference('save_recent_directory') == 'off':
-            self.save_recent_dir_om.set_history(1)
-        else:
-            self.save_recent_dir_om.set_history(0)
+    def html_cb(self, entry, *args):
+        command = entry.get_text()
+        if command and not command.endswith(' '):
+            command += ' '
+        gvhtml.SetBrowseCommand(command)
 
-    def html_cb(self, *args):
-        command = self.html_command.get_text()
-        if len(command) > 0 and command[len(command)-1] != ' ':
-            command = command + ' '
-        gvhtml.SetBrowseCommand( command )
-
-    def gdal_cb(self, *args):
-        value = int(self.gdal_cache.get_text())
+    def gdal_cb(self, entry, *args):
+        value = int(entry.get_text())
         if value < 2000000:
-            self.gdal_cache.set_text(str(gdal.GetCacheMax()
-                                         +gview.raster_cache_get_max()))
+            entry.set_text(str(gdal.GetCacheMax()+gview.raster_cache_get_max()))
             return 
 
         if value == gdal.GetCacheMax() + gview.raster_cache_get_max():
             return
 
-        gdal_cache = int( 900000 + (value - 900000) * 0.25)
+        gdal_cache = int(900000 + (value - 900000) * 0.25)
         gvraster_cache = value - gdal_cache
 
-        gview.set_preference( 'gdal_cache', str(gdal_cache) )
-        gdal.SetCacheMax( gdal_cache )
+        set_pref('gdal_cache', str(gdal_cache))
+        gdal.SetCacheMax(gdal_cache)
 
-        gview.set_preference( 'gvraster_cache', str(gvraster_cache) )
+        set_pref('gvraster_cache', str(gvraster_cache))
         gview.raster_cache_set_max(gvraster_cache)
 
-    def tcache_cb(self, *args):
-        value = int(self.texture_cache.get_text())
+    def tcache_cb(self, entry, *args):
+        value = int(entry.get_text())
         if value > 4000000:
-            gview.set_preference( 'texture_cache', str(value) )
+            set_pref('texture_cache', str(value))
             gview.texture_cache_set_max(value)
         else:
-            self.texture_cache.set_text(str(gview.texture_cache_get_max()))
+            entry.set_text(str(gview.texture_cache_get_max()))
 
     def create_tracking_tool_prefs(self):
-        self.ttp = gtk.VBox(spacing=10)
-        self.ttp.set_border_width(10)
-        self.notebook.append_page( self.ttp, gtk.Label('Tracking Tool'))
+        vbox = gtk.VBox(spacing=10)
+        vbox.set_border_width(10)
+        self.notebook.append_page(vbox, gtk.Label("Tracking Tool"))
         table = gtk.Table(rows=4, columns=2)
         table.set_border_width(5)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
-        self.ttp.pack_start(table, expand=False)
+        vbox.pack_start(table, expand=False)
 
         # Coordinate
-        coord_label = gtk.Label('Coordinate:')
-        coord_label.set_alignment(0, 0.5)
-        table.attach(coord_label, 0, 1, 0, 1)
+        label = pgu.Label("Coordinate:")
+        table.attach(label, 0, 1, 0, 1)
 
-        self.coord_om = gvutils.GvOptionMenu(
-            ('Off','Raster Pixel/Line','Georeferenced','Geodetic (lat/long)'),
-            self.set_coordinate_mode)
-        table.attach(self.coord_om, 1, 2, 0, 1)
+        combo = pgu.ComboText(("Off","Raster Pixel/Line",
+                               "Georeferenced","Geodetic (lat/long)"))
+        pref = get_pref('_coordinate_mode','georef')
+        combo.set_active(['off','raster','georef','latlong'].index(pref))
+        combo.connect('changed', self.set_coordinate_mode)
+        table.attach(combo, 1, 2, 0, 1)
 
-        if gview.get_preference('_coordinate_mode') is not None:
-            if gview.get_preference('_coordinate_mode') == 'raster':
-                self.coord_om.set_history(1)
-            elif gview.get_preference('_coordinate_mode') == 'georef':
-                self.coord_om.set_history(2)
-            elif gview.get_preference('_coordinate_mode') == 'latlong':
-                self.coord_om.set_history(3)
-            else:
-                self.coord_om.set_history(0)
-        else:
-                self.coord_om.set_history(2)
 
         # Lat/Long Display format (dms or decimal)
-        degree_mode_label = gtk.Label('Lat/Long Format:')
-        degree_mode_label.set_alignment(0, 0.5)
-        table.attach(degree_mode_label, 0, 1, 1, 2)
+        label = pgu.Label("Lat/Long Format:")
+        table.attach(label, 0, 1, 1, 2)
 
-        self.degree_mode_om = gvutils.GvOptionMenu(('ddd:mm:ss.ss', \
-                                                    'ddd.ddddddd'), self.set_degree_mode)
-        table.attach(self.degree_mode_om, 1, 2, 1, 2)
-
-        if gview.get_preference('_degree_mode') is not None \
-           and gview.get_preference('_degree_mode') == 'decimal':
-            self.degree_mode_om.set_history(1)
-        else:
-            self.degree_mode_om.set_history(0)
+        combo = pgu.ComboText(("ddd:mm:ss.ss","ddd.ddddddd"))
+        pref = get_pref('_degree_mode','decimal')
+        combo.set_active(['dms','decimal'].index(pref))
+        combo.connect('changed', self.set_degree_mode)
+        table.attach(combo, 1, 2, 1, 2)
 
         # Raster Value
-        pixel_mode_label = gtk.Label('Pixel Value:')
-        pixel_mode_label.set_alignment(0, 0.5)
-        table.attach(pixel_mode_label, 0, 1, 2, 3)
+        label = pgu.Label("Pixel Value:")
+        table.attach(label, 0, 1, 2, 3)
 
-        self.pixel_mode_om = \
-            gvutils.GvOptionMenu(('On','Off'), self.set_pixel_mode)
-        table.attach(self.pixel_mode_om, 1, 2, 2, 3)
-
-        if gview.get_preference('_pixel_mode') is not None \
-           and gview.get_preference('_pixel_mode') == 'off':
-            self.pixel_mode_om.set_history(1)
-        else:
-            self.pixel_mode_om.set_history(0)
+        combo = pgu.ComboText(("On","Off"))
+        pref = get_pref('_pixel_mode','off').capitalize()
+        combo.set_active_text(pref)
+        combo.connect('changed', self.set_pixel_mode)
+        table.attach(combo, 1, 2, 2, 3)
 
         # NODATA mark
-        nodata_mode_label = gtk.Label('Show NODATA mark:')
-        nodata_mode_label.set_alignment(0, 0.5)
-        table.attach(nodata_mode_label, 0, 1, 3, 4)
+        label = pgu.Label("Show NODATA mark:")
+        table.attach(label, 0, 1, 3, 4)
 
-        self.nodata_mode_om = \
-            gvutils.GvOptionMenu(('On','Off'), self.set_nodata_mode)
-        table.attach(self.nodata_mode_om, 1, 2, 3, 4)
+        combo = pgu.ComboText(("On","Off"))
+        pref = get_pref('_nodata_mode','off').capitalize()
+        combo.set_active_text(pref)
+        combo.connect('changed', self.set_nodata_mode)
+        table.attach(combo, 1, 2, 3, 4)
 
-        if gview.get_preference('_nodata_mode') is not None \
-           and gview.get_preference('_nodata_mode') == 'off':
-            self.nodata_mode_om.set_history(1)
-        else:
-            self.nodata_mode_om.set_history(0)
+    def set_coordinate_mode(self, combo):
+        mode = ('off','raster','georef','latlong')[combo.get_active()]
+        set_pref('_coordinate_mode', mode)
 
-    def set_coordinate_mode(self, om):
-        if self.coord_om.get_history() == 0:
-            gview.set_preference( '_coordinate_mode', 'off')
-        elif  self.coord_om.get_history() == 1:
-            gview.set_preference( '_coordinate_mode', 'raster')
-        elif  self.coord_om.get_history() == 2:
-            gview.set_preference( '_coordinate_mode', 'georef')
-        elif  self.coord_om.get_history() == 3:
-            gview.set_preference( '_coordinate_mode', 'latlong')
+    def set_pixel_mode(self, combo):
+        mode = combo.get_active_text().lower()
+        set_pref('_pixel_mode', mode)
 
-    def set_pixel_mode(self, om):
-        if om.get_history() == 1:
-            gview.set_preference( '_pixel_mode', 'off')
-        else:
-            gview.set_preference( '_pixel_mode', 'on')
+    def set_nodata_mode(self, combo):
+        mode = combo.get_active_text().lower()
+        set_pref('_nodata_mode', mode)
 
-    def set_nodata_mode(self, om):
-        if om.get_history() == 1:
-            gview.set_preference( '_nodata_mode', 'off')
-        else:
-            gview.set_preference( '_nodata_mode', 'on')
+    def set_degree_mode(self, combo):
+        mode = ('dms','decimal')[combo.get_active()]
+        set_pref('_degree_mode', mode)
 
-    def set_degree_mode(self, om):
-        if om.get_history() == 1:
-            gview.set_preference( '_degree_mode', 'decimal')
-        else:
-            gview.set_preference( '_degree_mode', 'dms')
+    def set_gcp_warp_mode(self, combo):
+        mode = combo.get_active_text().lower()
+        set_pref('gcp_warp_mode', mode)
 
-    def set_gcp_warp_mode(self, om):
-        if om.get_history() == 1:
-            gview.set_preference( 'gcp_warp_mode', 'no' )
-        else:
-            gview.set_preference( 'gcp_warp_mode', 'yes' )
+    def set_sample_method(self, combo):
+        mode = ('sample','average')[combo.get_active()]
+        set_pref('default_raster_sample', mode)
 
-    def set_sample_method(self, om):
-        if om.get_history() == 0:
-            gview.set_preference( 'default_raster_sample', 'sample' )
-        else:
-            gview.set_preference( 'default_raster_sample', 'average' )
+    def set_interp_method(self, combo):
+        mode = ('linear','nearest')[combo.get_active()]
+        set_pref('interp_mode', mode)
 
-    def set_interp_method(self, im):
-        if im.get_history() == 0:
-            gview.set_preference( 'interp_mode', 'linear' )
-        else:
-            gview.set_preference( 'interp_mode', 'nearest' )
+    def set_scaling_method(self, combo):
+        mode = ('percent_tail_trim','std_deviation')[combo.get_active()]
+        set_pref('scale_algorithm', mode)
 
-    def set_scaling_method(self, om):
-        if om.get_history() == 0:
-            gview.set_preference( 'scale_algorithm', 'percent_tail_trim' )
-        else:
-            gview.set_preference( 'scale_algorithm', 'std_deviation' )
-
-    def tail_trim_cb(self,*args):
+    def tail_trim_cb(self, entry, *args):
         try:
-            gview.set_preference( 'scale_percent_tail',
-                                  str(float(self.tt_entry.get_text())/100.0) )
+            set_pref('scale_percent_tail',
+                                  str(float(entry.get_text())/100.0))
         except:
             pass
 
-    def std_dev_cb(self,*args):
+    def std_dev_cb(self, entry, *args):
         try:
-            if float(self.sd_entry.get_text()) > 0.0:
-                gview.set_preference( 'scale_std_deviations',
-                                      self.sd_entry.get_text())
+            if float(entry.get_text()) > 0.0:
+                set_pref('scale_std_deviations', entry.get_text())
         except:
             pass
 
-    def set_save_recent_dir(self, om):
-        if om.get_history() == 0:
-            gview.set_preference( 'save_recent_directory', 'off')
-        else:
-            gview.set_preference( 'save_recent_directory', 'on')
+    def set_save_recent_dir(self, combo):
+        mode = combo.get_active_text().lower()
+        set_pref('save_recent_directory', mode)
 
     def page_legend(self):
         """
         properties for the legend dialog
         """
-        import pgucolor
+        from pgucolor import ColorButton
+        from pgufont import FontControl
 
         vbox = gtk.VBox()
         table = gtk.Table(rows=1, columns=3)
@@ -1636,184 +1537,145 @@ class PrefDialog(gtk.Window):
         vbox.pack_start(table)
 
         # Background color
-        lbl = gtk.Label('Legend Background Color:')
-        table.attach(lbl, 0, 1, 0, 1,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
+        lbl = pgu.Label("Background Color:")
+        table.attach(lbl, 0, 1, 0, 1, yoptions=gtk.SHRINK)
 
-        color = gview.get_preference('legend-background-color', 
-                                     self.default_color)
-        cb = pgucolor.ColorButton(color)
-        cb.connect('color-set', self.set_color_preference,
-                        'legend-background-color')
-        table.attach(cb, 1, 2, 0, 1,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb,
-                'Click to change the default color for the legend background')
+        color = get_pref('legend-background-color', self.default_color)
+        cb = ColorButton(color)
+        cb.connect('color-set', self.set_color_preference, 'legend-background-color')
+        table.attach(cb, 1, 2, 0, 1, yoptions=gtk.SHRINK)
+        self.tips.set_tip(cb, "Click to change the default color for the legend background")
 
         # Title Font
-        lbl = gtk.Label('Title Font:')
-        table.attach(lbl, 0, 1, 1, 2,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
+        lbl = pgu.Label("Title Font:")
+        table.attach(lbl, 0, 1, 1, 2, yoptions=gtk.SHRINK)
 
-        color = gview.get_preference('legend-title-font-color',
-                                     self.default_color)
-        cb = pgucolor.ColorButton(color)
-        cb.connect('color-set', self.set_color_preference, 
-                   'legend-title-font-color')
-        table.attach(cb, 1, 2, 1, 2,
-                xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb, 
-                'Click to change the default color for the legend font')
+        color = get_pref('legend-title-font-color', self.default_color)
+        cb = ColorButton(color)
+        cb.connect('color-set', self.set_color_preference, 'legend-title-font-color')
+        table.attach(cb, 1, 2, 1, 2, yoptions=gtk.SHRINK)
+        self.tips.set_tip(cb, "Click to change the default color for the legend font")
 
         # Get preference as XLFD font spec or pango name
-        font_spec = gview.get_preference('legend-title-font', self.default_font)
-        self.title_font_button = pgufont.FontControl(font_spec, self.set_title_font_cb)
+        # MB: XLFD usage is discouraged...
+        font_spec = get_pref('legend-title-font', self.default_font)
+        font_button = FontControl(font_spec)
+        font_button.connect('font-set', self.set_font_preference, 'legend-title-font')
 
-        table.attach(self.title_font_button, 2, 3, 1, 2,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(self.title_font_button,
-                           'Select a font for the legend title')
+        table.attach(font_button, 2, 3, 1, 2, yoptions=gtk.SHRINK)
+        self.tips.set_tip(font_button, "Select a font for the legend title")
 
         # Label Font
-        lbl = gtk.Label('Label Font:')
-        table.attach(lbl, 0, 1, 2, 3,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        color = gview.get_preference('legend-label-font-color',
-                                     self.default_color)
-        cb = pgucolor.ColorButton(color)
-        cb.connect('color-set', self.set_color_preference, 
-                   'legend-label-font-color')
-        table.attach(cb, 1, 2, 2, 3,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb, 
-                'Click to change the default color for the legend font')
+        lbl = pgu.Label("Label Font:")
+        table.attach(lbl, 0, 1, 2, 3, yoptions=gtk.SHRINK)
+        color = get_pref('legend-label-font-color', self.default_color)
+        cb = ColorButton(color)
+        cb.connect('color-set', self.set_color_preference, 'legend-label-font-color')
+        table.attach(cb, 1, 2, 2, 3, yoptions=gtk.SHRINK)
+        self.tips.set_tip(cb, "Click to change the default color for the legend font")
 
         # Get preference as XLFD font spec or pango name
-        font_spec = gview.get_preference('legend-label-font', self.default_font)
-        self.label_font_button = pgufont.FontControl(font_spec, self.set_label_font_cb)
+        # MB: XLFD usage is discouraged...
+        font_spec = get_pref('legend-label-font', self.default_font)
+        font_button = FontControl(font_spec)
+        font_button.connect('font-set', self.set_font_preference, 'legend-label-font')
 
-        table.attach(self.label_font_button, 2, 3, 2, 3,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(self.label_font_button, 'Select a font for legend labels')
+        table.attach(font_button, 2, 3, 2, 3, yoptions=gtk.SHRINK)
+        self.tips.set_tip(font_button, "Select a font for legend labels")
 
         # Sample Size
 
-        lbl = gtk.Label( 'Legend Samples:')
-        table.attach(lbl, 0, 1, 3, 4,
-                xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        lbl = pgu.Label("Legend Samples:")
+        table.attach(lbl, 0, 1, 3, 4, yoptions=gtk.SHRINK)
 
-        lbl = gtk.Label( 'X Size:')
-        table.attach(lbl, 1, 2, 3, 4,
-                xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        lbl = pgu.Label("X Size:")
+        table.attach(lbl, 1, 2, 3, 4, yoptions=gtk.SHRINK)
 
+        x = get_pref('legend-sample-x-size', 30)
+        y = get_pref('legend-sample-y-size', 20)
 
-        x = gview.get_preference('legend-sample-x-size', 30)
-        y = gview.get_preference('legend-sample-y-size', 20)
-
-        spin_adjust = gtk.Adjustment(value=float(x), lower=0.0,
-                        upper=50.0, step_incr=1.0)
+        spin_adjust = gtk.Adjustment(value=float(x), lower=0.0, upper=50.0, step_incr=1.0)
         spin = gtk.SpinButton(spin_adjust)
         spin.set_digits(0)
-        spin.set_size_request(75,20)
-        spin.connect('value-changed', self.set_spin_preference, 
-                     'legend-sample-x-size')
-        spin.connect('focus-out-event', self.check_spin_preference, 
-                     'legend-sample-x-size')
-        table.attach(spin, 2, 3, 3, 4,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(spin, 'The X Size of a sample on the legend dialog')
+        spin.set_size_request(75,-1)
+        spin.connect('value-changed', self.set_spin_preference, 'legend-sample-x-size')
+        spin.connect('focus-out-event', self.check_spin_preference, 'legend-sample-x-size')
+        table.attach(spin, 2, 3, 3, 4, yoptions=gtk.SHRINK)
+        self.tips.set_tip(spin, "The X Size of a sample on the legend dialog")
 
-        lbl = gtk.Label( 'Y Size:')
-        table.attach(lbl, 3, 4, 3, 4,
-                xoptions=gtk.SHRINK, yoptions=gtk.SHRINK)
+        lbl = gtk.Label("Y Size:")
+        table.attach(lbl, 3, 4, 3, 4, yoptions=gtk.SHRINK)
 
-        spin_adjust = gtk.Adjustment(value=float(y), lower=0.0,
-                        upper=50.0, step_incr=1.0)
+        spin_adjust = gtk.Adjustment(value=float(y), lower=0.0, upper=50.0, step_incr=1.0)
         spin = gtk.SpinButton(spin_adjust)
         spin.set_digits(0)
-        spin.set_size_request(75, 20)
-        spin.connect('value-changed', self.set_spin_preference, 
-                     'legend-sample-y-size')
-        spin.connect('focus-out-event', self.check_spin_preference, 
-                     'legend-sample-y-size')
-        table.attach(spin, 4, 5, 3, 4,
-                        xoptions = gtk.SHRINK, yoptions=gtk.SHRINK)
-        self.tips.set_tip(spin, 'The Y Size of a sample on the legend dialog')
+        spin.set_size_request(75, -1)
+        spin.connect('value-changed', self.set_spin_preference, 'legend-sample-y-size')
+        spin.connect('focus-out-event', self.check_spin_preference, 'legend-sample-y-size')
+        table.attach(spin, 4, 5, 3, 4, yoptions=gtk.SHRINK)
+        self.tips.set_tip(spin, "The Y Size of a sample on the legend dialog")
+
         return vbox
 
-    def set_title_font_cb(self, font_btn):
-        gview.set_preference('legend-title-font', font_btn.get_xlfdfont())
-
-    def set_label_font_cb(self, font_btn):
-        gview.set_preference('legend-label-font', font_btn.get_xlfdfont())
+    def set_font_preference(self, button, pref):
+        set_pref(pref, button.get_font_name())
 
     def set_entry_text(self, widget, dlg, entry, pref):
         directory = dlg.get_directory()
         entry.set_text(directory)
         entry.grab_focus()
-        gview.set_preference( pref, directory )
+        set_pref(pref, directory)
         dlg.destroy()
 
-    def set_color_preference(self, widget, pref):
-        ##def set_color_preference(self, widget, color, pref):
-        """
-        """
-        gview.set_preference(pref, str(widget.get_color()))
+    def set_color_preference(self, button, pref):
+        """set a preference from a color button"""
+        set_pref(pref, str(button.get_color()))
 
-    def set_toggle_preference( self, widget, pref ):
+    def set_toggle_preference(self, widget, pref):
         """set a preference from a toggle button
         """
-        gview.set_preference( pref, str(widget.get_active()) )
+        set_pref(pref, str(widget.get_active()))
 
     def set_any_preference(self, widget, pref, func):
         """
         set a preference from the results of a function call
         """
-        gview.set_preference(pref, str(func()))
+        set_pref(pref, str(func()))
 
     def set_directory_preference(self, widget, event, pref, func):
         """
         set a preference for a directory.  Check the value first.
         """
-        self.current_widget = widget
-
         value = func()
-        if not os.path.isdir( value ) and value != "":
-            warning( "Invalid Path:\n%s" % value )
-            widget.set_text( gview.get_preference( pref, gview.home_dir)  )
+        if value and not os.path.isdir(value):
+            warning("Invalid Path:\n%s" % value)
+            widget.set_text(get_pref(pref, gview.home_dir))
         else:
             self.set_any_preference(widget, pref, func)
 
     def set_menu_preference(self, widget, pref, value):
-        """
-        """
-        gview.set_preference(pref, str(value))
+        set_pref(pref, str(value))
 
     def set_spin_preference(self, widget, pref):
-        """
-        """
         val = widget.get_value()
 
         if widget.get_text() != str(widget.get_value_as_int()):
             if widget.get_text() == str(round(val,2)):
-                gview.set_preference( pref, 
-                                str(round(val,2)))
+                set_pref(pref, str(round(val,2)))
             else:
                 try:
-                    i = float( widget.get_text() )
+                    i = float(widget.get_text())
                 except:
                     i = 0
-                widget.set_value( i )
+                widget.set_value(i)
         else:
-            gview.set_preference(pref, str(widget.get_value_as_int()))
+            set_pref(pref, str(widget.get_value_as_int()))
 
     def check_spin_preference(self, widget, event, pref):
         """
         added to catch unset preferences in spin buttons on focus-out events.
         """
-        self.set_spin_preference( widget, pref )
-
-
+        self.set_spin_preference(widget, pref)
 
 class Position_3D_Dialog(gtk.Window):
     def __init__(self, view_manager):
