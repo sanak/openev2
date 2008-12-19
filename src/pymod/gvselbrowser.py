@@ -1,10 +1,12 @@
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  GUI component to show the current list of selected objects, and
 #           to control a single sub-selection out of that set. 
 # Author:   Frank Warmerdam, warmerdam@pobox.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
@@ -25,19 +27,20 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
+import os
+if 'CIETMAP_HOME' in os.environ:
+    import cview as gview
+else:
+    import gview
+
 import gtk
-from gvsignaler import *
-import os.path
-import pgu
-import gview
-import gvutils
+from gvutils import create_stock_button
+from gvsignaler import Signaler
 
 class GvSelBrowser(gtk.VBox):
-
     def __init__(self, spacing=10):
         gtk.VBox.__init__(self, spacing=spacing)
-
-        self.updating = 0
+        self.updating = False
 
         self.sel_manager = gview.app.sel_manager
 
@@ -45,45 +48,34 @@ class GvSelBrowser(gtk.VBox):
         self.sel_manager.subscribe('selection-changed', self.update_gui)
         self.sel_manager.subscribe('subselection-changed', self.update_gui)
 
-        self.tooltips = gtk.Tooltips()
+        tips = gtk.Tooltips()
 
         hbox = gtk.HBox(spacing=3)
-        self.pack_start(hbox,expand=False)
+        self.pack_start(hbox, expand=False)
         self.hbox = hbox
 
-        hbox.pack_start(gtk.Label('Shape:'),expand=False)
+        hbox.pack_start(gtk.Label('Shape:'), expand=False)
 
-        self.oid_tb = gtk.Entry()
-        self.oid_tb.set_max_length(7)
+        self.oid_tb = gtk.Entry(max=7)
         self.oid_tb.connect('activate', self.oid_cb)
         self.oid_tb.connect('focus-out-event', self.oid_cb)
         hbox.pack_start(self.oid_tb)
 
-        left_button = gtk.Button()
-
-        print os.path.join(gview.home_dir,'pics', 'pan_left.xpm')
-        im = gtk.Image()
-        im.set_from_file(os.path.join(gview.home_dir,'pics', 'pan_left.xpm'))
-        left_button.add(im)
-        self.tooltips.set_tip(left_button,'Cycle Selection Down')
-        left_button.connect('clicked', self.cycle_down)
-        hbox.pack_start(left_button,expand=False)
+        left_button = create_stock_button(gtk.STOCK_GO_BACK, self.cycle_down)
+        hbox.pack_start(left_button, expand=False)
+        tips.set_tip(left_button, 'Cycle Selection Down')
 
         self.n_of_n_label = gtk.Label('XXXX of XXXX')
         hbox.pack_start(self.n_of_n_label)
 
-        right_button = gtk.Button()
-        im = gtk.Image()
-        im.set_from_file(os.path.join(gview.home_dir,'pics', 'pan_rght.xpm'))
-        right_button.add(im)
-        self.tooltips.set_tip(left_button,'Cycle Selection Up')
-        right_button.connect('clicked', self.cycle_up)
+        right_button = create_stock_button(gtk.STOCK_GO_FORWARD, self.cycle_up)
+        tips.set_tip(right_button, 'Cycle Selection Up')
         hbox.pack_start(right_button, expand=False)
 
         hbox = gtk.HBox(spacing=3)
         self.pack_start(hbox)
         self.layer_label = gtk.Label('XXXXXXXXXXXXXXXXXXXXXXXXXXX')
-        self.layer_label.set_justify( gtk.JUSTIFY_LEFT )
+        self.layer_label.set_alignment(0,0.5)
         hbox.pack_start(self.layer_label, expand=False)
 
         self.connect('unrealize', self.close)
@@ -97,12 +89,12 @@ class GvSelBrowser(gtk.VBox):
         self.sel_manager.unsubscribe('subselection-changed', self.update_gui)
 
     def update_gui(self, *args):
-        self.updating = 1
+        self.updating = True
         layer = self.sel_manager.get_active_layer()
         if layer is None:
             self.layer_label.set_text('Layer: <none selected>')
         else:
-            self.layer_label.set_text('Layer: '+layer.get_name())
+            self.layer_label.set_text('Layer: ' + layer.name)
 
         try:
             layer = self.sel_manager.get_active_layer()
@@ -111,17 +103,17 @@ class GvSelBrowser(gtk.VBox):
         except:
             self.n_of_n_label.set_text('0 of 0')
             self.oid_tb.set_text('')
-            self.updating = 0
+            self.updating = False
             return
 
         self.oid_tb.set_text(str(subsel))
 
-        index_of = self.get_sel_index(subsel,selected)
+        index_of = self.get_sel_index(subsel, selected)
 
         label = '%d of %d' % (index_of+1, len(selected))
         self.n_of_n_label.set_text(label)
 
-        self.updating = 0
+        self.updating = False
 
     def oid_cb(self, *args):
         if self.updating:
@@ -132,11 +124,11 @@ class GvSelBrowser(gtk.VBox):
             layer = self.sel_manager.get_active_layer()
             selected = layer.get_selected()
             if new_oid in selected:
-                layer.subselect_shape( new_oid )
+                layer.subselect_shape(new_oid)
             else:
                 layer.clear_selection()
                 if new_oid >= 0:
-                    layer.select_shape( new_oid )
+                    layer.select_shape(new_oid)
 
             layer.display_change()
         except:
@@ -149,9 +141,9 @@ class GvSelBrowser(gtk.VBox):
         except:
             return
 
-        index_of = self.get_sel_index( layer.get_subselected(), selected )
+        index_of = self.get_sel_index(layer.get_subselected(), selected)
         if index_of > 0:
-            layer.subselect_shape( selected[index_of-1] )
+            layer.subselect_shape(selected[index_of-1])
 
     def cycle_up(self, *args):
         try:
@@ -160,15 +152,14 @@ class GvSelBrowser(gtk.VBox):
         except:
             return
 
-        index_of = self.get_sel_index( layer.get_subselected(), selected )
+        index_of = self.get_sel_index(layer.get_subselected(), selected)
         if index_of < len(selected)-1:
-            layer.subselect_shape( selected[index_of+1] )
+            layer.subselect_shape(selected[index_of+1])
 
     def get_sel_index(self, subsel, selected):
         index_of = 0
-        while index_of < len(selected) \
-              and selected[index_of] != subsel:
-            index_of = index_of + 1
+        while index_of < len(selected) and selected[index_of] != subsel:
+            index_of += 1
 
         if index_of >= len(selected):
             return -1
@@ -176,7 +167,6 @@ class GvSelBrowser(gtk.VBox):
             return index_of
 
 class GvSelectionManager(Signaler):
-
     """
     Convenient manager for view, layer, and shape selection tracking.
 
@@ -191,7 +181,7 @@ class GvSelectionManager(Signaler):
     the "subscribe" method to add a callback.
 
     active-view-changed -- The current application view has changed (as
-                           understood by openev.ViewManager).
+                           understood by ViewManager).
 
     active-layer-changed -- The current layer of the active view (as returned
                             by GvViewArea.active_layer()) has changed, possibly
@@ -210,14 +200,12 @@ class GvSelectionManager(Signaler):
     """
 
     def __init__(self, view_manager):
-
         self.view_manager = view_manager
-        self.view_manager.subscribe('active-view-changed',self.view_change)
+        self.view_manager.subscribe('active-view-changed', self.view_change)
 
         self.view = self.view_manager.get_active_view()
-        if self.view is not None:
-            self.view_cb_id \
-                = self.view.connect('active-changed', self.layer_change)
+        if self.view:
+            self.view_cb_id = self.view.connect('active-changed', self.layer_change)
         else:
             self.view_cb_id = None
 
@@ -240,17 +228,16 @@ class GvSelectionManager(Signaler):
         if self.view == self.view_manager.get_active_view():
             return
 
-        if self.view_cb_id is not None:
+        if self.view_cb_id:
             self.view.disconnect(self.view_cb_id)
             self.view_cb_id = None
 
         self.view = self.view_manager.get_active_view()
 
-        if self.view is not None:
-            self.view_cb_id \
-                = self.view.connect('active-changed', self.layer_change)
+        if self.view:
+            self.view_cb_id = self.view.connect('active-changed', self.layer_change)
 
-        Signaler.notify(self, 'active-view-changed')
+        self.notif('active-view-changed')
         self.layer_change()
 
     def get_active_view_window(self):
@@ -262,49 +249,45 @@ class GvSelectionManager(Signaler):
         return self.view_manager.get_active_view()
 
     def layer_change(self, *args):
-        if self.view is None:
-            new_layer = None
-        else:
+        if self.view:
             new_layer = self.view.active_layer()
+        else:
+            new_layer = None
 
         if new_layer == self.layer:
             return
 
-        if self.layer_selcb_id is not None:
+        if self.layer_selcb_id:
             self.layer.disconnect(self.layer_selcb_id)
             self.layer.disconnect(self.layer_sselcb_id)
             self.layer_selcb_id = None
 
         self.layer = new_layer
 
-        if self.layer is not None \
-           and gvutils.is_of_class(self.layer.__class__, 'GvShapeLayer'):
-            self.layer_selcb_id = \
-                 self.layer.connect('selection-changed',self.sel_change)
-            self.layer_sselcb_id = \
-                 self.layer.connect('subselection-changed',self.ssel_change)
+        if self.layer is not None and isinstance(self.layer, gview.GvShapeLayer):
+            self.layer_selcb_id = self.layer.connect('selection-changed', self.sel_change)
+            self.layer_sselcb_id = self.layer.connect('subselection-changed', self.ssel_change)
 
-        Signaler.notify(self, 'active-layer-changed')
+        self.notif('active-layer-changed')
         self.sel_change()
         self.ssel_change()
 
     def get_active_layer(self):
         return self.layer
 
-    def sel_change(self,*args):
+    def sel_change(self, *args):
         try:
             new_len = len(self.layer.get_selected())
         except:
             new_len = 0
 
-        if new_len == 0 and self.sel_len == 0:
+        if not new_len and not self.sel_len:
             return
 
         self.sel_len = new_len
-        Signaler.notify(self, 'selection-changed')
+        self.notif('selection-changed')
 
-    def ssel_change(self,*args):
-
+    def ssel_change(self, *args):
         try:
             new_ssel = self.layer.get_subselected()
         except:
@@ -319,7 +302,18 @@ class GvSelectionManager(Signaler):
         self.ssel_layer = self.layer
         self.ssel = new_ssel
 
-        Signaler.notify(self, 'subselection-changed')
+        self.notif('subselection-changed')
 
+    def get_selected(self):
+        selected = []
+        if self.sel_len:
+            selected = self.layer.get_selected()
 
-pgu.gtk_register('GvSelBrowser',GvSelBrowser)
+        return selected
+
+    def get_selected_shape(self):
+        selected = self.get_selected()
+        if not selected:
+            return
+        shapes = self.layer.get_parent()
+        return shapes[selected[0]]
