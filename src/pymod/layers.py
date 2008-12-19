@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: layers.py 116 2007-04-26 00:23:52Z geddy $
+# $Id$
 #
 # Project:  CIETmap
 # Purpose:  Layer Management Window
