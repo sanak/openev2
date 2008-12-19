@@ -1,0 +1,46 @@
+<ui>
+<menubar name='OEMenuBar'>
+  <menu action='File'>
+    <menuitem action='ImportFile'/>
+    <menuitem action='OpenFile'/>
+    <menuitem action='OpenRGB'/>
+    <menuitem action='Open3D'/>
+    <menuitem action='SaveVector'/>
+    <menuitem action='SaveProject'/>
+    <menuitem action='SaveProjectAs'/>
+    <menuitem action='NewView'/>
+    <menuitem action='PrintView'/>
+    <separator/>
+    <menuitem action='rfl1'/>
+    <menuitem action='rfl2'/>
+    <menuitem action='rfl3'/>
+    <menuitem action='rfl4'/>
+    <menuitem action='rfl5'/>
+    <separator/>
+    <menuitem action='CloseView'/>
+    <menuitem action='Exit'/>
+  </menu>
+  <menu action='Edit'>
+    <menuitem action='Undo'/>
+    <menuitem action='Attrib'/>
+    <menuitem action='EditTools'/>
+    <menuitem action='Goto'/>
+    <menuitem action='Pyshell'/>
+    <menuitem action='Pos3D'/>
+    <menuitem action='Preferences'/>
+  </menu>
+  <menu action='Tools'>
+    <menuitem action='WMSTool'/>
+  </menu>
+  <menu action='Image'>
+    <menuitem action='HistoTool'/>
+    <menuitem action='FusionTool'/>
+  </menu>
+  <menu action='Help'>
+    <menuitem action='HelpOpenEV'/>
+    <separator/>
+    <menuitem action='OpenEVWeb'/>
+    <menuitem action='About'/>
+  </menu>
+</menubar>
+</ui>

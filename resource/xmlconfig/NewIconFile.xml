@@ -1,0 +1,25 @@
+<ui>
+<toolbar name='OEToolbar'>
+  <toolitem action='OpenFile'/>
+  <toolitem action='PrintView'/>
+  <separator/>
+  <toolitem action='NoEnh'/>
+  <toolitem action='Linear'/>
+  <toolitem action='Equal'/>
+  <toolitem action='Log'/>
+  <toolitem action='Restretch'/>
+  <toolitem action='Classify'/>
+  <toolitem action='Legend'/>
+  <placeholder name='ZoomFactor'/>
+  <separator/>
+  <toolitem action='SeeAll'/>
+  <toolitem action='ZoomIn'/>
+  <toolitem action='ZoomOut'/>
+  <toolitem action='Refresh'/>
+  <separator/>
+  <placeholder name='RawGeo'/>
+  <separator/>
+  <toolitem action='HelpOpenEV'/>
+  <placeholder name='IdleBusy'/>
+</toolbar>
+</ui>
