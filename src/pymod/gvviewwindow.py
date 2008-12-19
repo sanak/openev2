@@ -34,7 +34,7 @@ from osgeo.gdalconst import *
 import gvutils
 import os
 from filedlg import file_open
-import pguprogress
+import pgu
 import math
 import gvhtml
 import gviewapp
@@ -99,9 +99,6 @@ class GvViewWindow(gtk.Window):
         self.set_title('OpenEV: '+title)
         gvhtml.set_help_topic(self, 'mainwindow.html')
         self.view_title = title
-        self.file_sel = None
-        self.drape_file_sel = None
-        self.DEM_file_sel = None
         shell = gtk.VBox(spacing=0)
         self.add(shell)
         self.pref_dialog = None
@@ -778,9 +775,8 @@ class GvViewWindow(gtk.Window):
             i = i+1
             newfile = newbase+"_"+str(i)+".tif"
 
-        progress = pguprogress.PGUProgressDialog( 'Import to '+newfile,
-                                                  cancel = True )
-        progress.SetDefaultMessage( "translated" )
+        progress = pgu.ProgressDialog('Import to '+newfile, cancel=True)
+        progress.SetDefaultMessage("translated")
 
         old_cache_max = gdal.GetCacheMax()
         if old_cache_max < 20000000:
@@ -1387,140 +1383,18 @@ class GvViewWindow(gtk.Window):
 
     # -------- 3D File Open and Setup --------
     def open_3D_request(self, *args):
-        """ 3D File Open Dialog for selecting drape and height data """
         self.make_active()
-        self.drape_dataset = None
-        self.DEM_dataset = None
 
         # Create Dialog Window
-        dialog = gtk.Window()
-        dialog.set_title('Open 3D')
-        dialog.set_border_width(10)
-        dialog.set_resizable(False)
-        gvhtml.set_help_topic( dialog, 'open3d.html' )
-
-        box = gtk.VBox(homogeneous=False, spacing=5)
-        dialog.add(box)
+        dialog = Dialog3D(self)
         self.file_dialog_3D = dialog
 
-        # Drape File Selector
-        drape_label = gtk.Label('Select Drape')
-        box.pack_start(drape_label)
-
-        self.drape_fileSelectWin = gtk.FileSelection()
-        zsChildren = self.drape_fileSelectWin.children()[0].children() 
-        for zsChild in zsChildren : zsChild.reparent(box)
-
-        # DEM File Selector
-        ruler1 = gtk.HSeparator()
-        box.pack_start(ruler1)
-        DEM_label = gtk.Label('Select DEM')
-        box.pack_start(DEM_label)
-
-        self.DEM_fileSelectWin = gtk.FileSelection()
-        zsChildren = self.DEM_fileSelectWin.children()[0].children() 
-        for zsChild in zsChildren : zsChild.reparent(box)
-
-        # Mesh LOD and Height Scale
-        mesh_opts = gtk.HBox(homogeneous=False, spacing=5)
-        lod_label =  gtk.Label('Mesh Level of Detail')
-        spin_adjust = gtk.Adjustment(value=3, lower=0, upper=8, step_incr=1)
-        self.lod_spin_button = gtk.SpinButton(spin_adjust, climb_rate=1, digits=0)
-
-        hscale_label = gtk.Label('Height Scaling Factor:')
-        self.scale_value = gtk.Entry()
-        self.scale_value.set_max_length(7)
-        self.scale_value.set_max_length(7)
-        self.scale_value.set_text('1.0')
-
-        mesh_opts.pack_start(lod_label)
-        mesh_opts.pack_start(self.lod_spin_button)
-        mesh_opts.pack_start(hscale_label)
-        mesh_opts.pack_start(self.scale_value)
-        box.pack_start(mesh_opts)
-
-        # DEM height clamping options
-        min_clamp_opts = gtk.HBox(homogeneous=True,spacing=5)
-        self.min_heightclamp_entry = gtk.Entry()
-        self.min_heightclamp_entry.set_max_length(10)
-        self.min_heightclamp_entry.set_text('0.0')
-        min_clamp_label = gtk.Label('Minimum Height:')
-        self.min_heightclamp_toggle = gtk.CheckButton('Clamp Minimum Height')
-        self.min_heightclamp_toggle.set_active(False)
-        min_clamp_opts.pack_start(self.min_heightclamp_toggle)
-        min_clamp_opts.pack_start(min_clamp_label)
-        min_clamp_opts.pack_start(self.min_heightclamp_entry)
-        box.pack_start(min_clamp_opts)
-
-        max_clamp_opts = gtk.HBox(homogeneous=True,spacing=5)
-        self.max_heightclamp_entry = gtk.Entry()
-        self.max_heightclamp_entry.set_max_length(10)
-        self.max_heightclamp_entry.set_text('100000.0')
-        max_clamp_label = gtk.Label('Maximum Height:')
-        self.max_heightclamp_toggle = gtk.CheckButton('Clamp Maximum Height')
-        self.max_heightclamp_toggle.set_active(False)
-        max_clamp_opts.pack_start(self.max_heightclamp_toggle)
-        max_clamp_opts.pack_start(max_clamp_label)
-        max_clamp_opts.pack_start(self.max_heightclamp_entry)
-        box.pack_start(max_clamp_opts)
-
-        # Okay/Cancel Buttons
-        buttons = gtk.HBox(homogeneous=False, spacing=5)
-        okay = gtk.Button('OK')
-        okay.set_size_request(64, 32)
-        okay.connect('clicked', self.perform_3D_request)
-
-        cancel = gtk.Button('Cancel')
-        cancel.set_size_request(64, 32)
-        cancel.connect('clicked', dialog.destroy)
-
-        help = gtk.Button('Help')
-        help.set_size_request(64, 32)
-        help.connect('clicked', self.helpcb, 'open3d.html')
-
-        buttons.pack_end(help, expand=False)
-        buttons.pack_end(cancel, expand=False)
-        buttons.pack_end(okay, expand=False)
-        box.pack_start(buttons, expand=False)
-
-        # Show everything but unused fileselection buttons
-        dialog.show_all()
-        box.children()[1].hide()  # Remove Drape Create/Delete/Rename 
-        box.children()[6].hide()  # Remove Drape Ok/Cancel
-        box.children()[9].hide()  # Remove DEM Create/Delete
-        box.children()[14].hide() # Remove DEM Ok/Cancel
-
-
-    def perform_3D_request(self, *args):
-        """Tries to open selected files, then creates 3D Layer and switches to 3D mode"""
-        drape_filename = self.drape_fileSelectWin.get_filename()
-        dem_filename = self.DEM_fileSelectWin.get_filename()
-        mesh_lod = self.lod_spin_button.get_value_as_int()
-        hscale = float(self.scale_value.get_text())
-
-        if (self.min_heightclamp_toggle.get_active() == True):
-            min_clamp = float(self.min_heightclamp_entry.get_text())
-        else:
-            min_clamp = None
-
-        if (self.max_heightclamp_toggle.get_active() == True):
-            max_clamp = float(self.max_heightclamp_entry.get_text())
-        else:
-            max_clamp = None
-
-        # Do real work.
-        self.view3d_action( dem_filename, drape_filename, mesh_lod, hscale,
-                            min_clamp, max_clamp )
-
-        # Clean up File Dialog Window
-        self.file_dialog_3D.destroy()
-
-    def view3d_action( self, dem_filename, drape_filename = None,
-                       mesh_lod = None, hscale = None,
-                       min_clamp = None, max_clamp = None ):
+    def view3d_action(self, dem_filename, drape_filename=None, mesh_lod=None,
+                        hscale=None, min_clamp=None, max_clamp=None):
 
         self.make_active()
         gview.manager.set_busy(True)
+        self.viewarea.remove_all_layers()
 
         # Fill default parameters.
         if drape_filename is None:
@@ -1529,107 +1403,96 @@ class GvViewWindow(gtk.Window):
             mesh_lod = 3
         if hscale is None:
             hscale = 1.0
-
+        
         # Get Data
         drape_dataset = gview.manager.get_dataset(drape_filename)
-        if drape_dataset is None or drape_dataset._o is None:
-            gvutils.error( 'Unable to open drape dataset: '+drape_filename)
+        if drape_dataset is None:
+            gvutils.error('Unable to open drape dataset: '+drape_filename)
             return
 
-        DEM_dataset = self.raster_open_by_name(dem_filename)
-        if DEM_dataset is None or DEM_dataset._o is None:
+        DEM_dataset = gview.manager.get_dataset(dem_filename)
+        if DEM_dataset is None:
+            gvutils.error('Unable to open DEM dataset: '+dem_filename)
             return
 
-        if (drape_dataset is not None) and (DEM_dataset is not None):
-            # Get Current View & Prefs
-            view = self.viewarea
+        # Get Current View & Prefs
+        view = self.viewarea
+        options = []
+        pref = get_pref('gcp_warp_mode','yes')
+        if pref == 'no':
+            options.append(('raw','yes'))
 
-            options = []
-            if get_pref('_gcp_warp_mode') is not None \
-               and get_pref('_gcp_warp_mode') == 'no':
-                options.append(('raw','yes'))
+        # Set Current View to 3D Mode
+        view.set_mode(gview.MODE_3D)
+        # view.height_scale(hscale)
+        options.append(('mesh_lod',str(mesh_lod)))
 
-            # Set Current View to 3D Mode
-            view.set_mode(gview.MODE_3D)
-            # view.height_scale(hscale)
-            options.append(('mesh_lod',str(mesh_lod)))
+        # Create Drape Raster
+        drape_raster = gview.manager.get_dataset_raster(drape_dataset, 1)
 
-            band = drape_dataset.GetRasterBand(1)
-            interp = band.GetRasterColorInterpretation()
+        # Create Drape Raster Layer
+        drape_raster_layer = gview.GvRasterLayer(drape_raster, options, rl_mode=gview.RLM_AUTO)
 
-            # Create Drape Raster
-            drape_raster = gview.manager.get_dataset_raster(drape_dataset,1)
-            gview.undo_register(drape_raster)
+        #
+        # Note: We now set source for initial raster (0) as well, as set_source
+        # will apply a default lut, if specified in band metadata.
+        #
+        drape_raster_layer.set_source(0, drape_raster)
 
-            # Create Drape Raster Layer
-            drape_raster_layer = gview.GvRasterLayer(drape_raster, options,
-                                                     rl_mode = gview.RLM_AUTO )
+        # Logic to handle RGB and RGBA Layers
+        if drape_raster_layer.get_mode() == gview.RLM_RGBA:
+            green_raster= gview.manager.get_dataset_raster(drape_dataset, 2)
+            blue_raster = gview.manager.get_dataset_raster(drape_dataset, 3)
 
-            #
-            # Note: We now set source for initial raster (0) as well, as set_source
-            # will apply a default lut, if specified in band metadata.
-            #
-            raster_layer.set_source(0, drape_raster)
+            drape_raster_layer.set_source(1, green_raster)
+            drape_raster_layer.set_source(2, blue_raster)
 
-            # Logic to handle RGB and RGBA Layers
-            if drape_raster_layer.get_mode() == gview.RLM_RGBA:
+            if drape_dataset.RasterCount > 3:
+                band = drape_dataset.GetRasterBand(4)
+                if band.GetRasterColorInterpretation() == gdal.GCI_AlphaBand:
+                    drape_raster_layer.blend_mode_set(gview.RL_BLEND_FILTER)
+                    drape_raster_layer.set_source(3, gview.manager.get_dataset_raster(drape_dataset, 4))
 
-                green_raster= gview.manager.get_dataset_raster(drape_dataset,2)
-                blue_raster = gview.manager.get_dataset_raster(drape_dataset,3)
+        # Add to view
+        drape_raster_layer.set_name(drape_dataset.GetDescription())
+        view.add_layer(drape_raster_layer)
 
-                drape_raster_layer.set_source(1,green_raster)
-                drape_raster_layer.set_source(2,blue_raster)
+        # Create DEM Raster and Add as Height
+        DEM_raster = gview.manager.get_dataset_raster(DEM_dataset, 1)
+        DEM_raster.set_name(dem_filename)
+        drape_raster_layer.add_height(DEM_raster)
 
-                if drape_dataset.RasterCount > 3:
-                    band = drape_dataset.GetRasterBand(4)
-                    if band.GetRasterColorInterpretation() == \
-                                                gdal.GCI_AlphaBand:
-                        drape_raster_layer.blend_mode_set(
-                            gview.RL_BLEND_FILTER )
-                        drape_raster_layer.set_source(3,
-                             gview.manager.get_dataset_raster(drape_dataset,4))
+        # perform clamping, if requested
+        if min_clamp is not None:
+            drape_raster_layer.clamp_height(1, 0, min_clamp)
 
-            # Add to view
-            drape_raster_layer.set_name(drape_dataset.GetDescription() )
-            view.add_layer(drape_raster_layer)
-            view.set_active_layer(drape_raster_layer)
+        if max_clamp is not None:
+            drape_raster_layer.clamp_height(0, 1, 0, max_clamp)
 
-            # Create DEM Raster and Add as Height
-            DEM_raster = gview.GvRaster(dataset=DEM_dataset)
-            DEM_raster.set_name(str(dem_filename))
-            drape_raster_layer.add_height(DEM_raster)
-
-            # perform clamping, if requested
-            if min_clamp is not None:
-                drape_raster_layer.clamp_height(1,0,min_clamp)
-
-            if max_clamp is not None:
-                drape_raster_layer.clamp_height(0,1,0,max_clamp)
-
-            # Modify hscale to be more reasonable in some geo-referenced cases 
-            #[hscalex1,dummy] = DEM_raster.pixel_to_georef(0,0)
-            #[hscalex2,dummy] = DEM_raster.pixel_to_georef(DEM_dataset.RasterXSize - 1,0)
-            #hscale_georef = hscale*abs(hscalex2-hscalex1)/DEM_dataset.RasterXSize
-            #view.height_scale(hscale_georef)
-            view.height_scale(hscale) 
-
-            # Try to make sure everything is visible.
-            self.seeall_cb()
+        # Modify hscale to be more reasonable in some geo-referenced cases 
+        #[hscalex1,dummy] = DEM_raster.pixel_to_georef(0,0)
+        #[hscalex2,dummy] = DEM_raster.pixel_to_georef(DEM_dataset.RasterXSize - 1,0)
+        #hscale_georef = hscale*abs(hscalex2-hscalex1)/DEM_dataset.RasterXSize
+        #view.height_scale(hscale_georef)
+        view.height_scale(hscale) 
+       
+        # Try to make sure everything is visible.
+        self.seeall_cb()
+        view.set_active_layer(drape_raster_layer)
+        gview.manager.set_busy(False)
 
     def position_3d(self, *args):
         self.make_active()
         if self.position3D_dialog is None:
-            self.position3D_dialog = \
-                         gviewapp.Position_3D_Dialog(self.app.view_manager)
+            self.position3D_dialog = gviewapp.Position_3D_Dialog(self.app.view_manager)
             self.position3D_dialog.connect('destroy', self.destroy_position_3d)
-        self.position3D_dialog.show()
-        self.position3D_dialog.window.raise_()
+        self.position3D_dialog.present()
 
         view = self.viewarea
         self.position3D_dialog.update_cb(view)
         view.connect('view-state-changed', self.position3D_dialog.update_cb)
 
-    def destroy_position_3d(self,*args):
+    def destroy_position_3d(self, *args):
         self.position3D_dialog = None
 
     def raster_open_by_name(self,filename):
@@ -1656,3 +1519,141 @@ class GvViewWindow(gtk.Window):
             self.rawgeo_pixmap.set_from_stock('worldg', gtk.ICON_SIZE_LARGE_TOOLBAR)
         else:
             self.rawgeo_pixmap.set_from_stock('worldrgb', gtk.ICON_SIZE_LARGE_TOOLBAR)
+
+class Dialog3D(gtk.Window):
+    def __init__(self, win):
+        """ 3D File Open Dialog for selecting drape and height data """
+        from filedlg import FileOpenButton
+        gtk.Window.__init__(self)
+        self.set_title('Open 3D')
+        self.set_border_width(5)
+        self.set_resizable(False)
+        gvhtml.set_help_topic(self, 'open3d.html')
+        self.win = win
+        
+        vbox = gtk.VBox(spacing=5)
+        self.add(vbox)
+        table = gtk.Table()
+        table.set_row_spacings(5)
+        table.set_col_spacings(5)
+        vbox.pack_start(table)
+        
+        # Drape File Selector
+        row = 0
+        table.attach(pgu.Label('Select Drape:'), 0, 1, row, row+1)
+
+        self.drape_entry = pgu.Entry()
+        table.attach(self.drape_entry, 1, 4, row, row+1)
+
+        button = FileOpenButton(title='Select Drape',
+                                cwd=get_pref('recent_directory'),
+                                filter=['gdalr'], cb=self.file_selected)
+        button.set_args('drape')
+        table.attach(button, 4, 5, row, row+1, xoptions=gtk.SHRINK)
+
+        # DEM File Selector
+        row += 1
+        table.attach(pgu.Label('Select DEM:'), 0, 1, row, row+1)
+
+        self.dem_entry = pgu.Entry()
+        table.attach(self.dem_entry, 1, 4, row, row+1)
+
+        button = FileOpenButton(title='Select DEM',
+                                cwd=get_pref('recent_directory'),
+                                filter=['gdalr'], cb=self.file_selected)
+        button.set_args('dem')
+        table.attach(button, 4, 5, row, row+1, xoptions=gtk.SHRINK)
+
+        # Mesh LOD and Height Scale
+        row += 1
+        table.attach(pgu.Label('Mesh LOD:'), 0, 1, row, row+1)
+
+        spin_adjust = gtk.Adjustment(value=3, lower=0, upper=8, step_incr=1)
+        self.lod_spin_button = gtk.SpinButton(spin_adjust, climb_rate=1, digits=0)
+        table.attach(self.lod_spin_button, 1, 2, row, row+1, xoptions=gtk.SHRINK)
+
+        table.attach(pgu.Label('Height Scaling Factor:'), 2, 3, row, row+1)
+        entry = pgu.Entry()
+        entry.set_size_request(70, -1)
+        entry.set_max_length(7)
+        entry.set_text('1.0')
+        table.attach(entry, 3, 4, row, row+1, xoptions=gtk.SHRINK)
+        self.scale_value = entry
+        
+        # DEM height clamping options
+        row += 1
+        toggle = gtk.CheckButton('Clamp Minimum Height to:')
+        toggle.set_active(False)
+        table.attach(toggle, 0, 3, row, row+1)
+        self.min_heightclamp_toggle = toggle
+
+        entry = pgu.Entry()
+        entry.set_size_request(70, -1)
+        entry.set_max_length(10)
+        entry.set_text('0.0')
+        table.attach(entry, 3, 4, row, row+1, xoptions=gtk.SHRINK)
+        self.min_heightclamp_entry = entry
+
+        row += 1
+        toggle = gtk.CheckButton('Clamp Maximum Height to:')
+        toggle.set_active(False)
+        table.attach(toggle, 0, 3, row, row+1)
+        self.max_heightclamp_toggle = toggle
+
+        entry = pgu.Entry()
+        entry.set_size_request(70, -1)
+        entry.set_max_length(10)
+        entry.set_text('100000.0')
+        table.attach(entry, 3, 4, row, row+1, xoptions=gtk.SHRINK)
+        self.max_heightclamp_entry = entry
+
+        buttons = gtk.HBox(homogeneous=True, spacing=20)
+        vbox.pack_start(buttons, expand=False)
+
+        button = gtk.Button(stock=gtk.STOCK_APPLY)
+        button.connect('clicked', self.perform_3D_request)
+        buttons.pack_start(button, expand=False)
+        
+        button = gtk.Button(stock=gtk.STOCK_CLOSE)
+        button.connect('clicked', self.close)
+        buttons.pack_start(button, expand=False)
+
+        button = gtk.Button(stock=gtk.STOCK_HELP)
+        button.connect('clicked', win.helpcb, 'open3d.html')
+        buttons.pack_start(button, expand=False)
+
+        self.show_all()
+
+    def file_selected(self, filename, cwd, id):
+        if id == 'drape':
+            self.drape_entry.set_text(filename)
+        else:
+            self.dem_entry.set_text(filename)
+
+        if get_pref('save_recent_directory') == 'on':
+            gview.set_preference('recent_directory', cwd)
+
+    def close(self, *args):
+        self.hide()
+        self.destroy()
+
+    def perform_3D_request(self, *args):
+        """Tries to open selected files, then creates 3D Layer and switches to 3D mode"""
+        drape_filename = self.drape_entry.get_text()
+        dem_filename = self.dem_entry.get_text()
+        mesh_lod = self.lod_spin_button.get_value_as_int()
+        hscale = float(self.scale_value.get_text())
+
+        if self.min_heightclamp_toggle.get_active():
+            min_clamp = float(self.min_heightclamp_entry.get_text())
+        else:
+            min_clamp = None
+
+        if self.max_heightclamp_toggle.get_active():
+            max_clamp = float(self.max_heightclamp_entry.get_text())
+        else:
+            max_clamp = None
+
+        # Do real work.
+        self.win.view3d_action(dem_filename, drape_filename, mesh_lod, hscale,
+                                min_clamp, max_clamp)
