@@ -1,9 +1,11 @@
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  Print Dialog
 # Author:   Frank Warmerdam, warmerda@home.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,12 +26,23 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk
-import gview
-import gvutils
-import gdal
+# differentiate between CIETMap and OpenEV
 import os
-import gvhtml
+if 'CIETMAP_HOME' in os.environ:
+    import cview as gview
+    from cietutils import set_help_topic
+else:
+    import gview
+    from gvhtml import set_help_topic
+
+from gvutils import error
+import gtk
+import pgu
+from osgeo import gdal
+
+# temporary
+def _(s):
+    return s
 
 paper_sizes = ( ("US Letter",       8.500, 11.000 ),
                 ("US Legal",        8.500, 14.000 ),
@@ -47,226 +60,218 @@ DV_FILE = 0
 DV_PRINTER = 1
 
 class GvPrintDialog(gtk.Window):
-
     def __init__(self, view):
         gtk.Window.__init__(self)
-        self.set_title('Print')
+        self.set_title(_("Print"))
         self.connect('delete-event',self.close)
         self.view = view
-
-        gvhtml.set_help_topic( self, "gvprint.html" );
-
-        self.command = gview.get_preference('print_command')
-        if self.command is None:
-            self.command = 'lpr'
-
-        self.filename = 'openev.ps'
+        self.command = gview.get_preference('print_command', 'lpr')
 
         cgroup = gtk.VBox(spacing=6)
-        cgroup.set_border_width(10)
-        self.add( cgroup )
+        cgroup.set_border_width(5)
+        self.add(cgroup)
+        frame = gtk.Frame()
+        cgroup.pack_start(frame, expand=False)
 
         table = gtk.Table()
-        table.n_columns = 2
-        table.n_rows = 4
-        cgroup.add(table)
+        table.set_row_spacings(6)
+        table.set_border_width(5)
+        frame.add(table)
 
         # Setup Driver Option Menu
-	driver_label = gtk.Label('Driver:')
-	driver_label.set_alignment(0, 0.5)
-        table.attach(driver_label,0,1,0,1)
-        if os.name == "nt":
-            self.driver = gvutils.GvOptionMenu( ('PostScript', 'TIFF', 'PNG',
-                                                 'Windows Print Driver',
-                                                 'GIF' ),
-                                                self.update_cb )
+        driver_label = pgu.Label(_("Driver:"))
+        table.attach(driver_label, 0,1,0,1, yoptions=gtk.SHRINK)
+        if os.name == 'nt':
+            drivers = ("PostScript", "TIFF", "PNG", "Windows Print Driver", "GIF")
         else:
-            self.driver = gvutils.GvOptionMenu( ('PostScript', 'TIFF', 'PNG',
-                                                 '', 'GIF' ),
-                                                self.update_cb )
-        table.attach(self.driver,1,2,0,1)
+            drivers = ("PostScript", "TIFF", "PNG", "GIF")
+        self.driver = pgu.ComboText(strings=drivers, action=self.update_cb)
+        table.attach(self.driver, 1,2,0,1, yoptions=gtk.SHRINK)
 
         # Setup Device Option Menu
-	device_label = gtk.Label('Device:')
-	device_label.set_alignment(0, 0.5)
-        table.attach(device_label,0,1,1,2)
-        self.device = gvutils.GvOptionMenu( ('File', 'Spool to Printer'),
-                                            self.device_cb )
-        table.attach(self.device,1,2,1,2)
+        device_label = pgu.Label(_("Device:"))
+        table.attach(device_label, 0,1,1,2, yoptions=gtk.SHRINK)
+        self.device = pgu.ComboText(strings=(_("File"), _("Spool to Printer")), action=self.device_cb)
+        table.attach(self.device, 1,2,1,2, yoptions=gtk.SHRINK)
 
         # Setup File/Command entry.
-        self.file_label = gtk.Label('File:')
-	self.file_label.set_alignment(0, 0.5)
-        table.attach(self.file_label,0,1,2,3)
+        self.file_label = pgu.Label(_("File:"))
+        table.attach(self.file_label, 0,1,2,3, yoptions=gtk.SHRINK)
         self.file = gtk.Entry()
-        self.file.set_max_length(40)
-        table.attach(self.file,1,2,2,3)
+        table.attach(self.file, 1,2,2,3, yoptions=gtk.SHRINK)
 
         # Setup Output Type
-        self.output_label = gtk.Label('Output Type:')
-	self.output_label.set_alignment(0, 0.5)
-        table.attach(self.output_label,0,1,3,4)
-        self.output = gvutils.GvOptionMenu( ('Greyscale', 'Color' ), None )
-        table.attach(self.output,1,2,3,4)
+        self.output_label = pgu.Label(_("Output type:"))
+        table.attach(self.output_label, 0,1,3,4, yoptions=gtk.SHRINK)
+        self.output = pgu.ComboText(strings=(_("Greyscale"), _("Color")))
+        table.attach(self.output, 1,2,3,4, yoptions=gtk.SHRINK)
 
         # Setup Paper Type
-        self.paper_label = gtk.Label('Paper:')
-	self.paper_label.set_alignment(0, 0.5)
-        table.attach(self.paper_label,0,1,4,5)
+        self.paper_label = pgu.Label(_("Paper:"))
+        table.attach(self.paper_label, 0,1,4,5, yoptions=gtk.SHRINK)
         sizes = []
         for entry in paper_sizes:
-            sizes.append( entry[0] )
-        self.paper = gvutils.GvOptionMenu( sizes, self.update_cb )
-        table.attach(self.paper,1,2,4,5)
+            sizes.append(entry[0])
+        self.paper = pgu.ComboText(strings=sizes, action=self.update_cb)
+        table.attach(self.paper, 1,2,4,5, yoptions=gtk.SHRINK)
 
         # Setup Scale slider
-        self.scale_label = gtk.Label('Scale:')
-	self.scale_label.set_alignment(0, 0.5)
-        table.attach(self.scale_label,0,1,5,6)
+        self.scale_label = pgu.Label(_("Scale:"))
+        table.attach(self.scale_label, 0,1,5,6, yoptions=gtk.SHRINK)
         self.scale_adjustment = gtk.Adjustment(1, 0, 1.25, 0.05, 0.05, 0.05)
         self.scale_slider = gtk.HScale(self.scale_adjustment)
-        table.attach(self.scale_slider,1,2,5,6)
+        table.attach(self.scale_slider, 1,2,5,6, yoptions=gtk.SHRINK)
 
         # Setup Resolution spinner
-	resolution_label = gtk.Label('Resolution:')
-	resolution_label.set_alignment(0, 0.5)
-        table.attach(resolution_label,0,1,6,7)
+        resolution_label = pgu.Label(_("Resolution:"))
+        table.attach(resolution_label, 0,1,6,7, yoptions=gtk.SHRINK)
         self.resolution_adjustment = gtk.Adjustment(1, 0, 10, 0.1, 0.1, 0.1)
-	self.resolution_spinner = \
-	    gtk.SpinButton(self.resolution_adjustment,climb_rate=0.1,digits=1)
-	self.resolution_spinner.connect("changed", self.resolution_cb)
-	table.attach(self.resolution_spinner,1,2,6,7)
+        self.resolution_spinner = gtk.SpinButton(self.resolution_adjustment, climb_rate=0.1, digits=1)
+        self.resolution_spinner.connect('changed', self.resolution_cb)
+        table.attach(self.resolution_spinner, 1,2,6,7, yoptions=gtk.SHRINK)
 
         # Setup Size entries
-	size_label = gtk.Label('Image size:')
-	size_label.set_alignment(0, 0.5)
-        table.attach(size_label,0,1,7,8)
-	size_box = gtk.HBox(spacing=5)
-	self.xsize_entry = gtk.Entry()
-	self.xsize_entry.connect('activate', self.resolution_cb)
-	self.xsize_entry.connect('leave-notify-event', self.resolution_cb)
-	size_box.pack_start(self.xsize_entry)
-	size_box.pack_start(gtk.Label('x'))
-	self.ysize_entry = gtk.Entry()
-	self.ysize_entry.connect('activate', self.resolution_cb)
-	self.ysize_entry.connect('leave-notify-event', self.resolution_cb)
-	size_box.pack_start(self.ysize_entry)
-        table.attach(size_box,1,2,7,8)
+        size_label = pgu.Label(_("Image size:"))
+        table.attach(size_label,0,1,7,8, yoptions=gtk.SHRINK)
+        size_box = gtk.HBox(spacing=5)
+
+        self.xsize_entry = gtk.Entry()
+        self.xsize_entry.connect('activate', self.resolution_cb)
+        self.xsize_entry.connect('leave-notify-event', self.resolution_cb)
+        size_box.pack_start(self.xsize_entry)
+        size_box.pack_start(gtk.Label("x"))
+
+        self.ysize_entry = gtk.Entry()
+        self.ysize_entry.connect('activate', self.resolution_cb)
+        self.ysize_entry.connect('leave-notify-event', self.resolution_cb)
+        size_box.pack_start(self.ysize_entry)
+        table.attach(size_box, 1,2,7,8, yoptions=gtk.SHRINK)
 
         # Add Print, and Close button(s)
-	btn_box = gtk.HBox(spacing=10)
+        btn_box = gtk.HBox(homogeneous=True, spacing=20)
 
-        but = gtk.Button('Print')
+        but = gtk.Button(stock=gtk.STOCK_PRINT)
         but.connect('clicked',self.print_cb)
-	btn_box.pack_start(but)
+        btn_box.pack_start(but, expand=False)
 
-        but = gtk.Button('Close')
+        but = gtk.Button(stock=gtk.STOCK_CLOSE)
         but.connect('clicked',self.close)
-	btn_box.pack_start(but)
+        btn_box.pack_start(but, expand=False)
 
-        table.attach(btn_box,0,2,8,9)
+        cgroup.pack_end(btn_box, expand=False)
 
         # Initialize values.
-        if gview.get_preference('print_driver') is not None:
-            self.driver.set_history(int(gview.get_preference('print_driver')))
-        elif os.name == 'nt':
-            self.driver.set_history(DR_WINPRINT)
+        # lazy
+        prefs = gview.get_preference
+        pref = prefs('print_driver', -1)
+        self.driver.set_active(int(pref))
+        if os.name == 'nt':
+            self.driver.set_active(DR_WINPRINT)
 
-        if gview.get_preference('print_device') is not None:
-            self.device.set_history(int(gview.get_preference('print_device')))
+        pref = prefs('print_device', -1)
+        self.device.set_active(int(pref))
 
-        if self.device.get_history() == 0:
+        if self.device.get_active() == DV_FILE:
             self.set_default_filename()
         else:
-            self.file.set_text( self.command )
+            self.file.set_text(self.command)
 
-        if gview.get_preference('print_paper') is not None:
-            self.paper.set_history(int(gview.get_preference('print_paper')))
+        pref = prefs('print_paper', -1)
+        self.paper.set_active(int(pref))
 
-        if gview.get_preference('print_output') is not None:
-            self.output.set_history(int(gview.get_preference('print_output')))
+        pref = prefs('print_output', -1)
+        self.output.set_active(int(pref))
 
-        if gview.get_preference('print_resolution') is not None:
-	    resolution = float(gview.get_preference('print_resolution'))
+        pref = prefs('print_resolution')
+        if pref:
+            resolution = float(pref)
             self.resolution_adjustment.set_value(resolution)
-	    width = int(self.view.get_width() * resolution + 0.5)
-	    height = int(self.view.get_height() * resolution + 0.5)
-	    self.xsize_entry.set_text(str(width))
-	    self.ysize_entry.set_text(str(height))
+            width = int(self.view.get_width() * resolution + 0.5)
+            height = int(self.view.get_height() * resolution + 0.5)
+            self.xsize_entry.set_text(str(width))
+            self.ysize_entry.set_text(str(height))
 
         self.set_paper_size()
         self.scale_adjustment.set_value(1.0)
 
+        if 'CIETMAP_HOME' in os.environ:
+            topic = "Pages/Printing.htm"
+            self.filename = 'cietmap.ps'
+        else:
+            topic = "gvprint.html"
+            self.filename = 'openev.ps'
+        set_help_topic(self, topic)
         # Show
-        table.set_row_spacings(6)
-        table.show_all()
+        self.show_all()
         self.update_cb()
-        cgroup.show()
-        self.show()
 
-    def resolution_cb(self,entry,*args):
+    def resolution_cb(self, entry, *args):
         try:
             value = float(entry.get_text())
-	except:
-	    return
+        except:
+            return
 
-	if entry == self.resolution_spinner:
-	    resolution = self.resolution_adjustment.value
-	    width = int(self.view.get_width() * resolution + 0.5)
-	    self.xsize_entry.set_text(str(width))
-	    height = int(self.view.get_height() * resolution + 0.5)
-	    self.ysize_entry.set_text(str(height))
-	elif entry == self.xsize_entry:
-	    resolution = value / self.view.get_width()
-	    height = int(self.view.get_height() * resolution + 0.5)
-	    self.ysize_entry.set_text(str(height))
-	elif entry == self.ysize_entry:
-	    resolution = value / self.view.get_height()
-	    width = int(self.view.get_width() * resolution + 0.5)
-	    self.xsize_entry.set_text(str(width))
-	self.resolution_adjustment.set_value(resolution)
+        if entry == self.resolution_spinner:
+            resolution = self.resolution_adjustment.value
+            width = int(self.view.get_width() * resolution + 0.5)
+            self.xsize_entry.set_text(str(width))
+            height = int(self.view.get_height() * resolution + 0.5)
+            self.ysize_entry.set_text(str(height))
+        elif entry == self.xsize_entry:
+            resolution = value / self.view.get_width()
+            height = int(self.view.get_height() * resolution + 0.5)
+            self.ysize_entry.set_text(str(height))
+        elif entry == self.ysize_entry:
+            resolution = value / self.view.get_height()
+            width = int(self.view.get_width() * resolution + 0.5)
+            self.xsize_entry.set_text(str(width))
 
+        self.resolution_adjustment.set_value(resolution)
 
     def device_cb(self, *args):
-        if self.device.get_history() == 0:
+        if self.device.get_active() == DV_FILE:
             self.command = self.file.get_text()
             self.set_default_filename()
         else:
             self.file.set_text(self.command)
-        self.update_cb( args )
+        self.update_cb(args)
 
     def set_default_filename(self):
-        if self.driver.get_history() == DR_TIFF:
-            self.file.set_text('openev.tif')
-        elif self.driver.get_history() == DR_PNG:
-            self.file.set_text('openev.png')
-        elif self.driver.get_history() == DR_GIF:
-            self.file.set_text('openev.gif')
+        driver = self.driver.get_active()
+        if 'CIETMAP_HOME' in os.environ:
+            basename = "cietmap"
         else:
-            self.file.set_text('openev.ps')
+            basename = "openev"
+        if driver == DR_TIFF:
+            self.file.set_text("%s.tif" % basename)
+        elif driver == DR_PNG:
+            self.file.set_text("%s.png" % basename)
+        elif driver == DR_GIF:
+            self.file.set_text("%s.gif" % basename)
+        else:
+            self.file.set_text("%s.ps" % basename)
 
     def set_paper_size(self):
         # Setup paper size.
         self.paper_x = 8.5
         self.paper_y = 11
         try:
-            entry = paper_sizes[self.paper.get_history()]
+            entry = paper_sizes[self.paper.get_active()]
             self.paper_x = entry[1]
             self.paper_y = entry[2]
         except:
             pass
 
     def update_cb(self, *args):
-
-        driver = self.driver.get_history()
+        driver = self.driver.get_active()
 
         # Set FILE/PRINTER Device based on driver.
-        if driver == DR_TIFF or driver == DR_PNG or driver == DR_GIF:
-            self.device.set_history(DV_FILE)
+        if driver in (DR_TIFF, DR_PNG, DR_GIF):
+            self.device.set_active(DV_FILE)
         if driver == DR_WINPRINT:
-            self.device.set_history(DV_PRINTER)
+            self.device.set_active(DV_PRINTER)
         if driver == DR_POSTSCRIPT and os.name == 'nt':
-            self.device.set_history(DV_FILE)
+            self.device.set_active(DV_FILE)
 
         self.set_paper_size()
 
@@ -282,10 +287,10 @@ class GvPrintDialog(gtk.Window):
             self.output_label.show()
             self.output.show()
 
-        if self.device.get_history() == DV_PRINTER:
-            self.file_label.set_text('Command:')
+        if self.device.get_active() == DV_PRINTER:
+            self.file_label.set_text(_("Command:"))
         else:
-            self.file_label.set_text('File:')
+            self.file_label.set_text(_("File:"))
 
         # Make Positioning controls visible only for PostScript
         if driver == DR_POSTSCRIPT:
@@ -299,94 +304,83 @@ class GvPrintDialog(gtk.Window):
             self.paper_label.hide()
             self.paper.hide()
 
+        self.resize_children()
+
     def print_cb(self, *args):
-        if self.resolution_adjustment.value >= 0.99 \
-           and self.resolution_adjustment.value <= 1.01:
+        rez = self.resolution_adjustment.value
+        if rez >= 0.99 and rez <= 1.01:
             width = self.view.get_width()
             height = self.view.get_height()
         else:
-            width = self.view.get_width() * self.resolution_adjustment.value
-            height = self.view.get_height() * self.resolution_adjustment.value
-            width=int(width+0.5)
-            height=int(height+0.5)
+            width = self.view.get_width() * rez
+            height = self.view.get_height() * rez
+            width = int(width+0.5)
+            height = int(height+0.5)
 
-        if width / self.paper_x > height / self.paper_y:
+        if width/self.paper_x > height/self.paper_y:
             pixels_per_inch = width / (self.paper_x*0.9)
         else:
             pixels_per_inch = height / (self.paper_y*0.9)
 
-        pixels_per_inch = pixels_per_inch * self.scale_adjustment.value
+        pixels_per_inch = pixels_per_inch * rez
         ulx = (self.paper_x - width/pixels_per_inch)/2.0
         uly = (self.paper_y - height/pixels_per_inch)/2.0
         lrx = self.paper_x - ulx
         lry = self.paper_y - uly
 
         try:
-            os.unlink( self.file.get_text() )
+            os.unlink(self.file.get_text())
         except:
             pass
 
-        err = 0            
-        if self.driver.get_history() == DR_POSTSCRIPT:
-            filename = self.file.get_text()
-            if self.device.get_history() == 1:
+        err = 0
+        driver = self.driver.get_active()
+        output = self.output.get_active()
+        filename = self.file.get_text()
+        if driver == DR_POSTSCRIPT:
+            if self.device.get_active() == DV_PRINTER:
                 filename = '|' + filename
-
-            err = self.view.print_postscript_to_file(width,height,
-                                               ulx,uly,lrx,lry,
-                                               self.output.get_history(),
-                                               filename )
-        elif self.driver.get_history() == DR_TIFF:
-            err = self.view.print_to_file(width,height,self.file.get_text(),
-                                    'GTiff',self.output.get_history())
-        elif self.driver.get_history() == DR_PNG:
-            err = self.view.print_to_file(width,height,'_temp.tif','GTiff',
-                                          self.output.get_history())
-            if err == 0:
-                gdal.GetDriverByName('PNG').CreateCopy(self.file.get_text(),
-                                                   gdal.Open('_temp.tif'),True)
-            os.unlink( '_temp.tif' )
-        elif self.driver.get_history() == DR_WINPRINT:
-            self.view.print_to_windriver( width, height, ulx, uly, lrx, lry,
-                                          self.output.get_history() )
-        elif self.driver.get_history() == DR_GIF:
-            err = self.view.print_to_file(width,height,'_temp.tif','GTiff',
-                                    self.output.get_history())
-            if err == 0:
-                if self.output.get_history() == 1:
-                    gdal.RGBFile2PCTFile( '_temp.tif', '_temp2.tif' )
+            err = self.view.print_postscript_to_file(width, height,
+                                                    ulx, uly, lrx, lry,
+                                                    output, filename)
+        elif driver == DR_TIFF:
+            err = self.view.print_to_file(width, height, filename, 'GTiff', output)
+        elif driver == DR_PNG:
+            err = self.view.print_to_file(width, height, '_temp.tif', 'GTiff', output)
+            if not err:
+                gdal.GetDriverByName('PNG').CreateCopy(filename, gdal.Open('_temp.tif'), True)
+            os.unlink('_temp.tif')
+        elif driver == DR_WINPRINT:
+            self.view.print_to_windriver(width, height, ulx, uly, lrx, lry, output)
+        elif driver == DR_GIF:
+            err = self.view.print_to_file(width, height, '_temp.tif', 'GTiff', output)
+            if not err:
+                if output == 1:
+                    gdal.RGBFile2PCTFile('_temp.tif', '_temp2.tif')
                     os.unlink('_temp.tif')
-                    os.rename('_temp2.tif','_temp.tif')
+                    os.rename('_temp2.tif', '_temp.tif')
 
-                gdal.GetDriverByName('GIF').CreateCopy(self.file.get_text(),
-                                                  gdal.Open('_temp.tif'),True)
-            os.unlink( '_temp.tif' )
+                gdal.GetDriverByName('GIF').CreateCopy(filename, gdal.Open('_temp.tif'), True)
+            os.unlink('_temp.tif')
 
-        if err != 0:
-            gvutils.error('The request to print appears to have failed.')
+        if err:
+            error(_("The request to print appears to have failed."))
 
         self.close()
 
     def close(self, *args):
-        if self.device.get_history() == 1:
-            gview.set_preference('print_command',self.file.get_text())
-        gview.set_preference('print_driver', str(self.driver.get_history()))
-        gview.set_preference('print_device', str(self.device.get_history()))
-        gview.set_preference('print_paper', str(self.paper.get_history()))
-        gview.set_preference('print_output', str(self.output.get_history()))
-        gview.set_preference('print_resolution',
-                             str(self.resolution_adjustment.value))
-        gview.set_preference('print_scale',
-                             str(self.scale_adjustment.value))
+        # lazy
+        pref = gview.set_preference
+        if self.device.get_active() == DV_PRINTER:
+            pref('print_command', self.file.get_text())
+        pref('print_driver', str(self.driver.get_active()))
+        pref('print_device', str(self.device.get_active()))
+        pref('print_paper', str(self.paper.get_active()))
+        pref('print_output', str(self.output.get_active()))
+        pref('print_resolution', str(self.resolution_adjustment.value))
+        pref('print_scale', str(self.scale_adjustment.value))
 
+        self.hide()
         self.destroy()
 
         return True
-
-
-if __name__ == '__main__':
-    dialog = GvPrintDialog(None)
-
-    dialog.connect('delete-event', gtk.main_quit)
-
-    gtk.main()
