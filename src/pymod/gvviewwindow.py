@@ -26,8 +26,7 @@
 ###############################################################################
 
 import gtk
-from gtk.gdk import *
-from gtk.keysyms import *
+from gtk.keysyms import F9
 
 import gview
 import gdal
@@ -83,7 +82,9 @@ class GvViewWindow(gtk.Window):
     next_viewnum = 1
 
     def __init__(self, app=None, title=None, show_menu=1, show_icons=1, 
-                 show_tracker=1, show_scrollbars=1, menufile='DefaultMenuFile.xml',iconfile='DefaultIconFile.xml'):
+                 show_tracker=1, show_scrollbars=1,
+                 menufile='NewMenuFile.xml',
+                 iconfile='NewIconFile.xml'):
 
         gtk.Window.__init__(self)
 
@@ -109,6 +110,11 @@ class GvViewWindow(gtk.Window):
         self.position3D_dialog = None
         self.menufile = menufile
         self.iconfile = iconfile
+        self.UImgr = gtk.UIManager()
+        self.add_accel_group(self.UImgr.get_accel_group())
+        self.actions = gtk.ActionGroup('MainActions')
+        self.setup_actions()
+        self.UImgr.insert_action_group(self.actions, 0)
 
         # Menu bar
         if show_menu > 0:
@@ -122,6 +128,10 @@ class GvViewWindow(gtk.Window):
             shell.pack_start(self.iconbar,expand=False)
         else:
             self.iconbar = None        
+
+        self.tool_actions = gtk.ActionGroup('ToolActions')
+        self.UImgr.insert_action_group(self.tool_actions, -1)
+        self.add_tool_actions()
 
         # Add the actual GvViewArea for drawing in
         self.viewarea = gview.GvViewArea()
@@ -185,6 +195,91 @@ class GvViewWindow(gtk.Window):
         # Trap window close event
         self.connect('delete-event', self.close)
 
+    def setup_actions(self):
+        self.actions.add_actions([
+            ('File', None, "File"),
+            ('ImportFile', gtk.STOCK_OPEN, "Import", None, "Import and Display Raster File", self.file_import_cb),
+            ('OpenFile', gtk.STOCK_OPEN, "Open", '<control>O', "Open and Display Raster/Vector File", self.file_open_cb),
+            ('Open3D', None, "Open 3D", None, None, self.open_3D_request),
+            ('SaveVector', gtk.STOCK_SAVE, "Save Vector Layer", None, None, self.save_vector_layer_request),
+            ('SaveProject', gtk.STOCK_SAVE, "Save Project", None, None, self.menu_save_project),
+            ('SaveProjectAs', gtk.STOCK_SAVE_AS, "Save Project As", None, None, self.menu_save_project_as),
+            ('NewView', gtk.STOCK_NEW, "New View", None, "Create a New View", self.menu_new_view),
+            ('PrintView', gtk.STOCK_PRINT, "Print", '<control>P', "Print Current View", self.print_cb),
+            ('rfl1', '', '', None, None, self.rfl_cb),
+            ('rfl2', '', '', None, None, self.rfl_cb),
+            ('rfl3', '', '', None, None, self.rfl_cb),
+            ('rfl4', '', '', None, None, self.rfl_cb),
+            ('rfl5', '', '', None, None, self.rfl_cb),
+            ('CloseView', gtk.STOCK_CLOSE, "Close", None, None, self.close),
+            ('Exit', gtk.STOCK_QUIT, "Exit", '<control>Q', None, self.exit),
+            ('Edit', None, "Edit"),
+            ('Undo', gtk.STOCK_UNDO, "Undo", '<control>Z', None, self.undo),
+            ('Layers', None, "Layers...", None, None, self.app.show_layerdlg),
+            ('Attrib', None, "Vector Layer Attributes...", None, None, self.show_oeattedit),
+            ('EditTools', None, "Edit Toolbar...", None, None, self.app.show_toolbardlg),
+            ('Goto', None, "Go To...", None, None, self.goto_dlg),
+            ('Pyshell', None, "Python Shell...", None, None, self.pyshell),
+            ('Pos3D', None, "3D Position...", None, None, self.position_3d),
+            ('Preferences', gtk.STOCK_PREFERENCES, "Preferences...", None, None, self.app.launch_preferences),
+            ('Tools', None, "Tools"),
+            ('Image', None, "Image"),
+            ('Help', None, "Help"),
+            ('About', gtk.STOCK_ABOUT, "About...", None, None, self.aboutcb)
+            ])
+
+        self.actions.add_actions([
+            ('HelpOpenEV', gtk.STOCK_HELP, "Help...", None, None, self.helpcb),
+            ], "openevmain.html")
+
+        self.actions.add_actions([
+            ('OpenEVWeb', gtk.STOCK_HELP, "Web Page...", None, None, self.helpcb),
+            ], "http://OpenEV.Sourceforge.net/")
+
+        self.actions.add_actions([
+            ('NoEnh', 'nonelut', None, None, "Revert to no Enhancement", self.nonelut_cb),
+            ('Linear', 'linear', None, None, "Linear Stretch/Enhancement", self.linear_cb),
+            ('Equal', 'equalize', None, None, "Apply Equalization Enhancement to Raster", self.equalize_cb),
+            ('Log', 'log', None, None, "Logarithmic Enhancement to Raster", self.log_cb),
+            ('Restretch', 'windowed', None, None, "Windowed Raster Re-enhancement", self.restretch_cb),
+            ('Classify', 'classify', None, None, "Classify Layer", self.classify_cb),
+            ('Legend', 'legend', None, None, "Show Legend", self.show_legend_cb),
+            ])
+
+        self.actions.add_actions([
+            ('SeeAll', gtk.STOCK_ZOOM_FIT, None, None, "Fit All Layers", self.seeall_cb),
+            ('ZoomIn', gtk.STOCK_ZOOM_IN, None, None, "Zoom in x2", self.zoomin_cb),
+            ('ZoomOut', gtk.STOCK_ZOOM_OUT, None, None, "Zoom out x2", self.zoomout_cb),
+            ('Refresh', gtk.STOCK_REFRESH, None, None, "Refresh Rasters From Disk", self.refresh_cb),
+            ])
+
+    def add_tool_actions(self):
+        if self.app is None or not hasattr(self.app, 'Tool_List'):
+            return
+
+        actions = []
+        for name, ctool in self.app.Tool_List:
+            stock_id = None
+            accelerator = None
+            hint = None
+            items = ctool.menu_entries.entries.items()
+            if items:
+                path, (pos, callback, accelerator) = items[0]
+                splitted = path.split('/')
+                path,label = '/'.join(splitted[:-1]), splitted[-1]
+                id = self.UImgr.new_merge_id()
+                # MB TODO: handle position
+                self.UImgr.add_ui(id, '/OEMenuBar/'+path, label, name, gtk.UI_MANAGER_MENUITEM, False)
+            if ctool.icon_entries.entries:
+                items = ctool.icon_entries.entries[0]
+                filename, duh, hint, pos, callback, help, itype = items
+                stock_id = os.path.basename(filename)[:-4]
+                if help:
+                    gvhtml.set_help_topic(item, help)
+            actions.append((name, stock_id, label, accelerator, hint, callback))
+
+        self.tool_actions.add_actions(actions, self.view_title)
+
     def serialize(self,base=None, filename=None ):
         if base is None:
             base = [gdal.CXT_Element, 'GvViewWindow']
@@ -236,25 +331,24 @@ class GvViewWindow(gtk.Window):
         if self.menuf is None:
             return
 
-        if ((self.app is None) or (hasattr(self.app,'get_rfl') == 0)):
+        if self.app is None or not hasattr(self.app, 'get_rfl'):
             return
 
         try:
-            list = self.app.get_rfl()
+            lst = self.app.get_rfl()
             for i in range(5):
-                menuitem = self.menuf.find('File/rfl'+str(i+1))
-                if i < len(list):
-                    menuitem.get_children()[0].set_text(list[i])
-                    menuitem.show()
+                rflitem = self.actions.get_action('rfl%s'%(i+1))
+                if i < len(lst):
+                    rflitem.set_property('label',lst[i])
                 else:
-                    menuitem.get_children()[0].set_text('')
-                    menuitem.hide()
+                    rflitem.set_property('label','')
+                    rflitem.set_visible(False)
         except:
             # Some menus don't have rfl
             pass
 
-    def rfl_cb(self, menuitem, rfl_index, *args):
-        self.file_open_by_name(menuitem.get_children()[0].get(), sds_check=0)
+    def rfl_cb(self, action):
+        self.file_open_by_name(action.get_property('label'), sds_check=0)
 
     def make_active(self, *args):
         self.app.view_manager.set_active_view( self )
@@ -263,11 +357,11 @@ class GvViewWindow(gtk.Window):
         if event.keyval == F9:
             gview.texture_cache_dump()
 
-    def busy_changed_cb(self,*args):
+    def busy_changed_cb(self, *args):
         if gview.manager.get_busy():
-            self.idlebusy_pixmap.set_from_pixmap(self.busy_icon[0], self.busy_icon[1])
+            self.idlebusy_pixmap.set_from_stock('busy', gtk.ICON_SIZE_LARGE_TOOLBAR)
         else:
-            self.idlebusy_pixmap.set_from_pixmap(self.idle_icon[0], self.idle_icon[1])
+            self.idlebusy_pixmap.set_from_stock('idle', gtk.ICON_SIZE_LARGE_TOOLBAR)
 
     def print_cb(self, *args):
         import gvprint
@@ -375,33 +469,33 @@ class GvViewWindow(gtk.Window):
             self.destroy()
             return True
 
-    def hide_entry(self,entrystr='File/Exit'):
+    def hide_entry(self, entrystr='File/Exit'):
         """Hide a menu entry (can be temporary)
            Input: entrystr- eg. 'File/Exit', 'File/Close',...
-           Returns 1 for success, 0 for failure.
+           Returns True for success, False for failure.
         """
         try:
-            item=self.menuf.find(entrystr)
+            item = self.UImgr.get_action('/OEMenuBar/'+entrystr)
             if item is not None:
                 item.hide()
-                return 1
-            return 0
+                return True
+            return False
         except:
-            return 0
+            return False
 
-    def show_entry(self,entrystr='File/Exit'):
+    def show_entry(self, entrystr='File/Exit'):
         """Re-show a hidden menu entry
            Input: entrystr- eg. 'File/Exit', 'File/Close',...
-           Returns 1 for success, 0 for failure.
+           Returns True for success, False for failure.
         """
         try:
-            item=self.menuf.find(entrystr)
+            item = self.UImgr.get_action('/OEMenuBar/'+entrystr)
             if item is not None:
                 item.show()
-                return 1
-            return 0
+                return True
+            return False
         except:
-            return 0
+            return False
 
     def exit(self, *args ):
         # should ask for confirmation at this point.
@@ -915,322 +1009,158 @@ class GvViewWindow(gtk.Window):
     def init_default_icons(self):
         # Zoom ratio selection box
 
-        zoom_factor = gtk.combo_box_entry_new_text()
-        for item in ratio_list:
-            zoom_factor.append_text(item)
-        zoom_factor.child.set_text('1:1')
-        zoom_factor.child.set_width_chars(5)
-        self.zoom_entry_changed_id = zoom_factor.child.connect('changed', self.set_zoom_factor_cb)
-        self.zoom_factor = zoom_factor
+        combo = pgu.ComboBoxEntry(ratio_list)
+        entry = combo.entry
+        entry.set_text('1:1')
+        entry.set_width_chars(5)
+        self.zoom_entry_changed_id = entry.connect('changed', self.set_zoom_factor_cb)
+        self.insert_widget_to_bar(combo, 'ZoomFactor')
+        self.zoom_factor = combo
 
         # raw / georeferenced pixmap
-        self.show()
-        self.raw_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
-                   os.path.join(gview.home_dir,'pics', 'worldg.xpm'))
-        self.geo_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
-                   os.path.join(gview.home_dir,'pics', 'worldrgb.xpm'))
         self.rawgeo_pixmap = gtk.Image()
+        self.insert_widget_to_bar(self.rawgeo_pixmap, 'RawGeo')
 
         # idle / busy pixmap
-        self.idle_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
-                   os.path.join(gview.home_dir,'pics', 'idle.xpm'))
-        self.busy_icon = gtk.gdk.pixmap_create_from_xpm(self.window,None,
-                   os.path.join(gview.home_dir,'pics', 'busy.xpm'))
-
         self.idlebusy_pixmap = gtk.Image()
+        self.insert_widget_to_bar(self.idlebusy_pixmap, 'IdleBusy')
 
         gview.manager.connect('busy-changed', self.busy_changed_cb)
 
-    def create_iconbar(self, iconfile='DefaultIconFile.xml'):
-        self.iconbar = gtk.Toolbar()
+    def create_iconbar(self, iconfile='NewIconFile.xml'):
+        icon_cmds = 'self.add_default_iconbar()'
+        if iconfile:
+            # check that icon file exists.  If not, use default values
+            fulliconfile = os.path.join(gview.home_dir, 'xmconfig', iconfile)
+            if os.path.isfile(fulliconfile):
+                if self.app and hasattr(self.app, 'load_icons_file_from_xml'):
+                    icon_cmds = self.app.load_icons_file_from_xml(fulliconfile)
+                else:
+                    icon_cmds = 'self.UImgr.add_ui_from_file(fulliconfile)'
+            else:
+                print "Unable to find view icon configuration file " + iconfile
+                print "Loading defaults"
+                icon_cmds = 'self.add_default_iconbar()'
+
+        exec icon_cmds
+        self.iconbar = self.UImgr.get_widget('/OEToolbar')
+        self.iconbar.set_style(gtk.TOOLBAR_ICONS)
 
         self.init_default_icons()
         self.init_custom_icons()
 
-        self.icon_cmds = None
-        if iconfile is not None:
-            # check that icon file exists.  If not, use old values for
-            # backwards compatibility
-            fulliconfile = os.path.join(gview.home_dir,'xmlconfig',iconfile)
-            if os.path.isfile(fulliconfile) == 1:
-                if (self.app is not None) and hasattr(self.app,'load_icons_file_from_xml'):
-                    icon_cmds=self.app.load_icons_file_from_xml( iconfile )
-                else:
-                    icon_cmds = self.load_icons_file_from_xml( iconfile )
-                self.icon_cmds = icon_cmds
-            else:
-                raise AttributeError,'Unable to find view icon configuration file '+iconfile
-        else:
-            self.icon_cmds=self.old_icon_cmds()
+    def add_default_iconbar(self):
+        """Fallback in case of configuration file problems"""
+        self.UImgr.add_ui_from_string("""
+            <ui>
+            <toolbar name='OEToolbar'>
+              <toolitem action='OpenFile'/>
+              <toolitem action='PrintView'/>
+              <separator/>
+              <toolitem action='NoEnh'/>
+              <toolitem action='Linear'/>
+              <toolitem action='Equal'/>
+              <toolitem action='Log'/>
+              <toolitem action='Restretch'/>
+              <toolitem action='Classify'/>
+              <toolitem action='Legend'/>
+              <placeholder name='ZoomFactor'/>
+              <separator/>
+              <toolitem action='SeeAll'/>
+              <toolitem action='ZoomIn'/>
+              <toolitem action='ZoomOut'/>
+              <toolitem action='Refresh'/>
+              <separator/>
+              <placeholder name='RawGeo'/>
+              <separator/>
+              <toolitem action='HelpOpenEV'/>
+              <placeholder name='IdleBusy'/>
+            </toolbar>
+            </ui>
+            """
+            )
 
-        for cmd in self.icon_cmds:
-            exec cmd
-
-        gview.manager.set_busy(True)
-
-    def old_icon_cmds(self):
-        icon_cmds=[]
-        icon_cmds.append("self.add_icon_to_bar( 'openfile.xpm', None,'Open and Display Raster/Vector File',self.file_open_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'print.xpm', None,'Print Current View',self.print_cb, 'gvprint.html' )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'nonelut.xpm', None,'Revert to no Enhancement',self.nonelut_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'linear.xpm', None,'Linear Stretch/Enhancement',self.linear_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'equalize.xpm', None,'Apply Equalization Enhancement to Raster',self.equalize_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'log.xpm', None,'Logarithmic Enhancement to Raster',self.log_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'windowed.xpm', None,'Windowed Raster Re-enhancement',self.restretch_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'classify.xpm', None,'Classify Raster',self.classify_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'legend.xpm', None,'Show Legend',self.show_legend_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'seeall.xpm', None,'Fit All Layers',self.seeall_cb )")
-
-        # Zoom ratio selection box
-        icon_cmds.append("self.iconbar.append_widget(self.zoom_factor, 'Zoom Ratio', 'Zoom Ratio')")
-
-        icon_cmds.append("self.add_icon_to_bar( 'zoomin.xpm', None,'Zoom in x2',self.zoomin_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'zoomout.xpm', None,'Zoom out x2',self.zoomout_cb )")
-
-        icon_cmds.append("self.add_icon_to_bar( 'refresh.xpm', None,'Refresh Rasters From Disk',self.refresh_cb )")
-
-        # raw / georeferenced pixmap
-        icon_cmds.append("self.iconbar.append_item(None, 'Georeferenced','Georeferenced', self.rawgeo_pixmap,self.rawgeo_cb )")
-
-        # Help
-        icon_cmds.append("self.add_icon_to_bar( 'help.xpm', None,'Launch Online Help',self.helpcb )")
-
-        # idle / busy pixmap
-        icon_cmds.append("self.iconbar.append_item(None, 'Busy Indicator','Busy Indicator', self.idlebusy_pixmap,self.do_nothing )")
-
-        return icon_cmds
-
-    def create_menubar(self, menufile='DefaultMenuFile.xml'):
-        self.menuf = gvutils.GvMenuFactory()
-
-        self.menu_cmd = None        
-        if menufile is not None:
-            # Check that menu file exists.  If not, load old menu
-            # for backwards comaptibility.
-            fullmenufile = os.path.join(gview.home_dir,'xmlconfig',menufile)
-            if os.path.isfile(fullmenufile) == 1:
-                if ((self.app is not None) and hasattr(self.app,'load_menus_file_from_xml')):
+    def create_menubar(self, menufile='NewMenuFile.xml'):
+        menu_cmd = 'self.add_default_menu()'
+        if menufile:
+            # Check that menu file exists.  If not, use default values
+            fullmenufile = os.path.join(gview.home_dir, 'xmlconfig', menufile)
+            if os.path.isfile(fullmenufile):
+                if self.app and hasattr(self.app, 'load_menus_file_from_xml'):
                     # Application parses the xml file itself
-                    menu_cmd=self.app.load_menus_file_from_xml( menufile, self.view_title )
+                    menu_cmd = self.app.load_menus_file_from_xml(menufile, self.view_title)
                 else:
-                    menu_cmd = self.load_menus_file_from_xml( menufile )
-                self.menu_cmd = menu_cmd
-                #print menu_cmd
+                    menu_cmd = 'self.UImgr.add_ui_from_file(fullmenufile)'
             else:
-                raise AttributeError,'Unable to find view menu configuration file '+menufile
-        else:
-            self.menu_cmd = self.old_menu_cmd()
+                print "Unable to find view menu configuration file " + menufile
+                print "Loading defaults"
+                menu_cmd = 'self.add_default_menu()'
 
-        exec self.menu_cmd
-        self.add_accel_group(self.menuf.accelerator)
-
+        exec menu_cmd
+        self.menuf = self.UImgr.get_widget('/OEMenuBar')
         if self.app is not None:
             self.app.subscribe('rfl-change',self.show_rfl)
 
-
-    def old_menu_cmd(self):
-        menu_cmd = "self.menuf.add_entries([" + \
-                "('File/Import', None, self.file_import_cb )," + \
-                "('File/Open', '<control>O', self.file_open_cb )," + \
-                "('File/Open 3D', None, self.open_3D_request)," + \
-                "('File/Save Vector Layer', None, self.save_vector_layer_request)," + \
-                "('File/Save Project', None, self.menu_save_project)," + \
-                "('File/New View', None, self.menu_new_view)," + \
-                "('File/Print', None, self.print_cb)," + \
-                "('File/<separator>', None, None)," + \
-                "('File/rfl1', None, self.rfl_cb, 1)," + \
-                "('File/rfl2', None, self.rfl_cb, 2)," + \
-                "('File/rfl3', None, self.rfl_cb, 3)," + \
-                "('File/rfl4', None, self.rfl_cb, 4)," + \
-                "('File/rfl5', None, self.rfl_cb, 5)," + \
-                "('File/<separator>', None, None)," + \
-                "('File/Close', None, self.close)," + \
-                "('File/Exit', '<control>Q', self.exit)," + \
-                "('Edit/Undo', None, self.undo)," + \
-                "('Edit/Layers...', None, self.app.show_layerdlg)," + \
-                "('Edit/Vector Layer Attributes...', None, self.show_oeattedit)," + \
-                "('Edit/Edit Toolbar...', None, self.app.show_toolbardlg)," + \
-                "('Edit/Go To...', None, self.goto_dlg)," + \
-                "('Edit/Python Shell...', None, self.pyshell)," + \
-                "('Edit/3D Position...', None, self.position_3d)," + \
-                "('Edit/Preferences...', None, self.app.launch_preferences)," + \
-                "('Help/Help...', None, self.helpcb, 'openevmain.html')," + \
-                "('Help/<separator>', None, None)," + \
-                "('Help/Web Page...', None, self.helpcb,'http://OpenEV.Sourceforge.net/')," + \
-                "('Help/About...', None, self.aboutcb)])"
-
-        return menu_cmd
-
-    def load_menus_file_from_xml(self, menufile='DefaultMenuFile.xml'):
-        # load in menu file and populate menu entries
-        menufile = os.path.join(gview.home_dir,'xmlconfig',menufile)
-        menu_list = []
-        try:
-            raw_xml = open(menufile).read()
-        except:
-            raise AttributeError,"Unable to load " + menufile
-            return
-
-        tree = gdal.ParseXMLString( raw_xml )
-        if tree is None:
-            raise AttributeError,"Problem occured parsing menu file " + menufile
-            return
-
-        if tree[1] != 'GViewAppMenu':
-            raise AttributeError,"Root of %s is not GViewAppMenu node " % menufile
-            return
-
-        # loop over entries getting path,accelerator,callback and arguments
-        menu_trees = gvutils.XMLFind( tree, 'Menu')
-        if menu_trees is None:
-            raise AttributeError,"Invalid menu file format"
-
-        for node in menu_trees[2:]:
-            if node[1] == 'entry':
-                node_path  = gvutils.XMLFind( node, 'path')
-                if node_path is None:
-                    raise AttributeError,"Invalid menu file format - missing path"
-
-                entry_type = gvutils.XMLFindValue( node_path, 'type', '')
-                entry_path = gvutils.XMLFindValue( node, 'path','')
-
-                if (entry_path.find("/") == -1):
-                    raise AttributeError,"Invalid menu file format - bad path:%s" % entry_path
-
-                if (entry_type != ''):
-                    entry_type = "<" + entry_type + ">"
-                path_split=string.split(entry_path,"/")
-                path_split[-1] = entry_type + path_split[-1]
-                entry_path=string.join(path_split,"/")
-
-                entry_accelerator = gvutils.XMLFindValue( node, 'accelerator', 'None')
-                if (entry_accelerator != 'None'):
-                    (key,mod) = string.split(entry_accelerator,'+')
-                    entry_accelerator = "'<" + key + ">" + mod + "'"
-
-                entry_callback = gvutils.XMLFindValue( node, 'callback', 'None')
-                entry= "("                                             \
-                        + string.join((entry_path,entry_accelerator,   \
-                                       entry_callback),",")
-
-                arguments = gvutils.XMLFind( node, 'arguments')
-                if arguments is not None:
-                    args_list = []
-                    args =  gvutils.XMLFind( arguments, 'arg','')
-                    if args is not None:
-                        for arg in args:
-                            args_list.append(gvutils.XMLFindValue( arg, '',''))
-                        entry = entry + "," + string.join(args_list,",")
-
-                entry = entry + ")"
-
-                menu_list.append(entry)
-            else:
-                raise AttributeError,"Invalid menu file format"
-
-        # create the menu command to populate the entries
-        menu_cmd =  "self.menuf.add_entries([" + string.join(menu_list,',') + "])"
-        return menu_cmd
-
-
-    def load_icons_file_from_xml(self, iconfile='DefaultIconFile.xml'):
-        #print "LOADING ICONS"
-        # load in icon file and create icon commands
-        iconfile = os.path.join(gview.home_dir,'xmlconfig',iconfile)
-        icon_list = []
-        try:
-            raw_xml = open(iconfile).read()
-        except:
-            raise AttributeError,"Unable to load " + iconfile
-            return
-
-        tree = gdal.ParseXMLString( raw_xml )
-        if tree is None:
-            raise AttributeError,"Problem occured parsing icon file " + iconfile
-            return
-
-        if tree[1] != 'GViewAppIconBar':
-            raise AttributeError,"Root of %s is not GViewAppIconBar node " % iconfile
-            return
-
-        # loop over entries getting icon,label,hint,callback and help
-        icon_trees = gvutils.XMLFind( tree, 'Iconbar')
-        if icon_trees is None:
-            raise AttributeError,"Invalid icon file format"
-
-        for node in icon_trees[2:]:
-            if node[1] == 'icon':
-                type = None
-                icon_label = gvutils.XMLFindValue( node, 'label','None')
-                icon_hint = gvutils.XMLFindValue( node, 'hint','None')
-                icon_callback = gvutils.XMLFindValue( node, 'callback','None')
-                icon_help = gvutils.XMLFindValue( node, 'help','None')
-                icon_file = gvutils.XMLFindValue( node, 'xpm','None')
-                # xpm files - need to add path and possible help
-                if (icon_file != 'None'):
-                    type = 'xpm'
-                    icon = "self.add_icon_to_bar("                           \
-                            + string.join((icon_file,icon_label,icon_hint,   \
-                                           icon_callback,icon_help),",")     \
-                            + ")" 
-
-                # pixmap files - not adding path or help 
-                icon_file = gvutils.XMLFindValue( node, 'pixmap','None')
-                if (icon_file!= 'None'):
-                    type = 'pixmap'
-                    icon = "self.iconbar.append_item("                        \
-                            + string.join((icon_label,icon_hint,icon_hint,    \
-                                              icon_file,icon_callback),",")   \
-                            + ")" 
-
-                # widget  
-                icon_file = gvutils.XMLFindValue( node, 'widget','None')
-                if (icon_file!= 'None'):
-                    type = 'widget'
-                    icon_file = gvutils.XMLFindValue( node, 'widget','None')
-                    icon = "self.iconbar.append_widget("                       \
-                            + string.join((icon_file,icon_hint,icon_hint),",") \
-                            + ")" 
-                # none of the above
-                if type is None:
-                    raise AttributeError,"Invalid icon file format - unknown type"
-
-                icon_list.append(icon)
-            else:
-                raise AttributeError,"Invalid icon file format"
-
-
-        return icon_list
+    def add_default_menu(self):
+        """Fallback in case of configuration file problems"""
+        self.UImgr.add_ui_from_string("""
+            <ui>
+            <menubar name='OEMenuBar'>
+              <menu action='File'>
+                <menuitem action='ImportFile'/>
+                <menuitem action='OpenFile'/>
+                <menuitem action='Open3D'/>
+                <menuitem action='SaveVector'/>
+                <menuitem action='SaveProject'/>
+                <menuitem action='SaveProjectAs'/>
+                <menuitem action='NewView'/>
+                <menuitem action='PrintView'/>
+                <separator/>
+                <menuitem action='rfl1'/>
+                <menuitem action='rfl2'/>
+                <menuitem action='rfl3'/>
+                <menuitem action='rfl4'/>
+                <menuitem action='rfl5'/>
+                <separator/>
+                <menuitem action='CloseView'/>
+                <menuitem action='Exit'/>
+              </menu>
+              <menu action='Edit'>
+                <menuitem action='Undo'/>
+                <menuitem action='Attrib'/>
+                <menuitem action='EditTools'/>
+                <menuitem action='Goto'/>
+                <menuitem action='Pyshell'/>
+                <menuitem action='Pos3D'/>
+                <menuitem action='Preferences'/>
+              </menu>
+              <menu action='Tools'>
+                <menuitem action='WMSTool'/>
+              </menu>
+              <menu action='Image'>
+                <menuitem action='HistoTool'/>
+                <menuitem action='FusionTool'/>
+              </menu>
+              <menu action='Help'>
+                <menuitem action='HelpOpenEV'/>
+                <separator/>
+                <menuitem action='OpenEVWeb'/>
+                <menuitem action='About'/>
+              </menu>
+            </menubar>
+            </ui>
+            """
+            )
 
     def do_nothing(self, *args):
         pass
 
-    def add_icon_to_bar(self, filename, text, hint_text, cb, help_topic=None):
-        full_filename = os.path.join(gview.home_dir,'pics',filename)
-        pix = gtk.Image()
-        pix.set_from_file(full_filename)
-        item = self.iconbar.append_item(text, hint_text, hint_text, pix, cb)
-        if help_topic is not None:
-            gvhtml.set_help_topic(item, help_topic)
-
-    def insert_tool_icon(self, filename, text, hint_text, cb, help_topic=None, pos=0):
-        # Tool specifies full filename (file may not be in pics directory)
-
-        pix = gtk.Image()
-        pix.set_from_file(filename)
-        item = self.iconbar.append_item(text, hint_text, hint_text, pix, cb)
-        if help_topic is not None:
-            gvhtml.set_help_topic(item, help_topic)
+    def insert_widget_to_bar(self, widget, path):
+        anchor = self.UImgr.get_widget('/OEToolbar/%s'%path)
+        idx = self.iconbar.get_item_index(anchor)
+        item = gtk.ToolItem()
+        item.add(widget)
+        self.iconbar.insert(item, idx)
 
     def classify_cb(self, *args):
         self.make_active()
@@ -1700,12 +1630,11 @@ class GvViewWindow(gtk.Window):
         self.viewarea.set_raw(ref_layer, not self.viewarea.get_raw(ref_layer))
         self.rawgeo_update()
 
-    def rawgeo_update( self, *args ):
+    def rawgeo_update(self, *args):
         if self.iconbar is None:
             return
 
-        ref_layer = self.viewarea.active_layer()
-        if self.viewarea.get_raw( ref_layer ):
-            self.rawgeo_pixmap.set_from_pixmap(self.raw_icon[0], self.raw_icon[1])
+        if self.viewarea.get_raw(self.viewarea.active_layer()):
+            self.rawgeo_pixmap.set_from_stock('worldg', gtk.ICON_SIZE_LARGE_TOOLBAR)
         else:
-            self.rawgeo_pixmap.set_from_pixmap(self.geo_icon[0], self.geo_icon[1])
+            self.rawgeo_pixmap.set_from_stock('worldrgb', gtk.ICON_SIZE_LARGE_TOOLBAR)
