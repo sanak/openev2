@@ -69,125 +69,105 @@ class GvViewArea(_gv.ViewArea):
     def __init__(self):
         _gv.ViewArea.__init__(self)
 
-    def serialize(self, filename=None ):
-        tree = [gdal.CXT_Element, 'GvViewArea']
+    def serialize(self, filename=None):
+        # for clarity...
+        Attr, Elem, Text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
+        tree = [Elem, 'GvViewArea']
 
-        tree.append( [CXT_Attribute, 'Mode',
-                    [CXT_Text, str(self.get_mode())]] )
-        tree.append( [CXT_Attribute, 'Raw',
-                      [CXT_Text, str(self.get_raw())]] )
+        tree.append([Attr, 'Mode', [Text, str(self.get_mode())]])
+        tree.append([Attr, 'Raw', [Text, str(self.get_raw())]])
 
-        translation = self.get_translation()
-        tree.append( [CXT_Element, 'Translation',
-                      [CXT_Attribute, 'x',
-                       [CXT_Text, str(translation[0])]],
-                      [CXT_Attribute, 'y',
-                       [CXT_Text, str(translation[1])]]] )
+        x,y = self.get_translation()
+        tree.append([Elem, 'Translation',
+                    [Attr, 'x', [Text, str(x)]],
+                    [Attr, 'y', [Text, str(y)]]])
 
-        tree.append( [CXT_Element, 'Zoom',
-                      [CXT_Text, str(self.get_zoom())]] )
-        tree.append( [CXT_Element, 'FlipX', 
-                      [CXT_Text, str(self.get_flip_x())]] )
-        tree.append( [CXT_Element, 'FlipY', 
-                      [CXT_Text, str(self.get_flip_y())]] )
+        tree.append([Elem, 'Zoom', [Text, str(self.get_zoom())]])
+        tree.append([Elem, 'FlipX', [Text, str(self.get_flip_x())]])
+        tree.append([Elem, 'FlipY', [Text, str(self.get_flip_y())]])
 
-        projection = self.get_projection()
-        if projection is not None and len(projection) > 0:
-            tree.append( [CXT_Element, 'Projection',
-                          [CXT_Text, str(self.get_projection())]] )
+        if self.projection:
+            tree.append( [Elem, 'Projection', [Text, self.projection]] )
 
-        background = self.get_background_color()
-        tree.append( [CXT_Element, 'Background',
-                    [CXT_Attribute, 'red',
-                     [CXT_Text, str(background[0])]],
-                    [CXT_Attribute, 'green',
-                     [CXT_Text, str(background[1])]],
-                    [CXT_Attribute, 'blue',
-                     [CXT_Text, str(background[2])]],
-                    [CXT_Attribute, 'alpha',
-                     [CXT_Text, str(background[3])]]] )
+        r,g,b,a = self.get_background_color()
+        tree.append([Elem, 'Background',
+                    [Attr, 'red', [Text, str(r)]],
+                    [Attr, 'green', [Text, str(g)]],
+                    [Attr, 'blue', [Text, str(b)]],
+                    [Attr, 'alpha', [Text, str(a)]]])
 
         if self.get_mode() == MODE_3D:
-            eye_pos = self.get_eye_pos()
-            tree.append( [CXT_Element, 'EyePos',
-                        [CXT_Attribute, 'x',
-                         [CXT_Text, str(eye_pos[0])]],
-                        [CXT_Attribute, 'y',
-                         [CXT_Text, str(eye_pos[1])]],
-                        [CXT_Attribute, 'z',
-                         [CXT_Text, str(eye_pos[2])]]] )
-            eye_dir = self.get_eye_dir()
-            tree.append( [CXT_Element, 'EyeDir',
-                        [CXT_Attribute, 'x',
-                         [CXT_Text, str(eye_dir[0])]],
-                        [CXT_Attribute, 'y',
-                         [CXT_Text, str(eye_dir[1])]],
-                        [CXT_Attribute, 'z',
-                         [CXT_Text, str(eye_dir[2])]]] )
+            x,y,z = self.get_eye_pos()
+            tree.append([Elem, 'EyePos',
+                        [Attr, 'x', [Text, str(x)]],
+                        [Attr, 'y', [Text, str(y)]],
+                        [Attr, 'z', [Text, str(z)]]])
+            x,y,z = self.get_eye_dir()
+            tree.append([Elem, 'EyeDir',
+                        [Attr, 'x', [Text, str(x)]],
+                        [Attr, 'y', [Text, str(y)]],
+                        [Attr, 'z', [Text, str(z)]]])
             height_scale = self.get_height_scale()
-            tree.append( [CXT_Element, 'HeightScale',
-                          [CXT_Text, str(height_scale)]] )
+            tree.append( [Elem, 'HeightScale', [Text, str(height_scale)]] )
 
-        layer_tree = [CXT_Element, 'Layers']
-        tree.append( layer_tree )
+        layer_tree = [Elem, 'Layers']
+        tree.append(layer_tree)
 
         layers = self.list_layers()
         for layer in layers:
-            layer_tree.append( layer.serialize( filename=filename ) )
+            layer_tree.append( layer.serialize(filename=filename) )
 
         return tree
 
-    def initialize_from_xml( self, tree, filename=None ):
-        self.set_property( '_supress_realize_auto_fit', 'on' )
+    def initialize_from_xml(self, tree, filename=None):
+        self.set_property('_supress_realize_auto_fit','on')
 
-        layer_trees = XMLFind( tree, 'Layers')
-        if layer_trees is not None:
+        layer_trees = XMLFind(tree,'Layers')
+        if layer_trees:
             for layer_tree in layer_trees[2:]:
-                layer = XMLInstantiate( layer_tree, self, filename=filename )
-                if layer is not None:
-                    self.add_layer( layer )
-                    self.set_active_layer( layer )
+                layer = XMLInstantiate(layer_tree, self, filename=filename)
+                if layer:
+                    self.add_layer(layer)
+                    self.set_active_layer(layer)
                 else:
                     print 'Failed to instantiate layer:', layer_tree
 
-        tr = XMLFind( tree, 'Translation')
-        if tr is not None:
-            x = float(XMLFindValue( tr, 'x', '0.0'))
-            y = float(XMLFindValue( tr, 'y', '0.0'))
+        tr = XMLFind(tree,'Translation')
+        if tr:
+            x = float( XMLFindValue(tr,'x','0.0') )
+            y = float( XMLFindValue(tr,'y','0.0') )
             cur_tr = self.get_translation()
-            self.translate( x - cur_tr[0], y - cur_tr[1] )
+            self.translate(x - cur_tr[0], y - cur_tr[1])
 
-        zm = float(XMLFindValue( tree, 'Zoom', 
-                                         str(self.get_zoom()) ))
-        self.zoom( zm - self.get_zoom() )
+        zm = float( XMLFindValue(tree,'Zoom',str(self.get_zoom())) )
+        self.zoom(zm - self.get_zoom())
 
-        flip_x = int(XMLFindValue( tree, 'FlipX','1'))
-        flip_y = int(XMLFindValue( tree, 'FlipY','1'))
-        self.set_flip_xy( flip_x, flip_y )
+        flip_x = int(XMLFindValue(tree,'FlipX','1'))
+        flip_y = int(XMLFindValue(tree,'FlipY','1'))
+        self.set_flip_xy(flip_x, flip_y)
 
-        bg = XMLFind( tree, 'Background')
-        if bg is not None:
+        bg = XMLFind(tree,'Background')
+        if bg:
             self.set_background_color(
-                (float(XMLFindValue( bg, 'red', '0.0')),
-                 float(XMLFindValue( bg, 'green', '0.0')),
-                 float(XMLFindValue( bg, 'blue', '0.0')),
-                 float(XMLFindValue( bg, 'alpha', '1.0'))) )
+                (float(XMLFindValue(bg,'red','0.0')),
+                 float(XMLFindValue(bg,'green','0.0')),
+                 float(XMLFindValue(bg,'blue','0.0')),
+                 float(XMLFindValue(bg,'alpha','1.0'))) )
 
-        eye_pos_xml = XMLFind( tree, 'EyePos' )
-        if eye_pos_xml is not None:
-            eye_pos = (float(XMLFindValue( eye_pos_xml, 'x', '0.0')),
-                       float(XMLFindValue( eye_pos_xml, 'y', '0.0')),
-                       float(XMLFindValue( eye_pos_xml, 'z', '1.0')))
-            eye_dir_xml = XMLFind( tree, 'EyeDir' )
-            eye_dir = (float(XMLFindValue( eye_dir_xml, 'x', '0.0')),
-                       float(XMLFindValue( eye_dir_xml, 'y', '0.0')),
-                       float(XMLFindValue( eye_dir_xml, 'z', '-1.0')))
-            self.set_3d_view( eye_pos, eye_dir )
+        eye_pos_xml = XMLFind(tree,'EyePos')
+        if eye_pos_xml:
+            eye_pos = (float(XMLFindValue(eye_pos_xml,'x','0.0')),
+                       float(XMLFindValue(eye_pos_xml,'y','0.0')),
+                       float(XMLFindValue(eye_pos_xml,'z','1.0')))
+            eye_dir_xml = XMLFind(tree,'EyeDir')
+            eye_dir = (float(XMLFindValue(eye_dir_xml,'x','0.0')),
+                       float(XMLFindValue(eye_dir_xml,'y','0.0')),
+                       float(XMLFindValue(eye_dir_xml,'z','-1.0')))
+            self.set_3d_view(eye_pos, eye_dir)
 
-            self.height_scale(
-                float(XMLFindValue( tree, 'HeightScale', '1.0' )) )
+            self.height_scale( float(XMLFindValue(tree,'HeightScale','1.0')) )
 
-            self.set_mode( MODE_3D )
+            self.set_mode(MODE_3D)
 
     def get_width(self):
         """Return width of area in pixels."""
@@ -711,9 +691,9 @@ class GvViewArea(_gv.ViewArea):
 
 ###############################################################################
 def GvShapeFromXML(tree, parent, filename=None):
-    """
-    construct a gvshape object from an xml tree"""
-    return _gv.Shape.from_xml(tree)
+    """construct a gvshape object from an xml tree"""
+    shape = GvShape()
+    return shape.from_xml(tree)
 
 # GvShape now implemented in _gv. Do help(GvShapeDoc) for documentation.
 GvShape = _gv.Shape
@@ -945,20 +925,24 @@ def gv_shapes_lines_for_vecplot(xlist,ylist,zlist,oklist):
 def serialize(obj, base=None, filename=None):
     """serialize this object in a format suitable for XML representation."""
     # for clarity...
-    attr, elem, text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
+    Attr, Elem, Text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
     if base is None:
-        base = [elem, 'GvData']
+        base = [Elem, 'GvData']
 
-    base.append([attr, 'read_only', [text, str(obj.is_read_only())]])
-    base.append([attr, 'name', [text, obj.name]])
+    base.append([Attr, 'read_only', [Text, str(obj.is_read_only())]])
+    base.append([Attr, 'name', [Text, obj.name]])
     if obj.projection:
-        base.append([elem, 'Projection', [text, obj.projection]])
+        base.append([Elem, 'Projection', [Text, obj.projection]])
 
     for key,v in obj.get_properties().iteritems():
         if key == '_gv_add_height_portable_path':
             continue
-##            if key == '_gv_add_height_filename' and os.path.exists(v):
-        base.append([elem, 'Property', [attr, 'name', [text, key]], [text, v]])
+        if key == '_gv_add_height_filename' and os.path.exists(v):
+            # MB: pathutils stuff untested...
+            base.append( [Elem, 'Property',
+                          [Attr, 'name', [Text, '_gv_add_height_portable_path']],
+                          [Text, pathutils.PortablePath(v, ref_path=filename).serialize()]] )
+        base.append([Elem, 'Property', [Attr, 'name', [Text, key]], [Text, v]])
 
     return base
 
@@ -1124,7 +1108,7 @@ def gv_data_registry_dump():
 
 
 ###############################################################################
-def GvShapesFromXML( node, parent, filename=None ):
+def GvShapesFromXML(node, parent, filename=None):
     """construct a gvshapes object from an xml tree.
 
     node is the current node to instantiate from
@@ -1134,21 +1118,16 @@ def GvShapesFromXML( node, parent, filename=None ):
     will return the new GvShapes instance or None if something went
     horribly wrong.
     """
-
     shapes = GvShapes()
 
     #restore properties
-    shapes.initialize_from_xml( node, filename=filename )
-
+    shapes.initialize_from_xml(node, filename=filename)
+    
     #restore shapes
     shape_tree = XMLFind(node, 'Shapes')
     for subtree in shape_tree[2:]:
-        shape = XMLInstantiate( subtree, parent, filename=filename )
-        if shape is None:
-            print 'shape is None'
-        elif shape._o is None:
-            print 'shape._o is None'
-        else:
+        shape = GvShapeFromXML(subtree, None, filename)
+        if shape:
             shapes.append(shape)
 
     return shapes
@@ -1509,19 +1488,21 @@ class GvAreas(_gv.Shapes):
             self.set_name(name)
 
 ###############################################################################
-def GvRasterFromXML( node, parent, filename=None ):
+def GvRasterFromXML(node, parent, filename=None):
     band = int(XMLFindValue(node,"band","1"))
-    portable_path = XMLFindValue( node, 'portable_path' )
+    portable_path = XMLFindValue(node, 'portable_path')
     if portable_path is not None:
-        f = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
+        # MB: pathutils stuff untested
+        f = pathutils.PortablePathFromXML(portable_path).local_path(ref_path=filename)
     else:
         for child in node[2:]:
             if child[0] == gdal.CXT_Text:
                 f = child[1]
 
-    ds = manager.get_dataset( f )
-    raster = manager.get_dataset_raster( ds, band )
-    return raster
+    if f:
+        ds = manager.get_dataset(f)
+        raster = manager.get_dataset_raster(ds, band)
+        return raster
 
 class GvRaster(_gv.Raster):
     """Raster data object
@@ -1556,7 +1537,7 @@ class GvRaster(_gv.Raster):
 
         if _obj is None:
             if dataset:
-                dataset_raw = dataset._o
+                dataset_raw = dataset.this
             else:
                 dataset_raw = None
             _gv.Raster.__init__(self, filename, sample, real, dataset_raw)
@@ -1669,8 +1650,8 @@ class GvRaster(_gv.Raster):
         dataset = self.get_dataset()
         for iband in range(dataset.RasterCount):
             test_band = dataset.GetRasterBand(iband+1)
-            if test_band._o == band._o:
-                return iband+1
+            if test_band.this == band.this:
+                return iband +1
         return -1
 
     def get_band(self):
@@ -1679,15 +1660,14 @@ class GvRaster(_gv.Raster):
         Fetch the band associated with the GvRaster as a
         gdal.RasterBand object.
         """
+        if hasattr(self, 'gdal_band'):
+            return self.gdal_band
 
-        if hasattr(self, "gdal_band"):
-	    return self.gdal_band
+        band = manager.get_raster_band(self)
+        if band is None:
+            return
 
-        band_swigptr = _gv.gv_raster_get_gdal_band(self)
-        if band_swigptr is None:
-            return None
-
-        self.gdal_band = gdal.Band(_obj=band_swigptr)
+        self.gdal_band = band
         return self.gdal_band
 
     def get_dataset(self):
@@ -1696,15 +1676,14 @@ class GvRaster(_gv.Raster):
         Fetch the dataset associated with the GvRaster as a
         gdal.Dataset object.
         """
+        if hasattr(self, 'gdal_dataset'):
+            return self.gdal_dataset
 
-        if hasattr(self, "gdal_dataset"):
-	    return self.gdal_dataset
+        ds = manager.get_raster_dataset(self)
+        if ds is None:
+            return
 
-        ds_swigptr = _gv.Raster.get_dataset(self)
-        if ds_swigptr is None:
-            return None
-
-        self.gdal_dataset = gdal.Dataset(_obj=ds_swigptr)
+        self.gdal_dataset = ds
         return self.gdal_dataset
 
     def autoscale(self, alg = ASAAutomatic, alg_param = -1.0, assign = 0):
@@ -1873,8 +1852,8 @@ class GvLayer(_gv.Layer):
     def initialize_from_xml(self, tree, filename=None):
         """restore object properties from XML tree"""
         initialize_from_xml(self, tree, filename=filename)
-        self.set_visible( int(XMLFindValue( tree, 'visible',
-                                                    str(self.is_visible()))))
+        vis = int(XMLFindValue(tree, 'visible', str(self.is_visible())))
+        self.set_visible(vis)
 
     def is_visible(self):
         """Check if layer is visible.
@@ -1972,7 +1951,7 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
             _gv.ShapeLayer.__init__(_obj)
         GvLayer.__init__(self, _obj)
 
-    def serialize(self, base, filename=None ):
+    def serialize(self, base, filename=None):
         """serialize this object in a format suitable for XML representation.
 
         Adds properties for the current selection
@@ -1981,13 +1960,11 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
         if base is None:
             base = [gdal.CXT_Element, 'GvShapeLayer']
 
-        GvLayer.serialize( self, base, filename=filename )
+        GvLayer.serialize(self, base, filename=filename)
 
-    def initialize_from_xml( self, tree, filename=None ):
-        """initialize this object from the XML tree
-        """
-
-        GvLayer.initialize_from_xml( self, tree, filename=filename )
+    def initialize_from_xml(self, tree, filename=None):
+        """initialize this object from the XML tree"""
+        GvLayer.initialize_from_xml(self, tree, filename=filename)
 
     def set_color(self, color):
         """Set the drawing color.
@@ -2088,7 +2065,7 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
 
 
 ###############################################################################
-def GvShapesLayerFromXML( base, parent, filename=None ):
+def GvShapesLayerFromXML(base, parent, filename=None):
     """Create a GvShapesLayer from an XML tree
 
     Look for a GvShapes tree and use it to build the GvShapes object if
@@ -2097,24 +2074,28 @@ def GvShapesLayerFromXML( base, parent, filename=None ):
 
     Returns a new GvShapesLayer or None if it failed
     """
-    shape_tree = XMLFind( base, 'GvShapes' )
-    if shape_tree is not None:
-        shapes = XMLInstantiate( shape_tree, None, filename=filename )
+    shape_tree = XMLFind(base,'GvShapes')
+    shapes = None
+    if shape_tree:
+        shapes = GvShapesFromXML(shape_tree, None, filename)
     else:
-        portable_path = XMLFindValue( base, 'portable_path' )
+        portable_path = XMLFindValue(base, 'portable_path')
         if portable_path is not None:
-            shapefilename = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
+            # MB: pathutils stuff untested
+            shapefilename = pathutils.PortablePathFromXML(portable_path).local_path(ref_path=filename)
         else:
-            shapefilename = XMLFindValue( base, "_filename" )
-            if shapefilename is None:
-                shapes = None
-        if shapefilename is not None:
-            shapes = GvShapes( shapefilename = shapefilename )
+            shapefilename = XMLFindValue(base, '_filename')
+        if shapefilename:
+            shapes = GvShapes(shapefilename=shapefilename)
 
-    layer = GvShapesLayer( shapes = shapes )
+    layer = GvShapesLayer(shapes=shapes)
 
     if layer is not None:
-        layer.initialize_from_xml( base, filename=filename )
+        layer.initialize_from_xml(base, filename=filename)
+        if layer.get_property('Class_sn'):
+            from gvclassification import GvClassification
+            cls = GvClassification(layer)
+            cls.update_vector(layer)
 
     return layer
 
@@ -2155,27 +2136,25 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
         """Fetch parent shapes."""
         return self.parent
 
-    def serialize( self, base = None, filename=None ):
+    def serialize(self, base=None, filename=None):
         """Create a representation of this object suitable for XMLing.
         """
         if base is None:
             base = [gdal.CXT_Element, "GvShapesLayer"]
 
         layer_props = self.get_properties()
-        shapes = self.get_parent()
+        shapes = self.parent
         if shapes is not None:
-            shape_props = shapes.get_properties()
-            if (layer_props.has_key('_serialize_shapes') and \
-                layer_props['_serialize_shapes'] == '1') \
-                or not shape_props.has_key('_filename'):
-                base.append( shapes.serialize( filename=filename ) )
-            elif shape_props.has_key('_filename'):
-                v = shape_props['_filename']
-                if os.path.exists( v ):
+            serial = self.get_property('_serialize_shapes')
+            v = shapes.get_property('_filename')
+            if serial == '1' or not v:
+                base.append(shapes.serialize(filename=filename))
+            elif v:
+                base.append([gdal.CXT_Attribute, '_filename', [gdal.CXT_Text, v]])
+                if os.path.exists(v):
+                    # MB: pathutils stuff untested
                     base.append( [gdal.CXT_Attribute, 'portable_path',
-                                  [gdal.CXT_Text, pathutils.PortablePath( v, ref_path = filename ).serialize()]] )
-                base.append( [gdal.CXT_Attribute, '_filename',
-                              [gdal.CXT_Text, v]] )
+                                  [gdal.CXT_Text, pathutils.PortablePath(v, ref_path=filename).serialize()]] )
 
         # Do we have a symbol manager?
 
@@ -2184,7 +2163,7 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
             base.append( sm.serialize() )
 
         #serialize the base class properties (all the way to GvData)
-        GvShapeLayer.serialize( self, base, filename=filename )
+        GvShapeLayer.serialize(self, base, filename=filename)
 
         return base
 
@@ -2195,18 +2174,16 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
     def get_symbol_manager(self, ok_to_create=0):
         return _gv.ShapesLayer.get_symbol_manager(self, ok_to_create)
 
-    def initialize_from_xml( self, tree, filename=None ):
-        """initialize this object from the XML tree
-        """
+    def initialize_from_xml(self, tree, filename=None):
+        """initialize this object from the XML tree"""
 
         # Initialize GvSymbolManager.
+        sm_xml = XMLFind(tree,'GvSymbolManager')
+        if sm_xml:
+            sm = self.get_symbol_manager(ok_to_create=1)
+            sm.initialize_from_xml(sm_xml, filename=filename)
 
-        sm_xml = XMLFind( tree, 'GvSymbolManager' )
-        if sm_xml is not None:
-            sm = self.get_symbol_manager( 1 )
-            sm.initialize_from_xml( sm_xml, filename=filename )
-
-        GvShapeLayer.initialize_from_xml( self, tree, filename=filename )
+        GvShapeLayer.initialize_from_xml(self, tree, filename=filename)
 
     def set_layer_type(self, shapes=None, shape_type=None):
         if shapes:
@@ -2256,25 +2233,26 @@ class GvAreaLayer(GvShapeLayer, _gv.ShapesLayer):
         self.layer_type = GVSHAPE_AREA
 
 ###############################################################################
-def GvPqueryLayerFromXML( base, parent, filename=None ):
-    shape_tree = XMLFind( base, 'GvShapes' )
+def GvPqueryLayerFromXML(base, parent, filename=None):
+    shape_tree = XMLFind(base, 'GvShapes')
     if shape_tree is not None:
-        shapes = XMLInstantiate( shape_tree, None, filename=filename )
+        shapes = XMLInstantiate(shape_tree, None, filename=filename)
     else:
-        portable_path = XMLFindValue( base, 'portable_path' )
+        portable_path = XMLFindValue(base, 'portable_path')
         if portable_path is not None:
-            shapefilename = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
+            # MB: pathutils stuff untested
+            shapefilename = pathutils.PortablePathFromXML(portable_path).local_path(ref_path=filename)
         else:
-            shapefilename = XMLFindValue( base, "_filename" )
+            shapefilename = XMLFindValue(base, "_filename")
             if shapefilename is None:
                 shapes = None
         if shapefilename is not None:
-            shapes = GvShapes( shapefilename = shapefilename )
+            shapes = GvShapes(shapefilename=shapefilename)
 
-    layer = GvPqueryLayer( shapes = shapes )
+    layer = GvPqueryLayer(shapes=shapes)
 
     if layer is not None:
-        layer.initialize_from_xml( base, filename=filename )
+        layer.initialize_from_xml(base, filename=filename)
 
     return layer
 
@@ -2315,37 +2293,36 @@ class GvPqueryLayer(GvShapesLayer, _gv.PqueryLayer):
         import gvpquerypropdlg
         return gvpquerypropdlg.LaunchPQueryPropDialog( self )
 
-    def serialize( self, base = None, filename=None ):
+    def serialize(self, base=None, filename=None):
         """Create a representation of this object suitable for XMLing.
         """
         if base is None:
             base = [gdal.CXT_Element, "GvPqueryLayer"]
 
         #serialize the base class properties
-        GvShapesLayer.serialize( self, base, filename=filename )
+        GvShapesLayer.serialize(self, base, filename=filename)
 
         return base
 
 ###############################################################################
-def GvRasterLayerFromXML( node, parent, filename=None ):
-    prototype_node = XMLFind( node, 'Prototype' )
+def GvRasterLayerFromXML(node, parent, filename=None):
+    prototype_node = XMLFind(node, 'Prototype')
     if prototype_node is not None:
-        prototype_data = GvRasterFromXML( prototype_node, None,
-                                          filename=filename )
+        prototype_data = GvRasterFromXML(prototype_node, None, filename=filename)
     else:
         prototype_data = None
 
-    rl_mode = int(XMLFindValue( node, 'mode', str(RLM_AUTO) ))
-    mesh_lod = XMLFindValue( node, 'mesh_lod', '0' )
+    rl_mode = int(XMLFindValue(node, 'mode', str(RLM_AUTO)))
+    mesh_lod = XMLFindValue(node, 'mesh_lod', '0')
 
-    layer = GvRasterLayer( raster = prototype_data, rl_mode = rl_mode,
-                           creation_properties = [('mesh_lod',mesh_lod)] )
-    layer.initialize_from_xml( node, filename=filename )
+    layer = GvRasterLayer(raster=prototype_data, rl_mode=rl_mode,
+                           creation_properties=[('mesh_lod',mesh_lod)])
+    layer.initialize_from_xml(node, filename=filename)
 
     sources_min_max = []
     for child in node[2:]:
         if child[0] == gdal.CXT_Element and child[1] == 'Source':
-            raster = GvRasterFromXML( child, None, filename=filename )
+            raster = GvRasterFromXML(child, None, filename=filename)
             isource = int(XMLFindValue(child,"index","0"))
             min = float(XMLFindValue(child,"min","0"))
             max = float(XMLFindValue(child,"max","0"))
@@ -2354,40 +2331,39 @@ def GvRasterLayerFromXML( node, parent, filename=None ):
             nodata = XMLFindValue( child, "nodata", None )
             nodata = eval(XMLFindValue(child, "nodata", "None"))
 
-            layer.set_source( isource, raster, min = min, max = max,
-                              const_value = const_value, nodata = nodata )
+            layer.set_source(isource, raster, min=int(min), max=int(max),
+                              const_value=int(const_value), nodata=int(nodata))
         else:
             raster = None
 
-    stretch = layer.get_property( 'last_stretch' )
+    stretch = layer.get_property('last_stretch')
     if stretch is not None:
-	exec 'func = layer.' + stretch + '()'
+        exec 'func = layer.%s()' % stretch
 
     # Warning !!! stretch functions generally reset min/max with autoscale for
     # each source, so we have to reset them to the good values...
     for i in range(layer.sources):
-        layer.min_set( i, sources_min_max[i][0] )
-        layer.max_set( i, sources_min_max[i][1] )
+        layer.min_set(i, sources_min_max[i][0])
+        layer.max_set(i, sources_min_max[i][1])
 
     # Set classification? 
 
     from gvclassification import GvClassification
-    cls = GvClassification( layer )
+    cls = GvClassification(layer)
     if cls.count > 0:
         cls.update_all_layers()
 
     # Set elevations?
-    f = layer.get_property( '_gv_add_height_portable_path' )
+    f = layer.get_property('_gv_add_height_portable_path')
     if f is None:
-        f = layer.get_property( '_gv_add_height_filename' )
+        f = layer.get_property('_gv_add_height_filename')
     else:
-        f = pathutils.PortablePathFromXML( f ).local_path( ref_path = filename )
+        # MB: pathutils stuff untested
+        f = pathutils.PortablePathFromXML(f).local_path(ref_path=filename)
     if f is not None:
-        ds = manager.get_dataset( f )
-        dem_raster = manager.get_dataset_raster(
-            ds, int(layer.get_property( '_gv_add_height_band' )) )
-        layer.add_height( dem_raster,
-                          float(layer.get_property( '_gv_add_height_default')))
+        ds = manager.get_dataset(f)
+        dem_raster = manager.get_dataset_raster(ds, int(layer.get_property('_gv_add_height_band')))
+        layer.add_height(dem_raster, float(layer.get_property( '_gv_add_height_default')))
 
     return layer
 
@@ -2433,16 +2409,14 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
             self.sources = 3
 
     def serialize(self, layer = None, filename=None ):
+        # for clarity...
+        Attr, Elem, Text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
         if layer is None:
-            layer = [gdal.CXT_Element, 'GvRasterLayer']
+            layer = [Elem, 'GvRasterLayer']
 
-        layer.append( [CXT_Attribute, 'mode',
-                       [CXT_Text, str(self.get_mode())]] )
-
-        layer.append( [CXT_Attribute, 'mesh_lod',
-                       [CXT_Text, str(self.get_mesh_lod())]] )
-
-        GvLayer.serialize( self, layer, filename=filename )
+        layer.append([Attr, 'mode', [Text, str(self.get_mode())]])
+        layer.append([Attr, 'mesh_lod', [Text, str(self.get_mesh_lod())]])
+        serialize(self, layer, filename=filename)
 
         source_count = self.sources
         prototype_raster = None
@@ -2454,44 +2428,40 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         if prototype_raster is not None:
             v = raster.get_dataset().GetDescription()
-            proto = [gdal.CXT_Element, 'Prototype',
-                     [gdal.CXT_Attribute, 'band', 
-                      [gdal.CXT_Text, str(raster.get_band_number())]]]
-            if os.path.exists( v ):
-                proto.append( [gdal.CXT_Attribute, 'portable_path', 
-                               [gdal.CXT_Text, pathutils.PortablePath( v, ref_path=filename ).serialize()]] )
-            proto.append( [gdal.CXT_Text, v] )
-            layer.append( proto )
+            proto = [Elem, 'Prototype',
+                       [Attr, 'band', [Text, str(raster.get_band_number())]]
+                    ]
+            if os.path.exists(v):
+                # MB: pathutils stuff untested
+                proto.append( [Attr, 'portable_path', 
+                               [Text, pathutils.PortablePath(v, ref_path=filename).serialize()]] )
+            proto.append( [Text, v] )
+            layer.append(proto)
 
         # Note that self.sources isn't necessary all the sources.  
         for isource in range(source_count):
-            src = [gdal.CXT_Element, 'Source',
-                   [gdal.CXT_Attribute, 'index',
-                    [gdal.CXT_Text, str(isource)]],
-                   [gdal.CXT_Attribute, 'min',
-                    [gdal.CXT_Text, str(self.min_get(isource))]],
-                   [gdal.CXT_Attribute, 'max',
-                    [gdal.CXT_Text, str(self.max_get(isource))]]
+            src = [Elem, 'Source', 
+                      [Attr, 'index', [Text, str(isource)]],
+                      [Attr, 'min', [Text, str(self.min_get(isource))]],
+                      [Attr, 'max', [Text, str(self.max_get(isource))]]
                    ]
 
             if self.nodata_get(isource) != -100000000.0:
-                src.append( [gdal.CXT_Attribute, 'nodata',
-                             [gdal.CXT_Text, str(self.nodata_get(isource))]] )
+                src.append([Attr, 'nodata', [Text, str(self.nodata_get(isource))]])
 
             raster = self.get_data(isource)
             if raster is None:
-                src.append( [gdal.CXT_Attribute, 'constant',
-                             [gdal.CXT_Text, str(self.get_const_value(isource))]] )
+                src.append([Attr, 'constant', [Text, str(self.get_const_value(isource))]])
             else:
-                src.append( [gdal.CXT_Attribute, 'band',
-                             [gdal.CXT_Text, str(raster.get_band_number())]] )
+                src.append([Attr, 'band', [Text, str(raster.get_band_number())]])
                 v = raster.get_dataset().GetDescription()
-                if os.path.exists( v ):
-                    src.append( [gdal.CXT_Attribute, 'portable_path', 
-                                 [gdal.CXT_Text, pathutils.PortablePath( v, ref_path=filename ).serialize()]] )
-                src.append( [gdal.CXT_Text, v] )
+                if os.path.exists(v):
+                    # MB: pathutils stuff untested
+                    src.append( [Attr, 'portable_path', 
+                                 [Text, pathutils.PortablePath(v, ref_path=filename).serialize()]] )
+                src.append( [Text, v] )
 
-            layer.append( src )
+            layer.append(src)
 
         return layer
 
@@ -3225,52 +3195,61 @@ class GvSymbolManager(_gv.SymbolManager):
     def inject_vector_symbol(self, name, shape):
         _gv.SymbolManager.inject_vector_symbol(self, name, shape._o)
 
-    def serialize( self ):
+    def serialize(self):
         tree = [gdal.CXT_Element, 'GvSymbolManager']
 
-        names = self.get_names()
-
-        for name in names:
-            sym = self.get_symbol( name )
+        for name in self.get_names():
+            sym = self.get_symbol(name)
             if sym[0] == 0:
                 print 'rasters symbol serialization not yet supported.'
 
             elif sym[0] == 1:
-                vs = [CXT_Element, 'GvVectorSymbol',
-                      [CXT_Attribute, 'name',
-                       [CXT_Text, name]]]
+                vs = [gdal.CXT_Element, 'GvVectorSymbol',
+                        [gdal.CXT_Attribute, 'name', [gdal.CXT_Text, name]]
+                     ]
                 vs.append( sym[1].serialize() )
-                tree.append( vs )
+                tree.append(vs)
             else:
                 print 'unsupported symbol type, not serialized'
 
         return tree
 
-    def initialize_from_xml( self, tree, filename=None ):
+    def initialize_from_xml(self, tree, filename=None):
         for item in tree[2:]:
-            if item[0] == CXT_Element and item[1] == 'GvVectorSymbol':
-                name = XMLFindValue(item, 'name', None )
-                shape = GvShapeFromXML( XMLFind( item, 'GvShape' ), None )
-                self.inject_vector_symbol( name, shape )
+            if item[0] == gdal.CXT_Element and item[1] == 'GvVectorSymbol':
+                name = XMLFindValue(item,'name')
+                shape = GvShapeFromXML(XMLFind(item,'GvShape'), None, filename)
+                self.inject_vector_symbol(name, shape)
 
 ###############################################################################
 class GvManager(_gv.Manager):
     def __init__(self):
         _gv.Manager.__init__(self)
+        # opened datasets with active rasters count
+        self.datasets = {}
+
+    def get_swig_ds(self, dataset):
+        return '_%s_GDALDatasetH' % hex(dataset.this)
 
     def add_dataset(self, dataset):
         """Adds gdal.Dataset instance to the list of managed datasets.
 
         This method adds given gdal.Dataset instance to the list of available
-	datasets. Does nothing if this dataset already listed.
+        datasets. Does nothing if this dataset already listed.
+    
+        Returns a gdal.Dataset object (the same as given in parameters).
+        """
+        swig_ds = self.get_swig_ds(dataset)
+        _gv.Manager.add_dataset(self, swig_ds)
+        if swig_ds not in self.datasets:
+            self.datasets[swig_ds] = dataset
+        return dataset
 
-	Returns a gdal.Dataset object (the same as given in parameters)."""
-
-        swig_ds = _gv.Manager.add_dataset(self, dataset._o)
-        if swig_ds is None:
-            return None
-
-        return gdal.Dataset( _obj=swig_ds )
+    def remove_dataset(self, dataset):
+        """Removes gdal.Dataset instance from the list of managed datasets."""
+        swig_ds = self.get_swig_ds(dataset)
+        if swig_ds in self.datasets and self.active_rasters(swig_ds) == 0:
+            self.datasets.pop(swig_ds)
 
     def get_dataset(self, filename):
         """Fetch gdal.Dataset for a filename.
@@ -3278,29 +3257,45 @@ class GvManager(_gv.Manager):
         This method fetches a gdal.Dataset for a given filename, while
         ensuring that the dataset is only opened once, even if requested
         more than once.
+    
+        Returns an opened  gdal.Dataset object.
+        """
+        for ds in self.datasets.itervalues():
+            if ds.GetDescription() == filename:
+                return ds
+        ds = gdal.Open(filename)
+        if ds:
+            return self.add_dataset(ds)
 
-	Returns an opened  gdal.Dataset object."""
+    def get_raster_dataset(self, raster):
+        swig_ds = _gv.Raster.get_dataset(raster)
+        if swig_ds in self.datasets:
+            return self.datasets[swig_ds]
 
-        swig_ds = _gv.Manager.get_dataset(self, filename)
-        if swig_ds is None:
-            return None
+    def get_raster_band(self, raster):
+        ds = self.get_raster_dataset(raster)
+        band_swigptr = _gv.Raster.get_band(raster)
+        if ds and band_swigptr:
+            for nBand in range(ds.RasterCount):
+                band = ds.GetRasterBand(nBand+1)
+                if '_%s_GDALRasterBandH' % hex(band.this) == band_swigptr:
+                    return band
 
-        return gdal.Dataset( _obj=swig_ds )
-
-    def get_dataset_raster(self,dataset,band):
+    def get_dataset_raster(self, dataset, band):
         """Fetch GvRaster for a dataset band.
 
         This method fetches a GvRaster for a given dataset band, while
         ensuring that only one GvRaster is instantiated for the band
-        across the whole application. """
+        across the whole application.
+        """
+        swig_ds = self.get_swig_ds(dataset)
+        raster = _gv.Manager.get_dataset_raster(self, swig_ds, band)
+        if raster:
+            gvraster = GvRaster(_obj=raster)
+            gvraster.connect('destroy', self.raster_destroyed)
+            return gvraster
 
-        raster_o = _gv.Manager.get_dataset_raster(self, dataset._o, band)
-        if raster_o is None:
-            return None
-
-        return GvRaster(_obj=raster_o)
-
-    def queue_task( self, task_name, priority, cb, cb_data = None ):
+    def queue_task(self, task_name, priority, cb, cb_data=None):
         """Queue an idle task.
 
         The GvManager has a concept of a unified, prioritized set of idle
@@ -3333,10 +3328,9 @@ class GvManager(_gv.Manager):
         cb -- python callback to invoke
         cb_data -- single argument to pass to callback (optional).
         """
+        _gv.Manager.queue_task(self, task_name, priority, cb, cb_data)
 
-        _gv.Manager.queue_task(self, task_name, priority, cb, cb_data )
-
-    def dump( self ):
+    def dump(self):
         """Dump GvManager info to stderr.
 
         The list of preferences, openev datasets, and idle tasks is written
@@ -3344,6 +3338,8 @@ class GvManager(_gv.Manager):
         """
         _gv.Manager.dump()
 
+    def raster_destroyed(self, raster):
+        self.remove_dataset(self.get_raster_dataset(raster))
 
 ###############################################################################
 def undo_register(data):
