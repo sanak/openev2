@@ -26,24 +26,22 @@
 
 import gtk
 from string import *
-import gvutils
-import pgucolorsel
+from pgucolorsel import ColorControl
 
 from gvconst import *
 import gview
 import gvhtml
 import gvogrfs
-import pgutogglebutton
+import pgu
 
 prop_dialog_list = []
 
 def LaunchVectorPropDialog(layer):
     # Check list to see if dialog exists - make it visible
     for test_dialog in prop_dialog_list:
-        if test_dialog.layer._o == layer._o:
+        if test_dialog.layer == layer:
             test_dialog.update_gui()
-            test_dialog.show()
-            test_dialog.window.raise_()
+            test_dialog.present()
             return test_dialog
 
     # Create new dialog if one doesn't exist already
@@ -87,7 +85,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         self.pane2.pack_start(box)
         box.pack_start( gtk.Label("Anti-alias:"), expand=False )
-        self.antialias = pgutogglebutton.pguToggleButton()
+        self.antialias = pgu.ToggleButton()
         self.antialias.connect('toggled', self.antialias_cb )
         box.pack_start( self.antialias, expand=False )
 
@@ -103,7 +101,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Symbol:'), expand=False)
-        self.point_symbol = gtk.Combo()
+        self.point_symbol = pgu.ComboBoxEntry()
         #add a default to symbol names
         self.point_symbol.set_popdown_strings( tuple(symbols) )
         self.point_symbol.entry.set_editable(False)
@@ -116,15 +114,14 @@ class GvVectorPropDialog(gtk.Window):
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Color:'),expand=False)
 
-        self.point_color = pgucolorsel.ColorControl('Point Color',
-                                                  self.symbol_cb)
+        self.point_color = ColorControl('Point Color', self.symbol_cb)
         box.pack_start(self.point_color)
 
         # Point size
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Point Size:'),expand=False)
-        self.point_size = gtk.Combo()
+        self.point_size = pgu.ComboBoxEntry()
         self.point_size.set_popdown_strings(
             ('1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '15', '20') )
         self.point_size.entry.connect('changed', self.point_size_cb)
@@ -142,8 +139,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Color:'),expand=False)
-        self.line_color = pgucolorsel.ColorControl('Line Color',
-                                         self.color_cb,'_line_color')
+        self.line_color = ColorControl('Line Color', self.color_cb, '_line_color')
         box.pack_start(self.line_color)
 
         #Line Width
@@ -167,14 +163,14 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Edge Color:'),expand=False)
-        self.area_edge_color = pgucolorsel.ColorControl('Area Edge Color',
+        self.area_edge_color = ColorControl('Area Edge Color',
                                               self.color_cb,'_area_edge_color')
         box.pack_start(self.area_edge_color)
 
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Fill Color:'),expand=False)
-        self.area_fill_color = pgucolorsel.ColorControl('Area Fill Color',
+        self.area_fill_color = ColorControl('Area Fill Color',
                                               self.color_cb,'_area_fill_color')
         box.pack_start(self.area_fill_color)
 
@@ -205,7 +201,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Label Field:'),expand=False)
-        self.label_field = gtk.Combo()
+        self.label_field = pgu.ComboBoxEntry()
         self.label_field.set_popdown_strings( fnlist )
         self.label_field.entry.connect('changed', self.label_change_cb)
         box.pack_start(self.label_field,expand=False)
@@ -214,8 +210,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Color:'),expand=False)
-        self.label_color = pgucolorsel.ColorControl('Label Color',
-                                                    self.label_change_cb)
+        self.label_color = ColorControl('Label Color', self.label_change_cb)
         box.pack_start(self.label_color)
 
         # Font
@@ -223,7 +218,7 @@ class GvVectorPropDialog(gtk.Window):
         box = gtk.HBox(spacing=3)
         vbox.pack_start(box, expand=False)
         box.pack_start(gtk.Label('Font:'),expand=False)
-        self.label_font = gtk.Combo()
+        self.label_font = pgu.ComboBoxEntry()
         self.label_font.set_popdown_strings(font_list)
         self.label_font.entry.connect('changed', self.label_change_cb)
         box.pack_start(self.label_font,expand=False)
