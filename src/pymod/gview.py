@@ -191,11 +191,11 @@ class GvViewArea(_gv.ViewArea):
 
     def get_width(self):
         """Return width of area in pixels."""
-        return _gv.gv_view_area_get_width(self)
+        return _gv.ViewArea.get_width(self)
 
     def get_height(self):
         """Return height of area in pixels."""
-        return _gv.gv_view_area_get_height(self)
+        return _gv.ViewArea.get_height(self)
 
     def add_layer(self, layer):
         """Add a new layer to the view window. 
@@ -219,14 +219,9 @@ class GvViewArea(_gv.ViewArea):
         Returns None if no such layer exists on the view."""
 
         return _gv.ViewArea.get_named_layer(self, name)
-        #### GTK2 _o = _gv.gv_view_area_get_named_layer(self._o,name)
-        #### GTK2 if _o is not None: return pgu._obj2inst(_o)
-        #### GTK2 return _o
 
     def active_layer(self):
         """Fetch the active layer for this view"""
-        #### GTK2 _o = _gv.gv_view_area_active_layer(self._o)
-        #### GTK2 if _o: return pgu._obj2inst(_o)
         return _gv.ViewArea.active_layer(self)
 
     def set_active_layer(self, layer):
@@ -323,7 +318,7 @@ class GvViewArea(_gv.ViewArea):
         (-1000,-2000) would be returned.  The value is returned as an
         (x,y) tuple."""
 
-        return _gv.gv_view_area_get_translation(self)
+        return _gv.ViewArea.get_translation(self)
 
     def get_flip_x( self ):
         """Fetch X flip flag.
@@ -596,14 +591,14 @@ class GvViewArea(_gv.ViewArea):
 
         The 3D eye position is returned as an (x,y,z) tuple."""
 
-        return _gv.gv_view_area_get_eye_pos(self)
+        return _gv.ViewArea.get_eye_pos(self)
 
     def get_eye_dir(self):
         """Fetch 3D eye direction
 
         The 3D eye direction is returned as an (x,y,z) tuple."""
 
-        return _gv.gv_view_area_get_eye_dir(self)
+        return _gv.ViewArea.get_eye_dir(self)
 
     def get_look_at_pos(self):
         """Fetch georeference location in z-plane that eye is looking
@@ -708,6 +703,11 @@ class GvViewArea(_gv.ViewArea):
         """
 
         return _gv.ViewArea.format_point_query( self, x, y )
+
+    def remove_all_layers(self):
+        for layer in self.list_layers():
+            self.remove_layer(layer)
+            layer = None
 
 ###############################################################################
 def GvShapeFromXML(tree, parent, filename=None):
@@ -1189,36 +1189,6 @@ class GvShapes(_gv.Shapes):
         if name:
             self.set_name(name)
 
-    def __len__(self):
-        """Return number of shapes in container."""
-        return _gv.gv_shapes_num_shapes(self)
-
-    def __getitem__(self, index):
-        """Return an individual shape by index"""
-        shp_o = _gv.gv_shapes_get_shape(self, index)
-        if shp_o is not None:
-            return GvShape(_obj=shp_o)
-        else:
-            if index < 0 or index >= _gv.gv_shapes_num_shapes(self):
-                raise IndexError
-            else:
-                return None;
-
-    def __setitem__(self, index, shape):
-        """Overwrite a shape by index
-
-        Note that this actually deletes the old shape, and the new shape
-        will hereafter be referenced in the layer.  Only freestanding GvShape
-        objects (not assigned to any existing GvShapes) should be assigned in
-        this manner, and they will thereafter be owned by the GvShapes."""
-
-        _gv.Shapes.replace_shapes(self, [index,], [shape._o,])
-
-    def __delitem__(self, index):
-        """Delete an individual shape by index"""
-
-        _gv.Shapes.delete_shapes(self, [index,])
-
     def serialize(self, base=None, filename=None):
         """serialize this object in a format suitable for XML representation.
         """
@@ -1242,21 +1212,24 @@ class GvShapes(_gv.Shapes):
 
         shape -- GvShape to add.
 
-        Returns the id of the newly added shape."""
-        return _gv.Shapes.add_shape(self, shape._o)
+        Returns the id of the newly added shape.
+        """
+        return _gv.Shapes.append(self, shape)
 
     def append_last(self, shape):
         """Add GvShape to GvShapes always at the end of list. 
 
         shape -- GvShape to add.
 
-        Returns the id of the newly added shape."""
-        return _gv.Shapes.add_shape_last(self, shape._o)
+        Returns the id of the newly added shape.
+        """
+        return _gv.Shapes.append_last(self, shape)
 
     def get_extents(self):
         """Fetch bounds extents of shapes.
 
-        The extents are returned as an (xmin,ymin,xsize,ysize) tuple."""
+        The extents are returned as an (xmin,ymin,xsize,ysize) tuple.
+        """
         return _gv.Shapes.get_extents(self)
 
     def delete_shapes(self, shapes):
@@ -1265,8 +1238,8 @@ class GvShapes(_gv.Shapes):
         shapes -- a list of integer shape indexes to delete
 
         Note the underlying GvShape objects are destroyed in addition to
-        them being removed from the container."""
-
+        them being removed from the container.
+        """
         _gv.Shapes.delete_shapes(self, shapes)
 
     def save_to(self, filename, type = 0):
@@ -1280,17 +1253,16 @@ class GvShapes(_gv.Shapes):
         filename -- name of file to save to (extension will be automatically
                     supplied)
         type -- One of the shapefile type codes, or zero to try and auto
-        detect the type of file to create.  Zero is the default."""
-
-        return _gv.gv_shapes_to_shapefile( filename, self, type )
+        detect the type of file to create.  Zero is the default.
+        """
+        return _gv.Shapes.save_to(self, filename, type)
 
     def save_to_dbf(self, filename):
         """Save shape attributes to a DBF file.
 
         filename -- name of the file to save to
         """
-
-        return _gv.gv_shapes_to_dbf( filename, self )
+        return _gv.Shapes.save_to_dbf(self, filename)
 
     def get_change_info(self, c_object):
         """Used to convert a PyCObject as returned from a changed/changing
@@ -1301,9 +1273,9 @@ class GvShapes(_gv.Shapes):
         (change_type, num_shapes, (shape_ids))
         where change_type is defined in gvconst.py
               num_shapes is an integer
-              shape_ids is a list of shape IDs"""
-
-        return _gv.gv_shapes_get_change_info(c_object)
+              shape_ids is a list of shape IDs
+        """
+        return _gv.Shapes.get_change_info(c_object)
 
     def add_height( self, raster, offset=0.0, default_height = 0.0 ):
         """Set vertex heights from raster DEM.
@@ -1319,36 +1291,35 @@ class GvShapes(_gv.Shapes):
 
         raster -- a GvRaster from which to sample elevations, should be in
         a compatible coordinate system to the shapes.
-        offset -- optional offset to apply to the vertices. """
-
+        offset -- optional offset to apply to the vertices.
+        """
         # Actually add the height.
-        _gv.GvShapes.add_height( self, raster, offset, default_height )
+        _gv.Shapes.add_height( self, raster, offset, default_height )
 
-    def get_schema( self, fieldname = None ):
+    def get_schema(self, fieldname=None):
         """Fetch attribute schema.
 
-        When read from GIS data sources such as shapefiles or OGR supported
-        GIS formats, there will be a schema associated with a GvShapes
-        grouping.  The schema is the definition of the list of attributes
-        shared by all shapes in the container.  This information is stored
-        in the properties of the GvShapes.  This method extracts the schema
-        information in a more easily used form for Python.
+            When read from GIS data sources such as shapefiles or OGR supported
+            GIS formats, there will be a schema associated with a GvShapes
+            grouping.  The schema is the definition of the list of attributes
+            shared by all shapes in the container.  This information is stored
+            in the properties of the GvShapes.  This method extracts the schema
+            information in a more easily used form for Python.
 
-        The returned schema will contain a list of tuples, with one tuple
-        per attribute in the schema.  The tuples wille each contain four
-        elements.
+            The returned schema will contain a list of tuples, with one tuple
+            per attribute in the schema.  The tuples wille each contain four
+            elements.
 
-         - name: the name of the field.
-         - type: the type of the field.  One of 'integer', 'float' or 'string'.
-         - width: the width normally used for displaying the field, and
-                  limiting storage capacity in some formats (ie. shapefiles)
-         - precision: the number of decimal places preserved.  For non
-                      floating point values this is normally 0.
+             - name: the name of the field.
+             - type: the type of the field.  One of 'integer', 'float' or 'string'.
+             - width: the width normally used for displaying the field, and
+                      limiting storage capacity in some formats (ie. shapefiles)
+             - precision: the number of decimal places preserved.  For non
+                          floating point values this is normally 0.
 
-        Optionally, a single fieldname can be given as an argument and only
-        schema tuple for that field will be returned (or None if it does not
-        exist).
-
+            Optionally, a single fieldname can be given as an argument and only
+            schema tuple for that field will be returned (or None if it does not
+            exist).
         """
         prop = self.get_properties()
 
@@ -1357,32 +1328,29 @@ class GvShapes(_gv.Shapes):
         key_name = '_field_name_' + str(cur_field)
 
         while prop.has_key(key_name):
-            name = prop['_field_name_'+str(cur_field)]
+            fid = '_field_name_%s' % cur_field
+            name = prop[fid]
 
-            if fieldname is not None \
-               and name.lower() != fieldname.lower():
-                cur_field = cur_field + 1
-                key_name = '_field_name_' + str(cur_field)
+            if fieldname and name.lower() != fieldname.lower():
+                cur_field += 1
+                key_name = fid
                 continue
 
-            type = prop['_field_type_'+str(cur_field)]
-            width = int(prop['_field_width_'+str(cur_field)])
-            try:
-                precision = int(prop['_field_precision_'+str(cur_field)])
-            except:
-                precision = 0
+            type = prop['_field_type_%s' % cur_field]
+            width = int(prop['_field_width_%s' % cur_field])
+            precision = int(prop.get('_field_precision_%s' % cur_field, 0))
 
             field_schema = (name, type, width, precision)
 
-            if fieldname is not None:
+            if fieldname:
                 return field_schema
 
-            schema.append( field_schema )
+            schema.append(field_schema)
 
-            cur_field = cur_field + 1
-            key_name = '_field_name_' + str(cur_field)
+            cur_field += 1
+            key_name = '_field_name_%s' % cur_field
 
-        if fieldname is not None:
+        if fieldname:
             return None
         else:
             return schema
@@ -1427,35 +1395,35 @@ class GvShapes(_gv.Shapes):
 
         return result
 
-    def add_field( self, name, type = 'string', width = 0, precision = 0 ):
-
+    def add_field(self, name, type='string', width=0, precision=0):
         """Add field to schema.
 
-        This function will define a new field in the schema for this
-        container.  The schema is stored in the GvShapes properties, and it
-        used by selected functions such as the save_to() method to define
-        the schema of output GIS files.
+            This function will define a new field in the schema for this
+            container.  The schema is stored in the GvShapes properties, and it
+            used by selected functions such as the save_to() method to define
+            the schema of output GIS files.
 
-        Note that adding a field to the schema does not cause it to be
-        added to all the individual GvShape objects in the container.
-        However, the save_to() method will assume a default value for
-        shapes missing some of the fields from the schema, so this is generally
-        not an issue. 
+            Note that adding a field to the schema does not cause it to be
+            added to all the individual GvShape objects in the container.
+            However, the save_to() method will assume a default value for
+            shapes missing some of the fields from the schema, so this is generally
+            not an issue. 
 
-        name -- the name of the field.  The application is expected to ensure
-                this is unique within the layer.
+            name -- the name of the field.  The application is expected to ensure
+                    this is unique within the layer.
 
-        type -- the type of the field.  Must be one of 'integer', 'float', or
-                'string'.
+            type -- the type of the field.  Must be one of 'integer', 'float', or
+                    'string'.
 
-        width -- the field width.  May be zero to indicated variable width.
+            width -- the field width.  May be zero to indicated variable width.
 
-        precision -- the number of decimal places to be preserved.  Should be
-                     zero for non-float field types.
+            precision -- the number of decimal places to be preserved.  Should be
+                         zero for non-float field types.
 
-        The field number of the newly created field is returned."""
+            The field number of the newly created field is returned.
+        """
 
-        if type != 'float' and type != 'integer' and type != 'string':
+        if type not in ('float','integer','string'):
             raise ValueError, 'Illegal field type "'+type+'" in GvShapes.add_field(), should be float, integer or string.'
 
         if precision != 0 and type != 'float':
@@ -1464,14 +1432,50 @@ class GvShapes(_gv.Shapes):
         cur_schema = self.get_schema()
         new_entry = len(cur_schema) + 1
 
-        self.set_property( '_field_name_'+str(new_entry), name )
-        self.set_property( '_field_type_'+str(new_entry), type )
-        self.set_property( '_field_width_'+str(new_entry), str(width) )
-        self.set_property( '_field_precision_'+str(new_entry), str(precision))
+        self.set_property('_field_name_%s' % new_entry, name)
+        self.set_property('_field_type_%s' % new_entry, type)
+        self.set_property('_field_width_%s' % new_entry, str(width))
+        self.set_property('_field_precision_%s' % new_entry, str(precision))
 
         return new_entry
 
+    def get_fieldnames(self, schema=None):
+        if not schema:
+            schema = self.get_schema()
 
+        return [ field[0] for field in schema ]
+
+    def new_field(self, fdef):
+        """Only a wrapper around add_field to accept a field def as a tuple."""
+        return self.add_field(fdef[0], fdef[1], fdef[2], fdef[3])
+
+    def del_fields(self, fields):
+        """Delete fields in given list from schema. Use with caution!!"""
+        props = self.get_properties()
+        for field in fields:
+            fid = self.get_fid(field)
+            if fid:
+                try:
+                    del props['_field_name_%s' % fid]
+                    del props['_field_type_%s' % fid]
+                    del props['_field_width_%s' % fid]
+                    del props['_field_precision_%s' % fid]
+                except:
+                    pass
+
+        self.set_properties(props)
+
+    def copy_fields(self, schema):
+        """Copy fields from given schema."""
+        fnames = [ field[0] for field in self.get_schema() ]
+        for field in schema:
+            if field[0] not in fnames:
+                self.new_field(field)
+
+    def collect_field(self, fname):
+        """Collect typed values from given field."""
+        ftype = self.get_schema(fname)[1]
+        return [shp.get_typed_property(fname, ftype) for shp in self]
 
 ###############################################################################
 # GvPoints, GvPolylines and GvAreas deprecated
@@ -1557,6 +1561,7 @@ class GvRaster(_gv.Raster):
                 dataset_raw = None
             _gv.Raster.__init__(self, filename, sample, real, dataset_raw)
         else:
+            # MB: I don't like it but it will do for now...
             _gv.Raster.__init__(self, _obj=_obj)
 
     def flush_cache(self,x_off=0,y_off=0,width=0,height=0):
@@ -1608,7 +1613,7 @@ class GvRaster(_gv.Raster):
 
         Returns a (pixel,line) coordinate tuple on the raster."""
 
-        return _gv.Raster.georef_to_pixelCL(self, x, y)
+        return _gv.Raster.cursor_link_georef_to_pixel(self, x, y)
 
     def pixel_to_georef(self, x, y ):
         """Translate pixel/line to georeferenced coordinate.
@@ -1657,7 +1662,7 @@ class GvRaster(_gv.Raster):
         Returns (change_type, x_off, y_off, width, height)
            where change_type is defined in gvconst.py and the rest are integers.
         """
-        return _gv.gv_raster_get_change_info(c_object)
+        return _gv.Raster.get_change_info(c_object)
 
     def get_band_number(self):
         band = self.get_band()
@@ -1739,13 +1744,13 @@ class GvRaster(_gv.Raster):
         """Get the minimum for default scaling
 
         See the autoscale() method for information on this is established."""
-        return _gv.gv_raster_get_min(self)
+        return self.min
 
     def get_max(self):
         """Get the maximum for default scaling
 
         See the autoscale() method for information on this is established."""
-        return _gv.gv_raster_get_max(self)
+        return self.max
 
     def force_load(self):
         """Force loading all full res data.
@@ -1757,7 +1762,7 @@ class GvRaster(_gv.Raster):
         provide speculative "preloading" of smallish files to provide smooth
         animation effects."""
 
-        _gv.gv_raster_force_load( self )
+        _gv.Raster.force_load(self)
 
     def get_gcps(self):
         gcp_tuple_list = _gv.Raster.get_gcps(self)
@@ -1924,17 +1929,21 @@ class GvLayer(_gv.Layer):
         classifyier = GvClassificationDlg(classification)
         classifyier.show()
 
+    def declassify(self):
+        props = self.get_properties()
+        for prop in props.keys():
+            if prop.startswith('Class'):
+                props.pop(prop)
+        self.set_properties(props)
+        self.changed()
+
     def show_legend(self):
         from gvclassification import GvClassification
         import gvlegenddlg
 
         cls = GvClassification(self)
-        if cls.count > 0:
-            gvlegenddlg.show_legend( self )
-
-    def refresh( self ):
-        """Refresh from view of layer as required by layer type."""
-        pass
+        if cls.count:
+            return gvlegenddlg.show_legend(self)
 
 ###############################################################################
 class GvShapeLayer(GvLayer, _gv.ShapeLayer):
@@ -1956,9 +1965,11 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
 
     """
     def __init__(self, _obj=None):
-        if (_obj == None):
+        if _obj is None:
             _gv.ShapeLayer.__init__(self)
             _obj = self
+        else:
+            _gv.ShapeLayer.__init__(_obj)
         GvLayer.__init__(self, _obj)
 
     def serialize(self, base, filename=None ):
@@ -2131,13 +2142,18 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
     """
 
     def __init__(self, shapes=None, _obj=None):
-        if (_obj == None):
+        if _obj is None:
             _gv.ShapesLayer.__init__(self, shapes)
             _obj = self
+        else:
+            _gv.ShapesLayer.__init__(_obj, shapes)
         GvShapeLayer.__init__(self, _obj)
         if shapes is not None:
-            self.set_data(shapes)
-        self.sink()
+            self.set_layer_type(shapes)
+
+    def get_parent(self):
+        """Fetch parent shapes."""
+        return self.parent
 
     def serialize( self, base = None, filename=None ):
         """Create a representation of this object suitable for XMLing.
@@ -2173,15 +2189,11 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
         return base
 
     def launch_properties(self):
-        import gvvectorpropdlg
-        return gvvectorpropdlg.LaunchVectorPropDialog( self )
+        from gvvectorpropdlg import LaunchVectorPropDialog
+        return LaunchVectorPropDialog(self)
 
-    def get_symbol_manager( self, ok_to_create = 0 ):
-        _sm = _gv.ShapesLayer.get_symbol_manager( self, ok_to_create )
-        if _sm is None:
-            return None
-        else:
-            return GvSymbolManager( _obj = _sm )
+    def get_symbol_manager(self, ok_to_create=0):
+        return _gv.ShapesLayer.get_symbol_manager(self, ok_to_create)
 
     def initialize_from_xml( self, tree, filename=None ):
         """initialize this object from the XML tree
@@ -2195,6 +2207,19 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
             sm.initialize_from_xml( sm_xml, filename=filename )
 
         GvShapeLayer.initialize_from_xml( self, tree, filename=filename )
+
+    def set_layer_type(self, shapes=None, shape_type=None):
+        if shapes:
+            self.layer_type = shapes[0].get_shape_type()
+        elif shape_type:
+            self.layer_type = shape_type
+
+    def declassify(self):
+        for shp in self.get_parent():
+            props = shp.get_properties()
+            props.pop('_gv_ogrfs')
+            shp.set_properties(props)
+        GvLayer.declassify(self)
 
 ###############################################################################
 # GvPointLayer, GvLineLayer and GvAreaLayer deprecated
@@ -2390,20 +2415,19 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         if raster is None:
             raise ValueError, "expecting GvRaster instance"
-        if (_obj == None):
+        if _obj is None:
             _gv.RasterLayer.__init__(self, raster, rl_mode, creation_properties)
             _obj = self
+        else:
+            _gv.RasterLayer.__init__(_obj)
         GvLayer.__init__(self, _obj)
-
-        #self.sink()
 
         # Note: we don't want to include alpha in self.sources as it should
         # not be enhanced.
-        if self.get_mode() == RLM_SINGLE:
+        mode = self.get_mode()
+        if mode in (RLM_SINGLE,RLM_COMPLEX):
             self.sources = 1
-        elif self.get_mode() == RLM_COMPLEX:
-            self.sources = 1
-        elif self.get_mode() == RLM_PSCI:
+        elif mode == RLM_PSCI:
             self.sources = 2
         else:
             self.sources = 3
@@ -2502,9 +2526,6 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         pseudocolored with 2D lookup table)."""
         return _gv.RasterLayer.get_mode(self);
 
-    def get_mesh_lod(self):
-        return _gv.gv_raster_layer_get_mesh_lod(self)
-
     def get_data(self, isource=0):
         """Fetch the GvRaster for a source.
 
@@ -2515,24 +2536,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         isource -- the source index (from 0 to 3).  
         """
-
-        #
-        # GTK2 PORT - Not sure why we have 'get_data' for some things and
-        # 'get_parent' for others, but I'll use parent_data here (as well
-        # as in 'get_parent'); I don't think anything bad will happen...
-        # PENDING
-        #
-
-        if not hasattr(self, "parent_data"):
-            parent_o = _gv.RasterLayer.get_data(self, isource)
-            if (parent_o.__class__.__name__[0:2] == "Gv"):
-                self.parent_data = parent_o
-            else:
-                classname = "Gv" + parent_o.__class__.__name__
-                call = "self.parent_data = " + classname + "(_obj=parent_o)"
-                exec call
-
-        return self.parent_data
+        return _gv.RasterLayer.get_data(self, isource)
 
     def source_get_lut(self, isource=0):
         """Fetch the lut for a source
@@ -2543,11 +2547,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         GvRasterLayer.set_source().
 
         isource -- the source to fetch from."""
-        return _gv.gv_raster_layer_get_source_lut(self, isource);
+        return _gv.RasterLayer.get_source_lut(self, isource);
 
     def get_nodata(self, isource):
-	"""Fetch NODATA value. DEPRECATED: use nodata_get()."""
-        return _gv.gv_raster_layer_get_nodata( self, isource )
+        """Fetch NODATA value. DEPRECATED: use nodata_get()."""
+        return _gv.RasterLayer.nodata_get( self, isource )
 
     def set_source(self, isource, data, min=None, max=None, const_value=0,
                    lut=None, nodata=None):
@@ -2576,35 +2580,29 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         values in the range 0-255. 
         """
 
-        #if data is None:
-        #    data_o = None
-        #else:
-        #    data_o = data._o
-
-	if (min is None):
-            if (data is not None):
-	        min = data.get_min()
+        if min is None:
+            if data is not None:
+                min = data.min
             else:
                 min = 0
 
-	if (max is None):
-            if (data is not None):
-	        max = data.get_max()
+        if max is None:
+            if data is not None:
+                max = data.max
             else:
                 max = 255
 
-        if( self.get_property("_scale_lock") is not None and 
-            self.get_property("_scale_lock") == "locked" ) :
-
-            if( self.get_property("_scale_limits") is not None ) : 
-                min, max = map(float, self.get_property("_scale_limits").split())
+        prop = self.get_property("_scale_lock")
+        if prop and prop == "locked":
+            if self.get_property("_scale_limits"): 
+                min, max = map(float, prop.split())
 
         #
         # Check for GvRasterLut default enhancement type set for
         # band, and if it exists set for source
         #
         if lut is None and data is not None:
-            band = data.get_band()
+            band = manager.get_raster_band(data)
             md = band.GetMetadata()
             if md.has_key(GV_LUT_TYPE):
                 lut = gvlut.GvLut.create_lut(md.get(GV_LUT_TYPE), data)
@@ -2615,8 +2613,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                         max = float(md[GV_LUT_MAX])
 
         return _gv.RasterLayer.set_source(self, isource, data,
-                                          min, max, const_value, lut,
-                                          nodata )
+                                      min, max, const_value, lut, nodata)
 
     def min_set(self,isource,min):
         """Set the scaling minimum.
@@ -2661,15 +2658,15 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
     def nodata_get(self,isource):
         """Fetch the NODATA value."""
-	return _gv.RasterLayer.nodata_get(self,isource)
+        return _gv.RasterLayer.nodata_get(self,isource)
 
     def type_get(self,isource):
         """Fetch GDAL type of the raster object."""
-	return _gv.RasterLayer.type_get(self,isource)
+        return _gv.RasterLayer.type_get(self,isource)
 
     def get_const_value(self,isource):
         """Fetch source constant value"""
-        return _gv.gv_raster_layer_get_source_const_value(self,isource)
+        return _gv.RasterLayer.get_const_value(self,isource)
 
     def zoom_set(self,mag_mode,min_mode):
         """Set interpolation method
@@ -2830,20 +2827,16 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
     def autoscale( self, alg = ASAAutomatic, alg_param = -1.0, isource=0,
                    viewonly = 0):
-        """
-
-        """
-        if viewonly == 0:
-            raster = self.get_data(isource)
-            if raster is None:
-                return (self.min_get(isource), self.max_get(isource))
-            else:
-                return raster.autoscale(alg, alg_param)
-
-        else:
+        if viewonly:
             try:
                 return self.autoscale_view(alg, alg_param, isource)
             except:
+                return (self.min_get(isource), self.max_get(isource))
+        else:
+            raster = self.get_data(isource)
+            if raster:
+                return raster.autoscale(alg, alg_param)
+            else:
                 return (self.min_get(isource), self.max_get(isource))
 
     def histogram_view(self, isource = 0, scale_min = 0.0, scale_max = 255.0,
@@ -2912,10 +2905,6 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                                          min_height, max_height)
 
     def complex_lut(self, method='magnitude'):
-
-        # This property is set at c-level now.
-        #self.set_property( 'last_complex_lut', method )
-
         # Magnitude
         if method == 'magnitude':
             self.lut_color_wheel_new_ev( 0, 1 )
@@ -3085,16 +3074,16 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         self.set_property( 'last_stretch', 'square' )
 
     def window_restretch(self):
-
         # Re-apply the last stretch operation.
-        if self.get_property( 'last_stretch' ) != None:
-            func_name = 'self.'+ self.get_property('last_stretch')
+        last_stretch = self.get_property('last_stretch')
+        if last_stretch:
+            func_name = 'self.' + last_stretch
         else:
-            func_name = 'self.'+ 'linear'
+            func_name = 'self.linear'
 
         exec 'func = ' + func_name  in locals()
 
-        func( viewonly = 1 )
+        func(viewonly=1)
 
     def get_height( self, x, y ):
         """Fetch 3D mesh height at location
@@ -3107,9 +3096,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         x -- Georeferenced X location to sample at. 
         y -- Georeferenced Y location to sample at.
         """
-        return _gv.gv_raster_layer_get_height( self, x, y )
+        return _gv.RasterLayer.get_height( self, x, y )
 
-    def build_skirt( self, base_height = 0.0 ):
+    def build_skirt(self, base_height=0.0):
         """Build a skirt around the edges of layer.
 
         The skirt is basically edges dropping down from the edge of the
@@ -3121,11 +3110,10 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         The returned skirt is a GvLayer (currently a GvShapesLayer). 
         """
-        layer_o = _gv.gv_build_skirt( self, base_height )
+        layer_o = _gv.RasterLayer.build_skirt(self, base_height)
         if layer_o is not None:
-            return GvLayer( layer_o )
-        else:
-            return None
+            layer_o.layer_type = 0
+            return layer_o
 
     def refresh( self ):
         """Refresh raster data from disk."""
