@@ -3,8 +3,8 @@ import gviewapp
 import gview
 import gvcommand
 import gvcorecmds
-import Numeric
-import gdalnumeric
+import numpy as Numeric
+from osgeo import gdalnumeric
 import sys
 from pyshell import _run_command_line
 from IPython.iplib import InteractiveShell

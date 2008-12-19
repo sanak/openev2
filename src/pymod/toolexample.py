@@ -7,8 +7,9 @@
 import gviewapp
 import gtk
 import os
-import gdal, gdalnumeric
-import Numeric
+from osgeo import gdal
+from osgeo import gdalnumeric
+import numpy as Numeric
 import string
 from gvsignaler import Signaler
 

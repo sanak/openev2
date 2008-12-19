@@ -30,7 +30,7 @@
 ###############################################################################
 
 import gview
-import Numeric
+import numpy as Numeric
 import os
 import gvogrfs
 
@@ -669,8 +669,6 @@ def GetLatLongString(ddvalue,lltype='latitude'):
 
         returns: lat/long string
     """
-    import Numeric
-
     deg=int(abs(ddvalue))
     min=int((abs(ddvalue)-deg)*60)
     sec=int((abs(ddvalue)-deg-(float(min)/60.0))*3600.0)

@@ -26,13 +26,13 @@
 ###############################################################################
 
 import gview
-import gdalnumeric
-import gdal
+from osgeo import gdalnumeric
+from osgeo import gdal
 
 ###############################################################################
 # define easy file view command
 def display(array, prototype_name = None):
-    import Numeric
+    import numpy as Numeric
     if len(Numeric.shape(array)) == 1:
         array=Numeric.reshape(array,(1,Numeric.shape(array)[0]))
 
@@ -91,7 +91,7 @@ def local_vars_list( var_list = None, typestrings=None ):
                     to search for).
     """
 
-    import Numeric
+    import numpy as Numeric
     img_type = type(Numeric.array((1,2)))
 
     type_dict = {'b': 'UnsignedInt8', 'D': 'CFloat64', 'F':'CFloat32',

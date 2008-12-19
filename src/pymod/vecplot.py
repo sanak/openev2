@@ -66,7 +66,7 @@
 #
 
 import gview
-import Numeric
+import numpy as Numeric
 import gtk
 import pgumenu
 import os

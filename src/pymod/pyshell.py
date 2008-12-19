@@ -45,8 +45,8 @@ def launch(pyshellfile=None):
         gview.app.shell = shell
 
         # Initialization Commands
-        shell.command('from Numeric import *')
-        shell.command('from gdalnumeric import *')
+        shell.command('from numpy import *')
+        shell.command('from osgeo.gdalnumeric import *')
         shell.command('from gvshell import *')
         shell.command('from gvplot import plot')
         shell.command('gview.shell_base_vars = dir()')
@@ -65,8 +65,8 @@ def launch_standalone(pyshellfile=None):
     gview.app.shell = shell
 
     # Initialization Commands 
-    shell.command('from Numeric import *')
-    shell.command('from gdalnumeric import *')
+    shell.command('from numpy import *')
+    shell.command('from osgeo.gdalnumeric import *')
     shell.command('from gvshell import *')
     shell.command('from gvplot import plot')
     shell.command('gview.shell_base_vars = dir()')
@@ -550,7 +550,7 @@ class MyInteractiveConsole(code.InteractiveConsole):
             variables or in the help.  If not, try to
             import it.
         """
-        import Numeric
+        import numpy as Numeric
 
         dtxt=None # default text
         # mname- name of module for shell variable func
@@ -889,7 +889,7 @@ class PseudoFile:
         self.shell.my_write(s, self.name)
         # self.shell.write(s)
 
-        import gdal
+        from osgeo import gdal
         gdal.Debug( "stderr", s )
 
     def writelines(self, l):
@@ -1014,7 +1014,7 @@ class Shell(gtk.Window):
         #text = gtk.Text()
         #text.set_editable(False)
         #top_console.pack_start(text, expand=True)
-    text_buff = gtk.TextBuffer()
+        text_buff = gtk.TextBuffer()
         text_window = ScrollableTextView(text_buff)
         text_view = text_window._textview
         text_view.set_editable(False)
@@ -1041,9 +1041,9 @@ class Shell(gtk.Window):
         #prompt.set_size_request(550, 50)
         #prompt.set_editable(True)
         #vbox.pack_start(prompt, expand=False)
-    prompt_buff = gtk.TextBuffer()
-    prompt_view = gtk.TextView(prompt_buff)
-    prompt_view.set_size_request(550, 50)
+        prompt_buff = gtk.TextBuffer()
+        prompt_view = gtk.TextView(prompt_buff)
+        prompt_view.set_size_request(550, 50)
         prompt_view.set_editable(True)
         vbox.pack_start(prompt_view, expand=False)
 
@@ -1481,7 +1481,7 @@ class Shell(gtk.Window):
 
     def load_pyshell_file_from_xml(self,pyshellfile="DefaultPyshellFile.xml"):
         import gview
-        import gdal
+        from osgeo import gdal
 
         pyshellfile=os.path.join(gview.home_dir,'xmlconfig',pyshellfile)
         try:
@@ -1985,9 +1985,9 @@ class PyshellHelpDialog(gtk.Window):
         pixel_scroll.set_size_request(496,250)
         vbox.add2(pixel_scroll)
 
-    self.help_buff = gtk.TextBuffer()
-    self.help_view = gtk.TextView(self.help_buff)
-    self.help_view.set_wrap_mode(gtk.WRAP_CHAR)
+        self.help_buff = gtk.TextBuffer()
+        self.help_view = gtk.TextView(self.help_buff)
+        self.help_view.set_wrap_mode(gtk.WRAP_CHAR)
         self.help_view.set_editable(False)
         pixel_scroll.add(self.help_view)
 
@@ -2112,7 +2112,7 @@ class PyshellHelpDialog(gtk.Window):
         import gview
 
         # Need numeric to locate ufunc's 
-        import Numeric
+        import numpy as Numeric
 
         self.loaded_func_keys=[]
         for ckey in gview.app.shell.interp.locals.keys():

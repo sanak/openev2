@@ -126,7 +126,7 @@ class GvFunctionsCommand(gvcommand.CommandBase):
 
     def execute( self, args, line, interp ):
         import os
-        import Numeric
+        import numpy as Numeric
 
         modname=args[0]
         verbose = args[1]
@@ -427,7 +427,7 @@ class GvHelpCommand(gvcommand.CommandBase):
         cf_name = args[0]
         gui_switch=args[1]
 
-        import Numeric
+        import numpy as Numeric
 
         if ((cf_name is None) and (gui_switch == 0)):
             print interp.get_command_help('help')
@@ -816,7 +816,7 @@ class GvGetCommand(gvcommand.CommandBase):
 
         import gvutils
         import gview
-        import gdalnumeric
+        from osgeo import gdalnumeric
 
         clayer = gview.app.sel_manager.get_active_layer()
         if clayer is None:
@@ -860,7 +860,7 @@ class GvGetCommand(gvcommand.CommandBase):
                 return 0
 
             try:
-                import Numeric
+                import numpy as Numeric
                 new_arr=gdalnumeric.LoadFile('_temp.tif')
                 if ((max(Numeric.ravel(Numeric.fabs(new_arr[0,:,:] - new_arr[1,:,:])))
                      == 0) and
@@ -994,7 +994,7 @@ class GvShowCommand(gvcommand.CommandBase):
              ]
 
     def execute(self, args, line, interp):
-        import gdalnumeric
+        from osgeo import gdalnumeric
         import gview
 
         data=args[0][0]
@@ -1021,7 +1021,7 @@ class GvShowCommand(gvcommand.CommandBase):
                 if item is not None:
                     item.hide()
 
-        import Numeric
+        import numpy as Numeric
         if type(data) == type(Numeric.zeros([1,1])):
             if ncswitch == 0:
                 # By default, display a copy of the
@@ -1140,7 +1140,7 @@ class GvSaveCommand(gvcommand.CommandBase):
             ]                  
 
     def execute(self, args, line, interp):
-        import gdalnumeric
+        from osgeo import gdalnumeric
         import gview
 
         data=args[0][0]
@@ -1155,7 +1155,7 @@ class GvSaveCommand(gvcommand.CommandBase):
             interp.showText('No input variable supplied','error')
             return 0
 
-        import Numeric
+        import numpy as Numeric
         if type(data) == type(Numeric.zeros([1,1])):
 
             # Only array data should get to here                
@@ -1167,7 +1167,7 @@ class GvSaveCommand(gvcommand.CommandBase):
                 return 1
             except ValueError:
                 txt = fmt + ' format not available.  Available formats are:\n'
-                import gdal
+                from osgeo import gdal
                 for cDriver in gdal.GetDriverList():
                     txt = txt + cDriver.ShortName + ' '
                 interp.showText(txt,'error')
