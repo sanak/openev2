@@ -24,19 +24,15 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk as _gtk
-#import _gtkmissing PENDING  GTK2 PORT
 import _gv
-import gvutils
+from gvxml import XMLFind, XMLFindValue, XMLInstantiate
 import gvlut
 import os
 import sys
-import pgu
-import gdal
+from osgeo import gdal
 from gvconst import *
-from gdalconst import *
+from osgeo.gdalconst import *
 import pathutils
-from gvobject import GvObject
 
 """
 Classes for viewing and interacting with geographic image and vector data.
@@ -68,7 +64,7 @@ SMSample = 1
 SMAverage8bitPhase = 2
 
 ###############################################################################
-class GvViewArea(GvObject, _gv.ViewArea):
+class GvViewArea(_gv.ViewArea):
     """Gtk geographic view area.
 
     Signals:
@@ -91,11 +87,8 @@ class GvViewArea(GvObject, _gv.ViewArea):
     to translate raw GtkWidget coordinates to georeferenced positions.
     """
 
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.ViewArea.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+    def __init__(self):
+        _gv.ViewArea.__init__(self)
 
     def serialize(self, filename=None ):
         tree = [gdal.CXT_Element, 'GvViewArea']
@@ -168,52 +161,52 @@ class GvViewArea(GvObject, _gv.ViewArea):
     def initialize_from_xml( self, tree, filename=None ):
         self.set_property( '_supress_realize_auto_fit', 'on' )
 
-        layer_trees = gvutils.XMLFind( tree, 'Layers')
+        layer_trees = XMLFind( tree, 'Layers')
         if layer_trees is not None:
             for layer_tree in layer_trees[2:]:
-                layer = gvutils.XMLInstantiate( layer_tree, self, filename=filename )
+                layer = XMLInstantiate( layer_tree, self, filename=filename )
                 if layer is not None:
                     self.add_layer( layer )
                     self.set_active_layer( layer )
                 else:
                     print 'Failed to instantiate layer:', layer_tree
 
-        tr = gvutils.XMLFind( tree, 'Translation')
+        tr = XMLFind( tree, 'Translation')
         if tr is not None:
-            x = float(gvutils.XMLFindValue( tr, 'x', '0.0'))
-            y = float(gvutils.XMLFindValue( tr, 'y', '0.0'))
+            x = float(XMLFindValue( tr, 'x', '0.0'))
+            y = float(XMLFindValue( tr, 'y', '0.0'))
             cur_tr = self.get_translation()
             self.translate( x - cur_tr[0], y - cur_tr[1] )
 
-        zm = float(gvutils.XMLFindValue( tree, 'Zoom', 
+        zm = float(XMLFindValue( tree, 'Zoom', 
                                          str(self.get_zoom()) ))
         self.zoom( zm - self.get_zoom() )
 
-        flip_x = int(gvutils.XMLFindValue( tree, 'FlipX','1'))
-        flip_y = int(gvutils.XMLFindValue( tree, 'FlipY','1'))
+        flip_x = int(XMLFindValue( tree, 'FlipX','1'))
+        flip_y = int(XMLFindValue( tree, 'FlipY','1'))
         self.set_flip_xy( flip_x, flip_y )
 
-        bg = gvutils.XMLFind( tree, 'Background')
+        bg = XMLFind( tree, 'Background')
         if bg is not None:
             self.set_background_color(
-                (float(gvutils.XMLFindValue( bg, 'red', '0.0')),
-                 float(gvutils.XMLFindValue( bg, 'green', '0.0')),
-                 float(gvutils.XMLFindValue( bg, 'blue', '0.0')),
-                 float(gvutils.XMLFindValue( bg, 'alpha', '1.0'))) )
+                (float(XMLFindValue( bg, 'red', '0.0')),
+                 float(XMLFindValue( bg, 'green', '0.0')),
+                 float(XMLFindValue( bg, 'blue', '0.0')),
+                 float(XMLFindValue( bg, 'alpha', '1.0'))) )
 
-        eye_pos_xml = gvutils.XMLFind( tree, 'EyePos' )
+        eye_pos_xml = XMLFind( tree, 'EyePos' )
         if eye_pos_xml is not None:
-            eye_pos = (float(gvutils.XMLFindValue( eye_pos_xml, 'x', '0.0')),
-                       float(gvutils.XMLFindValue( eye_pos_xml, 'y', '0.0')),
-                       float(gvutils.XMLFindValue( eye_pos_xml, 'z', '1.0')))
-            eye_dir_xml = gvutils.XMLFind( tree, 'EyeDir' )
-            eye_dir = (float(gvutils.XMLFindValue( eye_dir_xml, 'x', '0.0')),
-                       float(gvutils.XMLFindValue( eye_dir_xml, 'y', '0.0')),
-                       float(gvutils.XMLFindValue( eye_dir_xml, 'z', '-1.0')))
+            eye_pos = (float(XMLFindValue( eye_pos_xml, 'x', '0.0')),
+                       float(XMLFindValue( eye_pos_xml, 'y', '0.0')),
+                       float(XMLFindValue( eye_pos_xml, 'z', '1.0')))
+            eye_dir_xml = XMLFind( tree, 'EyeDir' )
+            eye_dir = (float(XMLFindValue( eye_dir_xml, 'x', '0.0')),
+                       float(XMLFindValue( eye_dir_xml, 'y', '0.0')),
+                       float(XMLFindValue( eye_dir_xml, 'z', '-1.0')))
             self.set_3d_view( eye_pos, eye_dir )
 
             self.height_scale(
-                float(gvutils.XMLFindValue( tree, 'HeightScale', '1.0' )) )
+                float(XMLFindValue( tree, 'HeightScale', '1.0' )) )
 
             self.set_mode( MODE_3D )
 
@@ -1081,7 +1074,7 @@ def gv_shapes_lines_for_vecplot(xlist,ylist,zlist,oklist):
         return GvShapes(_obj=obj)
 
 ###############################################################################
-class GvData(GvObject, _gv.Data):
+class GvData(_gv.Data):
     """Base class for various raster and vector data containers.
 
     All GvDatas have a name string, common undo semantics, and changing/changed
@@ -1100,11 +1093,8 @@ class GvData(GvObject, _gv.Data):
     modified region, and shape containing objects can have a list of shapes.
     """
 
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.Data.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+    def __init__(self):
+        _gv.Data.__init__(self)
 
     def serialize( self, base = None, filename=None ):
         """serialize this object in a format suitable for XML representation.
@@ -1150,19 +1140,19 @@ class GvData(GvObject, _gv.Data):
 
         Restores name, read_only, projection and all Property instances
         """
-        self.set_name( gvutils.XMLFindValue( tree, 'name', self.get_name() ) )
-        self.set_read_only(int(gvutils.XMLFindValue(tree, 'read_only',
+        self.set_name( XMLFindValue( tree, 'name', self.get_name() ) )
+        self.set_read_only(int(XMLFindValue(tree, 'read_only',
                                                     str(self.is_read_only()))))
-        projection = gvutils.XMLFindValue( tree, 'projection',
+        projection = XMLFindValue( tree, 'projection',
                                                    self.get_projection() )
         if projection is not None:
             self.set_projection( projection )
 
         for subtree in tree[2:]:
             if subtree[1] == 'Property':
-                name = gvutils.XMLFindValue( subtree, 'name' )
+                name = XMLFindValue( subtree, 'name' )
                 if name is not None:
-                    value = gvutils.XMLFindValue( subtree, '', '' )
+                    value = XMLFindValue( subtree, '', '' )
                     self.set_property(name, value)
 
     def get_name(self):
@@ -1285,269 +1275,6 @@ def gv_data_registry_dump():
 
 
 ###############################################################################
-class GvRecord:
-
-    def __init__(self, records, rec_index ):
-        self.records = records
-        self.rec_index = rec_index
-
-    def get_properties( self ):
-        return self.records.get_rec_properties( self.rec_index )
-
-    def get_typed_properties( self ):
-        return self.records.get_rec_typed_properties( self.rec_index )
-
-    def get_property( self, property_name, default_value = None ):
-        properties = self.records.get_rec_properties( self.rec_index )
-        if properties.has_key( property_name ):
-            return properties[property_name]
-        else:
-            return default_value
-
-    def set_property(self,name,value):
-        field_index = self.records.fieldname_to_index( name )
-        self.records.set_rec_property( self.rec_index, field_index, value )
-
-    def set_properties(self,properties):
-        pass
-
-###############################################################################
-class GvRecords(GvObject, _gv.Records):
-    def __init__(self, name=None, _obj=None, filename=None,
-                 progress_cb = None, cb_data = None ):
-        if (_obj == None):
-            if filename is not None:
-                if gvutils.is_shapefile(filename):
-                    _obj = _gv.gv_records_from_dbf(filename, progress_cb, cb_data)
-                else:
-                    _obj = _gv.gv_records_from_rec(filename, progress_cb, cb_data)
-                if _obj is None:
-                    raise ValueError, 'Reading %s failed.' % filename
-
-                if name is None:
-                    self.set_name(filename)
-
-                # default to all fields.
-                self.set_used_properties(None)
-            if (_obj == None):
-                _gv.Records.__init__(self)
-                _obj = self
-	#else:
-            #self.sink() PENDING GTK2 PORT - Not needed with new wrappers?
-        GvObject.__init__(self, _obj)
-        if name: self.set_name(name)
-
-        #if _obj:
-        #    self._o = _obj
-        #    self.sink()
-        #    return
-        #
-        #if filename is not None:
-        #    if gvutils.is_shapefile(filename):
-        #        self._o = _gv.gv_records_from_dbf( filename, progress_cb, cb_data )
-        #    else:
-        #        self._o = _gv.gv_records_from_rec( filename, progress_cb, cb_data )
-        #        
-        #    if self._o is None:
-        #        raise ValueError, 'Reading %s failed.' % filename
-        #
-        #    self.sink()
-        #    if name is not None:
-        #        self.set_name(name)
-        #    else:
-        #        self.set_name(filename)
-        #
-            # default to all fields.
-        #    self.set_used_properties(None)
-        #    return
-        #    
-        #self._o = _gv.gv_records_new()
-        #if name: self.set_name(name)
-
-    def __len__(self):
-        """Return number of shapes in container."""
-        return _gv.Records.num_records(self)
-
-    def __getitem__(self, rec_index):
-        if rec_index < 0 or rec_index >= _gv.gv_records_num_records(self):
-            raise IndexError
-        else:
-            return GvRecord( self, rec_index )
-
-    def __setitem__(self, index, shape):
-        pass
-
-    def create_records( self, count = 1 ):
-        return _gv.Records.create_records( self, count )
-
-    def fieldname_to_index( self, field_name, schema = None ):
-        if schema is None:
-            schema = self.get_schema()
-        for i in range(len(schema)):
-            if schema[i][0] == field_name:
-                return i
-
-        field_name = field_name.lower()
-        for i in range(len(schema)):
-            if schema[i][0].lower() == field_name:
-                return i
-
-        return -1
-
-    def set_used_properties( self, property_list ):
-        schema = self.get_schema()
-        index_list = []
-        if property_list is not None:
-            for i in range(len(property_list)):
-                item = property_list[i]
-                i_fld = self.fieldname_to_index( item )
-                if i_fld == -1:
-                    raise ValueError, 'Unknown field name:' + item
-                index_list.append( i_fld )
-        else:
-            index_list = range(len(schema))
-
-        _gv.Records.set_used_properties( self, index_list )
-
-
-    def get_rec_typed_properties( self, record_index ):
-        return _gv.gv_records_get_typed_properties( self, record_index )
-
-    def get_rec_properties( self, record_index ):
-        return _gv.gv_records_get_properties( self, record_index )
-
-    def get_rec_property( self, record_index, field_index ):
-        return _gv.Records.get_raw_field_data( self, record_index,
-                                                  field_index )
-
-    def set_rec_property( self, record_index, field_index, value ):
-        if value is not None:
-            value = str(value)
-
-        return _gv.Records.set_raw_field_data( self, record_index,
-                                                  field_index, value )
-
-    def get_schema( self, fieldname = None ):
-        prop = self.get_properties()
-
-        schema = []
-        cur_field = 1
-        key_name = '_field_name_' + str(cur_field)
-
-        while prop.has_key(key_name):
-            name = prop['_field_name_'+str(cur_field)]
-
-            if fieldname is not None \
-               and name.lower() != fieldname.lower():
-                cur_field = cur_field + 1
-                key_name = '_field_name_' + str(cur_field)
-                continue
-
-            type = prop['_field_type_'+str(cur_field)]
-            width = int(prop['_field_width_'+str(cur_field)])
-            try:
-                precision = int(prop['_field_precision_'+str(cur_field)])
-            except:
-                precision = 0
-
-            field_schema = (name, type, width, precision)
-
-            if fieldname is not None:
-                return field_schema
-
-            schema.append( field_schema )
-
-            cur_field = cur_field + 1
-            key_name = '_field_name_' + str(cur_field)
-
-        if fieldname is not None:
-            return None
-        else:
-            return schema
-
-    def get_layout( self ):
-        pass
-
-    def add_field( self, name, type = 'string', width = 0, precision = 0 ):
-
-        """Add field to schema.
-
-        This function will define a new field in the schema for this
-        container.  The schema is stored in the GvShapes properties, and it
-        is used by selected functions such as the save_to() method to define
-        the schema of output GIS files.
-
-        Note that adding a field to the schema does not cause it to be
-        added to all the individual GvShape objects in the container.
-        However, the save_to() method will assume a default value for
-        shapes missing some of the fields from the schema, so this is generally
-        not an issue. 
-
-        name -- the name of the field.  The application is expected to ensure
-                this is unique within the layer.
-
-        type -- the type of the field.  Must be one of 'integer', 'float', or
-                'string'.
-
-        width -- the field width.  May be zero to indicated variable width.
-
-        precision -- the number of decimal places to be preserved.  Should be
-                     zero for non-float field types.
-
-        The field number of the newly created field is returned."""
-
-        if precision != 0 and type != 'float':
-            raise ValueError, 'Non-zero precision on '+type+' field '+name+' in GvShapes.add_field()'
-
-        rft = None
-
-        # GV_RFT_FLOAT
-        if type == 'float':
-            rft = 2
-
-        # GV_RFT_STRING
-        if type == 'string':
-            rft = 3
-
-        # GV_RFT_INTEGER
-        if type == 'integer':
-            rft = 1
-
-        if rft is None:
-            raise ValueError, 'Illegal field type "'+type+'" in GvRecords.add_field(), should be float, integer or string.'
-
-        return _gv.Records.add_field(self, name, rft, width, precision )
-
-    def save_to_dbf(self, filename, selection = [],
-                    progress_cb = None, cb_data = None ):
-        """Save records attributes to a DBF file.
-
-        filename -- name of the file to save to
-
-        selection -- list of shape indexes to write, default for all.
-        """
-
-        return _gv.Records.to_dbf( self, filename, selection,
-                                      progress_cb, cb_data )
-
-    def MultiStratifiedCollect( self, selection, var1, var2, strat_vars = [],
-                                progress_cb = None, progress_data = None ):
-        return _gv.gv_records_MultiStratifiedCollect( self, selection,
-                                                      var1, var2, strat_vars,
-                                                      progress_cb,
-                                                      progress_data )
-
-    def recode( self, single_mapping, range_mapping, srcvar, dstvar = None,
-                progress_cb = None, progress_data = None ):
-
-        if dstvar is None:
-            dstvar = srcvar
-
-        return _gv.gv_records_recode( self, single_mapping, range_mapping,
-                                      srcvar, dstvar,
-                                      progress_cb, progress_data )
-
-###############################################################################
 def GvShapesFromXML( node, parent, filename=None ):
     """construct a gvshapes object from an xml tree.
 
@@ -1565,9 +1292,9 @@ def GvShapesFromXML( node, parent, filename=None ):
     shapes.initialize_from_xml( node, filename=filename )
 
     #restore shapes
-    shape_tree = gvutils.XMLFind(node, 'Shapes')
+    shape_tree = XMLFind(node, 'Shapes')
     for subtree in shape_tree[2:]:
-        shape = gvutils.XMLInstantiate( subtree, parent, filename=filename )
+        shape = XMLInstantiate( subtree, parent, filename=filename )
         if shape is None:
             print 'shape is None'
         elif shape._o is None:
@@ -1950,8 +1677,8 @@ class GvAreas(GvData, _gv.Areas):
 ###############################################################################
 
 def GvRasterFromXML( node, parent, filename=None ):
-    band = int(gvutils.XMLFindValue(node,"band","1"))
-    portable_path = gvutils.XMLFindValue( node, 'portable_path' )
+    band = int(XMLFindValue(node,"band","1"))
+    portable_path = XMLFindValue( node, 'portable_path' )
     if portable_path is not None:
         f = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
     else:
@@ -2274,7 +2001,7 @@ class GvRaster(GvData, _gv.Raster):
         _gv.Raster.set_poly_order_preference(self, poly_order)
 
 #def GvLayerFromXML( node, parent, filename=None ):
-#    band = int(gvutils.XMLFindValue(node,"band","1"))
+#    band = int(XMLFindValue(node,"band","1"))
 #    for child in node[2:]:
 #        if child[0] == gdal.CXT_Text:
 #            filename = child[1]
@@ -2324,7 +2051,7 @@ class GvLayer(GvData, _gv.Layer):
         """restore object properties from XML tree
         """
         GvData.initialize_from_xml( self, tree, filename=filename )
-        self.set_visible( int(gvutils.XMLFindValue( tree, 'visible',
+        self.set_visible( int(XMLFindValue( tree, 'visible',
                                                     str(self.is_visible()))))
 
     def is_visible(self):
@@ -2542,15 +2269,15 @@ def GvShapesLayerFromXML( base, parent, filename=None ):
 
     Returns a new GvShapesLayer or None if it failed
     """
-    shape_tree = gvutils.XMLFind( base, 'GvShapes' )
+    shape_tree = XMLFind( base, 'GvShapes' )
     if shape_tree is not None:
-        shapes = gvutils.XMLInstantiate( shape_tree, None, filename=filename )
+        shapes = XMLInstantiate( shape_tree, None, filename=filename )
     else:
-        portable_path = gvutils.XMLFindValue( base, 'portable_path' )
+        portable_path = XMLFindValue( base, 'portable_path' )
         if portable_path is not None:
             shapefilename = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
         else:
-            shapefilename = gvutils.XMLFindValue( base, "_filename" )
+            shapefilename = XMLFindValue( base, "_filename" )
             if shapefilename is None:
                 shapes = None
         if shapefilename is not None:
@@ -2645,7 +2372,7 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
 
         # Initialize GvSymbolManager.
 
-        sm_xml = gvutils.XMLFind( tree, 'GvSymbolManager' )
+        sm_xml = XMLFind( tree, 'GvSymbolManager' )
         if sm_xml is not None:
             sm = self.get_symbol_manager( 1 )
             sm.initialize_from_xml( sm_xml, filename=filename )
@@ -2678,15 +2405,15 @@ class GvAreaLayer(GvShapeLayer, _gv.AreaLayer):
 
 ###############################################################################
 def GvPqueryLayerFromXML( base, parent, filename=None ):
-    shape_tree = gvutils.XMLFind( base, 'GvShapes' )
+    shape_tree = XMLFind( base, 'GvShapes' )
     if shape_tree is not None:
-        shapes = gvutils.XMLInstantiate( shape_tree, None, filename=filename )
+        shapes = XMLInstantiate( shape_tree, None, filename=filename )
     else:
-        portable_path = gvutils.XMLFindValue( base, 'portable_path' )
+        portable_path = XMLFindValue( base, 'portable_path' )
         if portable_path is not None:
             shapefilename = pathutils.PortablePathFromXML( portable_path ).local_path( ref_path = filename )
         else:
-            shapefilename = gvutils.XMLFindValue( base, "_filename" )
+            shapefilename = XMLFindValue( base, "_filename" )
             if shapefilename is None:
                 shapes = None
         if shapefilename is not None:
@@ -2769,15 +2496,15 @@ class AppCurLayer(GvShapesLayer, _gv.CurLayer):
 
 ###############################################################################
 def GvRasterLayerFromXML( node, parent, filename=None ):
-    prototype_node = gvutils.XMLFind( node, 'Prototype' )
+    prototype_node = XMLFind( node, 'Prototype' )
     if prototype_node is not None:
         prototype_data = GvRasterFromXML( prototype_node, None,
                                           filename=filename )
     else:
         prototype_data = None
 
-    rl_mode = int(gvutils.XMLFindValue( node, 'mode', str(RLM_AUTO) ))
-    mesh_lod = gvutils.XMLFindValue( node, 'mesh_lod', '0' )
+    rl_mode = int(XMLFindValue( node, 'mode', str(RLM_AUTO) ))
+    mesh_lod = XMLFindValue( node, 'mesh_lod', '0' )
 
     layer = GvRasterLayer( raster = prototype_data, rl_mode = rl_mode,
                            creation_properties = [('mesh_lod',mesh_lod)] )
@@ -2787,13 +2514,13 @@ def GvRasterLayerFromXML( node, parent, filename=None ):
     for child in node[2:]:
         if child[0] == gdal.CXT_Element and child[1] == 'Source':
             raster = GvRasterFromXML( child, None, filename=filename )
-            isource = int(gvutils.XMLFindValue(child,"index","0"))
-            min = float(gvutils.XMLFindValue(child,"min","0"))
-            max = float(gvutils.XMLFindValue(child,"max","0"))
+            isource = int(XMLFindValue(child,"index","0"))
+            min = float(XMLFindValue(child,"min","0"))
+            max = float(XMLFindValue(child,"max","0"))
             sources_min_max.append([min, max])
-            const_value = float(gvutils.XMLFindValue(child,"const_value","0"))
-            nodata = gvutils.XMLFindValue( child, "nodata", None )
-            nodata = eval(gvutils.XMLFindValue(child, "nodata", "None"))
+            const_value = float(XMLFindValue(child,"const_value","0"))
+            nodata = XMLFindValue( child, "nodata", None )
+            nodata = eval(XMLFindValue(child, "nodata", "None"))
 
             layer.set_source( isource, raster, min = min, max = max,
                               const_value = const_value, nodata = nodata )
@@ -3601,12 +3328,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                 raster.changed()
 
 ###############################################################################
-class GvTool(GvObject, _gv.Tool):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.Tool.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+class GvTool(_gv.Tool):
+    def __init__(self):
+        _gv.Tool.__init__(self)
 
     def set_boundary(self, boundary):
         """Set constraint rectangle.
@@ -3767,12 +3491,10 @@ class GvToolbox(GvTool, _gv.Toolbox):
         GvTool.__init__(self, _obj)
 
 ###############################################################################
-class GvViewLink(GvObject, _gv.ViewLink):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.ViewLink.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+class GvViewLink(_gv.ViewLink):
+    def __init__(self):
+        _gv.ViewLink.__init__(self)
+
     def set_cursor_mode(self,mode=0):
         try:
             _gv.ViewLink.set_cursor_mode(self, mode)
@@ -3780,13 +3502,10 @@ class GvViewLink(GvObject, _gv.ViewLink):
             pass
 
 ###############################################################################
-class GvSymbolManager(GvObject, _gv.SymbolManager):
+class GvSymbolManager(_gv.SymbolManager):
 
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.SymbolManager.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+    def __init__(self):
+        _gv.SymbolManager.__init__(self)
 
     def get_symbol( self, name ):
         result = _gv.SymbolManager.get_symbol( self, name )
@@ -3821,17 +3540,14 @@ class GvSymbolManager(GvObject, _gv.SymbolManager):
     def initialize_from_xml( self, tree, filename=None ):
         for item in tree[2:]:
             if item[0] == CXT_Element and item[1] == 'GvVectorSymbol':
-                name = gvutils.XMLFindValue(item, 'name', None )
-                shape = GvShapeFromXML( gvutils.XMLFind( item, 'GvShape' ), None )
+                name = XMLFindValue(item, 'name', None )
+                shape = GvShapeFromXML( XMLFind( item, 'GvShape' ), None )
                 self.inject_vector_symbol( name, shape )
 
 ###############################################################################
-class GvManager(GvObject, _gv.Manager):
-    def __init__(self, _obj=None):
-        if (_obj == None):
-            _gv.Manager.__init__(self)
-            _obj = self
-        GvObject.__init__(self, _obj)
+class GvManager(_gv.Manager):
+    def __init__(self):
+        _gv.Manager.__init__(self)
 
     def add_dataset(self, dataset):
         """Adds gdal.Dataset instance to the list of managed datasets.
@@ -4180,13 +3896,6 @@ def gtk_object_unref(object):
 def py_object_get_ref_count(object):
     pass
     # return _gtkmissing.py_object_get_ref_count(object)
-
-pgu.gtk_register('IpGcpLayer', IpGcpLayer)
-pgu.gtk_register('AppCurLayer', AppCurLayer)
-for m in map(lambda x: eval(x), filter(lambda x: x[:2] == 'Gv', dir())):
-    if m != 'GvShape':
-        pgu.gtk_register(m.__name__,m)    
-del m
 
 manager = GvManager()
 
