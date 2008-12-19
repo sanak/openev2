@@ -1,12 +1,14 @@
-#!/usr/bin/env python
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV Python GTK Utility classes
+# Project:  Python GTK Utility classes
 # Purpose:  Embeddable Font class and font utility classes
 # Author:   Paul Spencer, pgs@magma.ca
 #
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
+#
 ###############################################################################
+# Copyright (c) 2007, CIETcanada
 # Copyright (c) 2000, DM Solutions Group Inc. (www.dmsolutions.on.ca)
 #
 # This library is free software; you can redistribute it and/or
@@ -27,12 +29,9 @@
 
 import gtk
 import pango
-import gdal
+from osgeo.gdal import Debug
 
-"""
-pgufont contains utility classes for manipulating and selecting fonts
-"""
-
+# MB: use of XLFD stuff is discouraged...
 class XLFDFontSpec:
     """
     encapsulate an X Logical Font Description (XLFD) font specification
@@ -64,7 +63,7 @@ class XLFDFontSpec:
                      font. Together with the Charset Encoding field, this
                      defines the character set for the font.
     Charset Encoding An identifier for the particular character set encoding.
-
+    
     GTK2 Port: pguFontControl modified to be a gtk.FontButton with XLFD support.
     Examples in gvogrfsgui and gviewapp.
     """
@@ -76,36 +75,28 @@ class XLFDFontSpec:
                    'Charset Encoding']
 
     def __init__(self, fontspec=None):
-        """
-        initialize, optionally parsing a font spec
-        """
+        """initialize, optionally parsing a font spec"""
         self.pango_desc = None
         self.parts = ['*'] * 14
-        if fontspec is not None:
+        if fontspec:
             self.parse_font_spec(fontspec)
 
     def parse_font_spec(self, font_spec):
-        """
-        parse a font specification
-
-        Now font spec may be XLFD or a pango description.
-        """
+        """parse a font specification"""
         self.pango_desc = None
 
         #coerce XLFDFontSpec classes into strings to parse them
         font_spec = str(font_spec)
 
         if not font_spec.startswith('-'):
-            self.pango_desc = self.parse_font_name(font_spec)
-            if self.pango_desc is None:
-                gdal.Debug("pgufont", "invalid XLFD(%s), should start with -" % font_spec)
+            Debug("pgufont", "invalid XLFD(%s), should start with -" % font_spec)
             return
 
         new_parts = font_spec.split('-')
         del new_parts[0] #remove first (empty) part produced by split
 
         if len(new_parts) != 14:
-            gdal.Debug( "pgufont", 'invalid XLFD(%s), should have 14 parts' % font_spec )
+            Debug( "pgufont", 'invalid XLFD(%s), should have 14 parts' % font_spec )
             return
 
         else:
@@ -121,17 +112,16 @@ class XLFDFontSpec:
         invalid, the an empty string.
         """
         result = ''
+        fnames = self.xlfd_field_names
         if field_number and field_number <= 14:
             result = self.parts[field_number]
         else:
-            gdal.Debug( "pgufont", 'invalid field number (%s), should be 1-14' % field_number)
+            Debug("pgufont", 'invalid field number (%s), should be 1-14' % field_number)
 
-        fnames = self.xlfd_field_names
         if field_name and field_name in fnames:
             result = self.parts[fnames.index(field_name)]
         else:
-            gdal.Debug( "pgufont", 'invalid field name (%s), should be one of %s' \
-                % (field_name, self.xlfd_field_names) )
+            Debug("pgufont", 'invalid field name (%s), should be one of %s' % (field_name, fnames))
 
         return result
 
@@ -143,8 +133,7 @@ class XLFDFontSpec:
         if field_name in fnames:
             self.parts[fnames.index(field_name)] = value
         else:
-            gdal.Debug( "pgufont", 'invalid field name (%s), should be one of %s' \
-                % (field_name, self.xlfd_field_names) )
+            Debug("pgufont", 'invalid field name (%s), should be one of %s' % (field_name, fnames))
 
     def get_display_string(self):
         """
@@ -179,7 +168,7 @@ class XLFDFontSpec:
             as once the pango description is computed it
             remains fixed.
         """
-        if self.pango_desc is not None:
+        if self.pango_desc:
             return self.pango_desc
 
         self.pango_desc = pango.FontDescription()
@@ -207,15 +196,15 @@ class XLFDFontSpec:
             self.pango_desc.set_weight(pango.WEIGHT_BOLD)
 
         stretch = self.get_font_part('Set')
-        if stretch[0] in ('C','c'):
+        if stretch[0] is ('C','c'):
             self.pango_desc.set_stretch(pango.STRETCH_CONDENSED)
-        if stretch[0] in ('E','e'):
+        if stretch[0] is ('E','e'):
             self.pango_desc.set_stretch(pango.STRETCH_EXPANDED)
 
         return self.pango_desc
 
     def set_font_name(self, pango_name="Sans 12"):
-        self.pango_desc = self.parse_font_name(pango_name)
+        self.pango_desc = pango.FontDescription(pango_name)
 
     def __str__(self):
         """
@@ -271,8 +260,6 @@ class XLFDFontSpec:
         elif stretch == pango.STRETCH_EXPANDED:
             self.set_font_part('Set', 'e')
 
-        return pango_desc
-
     def get_width(self, widget):
         context = widget.get_pango_context()
         metrics = context.get_metrics(self.get_pango_desc())
@@ -290,21 +277,24 @@ class FontControl(gtk.FontButton):
     action - optional action to connect to the 'font-set' signal
 
     """
-    def __init__(self, fontname=None, action=None):
-        font = XLFDFontSpec(fontname)
-        gtk.FontButton.__init__(self, font.get_font_name())
-        self.set_use_font(True)
+    def __init__(self, fontname=None, use_font=True):
+        gtk.FontButton.__init__(self)
+        if fontname.startswith('-'):
+            self.set_from_xlfd(fontname)
+        else:
+            self.set_font_name(fontname)
+        self.set_use_font(use_font)
         self.show()
-        if action:
-            self.connect('font-set', action)
 
     def get_xlfdfont(self):
         font_name = self.get_font_name()
-        font = XLFDFontSpec(font_name)
+        font = XLFDFontSpec()
         font.parse_font_name(font_name)
         return str(font)
 
-    def set_font(self, fontspec):
+    def set_from_xlfd(self, fontspec):
         font = XLFDFontSpec(fontspec)
-        self.set_font_name(font.get_font_name())
-
+        pango_desc = font.get_pango_desc()
+        if pango_desc:
+            fontname = pango_desc.to_string()
+            self.set_font_name(fontname)
