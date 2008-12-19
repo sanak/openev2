@@ -1,0 +1,25 @@
+#!/usr/bin/env python
+
+# check for OPENEV_HOME - if not present, then set the default
+# perform *before* import openev
+import os
+import sys
+home = os.environ.get('OPENEV_HOME')
+if home is None:
+    this_file = os.path.abspath(sys.modules['__main__'].__file__)
+    up = os.path.split(this_file)[0]
+    up = os.path.split(up)[0]
+
+    prefix = os.path.join(up, 'share', 'openev')
+    os.environ['OPENEV_HOME'] = prefix
+    print "OPENEV_HOME is not set.  Defaulting to %s." % os.environ['OPENEV_HOME']
+
+import openev.openev as ev
+
+
+# fix up the path so we don't have to prefix all external tools
+# using the 'openev.' package prefix
+import openev
+sys.path.insert(0, openev.__path__[0])
+ev.main()
+
