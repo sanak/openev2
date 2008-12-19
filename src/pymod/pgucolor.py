@@ -5,6 +5,8 @@
 # Purpose:  Color-related widgets and utilities.
 # Author:   Paul Spencer, pgs@magma.ca
 #
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
+#
 ###############################################################################
 # Copyright (c) 2000, DM Solutions Group Inc. (www.dmsolutions.on.ca)
 #
@@ -24,12 +26,16 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-MIN_COLOR=0
+MIN_COLOR = 0
 MAX_COLOR = 65535
 
 
 import gtk
 from gvsignaler import Signaler
+
+# temporary
+def _(s):
+    return s
 
 def color_string_to_tuple(s):
     """Convert a string to a color tuple"""
@@ -146,52 +152,10 @@ class ColorButton(gtk.ColorButton):
     set_d = set_color
     get_d = get_color
 
-class ColorDialog(gtk.Window):
-    """used with a ColorButton when it is clicked"""
-
-    def __init__(self, ok_cb = None, cancel_cb = None, cb_data = None):
-        gtk.Window.__init__(self)
-        self.set_title('Select a Color')
-        vbox = gtk.VBox(spacing=3)
-        self.add(vbox)
-        self.user_ok_cb = ok_cb
-        self.user_cancel_cb = cancel_cb
-        self.user_cb_data = cb_data
-
-        self.connect('delete-event', self.user_cancel_cb)
-        #add the color selection widget
-        self.colorsel = gtk.ColorSelection()
-        self.colorsel.set_opacity(True)
-        vbox.pack_start(self.colorsel)
-        #add the ok and cancel buttons
-        button_box = gtk.HButtonBox()
-        ok_button = gtk.Button("OK")
-        ok_button.connect('clicked', self.ok_cb, cb_data)
-        cancel_button = gtk.Button("Cancel")
-        cancel_button.connect('clicked', self.cancel_cb, cb_data)
-        button_box.pack_start(ok_button)
-        button_box.pack_start(cancel_button)
-        vbox.pack_start(button_box, expand=False)
-        vbox.show_all()
-        ok_button.set_flags(gtk.CAN_DEFAULT)
-        ok_button.grab_default()
-
-    def ok_cb(self, *args):
-        if self.user_ok_cb is not None:
-            self.user_ok_cb(self.user_cb_data, self)
-        self.hide()
-        self.destroy()
-
-    def cancel_cb(self, *args):
-        if self.user_cancel_cb is not None:
-            self.user_cancel_cb(self.user_cb_data, self)
-        self.hide()
-        self.destroy()
-
 RAMP_GRADIENT = 0
 RAMP_DISCRETE = 1
 
-class ColorRamp(gtk.Frame, Signaler):
+class ColorRamp(object, Signaler):
     """encapsulate the functionality of a color ramp that
     can apply itself in a linearly interpolated number of
     steps between several colors positioned along the ramp
@@ -202,32 +166,25 @@ class ColorRamp(gtk.Frame, Signaler):
     def __init__(self):
         """initialize the ramp
         """
-        gtk.Frame.__init__(self)
-        self.set_shadow_type(gtk.SHADOW_NONE)
         self.colors = []
         self.gradient = ColorGradientSwatch(self)
-        self.title = gtk.Label('Ramp')
-        fix = gtk.Fixed()
-        fix.put(self.gradient, 1, 0)
-        fix.put(self.title, 84, 0)
-        self.add(fix)
+        self.title = "Ramp"
         self.type = RAMP_GRADIENT
 
-    def serialize(self, fname = None):
+    def serialize(self, fname=None):
         """save to a file
         """
-
-        result = "%s\n" % self.title.get()
-        result = result + "%s\n" % self.type
+        title = self.title
+        result = '\n'.join( [title, self.type] )
         for n in self.colors:
             if self.type == RAMP_GRADIENT:
-                result = result + "%s %s\n" % (str(n[0]), str(n[1]))
+                result += '%s %s\n' % (n[0], n[1])
             else:
-                result = result + "%s\n" % str(n[1])
+                result += '%s\n' % n[1]
 
-        if fname is not None:
+        if fname:
             f = open(fname, 'w')
-            f.write( result )
+            f.write(result)
             f.close()
         else:
             return result      
@@ -236,11 +193,10 @@ class ColorRamp(gtk.Frame, Signaler):
         """read from a file"""
         fp = open(fname, 'r')
         lines = fp.readlines()
-        self.title.set_text(lines[0].strip())
-        self.type = int(lines[1].strip())
-        n_colors = len( lines[2:] )
-        for i in range(n_colors):
-            line = lines[2+i]
+        self.title = lines.pop(0).strip()
+        self.type = int(lines.pop(0))
+        n_colors = len(lines)
+        for n,line in enumerate(lines):
             line = line.replace('(', '')
             line = line.replace(')', '')
             line = line.replace(',', '')
@@ -249,11 +205,10 @@ class ColorRamp(gtk.Frame, Signaler):
             else:
                 r, g, b, a = line.split()
                 #assume equally spaced for DISCRETE
-                pos = float(i)/float(n_colors - 1)
+                pos = float(n)/float(n_colors - 1)
             self.add_color((float(r), float(g), float(b), float(a)), float(pos))
 
         fp.close()
-        self.queue_draw()
 
     def add_color(self, color, position):
         """add a color to the ramp at the given position.
@@ -274,36 +229,36 @@ class ColorRamp(gtk.Frame, Signaler):
         current position (in the range 0 to
         ncolors-1) and color
         """
-        if len(self.colors) == 0:
+        if not self.colors:
             return
 
         #insert false entries at 0 and 1 if necessary
         bLow = False
         bHi = False
 
-        if self.colors[0][0] <> 0.0:
+        if self.colors[0][0] != 0.0:
             self.add_color(self.colors[0][1], 0.0)
             bLow = True
-        if self.colors[len(self.colors) - 1][0] <> 1.0:
-            self.add_color(self.colors[len(self.colors)-1][1], 1.0)
+        if self.colors[-1][0] != 1.0:
+            self.add_color(self.colors[-1][1], 1.0)
             bHi = True
-
+        
         if ncolors > 1:
             for i in range(ncolors):
                 if self.type == RAMP_GRADIENT:
                     color_cb(i, self.calculate_color(float(float(i)/float(ncolors - 1))))
                 elif self.type == RAMP_DISCRETE:
                     pos = i % len(self.colors)
-                    color_cb(i, self.colors[pos][1] )
-
+                    color_cb(i, self.colors[pos][1])
+                    
         else:
-            color_cb( 0, self.calculate_color( 0 ) )
-
+            color_cb(0, self.calculate_color(0))
+            
         #clean up
         if bLow:
             del self.colors[0]
         if bHi:
-            del self.colors[len(self.colors)-1]
+            del self.colors[-1]
 
     def calculate_color(self, pos):
         """calculate the color at the given position.  If a color
@@ -324,10 +279,10 @@ class ColorRamp(gtk.Frame, Signaler):
                 tb = above[1][2]
                 ta = above[1][3]
                 delta = (pos - below[0]) / (above[0] - below[0])
-                cr = fr + ( tr - fr ) * delta
-                cg = fg + ( tg - fg ) * delta
-                cb = fb + ( tb - fb ) * delta
-                ca = fa + ( ta - fa ) * delta
+                cr = fr + (tr - fr) * delta
+                cg = fg + (tg - fg) * delta
+                cb = fb + (tb - fb) * delta
+                ca = fa + (ta - fa) * delta
                 return (cr, cg, cb, ca)
 
     def get_color_list(self, ncolors):
@@ -338,39 +293,106 @@ class ColorRamp(gtk.Frame, Signaler):
     def color_list_cb(self, num, color):
         self.color_list.insert(num, color)
 
-class ColorGradientSwatch(ColorSwatch):
+    def save_to_png(self):
+        pixbuf = self.gradient.get_pixbuf()
+        pixbuf.save(self.title.get_text()+'.png','png')
+
+class ColorGradientSwatch(gtk.gdk.Pixmap):
     """
-    Class ColorGradientSwatch extends ColorSwatch to n colors
-    and draws itself as a gradient between the various colors.
+    Class ColorGradientSwatch uses a Pixmap and draws itself
+    as a gradient between the various colors.
 
     This class is intended primarily to provide a GUI element for
     ColorRamps
     """
     def __init__(self, ramp):
-        ColorSwatch.__init__(self)
-        self.set_size_request(80, 15)
+        gtk.gdk.Pixmap.__init__(self, None, 80, 15, 24)
         self.ramp = ramp
+        self.gc = self.new_gc()
+        self.cm = gtk.gdk.colormap_get_system()
 
-    def expose_event(self, *args):
-        #get the window and graphic context
-        win = self.window
-        self.width, self.height = win.get_size()
-        self.cm = self.get_colormap()
+    def draw(self):
+        width, height = self.get_size()
         if self.ramp.type == RAMP_GRADIENT:
-            colors = self.ramp.get_color_list(self.width)
+            colors = self.ramp.get_color_list(width)
         else:
-            colors = self.ramp.get_color_list( len(self.ramp.colors) - 1 )
-        bar_width = self.width / len(colors)
+            colors = self.ramp.get_color_list(len(self.ramp.colors) - 1)
+
+        bar_width = width / len(colors)
         i = 0
         for color in colors:
-            self.gc.foreground = self.cm.alloc_color(int(color[0] * MAX_COLOR),
-                                               int(color[1] * MAX_COLOR),
-                                               int(color[2] * MAX_COLOR))
-            win.draw_rectangle(self.gc, True, i, 0, bar_width, self.height)
-            i = i + bar_width
-        win.draw_rectangle(self.get_style().black_gc, False, 0, 0, self.width-1, self.height-1)
-        return False
+            self.gc.foreground = self.cm.alloc_color(color_tuple_to_gdk(color))
+            self.draw_rectangle(self.gc, True, i, 0, bar_width, height)
+            i += bar_width
+        self.gc.foreground = self.cm.alloc_color(gtk.gdk.Color(0,0,0,0))
+        self.draw_rectangle(self.gc, False, 0, 0, width-1, height-1)
 
+    def get_pixbuf(self):
+        self.draw()
+        pixbuf = gtk.gdk.Pixbuf(gtk.gdk.COLORSPACE_RGB, False, 8, 80, 15)
+        return pixbuf.get_from_drawable(self, self.cm, 0,0,0,0,-1,-1)
+
+# previously in pgucolorsel.py
+class ColorControl(gtk.HBox):
+    def __init__(self, title, callback=None, cb_data=None):
+        from pgu import ComboText
+        gtk.HBox.__init__(self)
+        self.color_list = { _("Red"): (1, 0, 0, 1),
+                       _("Green"): (0, 1, 0, 1),
+                       _("Blue"): (0, 0, 1, 1),
+                       _("White"): (1, 1, 1, 1),
+                       _("Black"): (0, 0, 0, 1),
+                       _("Transparent"): (0, 0, 0, 0),
+                       _("Custom"): (0, 0, 0, 0)
+                        }
+
+        self.callback = callback
+        self.cb_data = cb_data
+        self.current_color = (1,0,0,1)
+
+        but = ColorButton(color=self.current_color, title=title)
+        but.connect('color-set', self.set_color_cb)
+        self.pack_start(but)
+        self.cbut = but
+
+        combo = ComboText(strings=self.color_list.keys(), action=self.set_color_cb)
+        self.pack_end(combo)
+        self.colorsCB = combo
+        self.show_all()
+        self.updating = False
+
+    def set_color_cb(self, widget):
+        if self.updating:
+            return
+
+        if widget == self.cbut:
+            color = self.cbut.get_color()
+            self.updating = True
+            self.colorsCB.set_active_text("Custom")
+            self.updating = False
+            self.color_list['Custom'] = self.current_color = color
+            self.invoke_callback()
+        else:
+            color_name = widget.get_active_text()
+            color = self.color_list[color_name]
+            self.current_color = color
+            self.updating = True
+            self.cbut.set_color(color)
+            self.updating = False
+            self.invoke_callback()
+
+    def set_color(self, new_color):
+        if new_color == self.current_color:
+            return
+
+        self.current_color = new_color
+        self.colorsCB.set_active_text("Custom")
+        self.cbut.set_color(new_color)
+
+    def invoke_callback(self):
+        if self.callback is None:
+            return
+        self.callback(self.current_color, self.cb_data)
 
 def test_cb(num, color):
     print num, ' - ', color
