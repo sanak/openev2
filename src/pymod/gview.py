@@ -710,16 +710,17 @@ class GvViewArea(_gv.ViewArea):
         return _gv.ViewArea.format_point_query( self, x, y )
 
 ###############################################################################
-def GvShapeFromXML( tree, parent, filename=None ):
+def GvShapeFromXML(tree, parent, filename=None):
     """
-    construct a gvshape object from an xml tree
-    """
+    construct a gvshape object from an xml tree"""
+    return _gv.Shape.from_xml(tree)
 
-    _obj = _gv.gv_shape_from_xml( tree )
-    return GvShape( _obj = _obj )
+# GvShape now implemented in _gv. Do help(GvShapeDoc) for documentation.
+GvShape = _gv.Shape
 
-class GvShape:
-    """Vector feature class for GvShapes/GvShapesLayer
+# This class is only for documenting GvShape.
+class GvShapeDoc:
+    """Vector feature class for GvShapes/GvShapesLayer.
 
     The following properties have special interpretation for a GvShape.
     Note that modifying these properties does not automatically trigger a
@@ -735,125 +736,26 @@ class GvShape:
 
     """
 
-    def __init__(self, _obj=None,type=GVSHAPE_POINT):
-        if _obj is None:
-            _obj = _gv.gv_shape_create(type)
-
-        _gv.gv_shape_ref( _obj )
-        self._o = _obj
-
-    def __del__(self):
-        if self._o is not None:
-            _gv.gv_shape_unref( self._o )
-            self._o = None
-
-    def copy(self):
-        """Make a copy of a shape"""
-
-        copy = _gv.gv_shape_copy( self._o )
-        if copy is None:
-            return None
-
-        return GvShape( _obj=copy )
-
-    def __getattr__(self,attr):
-        if self.__dict__.has_key(attr):
-            return self.__dict__[attr]
-
-        value = _gv.gv_shape_get_property( self._o, attr )
-        if value is None:
-            raise AttributeError, attr
-        else:
-            return value
-
-    def __delattr__(self,attr):
-        if self.__dict__.has_key(attr):
-            del self.__dict__[attr]
-            return
-
-        properties = self.get_properties()
-        if not properties.has_key(attr):
-            raise AttributeError, attr
-        else:
-            del properties[attr]
-            self.set_properties(properties)
-
-    def __setattr__(self,attr,value):
-        if attr == '_o':
-            self.__dict__['_o'] = value
-        else:
-            self.set_property(attr,value)
-
-    def __str__(self):
-        result = ''
-        properties = self.get_properties()
-        for key in properties.keys():
-            result = result + key + '=' + properties[key] + '\n'
-
-        result = result + self.geometry_to_wkt() + '\n'
-
-        return result
-
-    def serialize( self, base = None ):
-        """serialize this object in a format suitable for XML representation.
-        """
-        if base is not None:
-            raise ValueError, 'GvShape.serialize() doesnt allow base'
-
-        return _gv.gv_shape_to_xml( self._o )
-
-    def geometry_to_wkt(self):
-        t = self.get_shape_type()
-        fmt = '%f %f %f'
-        geom = ''
-        if t == GVSHAPE_POINT:
-            geom = ('POINT ('+fmt+')') % self.get_node()
-        elif t == GVSHAPE_LINE:
-            geom = 'LINESTRING ('
-            for node in range(self.get_nodes()):
-                if node > 0:
-                    geom = geom + ','
-                term = fmt % self.get_node(node)
-                geom = geom + term
-            geom = geom + ')'
-        elif t == GVSHAPE_AREA:
-            geom = 'POLYGON ('
-            for ring in range(self.get_rings()):
-                if ring > 0:
-                    geom = geom + ','
-                geom = geom + '('
-                for node in range(self.get_nodes()):
-                    if node > 0:
-                        geom = geom + ','
-                    term = fmt % self.get_node(node)
-                    geom = geom + term
-                geom = geom + ')'
-            geom = geom + ')'
-        return geom
-
     def destroy(self):
         """Destroy shape.
 
-        The GvShape is not a GtkObject, and doesn't employ the same
+        The GvShape is not a GObject, and doesn't employ the same
         reference counting mechanisms to ensure destruction when no longer
         referenced.  It is the applications responsibility to destroy
         GvShape's with an explicit call to the GvShape.destroy() method
-        when appropriate."""
-        if self._o is not None:
-            _gv.gv_shape_unref(self._o)
-            self._o = None
+        when appropriate.
+        """
+        pass
 
     def get_properties(self):
         """Get GvShape properties (attributes) as a dictionary.
 
         The properties are returned as a Python dictionary.  Note that
-        changes to this dictionary are not applied back to the GvShape."""
-        return _gv.gv_shape_get_properties(self._o)
+        changes to this dictionary are not applied back to the GvShape.
+        """
+        pass
 
-    def get_typed_properties(self, prop_list):
-        return _gv.gv_shape_get_typed_properties(self._o,prop_list)
-
-    def get_property(self,property_name, default_value=None):
+    def get_property(self, property_name, default_value=None):
         """Get the value of a property.
 
         Fetches the value of a single property on the shape.  Roughly
@@ -866,45 +768,42 @@ class GvShape:
         default_value -- the value to return if the property does not exist,
                          defaults to None.
 
-        Returns the property value (always a string) or the default value."""
+        Returns the property value (always a string) or the default value.
+        """
+        pass
 
-        value = _gv.gv_shape_get_property( self._o, property_name )
-        if value is None:
-            return default_value
-        else:
-            return value
-
-    def set_property(self,name,value):
+    def set_property(self, name, value):
         """Set a GvShape property.
 
         name -- the key or name of the property being set.  Should be a
         well behaved token (no spaces, equal signs, or colons).
 
-        value -- the value to be assigned.  Any text is acceptable."""
+        value -- the value to be assigned.  Any text is acceptable.
+        """
+        pass
 
-        return _gv.gv_shape_set_property(self._o,name,value)
-
-    def set_properties(self,properties):
+    def set_properties(self, properties):
         """Set a GvShape properties.
 
         Clear all existing properties, and assign the new set passed in.
 
         properties -- a python dictionary with the keys being property names,
-        and the result is the property value"""
+        and the result is the property value
+        """
+        pass
 
-        return _gv.gv_shape_set_properties(self._o,properties)
-
-    def get_node(self,node=0,ring=0):
+    def get_node(self, node=0, ring=0):
         """Fetch a node (point) as a tuple.
 
         node -- the node within the selected ring to return.  Defaults to zero.
         ring -- the ring containing the desired node.  Defaults to zero.
 
         The node is returned as an (x,y,z) tuple.  None is returned if the
-        requested node is out of range."""
-        return _gv.gv_shape_get_node(self._o,node,ring)
+        requested node is out of range.
+        """
+        pass
 
-    def set_node(self,x,y,z=0,node=0,ring=0):
+    def set_node(self, x, y, z=0, node=0, ring=0):
         """Set a node.
 
         x -- the x value to assign.
@@ -914,10 +813,11 @@ class GvShape:
         ring -- the ring containing the node to set.
 
         Note that the node and ring will be created if not already in
-        existance."""
-        return _gv.gv_shape_set_node(self._o,x,y,z,node,ring)
+        existance.
+        """
+        pass
 
-    def add_node(self,x,y,z=0,ring=0):
+    def add_node(self, x, y, z=0, ring=0):
         """Add a node.
 
         x -- the x value to assign.
@@ -926,33 +826,33 @@ class GvShape:
         ring -- the ring containing the node to set.
 
         Note that the ring will be created if not already in
-        existance.  The index of the newly created node is returned. """
-        return _gv.gv_shape_add_node(self._o,x,y,z,ring)
+        existance.  The index of the newly created node is returned.
+        """
+        pass
 
-    def get_nodes(self,ring=0):
+    def get_nodes(self, ring=0):
         """Get number of nodes.
 
         ring -- the ring to check.  Defaults to zero.
 
         Note that the returned number of nodes will be zero for non-existent
-        rings."""
-        return _gv.gv_shape_get_nodes(self._o,ring)
+        rings.
+        """
+        pass
 
     def get_rings(self):
-        """Get number of rings.
-        """
-        return _gv.gv_shape_get_rings(self._o)
+        """Get number of rings."""
+        pass
 
     def get_shape_type(self):
         """Get shape type.
 
         The returned integer will match one of gview.GVSHAPE_POINT,
-        gview.GVSHAPE_LINE, gview.GVSHAPE_AREA or gview.GVSHAPE_COLLECTION."""
+        gview.GVSHAPE_LINE, gview.GVSHAPE_AREA or gview.GVSHAPE_COLLECTION.
+        """
+        pass
 
-        return _gv.gv_shape_get_shape_type(self._o)
-    get_type = get_shape_type
-
-    def point_in_polygon(self, x, y ):
+    def point_in_polygon(self, x, y):
         """Check if point in this area.
 
         x -- the x component of the location to check.
@@ -960,19 +860,21 @@ class GvShape:
 
         Returns a non-zero value if the point (x,y) is inside this
         shapes area.  Returns zero if not, or if the current shape is not
-        an area."""
-        return _gv.gv_shape_point_in_polygon( self._o, x, y )
+        an area.
+        """
+        pass
 
-    def distance_from_polygon(self, x, y ):
+    def distance_from_polygon(self, x, y):
         """Compute shortest distance between point and outline of polygon
 
         x -- the x component of the location to check.
         y -- the y component of the location to check.
 
-        Returns the distance as a double."""
-        return _gv.gv_shape_distance_from_polygon( self._o, x, y )
+        Returns the distance as a double.
+        """
+        pass
 
-    def clip_to_rect(self, x, y, width, height ):
+    def clip_to_rect(self, x, y, width, height):
         """Clip shape to a rectangle.
 
         x -- the minimum x of the clip rectangle.
@@ -988,21 +890,7 @@ class GvShape:
         with holes due to an incomplete implementation of the clipping
         algorithm.  This will be fixed at some point in the future as needed.
         """
-
-        result = _gv.gv_shape_clip_to_rect( self._o, x, y, width, height )
-        if result is None:
-            return None
-        else:
-            return GvShape( _obj=result )
-
-    def add_shape( self, shape ):
-        _gv.gv_shape_add_shape( self._o, shape._o )
-
-    def get_shape( self, shape_index ):
-        return _gv.gv_shape_get_shape( self._o, shape_index )
-
-    def collection_get_count( self ):
-        return _gv.gv_shape_collection_get_count( self._o )
+        pass
 
 def gv_shape_line_from_nodes(xlist,ylist,zlist):
     """ Create a new line shape from three lists
@@ -1053,7 +941,51 @@ def gv_shapes_lines_for_vecplot(xlist,ylist,zlist,oklist):
         return GvShapes(_obj=obj)
 
 ###############################################################################
-class GvData(_gv.Data):
+# new functions for XML support (moved from GvData)
+def serialize(obj, base=None, filename=None):
+    """serialize this object in a format suitable for XML representation."""
+    # for clarity...
+    attr, elem, text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
+    if base is None:
+        base = [elem, 'GvData']
+
+    base.append([attr, 'read_only', [text, str(obj.is_read_only())]])
+    base.append([attr, 'name', [text, obj.name]])
+    if obj.projection:
+        base.append([elem, 'Projection', [text, obj.projection]])
+
+    for key,v in obj.get_properties().iteritems():
+        if key == '_gv_add_height_portable_path':
+            continue
+##            if key == '_gv_add_height_filename' and os.path.exists(v):
+        base.append([elem, 'Property', [attr, 'name', [text, key]], [text, v]])
+
+    return base
+
+def initialize_from_xml(obj, tree, filename=None):
+    """Initialize this instance's properties from the XML tree
+
+    Restores name, read_only, projection and all Property instances
+    """
+    obj.set_name( XMLFindValue(tree, 'name', '') )
+    obj.set_read_only(int(XMLFindValue(tree, 'read_only', '0')))
+    projection = XMLFindValue(tree, 'projection')
+    if projection:
+        obj.set_projection(projection)
+
+    for subtree in tree[2:]:
+        if subtree[1] == 'Property':
+            name = XMLFindValue(subtree, 'name')
+            if name:
+                value = XMLFindValue(subtree, '', '')
+                obj.set_property(name, value)
+
+# GvData not needed anymore. Subclassing is done in _gv. Do help(GvDataDoc)
+# for documentation
+GvData = _gv.Data
+
+# This class is only for documenting GvData
+class GvDataDoc:
     """Base class for various raster and vector data containers.
 
     All GvDatas have a name string, common undo semantics, and changing/changed
@@ -1072,85 +1004,35 @@ class GvData(_gv.Data):
     modified region, and shape containing objects can have a list of shapes.
     """
 
-    def __init__(self):
-        _gv.Data.__init__(self)
-
-    def serialize( self, base = None, filename=None ):
+    def serialize(self, base=None, filename=None):
         """serialize this object in a format suitable for XML representation.
         """
-
-        if base is None:
-            base = [gdal.CXT_Element, 'GvData']
-
-        base.append( [gdal.CXT_Attribute, 'read_only',
-                      [gdal.CXT_Text, str(self.is_read_only())]] )
-        base.append( [gdal.CXT_Attribute, 'name',
-                      [gdal.CXT_Text, str(self.get_name())]] )
-        projection = self.get_projection()
-        if  projection is not None and len(projection) > 0:
-            base.append( [gdal.CXT_Element, 'Projection',
-                          [gdal.CXT_Text, self.get_projection()]] )
-
-        props = self.get_properties()
-
-        for key in props.keys():
-            if key == '_gv_add_height_portable_path':
-                continue
-            v = props[key]
-            if key == '_gv_add_height_filename' and os.path.exists( v ):
-                base.append( [gdal.CXT_Element, 'Property',
-                              [gdal.CXT_Attribute, 'name',
-                               [gdal.CXT_Text,
-                                '_gv_add_height_portable_path']],
-                              [gdal.CXT_Text, pathutils.PortablePath( v, ref_path = filename ).serialize()]] )
-            base.append( [gdal.CXT_Element, 'Property',
-                          [gdal.CXT_Attribute, 'name', [gdal.CXT_Text, key]],
-                          [gdal.CXT_Text, v]] )
-        return base
-
-    def sink( self ):
-        # GTK2 PORT PENDING
-        #gobject.gobject_sink(self._o)
-        # _gtkmissing.gtk_object_sink( self._o )
         pass
 
-    def initialize_from_xml( self, tree, filename=None ):
+    def initialize_from_xml(self, tree, filename=None):
         """Initialize this instance's properties from the XML tree
 
         Restores name, read_only, projection and all Property instances
         """
-        self.set_name( XMLFindValue( tree, 'name', self.get_name() ) )
-        self.set_read_only(int(XMLFindValue(tree, 'read_only',
-                                                    str(self.is_read_only()))))
-        projection = XMLFindValue( tree, 'projection',
-                                                   self.get_projection() )
-        if projection is not None:
-            self.set_projection( projection )
-
-        for subtree in tree[2:]:
-            if subtree[1] == 'Property':
-                name = XMLFindValue( subtree, 'name' )
-                if name is not None:
-                    value = XMLFindValue( subtree, '', '' )
-                    self.set_property(name, value)
+        pass
 
     def get_name(self):
         """Fetch the name of this GvData."""
-        return _gv.Data.get_name(self)
+        pass
 
     def set_name(self, name):
         """Set the name of this GvData."""
-        _gv.Data.set_name(self, name)
+        pass
 
     def is_read_only(self):
         """Fetch the read_only flag."""
-        return _gv.Data.is_read_only(self)
+        pass
 
     def set_read_only(self, read_only):
         """Set the read_only flag of this GvData."""
-        _gv.Data.set_read_only(self, read_only)
+        pass
 
-    def changed(self, x_off = 0, y_off = 0, width = 0, height = 0):
+    def changed(self, x_off=0, y_off=0, width=0, height=0):
         """Emit GvData changed signal.
 
         Send a notification that this data has changed, with a NULL
@@ -1173,81 +1055,69 @@ class GvData(_gv.Data):
             accomodate data changed where subclasses have different change
             info objects...
         """
-        _gv.Data.changed(self, x_off, y_off, width, height)
+        pass
 
     def get_parent(self):
         """Fetch parent GvData object.
 
         This is typically used to get the underlying GvData on which
-        a GvLayer (which is also a GvData) depends."""
-
-        #
-        # Create an instance of the python wrapper subclass of the _gv
-        # module GvData superclass.  Assumes that the python wrapper subclass
-        # is named "Gv" plus the name of the _gv module class.
-        #
-        if not hasattr(self, "parent_data"):
-            parent_o = _gv.Data.get_parent(self)
-            if (parent_o.__class__.__name__[0:2] == "Gv"):
-                self.parent_data = parent_o
-            else:
-                classname = "Gv" + parent_o.__class__.__name__
-                call = "self.parent_data = " + classname + "(_obj=parent_o)"
-                exec call
-
-        return self.parent_data
+        a GvLayer (which is also a GvData) depends.
+        """
+        pass
 
     def get_projection(self):
         """Fetch projection, if any.
 
         The projection is normally expressed in OpenGIS Well Known Text
-        format or an empty string if no value is available."""
-
-        return _gv.Data.get_projection(self)
+        format or an empty string if no value is available.
+        """
+        pass
 
     def set_projection(self, projection):
         """Set the projection.
 
         This method won't actually modify the data geometry, only the
-        interpretation of the geometry."""
-        _gv.Data.set_projection(self, projection)
+        interpretation of the geometry.
+        """
+        pass
 
     def get_properties(self):
         """Get GvData properties (attributes) as a dictionary.
 
         The properties are returned as a Python dictionary.  Note that
-        changes to this dictionary are not applied back to the GvData."""
-        return _gv.Data.get_properties(self)
+        changes to this dictionary are not applied back to the GvData.
+        """
+        pass
 
-    def get_property(self,name):
+    def get_property(self, name):
         """Get a GvData property.
 
         name -- the key or name of the property being set.  Should be a
         well behaved token (no spaces, equal signs, or colons).
 
-        NOTE: Returns None if property does not exist."""
+        NOTE: Returns None if property does not exist.
+        """
+        pass
 
-        return _gv.Data.get_property(self,name)
-
-    def set_properties( self, properties ):
+    def set_properties(self, properties):
         """Set GvData properties
 
         Clear all existing properties, and assign the new set passed in.
 
         properties -- a python dictionary with the keys being property names,
-        and the result is the property value"""
+        and the result is the property value.
+        """
+        pass
 
-        return _gv.gv_data_set_properties( self, properties )
-
-    def set_property(self,name,value):
+    def set_property(self, name, value):
         """Set a GvData property.
 
         name -- the key or name of the property being set.  Should be a
         well behaved token (no spaces, equal signs, or colons).
 
-        value -- the value to be assigned.  Any text is acceptable."""
-
-        return _gv.Data.set_property(self,name,value)
+        value -- the value to be assigned.  Any text is acceptable.
+        """
+        pass
 
 def gv_data_registry_dump():
     _gv.gv_data_registry_dump()
@@ -1283,8 +1153,8 @@ def GvShapesFromXML( node, parent, filename=None ):
 
     return shapes
 
-class GvShapes(GvData, _gv.Shapes):
-    """A GvData of points, lines and areas (GvShapes). 
+class GvShapes(_gv.Shapes):
+    """A _gv.Data of points, lines and areas (GvShapes). 
 
     This layer can be treated as a list object, where each value is
     a GvShape.
@@ -1312,18 +1182,12 @@ class GvShapes(GvData, _gv.Shapes):
         shapefilename -- name of ESRI shapefile to create from, or None
                          (default) to create an empty container.
         """
-
-        if shapefilename:
-            _obj = _gv.gv_shapes_from_shapefile(shapefilename)
-            #self.sink() PENDING GTK2 PORT - Not needed with new wrappers?
-
-        if (_obj == None):
-            _gv.Shapes.__init__(self)
-            _obj = self
-        GvData.__init__(self, _obj)
-        self.save_obj = _obj # temp for testing only
-        if name: self.set_name(name)
-        #self.sink() PENDING GTK2 PORT - Not needed with new wrappers?
+        if _obj is None:
+            _gv.Shapes.__init__(self, shapefilename)
+        else:
+            _gv.Shapes.__init__(_obj, None)
+        if name:
+            self.set_name(name)
 
     def __len__(self):
         """Return number of shapes in container."""
@@ -1355,19 +1219,20 @@ class GvShapes(GvData, _gv.Shapes):
 
         _gv.Shapes.delete_shapes(self, [index,])
 
-    def serialize( self, base = None, filename = None ):
+    def serialize(self, base=None, filename=None):
         """serialize this object in a format suitable for XML representation.
         """
         if base is None:
             base = [gdal.CXT_Element, 'GvShapes']
 
-        GvData.serialize( self, base, filename=filename )
+        serialize(self, base, filename=filename)
 
-        shapes = [gdal.CXT_Element, 'Shapes' ]
-        for i in range(len(self)):
-            if self[i] is not None:
-                shapes.append(self[i].serialize( ))
-        base.append( shapes )
+        if self.get_property('_serialize_shapes') == '1':
+            shapes = [gdal.CXT_Element, 'Shapes']
+            for shp in self:
+                if shp is not None:
+                    shapes.append( shp.serialize() )
+            base.append(shapes)
 
         return base
 
@@ -1654,7 +1519,7 @@ def GvRasterFromXML( node, parent, filename=None ):
     raster = manager.get_dataset_raster( ds, band )
     return raster
 
-class GvRaster(GvData, _gv.Raster):
+class GvRaster(_gv.Raster):
     """Raster data object
 
     Signals:
@@ -1685,26 +1550,14 @@ class GvRaster(GvData, _gv.Raster):
         """
 
 
-        if (_obj == None):
-            if not (dataset is None):
+        if _obj is None:
+            if dataset:
                 dataset_raw = dataset._o
             else:
                 dataset_raw = None
             _gv.Raster.__init__(self, filename, sample, real, dataset_raw)
-            _obj = self
-        GvData.__init__(self, _obj)
-###PENDING..
-
-        ###if _obj: self._o = _obj; return
-        ###if (filename is None) and (dataset is None):
-        ###    raise ValueError, "expecting filename or dataset handle"
-        ###if not (dataset is None):
-        ###    dataset_raw = dataset._o
-        ###else:
-        ###    dataset_raw = None
-        ###self._o = _gv.gv_raster_new(filename = filename, sample = sample,
-        ###                            real = real, dataset = dataset_raw)
-        ###self.sink()
+        else:
+            _gv.Raster.__init__(self, _obj=_obj)
 
     def flush_cache(self,x_off=0,y_off=0,width=0,height=0):
         """Flush data cache.
@@ -1975,7 +1828,7 @@ class GvRaster(GvData, _gv.Raster):
 #    return raster
 
 ###############################################################################
-class GvLayer(GvData, _gv.Layer):
+class GvLayer(_gv.Layer):
     """Base class for display layers.
 
     Signals:
@@ -1995,26 +1848,26 @@ class GvLayer(GvData, _gv.Layer):
     """
 
     def __init__(self, _obj=None):
-        if (_obj == None):
+        if _obj is None:
             _gv.Layer.__init__(self)
-            _obj = self
-        GvData.__init__(self, _obj)
+        else:
+            _gv.Layer.__init__(_obj)
+        self.layer_type = 0
 
-    def serialize( self, base = None, filename=None ):
+    def serialize(self, base=None, filename=None):
         if base is None:
             base = [gdal.CXT_Element, 'GvLayer']
 
         base.append( [gdal.CXT_Attribute, 'visible',
                       [gdal.CXT_Text, str(self.is_visible())]] )
 
-        GvData.serialize( self, base, filename=filename )
+        serialize(self, base, filename=filename)
 
         return base
 
-    def initialize_from_xml( self, tree, filename=None ):
-        """restore object properties from XML tree
-        """
-        GvData.initialize_from_xml( self, tree, filename=filename )
+    def initialize_from_xml(self, tree, filename=None):
+        """restore object properties from XML tree"""
+        initialize_from_xml(self, tree, filename=filename)
         self.set_visible( int(XMLFindValue( tree, 'visible',
                                                     str(self.is_visible()))))
 
