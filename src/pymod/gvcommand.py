@@ -289,7 +289,7 @@ variable:
                 return (None,'')
             return (tokens2[0],tokens2[1])
         elif (line[0] == "'"):
-            tokens1 = .linesplit("'",1)
+            tokens1 = line.split("'",1)
             tokens2 = tokens1[1].split("'",1)
             if len(tokens2) < 2:
                 interpreter.showText( "Unmatched '  in argument line ",'error' )
