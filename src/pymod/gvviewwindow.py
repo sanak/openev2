@@ -29,16 +29,19 @@ import gtk
 from gtk.keysyms import F9
 
 import gview
-import gdal
-from gdalconst import *
+from osgeo import gdal
+from osgeo.gdalconst import *
 import gvutils
 import os
-import pgufilesel
+from filedlg import file_open
 import pguprogress
 import math
 import gvhtml
-import glob
 import gviewapp
+from layers import Layers
+
+# for better readability
+get_pref = gview.get_preference
 
 ratio_list = ['250:1', '200:1', '150:1', '100:1', '80:1', '60:1', '45:1',
               '35:1', '25:1', '18:1', '10:1', '8:1', '4:1', '2:1', '1:1',
@@ -136,8 +139,8 @@ class GvViewWindow(gtk.Window):
         # Add the actual GvViewArea for drawing in
         self.viewarea = gview.GvViewArea()
 
-        if gview.get_preference('view_background_color') is not None:
-            tokens = gview.get_preference('view_background_color').split()
+        if get_pref('view_background_color') is not None:
+            tokens = get_pref('view_background_color').split()
             self.viewarea.set_background_color( [ float(tokens[0]),
                                                   float(tokens[1]),
                                                   float(tokens[2]),
@@ -149,16 +152,28 @@ class GvViewWindow(gtk.Window):
         self.viewarea.connect("view-state-changed", self.update_zoom_cb)
         self.viewarea.connect("active-changed", self.update_zoom_cb)
 
+        #a horizontally paned window for the layer management and the
+        #view area
+
+        hpaned = gtk.HPaned()
+        shell.pack_start(hpaned)
+
+        layer_widget = Layers(self)
+        layer_widget.set_size_request(150, -1)
+        layer_widget.tree_view.unset_flags(gtk.CAN_FOCUS)
+        hpaned.pack1(layer_widget, resize=False)
+        self.layer_widget = layer_widget
+
         size = (620, 620)
         if show_scrollbars:
             self.scrolled_window = gtk.ScrolledWindow()
             self.set_size_request(size[0], size[1] + 60)
             self.scrolled_window.add(self.viewarea)
-            shell.pack_start(self.scrolled_window, expand=True)
+            hpaned.pack2(self.scrolled_window, resize=True)
         else:
             self.viewarea.size(size)
             self.scrolled_window = None
-            shell.pack_start(self.viewarea, expand=True)
+            hpaned.pack2(self.viewarea, resize=True)
 
         if show_tracker:
             statusbar = gtk.HBox()
@@ -215,7 +230,6 @@ class GvViewWindow(gtk.Window):
             ('Exit', gtk.STOCK_QUIT, "Exit", '<control>Q', None, self.exit),
             ('Edit', None, "Edit"),
             ('Undo', gtk.STOCK_UNDO, "Undo", '<control>Z', None, self.undo),
-            ('Layers', None, "Layers...", None, None, self.app.show_layerdlg),
             ('Attrib', None, "Vector Layer Attributes...", None, None, self.show_oeattedit),
             ('EditTools', None, "Edit Toolbar...", None, None, self.app.show_toolbardlg),
             ('Goto', None, "Go To...", None, None, self.goto_dlg),
@@ -223,7 +237,10 @@ class GvViewWindow(gtk.Window):
             ('Pos3D', None, "3D Position...", None, None, self.position_3d),
             ('Preferences', gtk.STOCK_PREFERENCES, "Preferences...", None, None, self.app.launch_preferences),
             ('Tools', None, "Tools"),
+            ('WMSTool', None, "WMS Tool", None, None, self.launch_wms),
             ('Image', None, "Image"),
+            ('HistoTool', None, "Histogram Enhance", None, None, self.launch_histo),
+            ('FusionTool', None, "Image Fusion", None, None, self.launch_fusion),
             ('Help', None, "Help"),
             ('About', gtk.STOCK_ABOUT, "About...", None, None, self.aboutcb)
             ])
@@ -512,14 +529,31 @@ class GvViewWindow(gtk.Window):
 
         oeattedit.launch()
 
-    def show_layerdlg(self, *args):
-        self.layerdlg.show()
-        self.layerdlg.window.raise_()
-
     def show_toolbardlg(self, *args):
         self.make_active()
         self.toolbar.show()
         self.toolbar.window.raise_()
+
+    def launch_wms(self, *args):
+        from wmstool import WMSDialog
+        wms = WMSDialog(self.app)
+        wms.show()
+
+    def launch_histo(self, *args):
+        from histoEnhance import HistogramWindow
+        self.make_active()
+        layer = self.app.active_layer()
+        if layer is None:
+            return
+        win = HistogramWindow(layer)
+        win.show()
+
+    def launch_fusion(self, *args):
+        from fusion import FusionDialog
+        self.make_active()
+        win = FusionDialog(self.app)
+        if win:
+            win.show()
 
     def goto_dlg(self, *args):
         """ Create the GoTo Dialog box with coordinate system option menu and
@@ -642,23 +676,23 @@ class GvViewWindow(gtk.Window):
     def menu_new_view(self, *args):
         self.app.new_view()
 
-    def save_vector_layer_request( self, *args ):
+    def save_vector_layer_request(self, *args):
+        from filedlg import file_save
         self.make_active()
+        cwd = get_pref('recent_directory')
 
         layer = self.viewarea.active_layer()
-        if layer is None or \
-           gvutils.is_of_class( layer.__class__, 'GvShapesLayer' ) == 0:
+        if not layer or not isinstance(layer, gview.GvShapesLayer):
             gvutils.warning('Please select a vector layer using the layer\n'+\
                             'dialog before attempting to save.' )
             return
 
-        pgufilesel.SimpleFileSelect( self.save_vector_layer_with_file,
-                                     cb_data = layer.get_parent(),
-                                     title = 'Save Shapefile',
-                                     default_filename = layer.get_name() )
+        file_save("Save Shapefile", cwd, filter=['ogrw'],
+                  cb=self.save_vector_layer_with_file,
+                  cb_data=layer.parent)
 
-    def save_vector_layer_with_file( self, filename, shapes_data ):
-        if shapes_data.save_to( filename ) == 0:
+    def save_vector_layer_with_file(self, filename, cwd, shapes_data):
+        if not shapes_data.save_to(filename):
             gvutils.error('Unable to save vectors to:'+filename)
 
     def destroy_preferences(self,*args):
@@ -680,7 +714,7 @@ class GvViewWindow(gtk.Window):
         self.viewarea.set_active_layer(layer)
 
     def file_open_ogr_by_name(self, filename):
-        import ogr
+        from osgeo import ogr
         import gvogrdlg
 
         self.make_active()
@@ -721,11 +755,11 @@ class GvViewWindow(gtk.Window):
 
     def file_import_cb(self, *args):
         self.make_active()
-        pgufilesel.SimpleFileSelect( self.file_import_by_name, None,
-                                     'File To Import',
-                                     help_topic = 'files.html' )
 
-    def file_import_by_name( self, filename, *args ):
+        file_open("File To Import", get_pref('recent_directory'), filter=['all'],
+                  cb=self.file_import_by_name, app=self.app)
+
+    def file_import_by_name(self, filename, *args):
         self.make_active()
         dataset = gdal.Open( filename )
         if dataset is None:
@@ -787,23 +821,15 @@ class GvViewWindow(gtk.Window):
     def file_open_cb(self, *args):
         self.make_active()
 
-        if gview.get_preference('save_recent_directory') == 'on':
-            recent_dir = gview.get_preference('recent_directory')
-        else:
-            recent_dir = None
+        filter = ['all','gdalr','ogrr']
+        file_open("File Open", get_pref('recent_directory'), filter=filter,
+                  cb=self.file_open_name_check, app=self.app, ms=True)
 
-        pgufilesel.SimpleFileSelect( ok_cb = self.file_open_name_check,
-                                    title = 'File Open',
-                                    default_filename = recent_dir,
-                                    help_topic = 'files.html' )
-
-# buffer function to check for wild cards in filename and then expand them
-    def file_open_name_check(self, filename, lut=None,*args):
-        if ('*' in filename)or('?' in filename):
-            for file in glob.glob(filename):
-               self.file_open_by_name(file)
-        else:
-            self.file_open_by_name(filename)
+    def file_open_name_check(self, filename, cwd, *args):
+        if get_pref('save_recent_directory') == 'on':
+            gview.set_preference('recent_directory', cwd)
+        for file in filename:
+           self.file_open_by_name(file)
 
     def open_subdataset_check( self, dataset ):
         import gvsdsdlg
@@ -811,8 +837,8 @@ class GvViewWindow(gtk.Window):
 
     def file_open_ap_envisat(self, dataset ):
         options = []
-        if gview.get_preference('gcp_warp_mode') is not None \
-           and gview.get_preference('gcp_warp_mode') == 'no':
+        if get_pref('gcp_warp_mode') is not None \
+           and get_pref('gcp_warp_mode') == 'no':
             options.append(('raw','yes'))
 
         md = dataset.GetMetadata()
@@ -877,8 +903,8 @@ class GvViewWindow(gtk.Window):
 
         raster = gview.manager.get_dataset_raster(dataset,1)
         options = []
-        if gview.get_preference('gcp_warp_mode') is not None \
-           and gview.get_preference('gcp_warp_mode') == 'no':
+        if get_pref('gcp_warp_mode') is not None \
+           and get_pref('gcp_warp_mode') == 'no':
             options.append(('raw','yes'))
 
         if lut:
@@ -961,14 +987,6 @@ class GvViewWindow(gtk.Window):
         return None
 
     def file_open_by_name(self, filename, lut=None, sds_check=1, *args):
-        head = os.path.dirname(filename)
-        if len(head) > 0:
-            if os.access(head,os.R_OK):
-                pgufilesel.simple_file_sel_dir = head+os.sep
-
-        if gview.get_preference('save_recent_directory') == 'on':
-            gview.set_preference('recent_directory', head+os.sep)
-
         if gvutils.is_shapefile(filename):
             self.file_open_shape_by_name(filename)
             return
@@ -1031,7 +1049,7 @@ class GvViewWindow(gtk.Window):
         icon_cmds = 'self.add_default_iconbar()'
         if iconfile:
             # check that icon file exists.  If not, use default values
-            fulliconfile = os.path.join(gview.home_dir, 'xmconfig', iconfile)
+            fulliconfile = os.path.join(gview.home_dir, 'xmlconfig', iconfile)
             if os.path.isfile(fulliconfile):
                 if self.app and hasattr(self.app, 'load_icons_file_from_xml'):
                     icon_cmds = self.app.load_icons_file_from_xml(fulliconfile)
@@ -1527,8 +1545,8 @@ class GvViewWindow(gtk.Window):
             view = self.viewarea
 
             options = []
-            if gview.get_preference('_gcp_warp_mode') is not None \
-               and gview.get_preference('_gcp_warp_mode') == 'no':
+            if get_pref('_gcp_warp_mode') is not None \
+               and get_pref('_gcp_warp_mode') == 'no':
                 options.append(('raw','yes'))
 
             # Set Current View to 3D Mode
