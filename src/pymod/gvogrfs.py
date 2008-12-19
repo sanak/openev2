@@ -2,9 +2,11 @@
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  Classes for building, and parsing OGR Feature Style Specifications
 # Author:   Frank Warmerdam, warmerdam@pobox.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2001, Frank Warmerdam <warmerdam@pobox.com>
@@ -25,9 +27,7 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import sys
-
-def gv_to_ogr_color( rgba ):
+def gv_to_ogr_color(rgba):
     if len(rgba) == 3:
         rgba = (rgba[0], rgba[1], rgba[2], 1.0)
 
@@ -37,12 +37,13 @@ def gv_to_ogr_color( rgba ):
     alpha = min(255,max(0,int(rgba[3] * 255 + 0.5)))
 
     color = '#%02X%02X%02X' % (red, green, blue)
+##    color = '#%02x%02x%02x%02x' % tuple([int(c*255.999) for c in color])
     if alpha != 255:
         color = color + '%02X' % alpha
 
     return color
 
-def ogr_to_gv_color( ogr_color ):
+def ogr_to_gv_color(ogr_color):
     if len(ogr_color) == 9:
         return (int(ogr_color[1:3],16) / 255.0,
                 int(ogr_color[3:5],16) / 255.0,
@@ -57,9 +58,8 @@ def ogr_to_gv_color( ogr_color ):
         return (0,0,0,1.0)
 
 class OGRFeatureStyleParam:
-
     def __init__(self, parm=None):
-        if parm is not None:
+        if parm:
             self.parse(parm)
 
     def set(self, name, value, role='string_value', units=''):
@@ -69,12 +69,12 @@ class OGRFeatureStyleParam:
         self.role = role
 
     def parse(self, parm):
-        (key,value) = parm.split(':',1)
+        key, value = parm.split(':', 1)
         self.param_name = key
 
         #trap params that have no value
-        if len(value) == 0:
-            self.role='numeric_value'
+        if not value:
+            self.role = 'numeric_value'
             self.value = ''
             self.units = ''
             return
@@ -107,23 +107,19 @@ class OGRFeatureStyleParam:
             self.value = value
 
     def unparse(self):
-        result = self.param_name + ':'
         if self.role == 'numeric_value':
-            result = result + self.value
+            frmt = '%s:%s%s'
         elif self.role == 'field_name':
-            result = result + '{'+self.value+'}'
+            frmt = '%s:{%s}%s'
         else:
-            result = result + '"'+self.value+'"'
+            frmt = '%s:"%s"%s'
 
-        result = result + self.units
-
-        return result
+        return frmt % (self.param_name, self.value, self.units)
 
     def __str__(self):
-        result = '  parm=%s  role=%12s  value=%-20s' \
-                 % (self.param_name, self.role, self.value)
-        if len(self.units) > 0:
-            result = result + ' units:'+self.units
+        result = '  parm=%s  role=%12s  value=%-20s' % (self.param_name, self.role, self.value)
+        if self.units:
+            result += (' units:'+self.units)
 
         return result
 
@@ -132,14 +128,13 @@ class OGRFeatureStylePart:
         pass
 
     def parse(self, style_part):
-
         style_part = style_part.strip()
         i = style_part.find('(')
         if i == -1:
             raise ValueError, 'no args to tool name - ' + style_part
 
         self.tool_name = style_part[:i].upper()
-        if self.tool_name not in [ 'PEN', 'BRUSH', 'SYMBOL', 'LABEL' ]:
+        if self.tool_name not in ('PEN', 'BRUSH', 'SYMBOL', 'LABEL'):
             raise ValueError, 'unrecognised tool name - ' + style_part
 
         if style_part[-1:] != ')':
@@ -152,17 +147,16 @@ class OGRFeatureStylePart:
         last_i = 0
         in_literal = 0
         while i < len(tool_parms):
-
             if tool_parms[i] == '"':
                 if not in_literal or i == 0 or tool_parms[i-1] != '\\':
                     in_literal = not in_literal
 
             if not in_literal and tool_parms[i] == ',':
-                parms_list.append(tool_parms[last_i:i].strip())
-                i = i + 1
+                parms_list.append( tool_parms[last_i:i].strip() )
+                i += 1
                 last_i = i
 
-            i = i + 1
+            i += 1
 
         if in_literal:
             raise ValueError, 'unterminated string literal - ' + style_part
@@ -174,40 +168,30 @@ class OGRFeatureStylePart:
             self.parms[parm.param_name] = parm
 
     def unparse(self):
-        result = self.tool_name + '('
-        first = 1
-        for key in self.parms.keys():
-            if first:
-                first = 0
-            else:
-                result = result + ','
+        valstr = ','.join( [v.unparse() for v in self.parms.values()] )
+        return '%s(%s)' % (self.tool_name, valstr)
 
-            result = result + self.parms[key].unparse()
-        result = result + ')'
-
-        return result
-
-    def set_parm(self, parm_obj ):
+    def set_parm(self, parm_obj):
         self.parms[parm_obj.param_name] = parm_obj
 
     def get_parm(self, parm_name, default_value=None):
-        if self.parms.has_key(parm_name):
+        if parm_name in self.parms:
             return self.parms[parm_name].value
         else:
             return default_value
 
     def get_color(self, default_value=None):
         color = self.get_parm('c', None)
-        if color is None or color[0] != '#':
-            return default_value
+        if color:
+##        if color and color[0] != '#':
+            return ogr_to_gv_color(color)
         else:
-            return ogr_to_gv_color( color )
+            return default_value
 
     def __str__(self):
         result = 'Tool:%s\n' % self.tool_name
-        for key in self.parms.keys():
-            parm = self.parms[key]
-            result = result + '  %s\n' % str(parm)
+        for parm in self.parms.values():
+            result += '  %s\n' % parm
 
         return result
 
@@ -222,7 +206,7 @@ class OGRFeatureStyle:
     def __init__(self, style=None):
         self.parts = {}
 
-        if style is not None:
+        if style:
             self.parse(style)
 
     def parse(self, style):
@@ -236,7 +220,7 @@ class OGRFeatureStyle:
             return
 
         style = style.strip()
-        if style == '':
+        if not style:
             print 'empty style'
             return
         in_quote = 0
@@ -250,7 +234,7 @@ class OGRFeatureStyle:
                 self.parse_part(part)
                 part_start = i + 1
         #check for the last one ...
-        if part_start != 0 or len(self.parts) == 0:
+        if part_start != 0 or not self.parts:
             part = style[part_start:]
             self.parse_part(part)
 
@@ -263,19 +247,13 @@ class OGRFeatureStyle:
             ogr_part.parse(part)
             self.add_part(ogr_part)
         except:
-            print 'Invalid part in feature sytle definition'
+            print 'Invalid part (%s) in feature style definition' % part
 
     def unparse(self):
         """
         compose the feature style into a string
         """
-        result = ''
-        sep = ''
-        for key in self.parts.keys():
-            part = self.parts[key]
-            result = result + sep + part.unparse()
-            sep = ";"
-        return result
+        return ';'.join( [v.unparse() for v in self.parts.values()] )
 
     def add_part(self, ogr_part):
         """
@@ -286,14 +264,14 @@ class OGRFeatureStyle:
         else:
             raise TypeError, 'ogr_part must be an OGRFeatureStylePart'
 
-    def get_part(self, part_name, default = None):
-        if self.parts.has_key(part_name):
+    def get_part(self, part_name, default=None):
+        if part_name in self.parts:
             return self.parts[part_name]
         else:
             return default
 
     def remove_part(self, part_name):
-        if self.parts.has_key(part_name):
+        if part_name in self.parts:
             del self.parts[part_name]
 
     def has_part(self, part_name):
@@ -301,14 +279,13 @@ class OGRFeatureStyle:
 
     def __str__(self):
         result = 'Feature Style Definition:\n'
-        for key in self.parts.keys():
-            part = self.parts[key]
-            result = result + '  %s\n' % str(part)
+        for part in self.parts.values():
+            result += '  %s\n' % part
 
         return result
 
-
 if __name__ == '__main__':
+    import sys
 
     fsp = OGRFeatureStylePart()
 
@@ -320,5 +297,3 @@ if __name__ == '__main__':
         fsp.parse( line )
         print fsp
         print fsp.unparse()
-
-

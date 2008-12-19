@@ -5,6 +5,8 @@
 # Purpose:  Utilities for creating vrt files.
 # Author:   Gillian Walter, gwalter@atlsci.com
 #
+# Maintained by Mario Beauchamp (starged@gmail.com)
+#
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
 # 
@@ -24,9 +26,9 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gdal       
-import Numeric
-import osr
+from osgeo import gdal       
+import numpy
+from osgeo import osr
 import os
 from gvconst import *
 
@@ -319,8 +321,8 @@ def GeoTransformToGCPs(gt,num_pixels,num_lines,grid=2):
 
     gcp_list=[]
 
-    parr=Numeric.arange(0.0,num_pixels+1.0,num_pixels/(grid+1.0))
-    larr=Numeric.arange(0.0,num_lines+1.0,num_lines/(grid+1.0))
+    parr=numpy.arange(0.0,num_pixels+1.0,num_pixels/(grid+1.0))
+    larr=numpy.arange(0.0,num_lines+1.0,num_lines/(grid+1.0))
 
     for idx in range(len(parr)*len(larr)):
         cgcp=gdal.GCP()
@@ -371,10 +373,10 @@ def serializeGeoTransform(indataset=None,vrt_options=None,geotransform=None):
                 gt3=gt[3]+gt[4]*(spix-dpix)+gt[5]*(sline-dline)
                 # floor- if xsize/ysize/dxsize/dysize are non-integer,
                 # gdal will truncate, so account for that here.
-                gt1=float(gt[1])*Numeric.floor(xsize)/Numeric.floor(dxsize)
-                gt2=float(gt[2])*Numeric.floor(ysize)/Numeric.floor(dysize)
-                gt4=float(gt[4])*Numeric.floor(xsize)/Numeric.floor(dxsize)
-                gt5=float(gt[5])*Numeric.floor(ysize)/Numeric.floor(dysize)
+                gt1=float(gt[1])*numpy.floor(xsize)/numpy.floor(dxsize)
+                gt2=float(gt[2])*numpy.floor(ysize)/numpy.floor(dysize)
+                gt4=float(gt[4])*numpy.floor(xsize)/numpy.floor(dxsize)
+                gt5=float(gt[5])*numpy.floor(ysize)/numpy.floor(dysize)
                 geo_text='  %0.22E, %0.22E, %0.22E, %0.22E, %0.22E, %0.22E' % (gt0, gt1, gt2, gt3, gt4, gt5)
 
         gbase=[gdal.CXT_Element,'GeoTransform',[gdal.CXT_Text,geo_text]]

@@ -1,9 +1,11 @@
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  Class providing lut utilities
 # Author:   Pete Nagy
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2005, Vexcel Corp.
@@ -24,7 +26,7 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gdal
+from osgeo import gdal
 import math
 from gvconst import *
 
@@ -128,7 +130,7 @@ class GvLut:
 
         (smin, smax) = raster.autoscale()
 
-        gdal_band = raster.get_band()
+        gdal_band = gdal.Band(raster.get_band())
         histogram = gdal_band.GetHistogram(smin, smax, approx_ok = 1)
 
         cum_hist = []

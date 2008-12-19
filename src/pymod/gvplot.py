@@ -25,7 +25,7 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import Numeric
+import numpy as Numeric
 import gtk
 import os
 import gvutils
@@ -174,7 +174,7 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
 
     elif terminal == 'xpm':
 
-        import gdal
+        from osgeo import gdal
         import time
 
         g.batch = 1
@@ -203,8 +203,8 @@ def plot( data=None, xaxis=None, yaxis=None, xmin=None, xmax=None,
         return
 
     else:
-        import gdal
-        import gdalnumeric
+        from osgeo import gdal
+        from osgeo import gdalnumeric
         import time
         import gview
 
@@ -406,8 +406,8 @@ def plot3d( data=None, xvec=None, yvec=None, xaxis=None, yaxis=None, zaxis=None,
         g.plot_current()
 
     else:
-        import gdal
-        import gdalnumeric
+        from osgeo import gdal
+        from osgeo import gdalnumeric
         import time
         import gview
 

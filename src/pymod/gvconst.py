@@ -1,9 +1,11 @@
 ###############################################################################
-# $Id: gvconst.py,v 1.1.1.1 2005/04/18 16:38:35 uid1026 Exp $
+# $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  Declaration of OpenEV constants
 # Author:   Frank Warmerdam, warmerda@home.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)

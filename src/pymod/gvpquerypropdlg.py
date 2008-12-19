@@ -36,10 +36,9 @@ pq_prop_dialog_list = []
 def LaunchPQueryPropDialog(layer):
     # Check list to see if dialog exists - make it visible
     for test_dialog in pq_prop_dialog_list:
-        if test_dialog.layer._o == layer._o:
+        if test_dialog.layer == layer:
             test_dialog.update_gui()
-            test_dialog.show()
-            test_dialog.window.raise_()
+            test_dialog.present()
             return test_dialog
 
     # Create new dialog if one doesn't exist already
