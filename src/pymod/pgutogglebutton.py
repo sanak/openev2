@@ -1,10 +1,11 @@
-#!/usr/bin/env python
 ###############################################################################
 # $Id$
 #
 # Project:  OpenEV Python GTK Utility classes
-# Purpose:  Embeddable, configurable toggle widget
+# Purpose:  DEPRECATED: now only imports pgu.ToggleButton
 # Author:   Paul Spencer, pgs@magma.ca
+#
+# Maintained by Mario Beauchamp (starged@gmail.com)
 #
 ###############################################################################
 # Copyright (c) 2000, DM Solutions Group Inc. (www.dmsolutions.on.ca)
@@ -25,82 +26,4 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk
-import gview
-import os.path
-
-class pguToggleButton(gtk.ToggleButton):
-    """
-    a widget for displaying toggled state (on/off).
-    """
-
-    def __init__(self, pix_on = "ck_on_l.xpm", pix_off = "ck_off_l.xpm"):
-        """
-        """
-        gtk.ToggleButton.__init__( self )
-
-        filename = os.path.join(gview.home_dir, 'pics', pix_on)
-
-        pix, mask = gtk.gdk.pixmap_colormap_create_from_xpm(None,
-            gtk.gdk.colormap_get_system(), None, filename)
-        self.pix_on = gtk.Image()
-        self.pix_on.set_from_pixmap(pix, mask)
-        self.pix_on.show()
-
-        # OLD...
-        #pix, mask = gtk.create_pixmap_from_xpm(self, None, filename)
-        #self.pix_on = gtk.Pixmap( pix, mask )
-        #self.pix_on.show()
-
-        filename = os.path.join(gview.home_dir, 'pics', pix_off)
-
-        pix, mask = gtk.gdk.pixmap_colormap_create_from_xpm(None,
-            gtk.gdk.colormap_get_system(), None, filename)
-        self.pix_off = gtk.Image()
-        self.pix_off.set_from_pixmap(pix, mask)
-        self.pix_off.show()
-
-        # OLD...
-        #pix, mask = gtk.create_pixmap_from_xpm(self, None, filename)
-        #self.pix_off = gtk.Pixmap( pix, mask )
-        #self.pix_off.show()
-
-        self.add( self.pix_off )
-
-        self.active_pix = self.pix_off
-
-        self.set_size_request(*pix.get_size())
-
-        self.connect( 'toggled', self.expose )
-        self.connect( 'expose-event', self.expose )
-        self.show()
-
-    def expose( self, *args ):
-
-        if not self.flags() & gtk.REALIZED:
-            return
-
-
-        if self.get_active():
-            active_pix = self.pix_on
-        else:
-            active_pix = self.pix_off
-        if active_pix != self.active_pix:
-            self.remove( self.active_pix )
-            self.active_pix = active_pix
-            self.add( self.active_pix )
-
-if __name__ == "__main__":
-    dlg = gtk.Dialog()
-    filename = os.path.join(gview.home_dir, 'pics')
-    print 'pixs from ', filename
-    tb = pguToggleButton()
-    dlg.vbox.pack_start( tb )
-
-    btn = gtk.Button( "OK" )
-    btn.connect( 'clicked', gtk.main_quit )
-    dlg.action_area.pack_start( btn )
-    dlg.connect( 'delete-event', gtk.main_quit )
-    dlg.show_all()
-    gtk.main()
-
+from pgu import ToggleButton as pguToggleButton

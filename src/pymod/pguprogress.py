@@ -2,8 +2,10 @@
 # $Id$
 #
 # Project:  OpenEV
-# Purpose:  Simplified progress monitor dialog.
+# Purpose:  DEPRECATED: now only imports pgu.ProgressDialog
 # Author:   Frank Warmerdam, warmerda@home.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com)
 #
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -24,73 +26,4 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk
-
-class PGUProgressDialog(gtk.Dialog):
-    def __init__(self, title = 'Progress', cancel = False ):
-        gtk.Dialog.__init__(self)
-        self.set_title( title )
-        self.min = 0.0
-        self.max = 1.0
-        self.message = "complete"
-        self.cancelled = False
-
-        vbox = gtk.VBox(spacing=5)
-        vbox.set_border_width(10)
-        self.vbox.pack_start(vbox)
-
-        label = gtk.Label(" 0% "+self.message)
-        label.set_alignment(0, 0.5)
-        vbox.pack_start(label, expand=True)
-        self.label = label
-
-        pbar = gtk.ProgressBar()
-        pbar.set_size_request(200, 20)
-        vbox.pack_start(pbar)
-
-        if cancel:
-            button = gtk.Button("cancel")
-            self.cancel = button
-            button.connect( "clicked", self.CancelCB )
-            self.action_area.pack_start(button)
-
-        self.pbar = pbar
-        self.show_all()
-
-    def CancelCB( self, *args ):
-        self.cancelled = True
-
-    def Reset(self):
-        self.cancelled = False
-
-    def SetRange( self, min, max ):
-        self.min = min
-        self.max = max
-
-    def SetDefaultMessage( self, message ):
-        self.message = message
-
-    def ProgressCB( self, complete, message, *args ):
-
-        self.complete = self.min + (self.max-self.min) * complete
-        if message == "":
-            message = self.message
-
-        message = str(int(complete*100)) + "% " + message
-        self.label.set_text(message)
-
-        self.pbar.update( complete )
-        while gtk.events_pending():
-            gtk.main_iteration(False)
-
-        if self.cancelled:
-            return 0
-        else:
-            return 1
-
-
-if __name__ == '__main__':
-    pdialog = PGUProgressDialog( "Progress Test" )
-
-    gtk.main()
-
+from pgu import ProgressDialog as PGUProgressDialog
