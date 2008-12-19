@@ -83,7 +83,6 @@ def GvViewWindowFromXML( node, parent, filename=None ):
 
 class GvViewWindow(gtk.Window):
     next_viewnum = 1
-
     def __init__(self, app=None, title=None, show_menu=1, show_icons=1, 
                  show_tracker=1, show_scrollbars=1,
                  menufile='NewMenuFile.xml',
@@ -119,13 +118,13 @@ class GvViewWindow(gtk.Window):
         self.UImgr.insert_action_group(self.actions, 0)
 
         # Menu bar
-        if show_menu > 0:
+        if show_menu:
             self.create_menubar(menufile)
             shell.pack_start(self.menuf, expand=False)
         else:
             self.menuf = None
 
-        if show_icons > 0:
+        if show_icons:
             self.create_iconbar(iconfile)
             shell.pack_start(self.iconbar,expand=False)
         else:
@@ -137,18 +136,14 @@ class GvViewWindow(gtk.Window):
 
         # Add the actual GvViewArea for drawing in
         self.viewarea = gview.GvViewArea()
-
-        if get_pref('view_background_color') is not None:
-            tokens = get_pref('view_background_color').split()
-            self.viewarea.set_background_color( [ float(tokens[0]),
-                                                  float(tokens[1]),
-                                                  float(tokens[2]),
-                                                  float(tokens[3])] )
+        self.viewarea.set_size_request(600,600)
+        rgba = get_pref('view_background_color', '0 0 0 0').split()
+        self.viewarea.set_background_color([float(c) for c in rgba])
 
         # Update Zoom ratio box in toolbar whenever view changes
         # (actually, only when zoom changes)
-        self.view_state_changed_id = \
-        self.viewarea.connect("view-state-changed", self.update_zoom_cb)
+        self.view_state_changed_id = self.viewarea.connect("view-state-changed",
+                                                           self.update_zoom_cb)
         self.viewarea.connect("active-changed", self.update_zoom_cb)
 
         #a horizontally paned window for the layer management and the
@@ -163,16 +158,14 @@ class GvViewWindow(gtk.Window):
         hpaned.pack1(layer_widget, resize=False)
         self.layer_widget = layer_widget
 
-        size = (620, 620)
+        self.scrolled_window = gtk.ScrolledWindow()
+        self.scrolled_window.add(self.viewarea)
+        hpaned.pack2(self.scrolled_window, resize=True)
+        
         if show_scrollbars:
-            self.scrolled_window = gtk.ScrolledWindow()
-            self.set_size_request(size[0], size[1] + 60)
-            self.scrolled_window.add(self.viewarea)
-            hpaned.pack2(self.scrolled_window, resize=True)
+            self.scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
         else:
-            self.viewarea.size(size)
-            self.scrolled_window = None
-            hpaned.pack2(self.viewarea, resize=True)
+            self.scrolled_window.set_policy(gtk.POLICY_NEVER, gtk.POLICY_NEVER)
 
         if show_tracker:
             statusbar = gtk.HBox()
@@ -381,8 +374,8 @@ class GvViewWindow(gtk.Window):
             self.idlebusy_pixmap.set_from_stock('idle', gtk.ICON_SIZE_LARGE_TOOLBAR)
 
     def print_cb(self, *args):
-        import gvprint
-        pd = gvprint.GvPrintDialog( self.viewarea )
+        from gvprint import GvPrintDialog
+        GvPrintDialog(self.viewarea)
 
     def helpcb(self, item, topic='openevmain.html'):
         gvhtml.LaunchHTML( topic )
@@ -468,14 +461,14 @@ class GvViewWindow(gtk.Window):
 
         # what else do we need to do?
         if len(self.app.view_manager.get_views()) == 1:
-            if self.app.request_quit() > 0:
+            if self.app.request_quit():
                 if self.menuf is not None:
                     self.app.unsubscribe('rfl-change',self.show_rfl)
                 # request_quit() sends out the order for the view
                 # to be shut.  The destroy() and return False are
-                # redundant and sometimes result in errors (project
-                # files).
-                #self.destroy()
+                # redundant and sometimes result in errors (project files).
+                # MB: try it and see what it does...
+                self.destroy()
                 #return False
                 return True
             else:
@@ -531,8 +524,7 @@ class GvViewWindow(gtk.Window):
 
     def show_toolbardlg(self, *args):
         self.make_active()
-        self.toolbar.show()
-        self.toolbar.window.raise_()
+        self.toolbar.present()
 
     def launch_wms(self, *args):
         from wmstool import WMSDialog
@@ -610,17 +602,17 @@ class GvViewWindow(gtk.Window):
 
     def file_open_ogr_by_name(self, filename):
         from osgeo import ogr
-        import gvogrdlg
+        from gvogrdlg import GvOGRDlg
 
         self.make_active()
 
-        hDS = ogr.Open( filename )
+        hDS = ogr.Open(filename)
         if hDS is None:
             return False
 
         self.app.add_to_rfl(filename)
 
-        dlg = gvogrdlg.GvOGRDlg(hDS, self )
+        GvOGRDlg(hDS, self)
 
         return True
 
@@ -656,9 +648,9 @@ class GvViewWindow(gtk.Window):
 
     def file_import_by_name(self, filename, *args):
         self.make_active()
-        dataset = gdal.Open( filename )
+        dataset = gdal.Open(filename)
         if dataset is None:
-            gvutils.error('Unable to open '+filename+' for import.')
+            gvutils.error('Unable to open %s for import.' % filename)
             return
 
         geotiff = gdal.GetDriverByName("GTiff")
@@ -670,47 +662,49 @@ class GvViewWindow(gtk.Window):
         newfile = newbase + ".tif"
         i = 0
         while os.path.isfile(newfile):
-            i = i+1
-            newfile = newbase+"_"+str(i)+".tif"
+            i += 1
+            newfile = "%s_%d.tif" % (newbase, i)
 
         progress = pgu.ProgressDialog('Import to '+newfile, cancel=True)
         progress.SetDefaultMessage("translated")
+        # do it this way until progress is fixed...
+        progress.show()
+        progress.ProgressCB(0)
 
         old_cache_max = gdal.GetCacheMax()
         if old_cache_max < 20000000:
-            gdal.SetCacheMax( 20000000 )
+            gdal.SetCacheMax(20000000)
 
-        new_dataset = geotiff.CreateCopy( newfile, dataset, False,
-                                          ['TILED=YES',],
-                                          callback = progress.ProgressCB )
+        new_dataset = geotiff.CreateCopy(newfile, dataset, False,
+                                         ['TILED=YES',])
         dataset = None
 
         if progress.cancelled:
             progress.destroy()
             if os.path.isfile(newfile):
                 os.unlink(newfile)
-            gdal.SetCacheMax( old_cache_max );
+            gdal.SetCacheMax(old_cache_max)
             return
 
-        if new_dataset == None:
+        if new_dataset is None:
             progress.destroy()
-            gvutils.error('Unable to translate '+filename+' to '+newfile)
+            gvutils.error('Unable to translate %s to %s' % (filename, newfile))
             if os.path.isfile(newfile):
                 os.unlink(newfile)
-            gdal.SetCacheMax( old_cache_max );
+            gdal.SetCacheMax(old_cache_max)
             return
 
-        progress.SetDefaultMessage( "overviews built" )
-        new_dataset.BuildOverviews( "average", callback = progress.ProgressCB )
+        progress.SetDefaultMessage("overviews built")
+        new_dataset.BuildOverviews("average")
         new_dataset = None
 
+        progress.ProgressCB(1, 'Done')
         progress.destroy()
 
-        gdal.SetCacheMax( old_cache_max );
+        gdal.SetCacheMax(old_cache_max)
 
         # open normally
-        self.file_open_by_name( newfile, sds_check=0 )
-
+        self.file_open_by_name(newfile, sds_check=0)
 
     def file_open_cb(self, *args):
         self.make_active()
@@ -723,7 +717,7 @@ class GvViewWindow(gtk.Window):
         self.make_active()
 
         filter = ['all','gdalr']
-        file_open("RGB File Open", get_pref('recent_directory'), filter=filter,
+        file_open("RGB Open", get_pref('recent_directory'), filter=filter,
                   cb=self.rgb_files_open_by_name, app=self.app, ms=True)
 
     def file_open_name_check(self, filename, cwd, *args):
@@ -732,38 +726,35 @@ class GvViewWindow(gtk.Window):
         for file in filename:
            self.file_open_by_name(file)
 
-    def open_subdataset_check( self, dataset ):
-        import gvsdsdlg
-        dlg = gvsdsdlg.GvSDSDlg(dataset, self)
+    def open_subdataset_check(self, dataset):
+        from gvsdsdlg import GvSDSDlg
+        GvSDSDlg(dataset, self)
 
-    def file_open_ap_envisat(self, dataset ):
+    def file_open_ap_envisat(self, dataset):
+        # MB: untested
         options = []
-        if get_pref('gcp_warp_mode') is not None \
-           and get_pref('gcp_warp_mode') == 'no':
+        pref = get_pref('gcp_warp_mode','yes')
+        if pref == 'no':
             options.append(('raw','yes'))
 
         md = dataset.GetMetadata()
-        try:
-            md1 = md['SPH_MDS1_TX_RX_POLAR']
-            md2 = md['SPH_MDS2_TX_RX_POLAR']
-        except:
-            md1 = ''
-            md2 = ''
+        md1 = md.get('SPH_MDS1_TX_RX_POLAR','')
+        md2 = md.get('SPH_MDS2_TX_RX_POLAR','')
 
-        raster1 = gview.manager.get_dataset_raster(dataset,1)
-        raster2 = gview.manager.get_dataset_raster(dataset,2)
+        raster1 = gview.manager.get_dataset_raster(dataset, 1)
+        raster2 = gview.manager.get_dataset_raster(dataset, 2)
 
-        rl1 = gview.GvRasterLayer(raster1, options, rl_mode=gview.RLM_AUTO )
-        rl1.set_name( 'MDS1: ' + md1 )
-        rl2 = gview.GvRasterLayer(raster2, options, rl_mode=gview.RLM_AUTO )
-        rl2.set_name( 'MDS2: ' + md2 )
+        rl1 = gview.GvRasterLayer(raster1, options, rl_mode=gview.RLM_AUTO)
+        rl1.set_name('MDS1: ' + md1)
+        rl2 = gview.GvRasterLayer(raster2, options, rl_mode=gview.RLM_AUTO)
+        rl2.set_name('MDS2: ' + md2)
 
         # Add MDS1 to the current view window. 
 
         self.viewarea.add_layer(rl1)
         self.viewarea.set_active_layer(rl1)
         self.rawgeo_update()
-        self.set_title( self.view_title + ': MDS1- ' + md1 )
+        self.set_title(self.view_title + ': MDS1- ' + md1)
 
         # Create a new view window and add MDS2 to it.
 
@@ -771,16 +762,15 @@ class GvViewWindow(gtk.Window):
         view2.viewarea.add_layer(rl2)
         view2.viewarea.set_active_layer(rl2)
         view2.rawgeo_update()
-        view2.set_title( view2.title + ': MDS2- ' + md2 )
+        view2.set_title(view2.title + ': MDS2- ' + md2)
 
         # Setup link between views.
         link = gview.GvViewLink()
-        link.register_view( self.viewarea )
-        link.register_view( view2.viewarea )
+        link.register_view(self.viewarea)
+        link.register_view(view2.viewarea)
         link.enable()
 
-    def open_gdal_dataset(self, dataset, lut=None, sds_check=1, \
-                            add_to_rfl=0, *args):
+    def open_gdal_dataset(self, dataset, lut=None, sds_check=1, add_to_rfl=0, *args):
         """Opens existing GDAL dataset."""
 
         self.make_active()
@@ -789,8 +779,8 @@ class GvViewWindow(gtk.Window):
         if dataset is None:
             return
 
-        if sds_check and len(dataset.GetSubDatasets()) > 0:
-            self.open_subdataset_check( dataset )
+        if sds_check and dataset.GetSubDatasets():
+            self.open_subdataset_check(dataset)
             return
 
         self.updating = True
@@ -799,35 +789,31 @@ class GvViewWindow(gtk.Window):
 
         md = dataset.GetMetadata()
         # special hack for displaying AP envisat specially.
-        if md.has_key('MPH_PHASE') and dataset.RasterCount == 2:
-            self.file_open_ap_envisat( dataset )
+        if 'MPH_PHASE' in md and dataset.RasterCount == 2:
+            self.file_open_ap_envisat(dataset)
             return
 
-        raster = gview.manager.get_dataset_raster(dataset,1)
+        raster = gview.manager.get_dataset_raster(dataset, 1)
         options = []
-        if get_pref('gcp_warp_mode') is not None \
-           and get_pref('gcp_warp_mode') == 'no':
+        pref = get_pref('gcp_warp_mode','yes')
+        if pref == 'no':
             options.append(('raw','yes'))
+        mode = gview.RLM_AUTO
 
         if lut:
-            raster_layer = gview.GvRasterLayer(raster, options,
-                                               rl_mode = gview.RLM_SINGLE )
+            mode = gview.RLM_SINGLE
             raster_layer.lut_put(lut)
-
         elif dataset.RasterCount > 2:
-            raster_layer = gview.GvRasterLayer(raster, options,
-                                               rl_mode = gview.RLM_RGBA )
-        elif dataset.RasterCount == 2 and \
-             dataset.GetRasterBand(2).GetRasterColorInterpretation() == gdal.GCI_AlphaBand:
-            raster_layer = gview.GvRasterLayer(raster, options,
-                                               rl_mode = gview.RLM_RGBA )
-        elif dataset.RasterCount < 3 and \
-            (dataset.GetRasterBand(1).GetRasterColorInterpretation() == gdal.GCI_PaletteIndex or
-            dataset.GetRasterBand(1).GetRasterColorInterpretation() == gdal.GCI_HueBand):
-            raster_layer = gview.GvRasterLayer(raster, options, rl_mode = gview.RLM_PSCI )
-        else:
-            raster_layer = gview.GvRasterLayer(raster, options,
-                                               rl_mode = gview.RLM_AUTO )
+            mode = gview.RLM_RGBA
+        elif dataset.RasterCount == 2:
+            if dataset.GetRasterBand(2).GetRasterColorInterpretation() == gdal.GCI_AlphaBand:
+                mode = gview.RLM_RGBA
+        elif dataset.RasterCount < 3:
+            ci = dataset.GetRasterBand(1).GetRasterColorInterpretation()
+            if ci == gdal.GCI_PaletteIndex or ci == gdal.GCI_HueBand:
+                mode = gview.RLM_PSCI
+
+        raster_layer = gview.GvRasterLayer(raster, options, rl_mode=mode)
         raster_layer.set_name(dataset.GetDescription())
 
         #
@@ -837,43 +823,36 @@ class GvViewWindow(gtk.Window):
         raster_layer.set_source(0, raster)
 
         # Logic to handle PSCI layers
-        if raster_layer.get_mode() == gview.RLM_PSCI:
+        if mode == gview.RLM_PSCI:
             if dataset.RasterCount > 1:
-                intensity_raster = gview.manager.get_dataset_raster(dataset,2)
+                intensity_raster = gview.manager.get_dataset_raster(dataset, 2)
                 raster_layer.set_source(1, intensity_raster)
             else:
-                intensity = 255
-                if md.has_key(gview.GV_PSCI_INTENSITY):
-                    intensity = float(md.get(gview.GV_PSCI_INTENSITY))
+                intensity = float(md.get(gview.GV_PSCI_INTENSITY, 255))
                 raster_layer.set_source(1, None, const_value=intensity)
 
         # Lots of logic to handle RGB and RGBA Layers
-        if raster_layer.get_mode() == gview.RLM_RGBA \
-           and dataset.RasterCount == 2:
+        if mode == gview.RLM_RGBA and dataset.RasterCount == 2:
+            alpha_band = gview.manager.get_dataset_raster(dataset, 2)
+            raster_layer.set_source(1, raster)
+            raster_layer.set_source(2, raster)
+            raster_layer.set_source(3, alpha_band)
 
-            alpha_band = gview.manager.get_dataset_raster(dataset,2)
-            raster_layer.set_source(1,raster)
-            raster_layer.set_source(2,raster)
-            raster_layer.set_source(3,alpha_band)
+            raster_layer.blend_mode_set(gview.RL_BLEND_FILTER)
 
-            raster_layer.blend_mode_set( gview.RL_BLEND_FILTER )
+        if mode == gview.RLM_RGBA and dataset.RasterCount > 2:
+            green_raster = gview.manager.get_dataset_raster(dataset, 2)
+            blue_raster = gview.manager.get_dataset_raster(dataset, 3)
 
-        if raster_layer.get_mode() == gview.RLM_RGBA \
-           and dataset.RasterCount > 2:
-
-            green_raster = gview.manager.get_dataset_raster(dataset,2)
-            blue_raster = gview.manager.get_dataset_raster(dataset,3)
-
-            raster_layer.set_source(1,green_raster)
-            raster_layer.set_source(2,blue_raster)
+            raster_layer.set_source(1, green_raster)
+            raster_layer.set_source(2, blue_raster)
 
             if dataset.RasterCount > 3:
                 band = dataset.GetRasterBand(4)
                 if band.GetRasterColorInterpretation() == gdal.GCI_AlphaBand:
-                    raster_layer.blend_mode_set( gview.RL_BLEND_FILTER )
-                    alpha_raster = \
-                        gview.manager.get_dataset_raster(dataset, 4)
-                    raster_layer.set_source(3,alpha_raster)
+                    raster_layer.blend_mode_set(gview.RL_BLEND_FILTER)
+                    alpha_raster = gview.manager.get_dataset_raster(dataset, 4)
+                    raster_layer.set_source(3, alpha_raster)
 
         self.viewarea.add_layer(raster_layer)
         self.updating = False
@@ -918,6 +897,9 @@ class GvViewWindow(gtk.Window):
         return None
 
     def file_open_by_name(self, filename, lut=None, sds_check=1, *args):
+        def show_error(filename):
+            gvutils.error('Unable to open %s\n\n%s' % (filename, gdal.GetLastErrorMsg()))
+
         if gvutils.is_shapefile(filename):
             self.file_open_shape_by_name(filename)
             return
@@ -927,27 +909,25 @@ class GvViewWindow(gtk.Window):
             return
 
         dataset = gview.manager.get_dataset(filename)
-        if dataset is None \
-               and gdal.GetLastErrorNo() != 4 \
-               and gdal.GetLastErrorNo() != 0:
-            gvutils.error( 'Unable to open '+filename+'\n\n' \
-                           + gdal.GetLastErrorMsg() )
-            return
+        if dataset is None:
+            err = gdal.GetLastErrorNo()
+            if err not in (0,4):
+                show_error(filename)
+                return
 
         # catch ogr file open failure and pop up
         # a warning rather than dumping to screen.
         try:
             if dataset is None and self.file_open_ogr_by_name(filename):
+                show_error(filename)
                 return
 
             if dataset is None:
-                gvutils.error('Unable to open '+filename+'\n\n' \
-                              + gdal.GetLastErrorMsg() )
+                show_error(filename)
                 return
         except:
             if dataset is None:
-                gvutils.error('Unable to open '+filename+'\n\n' \
-                              + gdal.GetLastErrorMsg() )
+                show_error(filename)
                 return
 
         self.open_gdal_dataset(dataset, lut, sds_check, add_to_rfl=1)
@@ -1135,7 +1115,6 @@ class GvViewWindow(gtk.Window):
             self.viewarea.active_layer().classify()
 
     def show_legend_cb(self, *args):
-        print "------------------ showing legend"
         self.make_active()
         if self.viewarea.active_layer() is not None:
             self.viewarea.active_layer().show_legend()
@@ -1236,17 +1215,13 @@ class GvViewWindow(gtk.Window):
 
     def refresh_cb(self, *args):
         self.make_active()
-        try:
-            layer = self.viewarea.active_layer()
-            for isource in range(4):
-                raster = layer.get_data(isource)
-                if raster is not None:
-                    raster.changed()
-        except:
-            gvutils.warning('The refresh from disk operation can only be\n'+\
-                            'applied to raster layers.  Select a raster\n'+\
+        layer = self.viewarea.active_layer()
+        if layer and isinstance(layer, gview.GvRasterLayer):
+            layer.refresh()
+        else:
+            gvutils.warning('The refresh from disk operation can only be\n'+
+                            'applied to raster layers.  Select a raster\n'+
                             'layer for this view in the layers dialog.')
-            pass
 
     def zoomin_cb(self,*args):
         self.make_active()
@@ -1277,7 +1252,7 @@ class GvViewWindow(gtk.Window):
 
         try:
             # Check if zoom factor changed
-            if (temp_zoom != self.zoom) and (layer is not None):
+            if layer and temp_zoom != self.zoom:
                 self.zoom = temp_zoom
                 self.zoom_flag = 'yes'
 
@@ -1309,6 +1284,7 @@ class GvViewWindow(gtk.Window):
 
 
     def pyshell(self, *args):
+        # MB: untested
         self.make_active()
         self.app.pyshell()
 
@@ -1318,6 +1294,7 @@ class GvViewWindow(gtk.Window):
 
         # Create Dialog Window
         dialog = Dialog3D(self)
+        dialog.connect('destroy', self.destroy_file_dialog_3D)
         self.file_dialog_3D = dialog
 
     def view3d_action(self, dem_filename, drape_filename=None, mesh_lod=None,
@@ -1426,14 +1403,16 @@ class GvViewWindow(gtk.Window):
     def destroy_position_3d(self, *args):
         self.position3D_dialog = None
 
+    def destroy_file_dialog_3D(self, *args):
+        self.file_dialog_3D = None
+
     def raster_open_by_name(self,filename):
         self.make_active()
         gdal.ErrorReset()
         dataset = gdal.Open(filename)
         if dataset is None:
-            gvutils.error('Unable to open: '+filename+'\n\n'+ \
-                          gdal.GetLastErrorMsg())
-            return None
+            gvutils.error('Unable to open %s\n\n%s' % (filename, gdal.GetLastErrorMsg()))
+            return
 
         return dataset
 
