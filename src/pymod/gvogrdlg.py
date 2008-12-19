@@ -28,7 +28,7 @@ import gtk
 import gview
 import os.path
 import gvhtml
-import ogr
+from osgeo import ogr
 
 
 class GvOGRDlg(gtk.Window):
