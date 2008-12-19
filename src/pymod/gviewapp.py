@@ -59,23 +59,22 @@ pics_dir = os.path.join(gview.home_dir, 'pics')
 def add_stock_icons():
     factory = gtk.IconFactory()
     for xpm in os.listdir(pics_dir):
-        if xpm.endswith('xpm'):
-            pix = pixbuf_new_from_file(os.path.join(pics_dir, xpm))
-            factory.add(os.path.basename(xpm)[:-4], gtk.IconSet(pix))
+        pix = pixbuf_new_from_file(os.path.join(pics_dir, xpm))
+        factory.add(os.path.basename(xpm)[:-4], gtk.IconSet(pix))
 
     factory.add_default()
 
 class GViewApp(Signaler):
-    def __init__(self,toolfile=None,menufile=None,iconfile=None,pyshellfile=None,notools=0):
+    def __init__(self, toolfile=None, menufile=None, iconfile=None, pyshellfile=None, notools=0):
         import gvselbrowser
         self.view_manager = ViewManager()
-        self.sel_manager = gvselbrowser.GvSelectionManager( self.view_manager )
+        self.sel_manager = gvselbrowser.GvSelectionManager(self.view_manager)
         self.pref_dialog = None
         self.filename = None
 
         # Toolbar
         self.toolbar = Toolbar()
-        self.view_manager.set_toolbar( self.toolbar )
+        self.view_manager.set_toolbar(self.toolbar)
 
         self.publish('quit')
         self.publish('rfl-change')
@@ -90,14 +89,14 @@ class GViewApp(Signaler):
                              to C and restarting OpenEV.''' )
 
         # Default configuration files for view and python shell
-        self.menufile=menufile
-        self.iconfile=iconfile
-        self.pyshellfile=pyshellfile
+        self.menufile = menufile
+        self.iconfile = iconfile
+        self.pyshellfile = pyshellfile
 
         # External tools to import and add to view menu
         self.Tool_List = []
         if toolfile is not None:
-            self.load_tools_file( toolfile )
+            self.load_tools_file(toolfile)
 
         if not notools:
             self.scan_tools_directories()
@@ -105,56 +104,55 @@ class GViewApp(Signaler):
         # Tool index: a dictionary with the tool name as a
         # key and the tool's position in the list as the value
         self.tool_index = {}
-        for idx in range(len(self.Tool_List)):
-            self.tool_index[self.Tool_List[idx][0]]=idx
+        for idx,tool in enumerate(self.Tool_List):
+            self.tool_index[tool[0]] = idx
 
         self.shell = None
 
-    def serialize(self,base=None, filename=None):
+    def serialize(self, base=None, filename=None):
         if base is None:
             base = [gdal.CXT_Element, 'GViewApp']
 
         for vw in self.view_manager.view_list:
-            base.append( vw.serialize( filename=filename ) )
+            base.append( vw.serialize(filename=filename) )
 
         return base
 
-    def clear_project( self ):
+    def clear_project(self):
         self.view_manager.close_all_views()
-        pass
 
     def load_project(self, filename):
         try:
             raw_xml = open(filename).read()
         except:
-            gvutils.error( 'Unable to load '+filename )
+            gvutils.error('Unable to load ' + filename)
             return
 
-        tree = gdal.ParseXMLString( raw_xml )
+        tree = gdal.ParseXMLString(raw_xml)
         if tree is None:
-            gvutils.error( 'Problem occured parsing project file '+filename )
+            gvutils.error('Problem occured parsing project file ' + filename)
             return
 
         if tree[1] != 'GViewApp':
-            gvutils.error( 'Root of %s is not GViewApp node.' % filename )
+            gvutils.error('Root of %s is not GViewApp node.' % filename)
             return
 
         self.clear_project()
         self.filename = filename
-        self.add_to_rfl( filename )
+        self.add_to_rfl(filename)
 
         for subnode in tree[2:]:
             if subnode[0] == gdal.CXT_Element:
-                gvutils.XMLInstantiate( subnode, self, filename=filename )
+                gvutils.XMLInstantiate(subnode, self, filename=filename)
 
-    def save_project_with_name_cb( self, filename, *args ):
-        if os.path.splitext(filename)[1] == '':
-            filename = filename + '.opf'
+    def save_project_with_name_cb(self, filename, *args):
+        if not os.path.splitext(filename)[1]:
+            filename += '.opf'
 
-        self.save_project( filename )
-        self.add_to_rfl( filename )
+        self.save_project(filename)
+        self.add_to_rfl(filename)
 
-    def save_project_as( self ):
+    def save_project_as(self):
         from pgufilesel import SimpleFileSelect
         if self.filename is None:
             default_filename = 'default.opf'
@@ -164,16 +162,16 @@ class GViewApp(Signaler):
                          title='Project Filename',
                          default_filename=default_filename)
 
-    def save_project(self, filename = None):
-        if filename is None and self.filename is not None:
+    def save_project(self, filename=None):
+        if filename is None and self.filename:
             filename = self.filename
 
         if filename is None:
             self.save_project_as()
             return
 
-        tree = self.serialize( filename=filename )
-        open( filename, 'w' ).write( gdal.SerializeXMLTree(tree) )
+        tree = self.serialize(filename=filename)
+        open(filename, 'w').write( gdal.SerializeXMLTree(tree) )
 
         self.filename = filename
 
@@ -207,94 +205,85 @@ class GViewApp(Signaler):
         sys.path.append(dir_name)
         for file in files:
             # print file
-            if file[-3:] == '.py':
-                print 'Loading tools from '+os.path.join(dir_name,file)
+            if file.endswith('.py'):
+                print "Loading tools from " + os.path.join(dir_name, file)
                 module = file[:-3]
 
                 try:
-                    exec "import " + module
-                    exec "tool_list = " + module + ".TOOL_LIST"
+                    exec 'import ' + module
+                    exec 'tool_list = %s.TOOL_LIST' % module
                     for item in tool_list:
-                        exec "tool_inst=" + module + "." + item + "(app=self)"
-                        self.Tool_List.append((item,tool_inst))
+                        exec 'tool_inst = %s.%s(app=self)' % (module, item)
+                        self.Tool_List.append((item, tool_inst))
                 except:
                     import traceback
                     traceback.print_exc()
-                    print '... failed to load ... skipping.'
-                    gdal.Debug( "GDA", '-'*60 )
+                    print "... failed to load ... skipping."
+                    gdal.Debug("GDA",'-'*60)
                     sys_type, sys_value, sys_traceback = sys.exc_info()
-                    exp = traceback.format_exception( sys_type, sys_value, sys_traceback )
-                    exception = ""
-                    for line in exp:
-                        exception = exception + line
-                    gdal.Debug( "GDA", exception )
-                    gdal.Debug( "GDA", '-'*60 )
+                    exp = traceback.format_exception(sys_type, sys_value, sys_traceback)
+                    exception = ''.join(exp) 
+                    gdal.Debug("GDA", exception)
+                    gdal.Debug("GDA", '-'*60)
 
         # We only add the tool directory to the python path long enough
         # to load the tool files.
         sys.path = old_path
 
-    def load_tool(self, module_name, tool_name ):
+    def load_tool(self, module_name, tool_name):
         exec "import " + module_name
         exec "cur_tool_class = " + module_name + "." + tool_name + "(app=self)"
         self.Tool_List.append([tool_name,cur_tool_class])
 
     def request_quit(self, *args):
-        dialog = gtk.Dialog('Confirmation',
-                     None,
-                     gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
-                     (gtk.STOCK_YES, gtk.RESPONSE_YES,
-                      gtk.STOCK_NO, gtk.RESPONSE_NO))
-        label = gtk.Label('Are you sure you want to exit OpenEV?')
-        dialog.vbox.pack_start(label, True, True, 0)
-        label.show()
+        response = gvutils.yesno('Confirmation', 'Are you sure you want to exit OpenEV?')
 
-        response = dialog.run();
-
-        if response == gtk.RESPONSE_YES:
+        if response == 'Yes':
             self.quit()
-            return 1
-        else:
-            return 0
+            return True
+
+        return False
 
     def quit(self, *args):
         # Save preferences
         gview.save_preferences()
 
         # Notify listeners of quit event
-        Signaler.notify(self,'quit')
+        self.notif('quit')
 
     def add_to_rfl(self, filename):
         # Don't add NUMPY arrays to file list.
-        if filename[:7] == 'NUMPY::':
+        if filename.startswith('NUMPY::'):
             return
 
         next_value = filename
         for i in range(1,6):
-            rbl_name = 'recent_file_'+str(i)
+            rbl_name = 'recent_file_%d' % i
             rbl_value = get_pref(rbl_name)
             set_pref(rbl_name, next_value)
 
             if rbl_value is None or rbl_value == filename:
-                break;
+                break
 
             next_value = rbl_value
 
-        Signaler.notify(self,'rfl-change')
+        self.notif('rfl-change')
 
     def get_rfl(self):
         list = []
         for i in range(1,6):
-            rbl_name = 'recent_file_'+str(i)
+            rbl_name = 'recent_file_%d' % i
             rbl_value = get_pref(rbl_name)
-            if rbl_value is not None:
+            if rbl_value:
                 list.append(rbl_value)
+
         return list
 
     def show_toolbardlg(self, *args):
         self.toolbar.present()
 
     def show_enhdlg(self, *args):
+        # MB: how long will we keep this?
         self.enhdlg = gvenhdlg.EnchancementDialog()
 
     def load_menus_file_from_xml(self, menufile, view_name):
@@ -836,32 +825,34 @@ class GViewApp(Signaler):
 
         return icon_list
 
-    def new_view(self, title=None, menufile=None,iconfile=None, *args):
+    def new_view(self, title=None, menufile=None, iconfile=None, *args):
         # If menu/icon files aren't specified, use application-wide
         # defaults
-        if ((menufile is None) and (self.menufile is not None)):
-            menufile=self.menufile
-        if ((iconfile is None) and (self.iconfile is not None)):
-            iconfile=self.iconfile
+        if not menufile and self.menufile:
+            menufile = self.menufile
+        if not iconfile and self.iconfile:
+            iconfile = self.iconfile
 
-        view_window = gvviewwindow.GvViewWindow(app=self, title=title, menufile=menufile, iconfile=iconfile)
-        view_name=view_window.title
+        view_window = GvViewWindow(app=self, title=title, menufile=menufile, iconfile=iconfile)
+        view_name = view_window.title
         view_menu = view_window.menuf    
 
-        if ((len(self.Tool_List) > 0) and (menufile is None)):
+        # MB: untested
+        if self.Tool_List and menufile is None:
+            pass
             # If no menu configuration file is specified, put
             # tools in the default positions specified by
             # the tool menu entry's position parameter.
-            for cur_tool_list in self.Tool_List:
-                cur_tool = cur_tool_list[1]
-                if hasattr(cur_tool.menu_entries.entries,'keys'):
-                    for item in cur_tool.menu_entries.entries.keys():
-                        view_menu.insert_entry(
-                            cur_tool.menu_entries.entries[item][0],
-                            item,
-                            cur_tool.menu_entries.entries[item][2],
-                            cur_tool.menu_entries.entries[item][1],
-                            (view_name))
+##            for cur_tool_list in self.Tool_List:
+##                cur_tool = cur_tool_list[1]
+##                if hasattr(cur_tool.menu_entries.entries,'keys'):
+##                    for item in cur_tool.menu_entries.entries.keys():
+##                        view_menu.insert_entry(
+##                            cur_tool.menu_entries.entries[item][0],
+##                            item,
+##                            cur_tool.menu_entries.entries[item][2],
+##                            cur_tool.menu_entries.entries[item][1],
+##                            (view_name))
 
         # Icons- Note: currently it is assumed that the tool icons are
         #        xpms.  Support for pixmaps and widgets will be added
@@ -886,18 +877,20 @@ class GViewApp(Signaler):
         #              the same as the view's self.title, but is based
         #              on it (usually 'OpenEV: '+self.title)
 
-        if ((len(self.Tool_List) > 0) and (iconfile is None)):
-            for cur_tool_list in self.Tool_List:
-                cur_tool=cur_tool_list[1]
-                for item in cur_tool.icon_entries.entries:
-                    view_window.insert_tool_icon(
-                        item[0], # filename
-                        item[1], # label
-                        item[2], # hint text
-                        item[4], # callback
-                        item[5], # help topic
-                        item[3],  # position
-                            )
+        # MB: untested
+        if self.Tool_List and iconfile is None:
+            pass
+##            for cur_tool_list in self.Tool_List:
+##                cur_tool=cur_tool_list[1]
+##                for item in cur_tool.icon_entries.entries:
+##                    view_window.insert_tool_icon(
+##                        item[0], # filename
+##                        item[1], # label
+##                        item[2], # hint text
+##                        item[4], # callback
+##                        item[5], # help topic
+##                        item[3],  # position
+##                            )
         view_window.show()
         return view_window
 
@@ -910,7 +903,7 @@ class GViewApp(Signaler):
         if view is None:
             return
 
-        view.open_gdal_dataset( dataset, lut = lut, sds_check = sds_check )
+        view.open_gdal_dataset(dataset, lut=lut, sds_check=sds_check)
 
     def file_open_by_name(self, filename, lut=None, sds_check=1, *args):
         view = self.view_manager.get_active_view_window()
@@ -921,7 +914,7 @@ class GViewApp(Signaler):
         if view is None:
             return
 
-        view.file_open_by_name( filename, lut = lut, sds_check = sds_check )
+        view.file_open_by_name(filename, lut=lut, sds_check=sds_check)
 
     def launch_preferences(self, *args):
         if self.pref_dialog is None:
@@ -929,10 +922,12 @@ class GViewApp(Signaler):
             self.pref_dialog.connect('destroy', self.destroy_preferences)
         self.pref_dialog.present()
 
-    def destroy_preferences(self,*args):
+    def destroy_preferences(self, *args):
         self.pref_dialog = None
+        return False
 
     def pyshell(self, *args):
+        # MB: untested
         import pyshell
         pyshell.launch(pyshellfile=self.pyshellfile)
 
@@ -941,12 +936,12 @@ class GViewApp(Signaler):
         al = get_pref('auto_load_%d'%i)
         while al is not None:
             try:
-                exec 'import '+al
+                exec 'import ' + al
             except:
-                print 'auto_load_'+str(i)+' error: import '+al
+                print 'auto_load_%d error: import %s' % (i, al)
                 print sys.exc_info()[0], sys.exc_info()[1]
 
-            i = i + 1
+            i += 1
             al = get_pref('auto_load_%d'%i)
 
     def active_layer(self):
@@ -1066,7 +1061,7 @@ class Toolbar(gtk.Window):
                     result_layer.set_property('pquery','true')
                     view.add_layer(result_layer)
 
-                view.set_active_layer( result_layer )
+                view.set_active_layer(result_layer)
 
         if data == 'labels':
             import gvlabeledit
@@ -1076,7 +1071,7 @@ class Toolbar(gtk.Window):
         self.toolbox.activate_tool(data)
 
     def link(self, but):
-        if (but.get_active()):
+        if but.get_active():
             self.link.enable()
         else:
             self.link.disable()
@@ -1102,31 +1097,30 @@ class Toolbar(gtk.Window):
         return self.poi_tool.get_point()
 
 class ViewManager(Signaler):
-
     def __init__(self):
         self.toolbar = None
         self.active_view = None
         self.view_list = []
-        self.publish( 'active-view-changed' )
+        self.publish('active-view-changed')
         self.updating = False
 
-    def set_toolbar(self,toolbar):
+    def set_toolbar(self, toolbar):
         self.toolbar = toolbar
-        self.toolbar.toolbox.connect('activate',self.toolbar_cb)
+        self.toolbar.toolbox.connect('activate', self.toolbar_cb)
 
-    def toolbar_cb(self,*args):
+    def toolbar_cb(self, *args):
         self.set_active_view( self.toolbar.toolbox.get_view() )
 
-    def add_view(self, new_view ):
+    def add_view(self, new_view):
         self.updating = True
-        self.view_list.append( new_view )
-        if self.toolbar is not None:
+        self.view_list.append(new_view)
+        if self.toolbar:
             self.toolbar.add_view(new_view.viewarea)
         new_view.connect('destroy', self.view_closing_cb)
         self.updating = False
-        self.set_active_view( new_view )
+        self.set_active_view(new_view)
 
-    def view_closing_cb( self, view_window_in, *args ):
+    def view_closing_cb(self, view_window_in, *args):
         # lookup original ViewWindow instance with internal variables.
         view_window = None
         for v in self.view_list:
@@ -1134,24 +1128,21 @@ class ViewManager(Signaler):
                 view_window = v
 
         if view_window is None:
-            gdal.Debug( "OpenEV",
-                        "unexpectedly missing view in ViewManager" )
+            gdal.Debug("OpenEV", "unexpectedly missing view in ViewManager")
             return
 
-        self.view_list.remove( view_window )
+        self.view_list.remove(view_window)
 
         if view_window_in == self.active_view:
-            if len(self.view_list) > 0:
-                self.set_active_view( self.view_list[0] )
+            if self.view_list:
+                self.set_active_view(self.view_list[0])
             else:
-                self.set_active_view( None );
+                self.set_active_view(None)
 
-        if self.toolbar is not None:
-            self.toolbar.toolbox.deactivate( view_window.viewarea )
+        if self.toolbar:
+            self.toolbar.toolbox.deactivate(view_window.viewarea)
 
-
-
-    def close_all_views( self, *args ):
+    def close_all_views(self, *args):
         old_len = len(self.view_list)+1
         while len(self.view_list) < old_len and old_len > 1:
             old_len = len(self.view_list)
@@ -1170,14 +1161,11 @@ class ViewManager(Signaler):
         if len(self.view_list) > 0:
             print 'failed to destroy all views.'
 
-
     def get_views(self):
         return self.view_list
 
     def get_active_view(self):
-        if self.active_view == None:
-            return None
-        else:
+        if self.active_view:
             return self.active_view.viewarea
 
     def get_active_view_window(self):
@@ -1190,8 +1178,7 @@ class ViewManager(Signaler):
         if new_view == self.active_view:
             return
 
-        if self.active_view is not None \
-           and new_view == self.active_view.viewarea:
+        if self.active_view and new_view == self.active_view.viewarea:
             return
 
         for v in self.view_list:
@@ -1199,12 +1186,12 @@ class ViewManager(Signaler):
                 new_view = v
 
         self.active_view = new_view
-        if new_view is not None and new_view.window is not None:
+        if new_view:
             new_view.present()
 
-        Signaler.notify(self,'active-view-changed')
+        self.notif('active-view-changed')
 
-        if self.toolbar is not None and new_view is not None:
+        if self.toolbar and new_view:
             self.toolbar.toolbox.activate(new_view.viewarea)
 
 class PrefDialog(gtk.Window):
@@ -1475,10 +1462,12 @@ class PrefDialog(gtk.Window):
     def set_coordinate_mode(self, combo):
         mode = ('off','raster','georef','latlong')[combo.get_active()]
         set_pref('_coordinate_mode', mode)
+        print get_pref('_coordinate_mode')
 
     def set_pixel_mode(self, combo):
         mode = combo.get_active_text().lower()
         set_pref('_pixel_mode', mode)
+        print get_pref('_pixel_mode')
 
     def set_nodata_mode(self, combo):
         mode = combo.get_active_text().lower()
@@ -1654,9 +1643,13 @@ class PrefDialog(gtk.Window):
             self.set_any_preference(widget, pref, func)
 
     def set_menu_preference(self, widget, pref, value):
+        """
+        """
         set_pref(pref, str(value))
 
     def set_spin_preference(self, widget, pref):
+        """
+        """
         val = widget.get_value()
 
         if widget.get_text() != str(widget.get_value_as_int()):
@@ -1833,11 +1826,9 @@ class Position_3D_Dialog(gtk.Window):
             eye_dir = view.get_eye_dir()
             view.set_3d_view(eye_pos, eye_dir)
 
-
-
 class Tool_GViewApp:
     # Abstract base class to derive tools from
-    def __init__(self,app=None):
+    def __init__(self, app=None):
         self.app = app
         self.menu_entries = Tool_GViewAppMenuEntries()
         self.icon_entries = Tool_GViewAppIconEntries()
@@ -1854,7 +1845,7 @@ class Tool_GViewAppMenuEntries:
     def __init__(self):
         self.entries = {}
 
-    def set_entry(self,item,position=0,callback=None,accelerator=None):
+    def set_entry(self, item, position=0, callback=None, accelerator=None):
         # item = a string describing menu location
         # position = default location in the menu (integer): Ignored if an
         #            xml menu entry is specified for the tool.  Note:
@@ -1866,12 +1857,13 @@ class Tool_GViewAppMenuEntries:
         #            configuration.
         # callback = callback
         # accelerator = shortcut key
+        # MB: untested, need to make that work with UIManager
 
-        if (type(item) == type('')):
-            if (type(position) == type(0)):
-                self.entries[item] = (position,callback, accelerator)
+        if isinstance(item, str):
+            if isinstance(position, int):
+                self.entries[item] = (position, callback, accelerator)
             else:
-                raise AttributeError,"position should be an integer"
+                raise AttributeError, "position should be an integer"
         else:
             raise AttributeError,"Menu entry item must be a string"
 
@@ -1881,7 +1873,8 @@ class Tool_GViewAppIconEntries:
     def __init__(self):
         self.entries = []
 
-    def set_entry(self,iconfile,hint_text,position=0,callback=None,help_topic=None,label=None,icontype='xpm'):
+    def set_entry(self, iconfile, hint_text, position=0, callback=None,
+                  help_topic=None, label=None, icontype='xpm'):
         # iconfile=icon filename (xpm case), or some other string not yet defined
         #          (pixmap/widget case- not yet supported- may never be)
         # hint_text=tooltip text to use
@@ -1890,32 +1883,33 @@ class Tool_GViewAppIconEntries:
         # help topic = html help file (not yet used by anything)
         # label = some gtk think- not sure what this does
         # icontype = 'xpm' (later may allow 'pixmap' or 'widget', but not yet)
+        # MB: untested, need to make that work with UIManager
 
-        if (type(iconfile) == type('')):
-            import os
+        if isinstance(iconfile, str):
             if os.path.isfile(iconfile):
-                fullfilename=iconfile
-            elif os.path.isfile(os.path.join(gview.home_dir,'tools',iconfile)):
-                fullfilename=os.path.join(gview.home_dir,'tools',iconfile)
-            elif os.path.isfile(os.path.join(gview.home_dir,'pics',iconfile)):
-                fullfilename=os.path.join(gview.home_dir,'pics',iconfile)                
+                fullfilename = iconfile
+            elif os.path.isfile(os.path.join(gview.home_dir, 'tools', iconfile)):
+                fullfilename = os.path.join(gview.home_dir, 'tools', iconfile)
+            elif os.path.isfile(os.path.join(gview.home_dir, 'pics', iconfile)):
+                fullfilename = os.path.join(gview.home_dir, 'pics', iconfile)                
             else:
-                txt = "Cannot find file "+iconfile+'.  Either the full\n'
-                txt = txt+"path must be specified, or "+iconfile+ " must be\n"
-                txt = txt+"placed in the tools or pics directory."
-                raise AttributeError,txt
+                txt = "Cannot find file %s. Either the full\n"
+                txt += "path must be specified, or %s must be\n"
+                txt += "placed in the tools or pics directory."
+                raise AttributeError, txt % (iconfile, iconfile)
 
             # On nt, path separators need to be trapped and doubled to avoid
             # being interpreted as an escape before special characters.
             if os.name == 'nt':
                 fullfilename = fullfilename.replace("\\","\\\\")
 
-            if (type(position) == type(0)):
-                self.entries.append((fullfilename,label,hint_text,position,callback,help_topic,icontype))
+            if isinstance(position, int):
+                self.entries.append((fullfilename, label, hint_text, position,
+                                     callback, help_topic, icontype))
             else:
-                raise AttributeError,"position should be an integer"
+                raise AttributeError, "position should be an integer"
         else:
-            txt = "Cannot find file "+iconfile+'.  Either the full\n'
-            txt = txt+"path must be specified, or "+iconfile+ " must be\n"
-            txt = txt+"placed in the tools or pics directory."
-            raise AttributeError,txt
+            txt = "Cannot find file %s. Either the full\n"
+            txt += "path must be specified, or %s must be\n"
+            txt += "placed in the tools or pics directory."
+            raise AttributeError, txt % (iconfile, iconfile)
