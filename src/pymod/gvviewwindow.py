@@ -554,131 +554,7 @@ class GvViewWindow(gtk.Window):
             win.show()
 
     def goto_dlg(self, *args):
-        """ Create the GoTo Dialog box with coordinate system option menu and
-        text entry fields """
-        window = gtk.Window()
-        window.set_title('Go To...')
-        window.set_border_width(10)
-        vbox = gtk.VBox(homogeneous=False,spacing=15)
-        window.add(vbox)
-
-        # Make this a selection menu - doesn't work, yet!
-        box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=False)
-        box.pack_start(pgu.Label('Coordinate System:'), expand=False)
-        self.coord_system_om = pgu.ComboText(('Row/Col','Native','lat-long'),
-                                            action=self.set_coord_system)
-        box.pack_start(self.coord_system_om, expand=False)
-
-        # Get current position in view native projection
-        #   - changing Option Menu updates this in entry fields
-
-        current_pos = self.viewarea.get_translation()
-
-        # X Position
-        box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=False)
-        box.pack_start(gtk.Label('X Position:'),expand=False)
-        x_pos_entry = gtk.Entry()
-        x_pos_entry.set_max_length(14)
-        x_pos_entry.set_text(str(-current_pos[0]))
-        box.pack_start(x_pos_entry,expand=False)
-
-        # Y Position
-        box = gtk.HBox(spacing=3)
-        vbox.pack_start(box, expand=False)
-        box.pack_start(gtk.Label('Y Position:'),expand=False)
-        y_pos_entry = gtk.Entry()
-        y_pos_entry.set_max_length(14)
-        y_pos_entry.set_text(str(-current_pos[1]))
-        box.pack_start(y_pos_entry,expand=False)
-
-        # Button to move
-        goto_button = gtk.Button('Go To...')
-        goto_button.connect('clicked', self.goto_location )
-        vbox.pack_start(goto_button,expand=False)
-
-        self.x_pos_entry = x_pos_entry
-        self.y_pos_entry = y_pos_entry
-
-        # set default to be native system - must be after x/y_pos_entry are setup
-        self.coord_system_om.set_active(1)
-
-        window.show_all()
-
-    def set_coord_system(self, om, *args):
-        """ Set coordinate system goto coordinates entered in GoTo dialog from
-        option menu. """
-        current_pos = self.viewarea.get_translation()
-        x_pos = str(-current_pos[0])
-        y_pos = str(-current_pos[1])
-
-        active = om.get_active()
-        if active == 0:
-            layer = self.viewarea.active_layer()
-            if isinstance(layer, gview.GvRasterLayer):
-                self.goto_coord_system = 'pixel'
-                pos = layer.view_to_pixel(-current_pos[0],-current_pos[1])
-                x_pos = str(pos[0])
-                y_pos = str(pos[1])
-        elif active == 2:
-            self.goto_coord_system = 'lat-long'
-            # must be a better way...
-            geo = self.viewarea.format_point_query(-current_pos[0],-current_pos[1])
-            lon = geo[1:geo.find(',')]
-            if lon[-1] == 'W':
-                x_pos = '-' + lon[:-1]
-            else:
-                x_pos = lon[:-1]
-            lat = geo[geo.find(',')+2:geo.find(')')]
-            if lat[-1] == 'S':
-                y_pos = '-' + lat[:-1]
-            else:
-                y_pos = lat[:-1]
-        else:
-            self.goto_coord_system = 'native'
-
-    def goto_location(self, Button, *args):
-        """ Translate view to location specified in GoTo Dialog, using projection """
-        self.make_active()
-
-        coord_system = self.goto_coord_system
-        str_x = self.x_pos_entry.get_text()
-        str_y = self.y_pos_entry.get_text()
-
-        x = float(str_x)
-        y = float(str_y)
-
-        if coord_system == 'pixel':
-            # Get current raster
-            layer = self.viewarea.active_layer()
-
-            if not layer or not isinstance(layer, gview.GvRasterLayer):
-                gvutils.warning('Please select a raster layer using the layer dialog.\n')
-                return
-
-            if layer.parent and not self.viewarea.get_raw(layer):
-                # layer is georeferenced, coordinates are pixel/line
-                position = layer.parent.pixel_to_georef(x, y)
-            elif raster is not None:
-                # layer is in pixel/line coordinates, coordinates are pixel/line
-                position = (x, y)
-            else:
-                return
-            
-        elif coord_system == 'lat-long':
-            position = self.viewarea.map_location((x, y))
-
-        elif coord_system == 'native':
-            # native - do nothing
-            position = (x, y)
-
-        else:
-            print 'Error in gvviewwindow.py function goto_location() passed invalid coordinate system'
-            # native - do nothing
-            position = (x, y)
-
-        self.viewarea.set_translation(-position[0],-position[1])
+        DialogGoTo(self)
 
     def menu_save_project(self, *args):
         self.app.save_project()
@@ -1703,3 +1579,136 @@ class Dialog3D(gtk.Window):
         # Do real work.
         self.win.view3d_action(dem_filename, drape_filename, mesh_lod, hscale,
                                 min_clamp, max_clamp)
+
+class DialogGoTo(gtk.Window):
+    def __init__(self, win):
+        """ Create the GoTo Dialog box with coordinate system option menu and
+        text entry fields """
+        gtk.Window.__init__(self)
+        self.set_title('Go To...')
+        self.win = win
+
+        vbox = gtk.VBox(homogeneous=False, spacing=15)
+        vbox.set_border_width(5)
+        self.add(vbox)
+
+        # Make this a selection menu - doesn't work, yet!
+        box = gtk.HBox(spacing=3)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(pgu.Label('Coordinate System:'), expand=False)
+        self.coord_system_om = pgu.ComboText(('Row/Col','Native','lat-long'),
+                                            action=self.set_coord_system)
+        box.pack_start(self.coord_system_om, expand=False)
+
+        # Get current position in view native projection
+        #   - changing Option Menu updates this in entry fields
+
+        current_pos = self.win.viewarea.get_translation()
+
+        # X Position
+        box = gtk.HBox(spacing=3)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('X Position:'),expand=False)
+        x_pos_entry = gtk.Entry()
+        x_pos_entry.set_max_length(14)
+        x_pos_entry.set_text(str(-current_pos[0]))
+        box.pack_start(x_pos_entry,expand=False)
+
+        # Y Position
+        box = gtk.HBox(spacing=3)
+        vbox.pack_start(box, expand=False)
+        box.pack_start(gtk.Label('Y Position:'),expand=False)
+        y_pos_entry = gtk.Entry()
+        y_pos_entry.set_max_length(14)
+        y_pos_entry.set_text(str(-current_pos[1]))
+        box.pack_start(y_pos_entry,expand=False)
+
+        # Button to move
+        goto_button = gtk.Button('Go To...')
+        goto_button.connect('clicked', self.goto_location)
+        vbox.pack_start(goto_button,expand=False)
+
+        self.x_pos_entry = x_pos_entry
+        self.y_pos_entry = y_pos_entry
+
+        # set default to be native system - must be after x/y_pos_entry are setup
+        self.coord_system_om.set_active(1)
+
+        self.show_all()
+
+    def set_coord_system(self, combo, *args):
+        """ Set coordinate system goto coordinates entered in GoTo dialog from
+        combo. """
+        view = self.win.viewarea
+        current_pos = view.get_translation()
+        x_pos = str(-current_pos[0])
+        y_pos = str(-current_pos[1])
+
+        active = combo.get_active()
+        if active == 0:
+            layer = view.active_layer()
+            if isinstance(layer, gview.GvRasterLayer):
+                self.goto_coord_system = 'pixel'
+                pos = layer.view_to_pixel(-current_pos[0], -current_pos[1])
+                x_pos = str(pos[0])
+                y_pos = str(pos[1])
+        elif active == 2:
+            self.goto_coord_system = 'lat-long'
+            # must be a better way...
+            geo = view.format_point_query(-current_pos[0], -current_pos[1])
+            lon = geo[1:geo.find(',')]
+            if lon[-1] == 'W':
+                x_pos = '-' + lon[:-1]
+            else:
+                x_pos = lon[:-1]
+            lat = geo[geo.find(',')+2:geo.find(')')]
+            if lat[-1] == 'S':
+                y_pos = '-' + lat[:-1]
+            else:
+                y_pos = lat[:-1]
+        else:
+            self.goto_coord_system = 'native'
+
+    def goto_location(self, Button, *args):
+        """ Translate view to location specified in GoTo Dialog, using projection """
+        self.win.make_active()
+        view = self.win.viewarea
+
+        coord_system = self.goto_coord_system
+        str_x = self.x_pos_entry.get_text()
+        str_y = self.y_pos_entry.get_text()
+
+        x = float(str_x)
+        y = float(str_y)
+
+        if coord_system == 'pixel':
+            # Get current raster
+            layer = view.active_layer()
+
+            if not layer or not isinstance(layer, gview.GvRasterLayer):
+                gvutils.warning('Please select a raster layer using the layer dialog.\n')
+                return
+
+            if layer.parent and not view.get_raw(layer):
+                # layer is georeferenced, coordinates are pixel/line
+                position = layer.parent.pixel_to_georef(x, y)
+            elif raster is not None:
+                # layer is in pixel/line coordinates, coordinates are pixel/line
+                position = (x, y)
+            else:
+                return
+            
+        elif coord_system == 'lat-long':
+            position = view.map_location((x, y))
+
+        elif coord_system == 'native':
+            # native - do nothing
+            position = (x, y)
+
+        else:
+            print 'Error in gvviewwindow.py function goto_location() passed invalid coordinate system'
+            # native - do nothing
+            position = (x, y)
+
+        view.set_translation(-position[0], -position[1])
+
