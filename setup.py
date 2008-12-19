@@ -1,5 +1,3 @@
-license = ''
-
 import sys, os
 from glob import glob
 
@@ -151,14 +149,9 @@ gv_srcs = ['crs.c', 'dbfopen.c', 'gextra.c', 'gvareatool.c', 'gvdata.c',
           'gvviewlink.c', 'gvwinprint.c', 'gvzoompantool.c', 'invdistance.c',
           'llrasterize.c', 'shpopen.c', 'gv_pwrap.c', 'gv-enum-types.c', 'gvmodule.c']
 
-tess_srcs = ['dict.c', 'memalloc.c', 'normal.c', 'priorityq.c', 'sweep.c',
-                'tessmono.c', 'geom.c', 'mesh.c', 'render.c', 'tess.c']
-tess_srcs = [os.path.join('src/lib/tess', src) for src in tess_srcs]
-
 gv_srcs = [os.path.join(gv_root, src) for src in gv_srcs]
-gv_srcs.extend(tess_srcs)
 
-includes = [gv_root, 'resource', 'src/lib/tess']
+includes = [gv_root, 'resource']
 # GDAL includes
 output = getoutput('gdal-config --cflags')
 includes.extend(output.replace('-I', '').split())
@@ -179,7 +172,7 @@ libs = [lib[2:]]
 # GTK link libs
 libs.extend(get_libraries(gtk))
 
-_gv = Extension('_gv', gv_srcs,
+_gv = Extension('openev._gv', gv_srcs,
                 include_dirs=includes,
                 define_macros=[('HAVE_OGR',1)],
                 library_dirs=lib_dirs,
@@ -188,7 +181,7 @@ _gv = Extension('_gv', gv_srcs,
 
 # Call the setup() routine which does most of the work
 setup(name             = 'openev',
-      version          = '2.0.0',
+      version          = '2.1.0',
       description      = '',
       long_description = '',
       author           = 'Vexcel Corporation',
@@ -196,22 +189,18 @@ setup(name             = 'openev',
       maintainer       = 'Mario Beauchamp',
       maintainer_email = 'starged@gmail.com',
       url              = 'http://openev.sourceforge.net',
-      license          = license,
-      platforms        = '',
+      license          = 'LGPL',
+      platforms        = 'UNIX/Linux, Windows',
       keywords         = '',
       ext_modules      = [_gv],
-      scripts          = None,
-##      cmdclass         = {'build_ext':build_ext},
-##      packages         = ['gview'],
-##      package_dir      = {'openev':'src/pymod'},
-      data_files       = [('data', glob('resource/data/*')),
-                          ('html', html_data),
-                          ('html/developer_info', glob('resource/html/developer_info/*')),
-                          ('pics', glob('resource/pics/*')),
-                          ('ramps', glob('resource/ramps/*')),
-                          ('scripts', glob('resource/scripts/*')),
-                          ('symbols', glob('resource/symbols/*')),
-                          ('xmlconfig', glob('resource/xmlconfig/*')),
-                          ('tools', glob('src/pymod/tools/*'))] 
+      scripts          = ['resource/scripts/openev2'],
+      packages         = ['openev'],
+      package_dir      = {'openev':'src/pymod'}, 
+      data_files       = [('share/openev/pics', glob('resource/pics/*')),
+                          ('share/openev/ramps', glob('resource/ramps/*')),
+                          ('share/openev/symbols', glob('resource/symbols/*')),
+                          ('share/openev/xmlconfig', glob('resource/xmlconfig/*')),
+                          ('share/openev/tools', glob('src/pymod/tools/*.py'))
+                          ]
       )
 
