@@ -1,10 +1,12 @@
 ###############################################################################
 # $Id$
 #
-# Project:  OpenEV
+# Project:  OpenEV / CIETmap
 # Purpose:  Signaler - implements subscription/notification system a bit like
 #           Gtk signaling.
 # Author:   Frank Warmerdam, warmerda@home.com
+#
+# Maintained by Mario Beauchamp (starged@gmail.com) for CIETcanada
 #
 ###############################################################################
 # Copyright (c) 2000, Atlantis Scientific Inc. (www.atlsci.com)
@@ -48,27 +50,27 @@ class UnpublishedSignalError(Exception): pass
 class SignalExistsError(Exception): pass
 
 class Signaler:
-    "Base class for objects with published signals"
+    """Base class for objects with published signals"""
     signal = {}  # Prevents AttributeErrors
 
     def publish(self, *sigs):
-        "Publish one or more named signals"
-        if not self.__dict__.has_key('signal'):
+        """Publish one or more named signals"""
+        if 'signal' not in self.__dict__:
             self.signal = {}
         for s in sigs:
-            if self.signal.has_key(s):
+            if s in self.signal:
                 raise SignalExistsError
             self.signal[s] = [0, []]  # Blocked flag, handlers list
 
     def subscribe(self, name, meth, *args):
-        "Attach a callback function/method to a signal"
+        """Attach a callback function/method to a signal"""
         try:
             self.signal[name][1].append((meth, args))
         except KeyError:
             raise UnpublishedSignalError
 
     def unsubscribe(self, name, meth):
-        "Remove a callback function/method for a named signal"
+        """Remove a callback function/method for a named signal"""
         try:
             l = len(self.signal[name][1])
             for si in range(l):
@@ -78,8 +80,8 @@ class Signaler:
         except KeyError:
             raise UnpublishedSignalError
 
-    def notify(self, name, *args):
-        "Execute callbacks attached to the named signal"
+    def notif(self, name, *args):
+        """Execute callbacks attached to the named signal"""
         try:
             sig = self.signal[name]
         except KeyError:
@@ -88,19 +90,18 @@ class Signaler:
         if sig[0] == 0:
             for s in sig[1]:
                 apply(s[0], (self,) + args + s[1])
+    notify = notif
 
     def block(self, name):
-        "Prevent a signal from being emitted"
+        """Prevent a signal from being emitted"""
         try:
             self.signal[name][0] = 1
         except KeyError:
             raise UnpublishedSignalError
 
     def unblock(self, name):
-        "Allows a blocked signal to be emitted"
+        """Allows a blocked signal to be emitted"""
         try:
             self.signal[name][0] = 0
         except KeyError:
             raise UnpublishedSignalError
-
-
