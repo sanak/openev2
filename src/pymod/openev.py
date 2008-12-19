@@ -25,65 +25,66 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
+import os
+home_dir = os.environ['OPENEV_HOME']
+import sys
 import gviewapp
 import gview
 import gtk
-import sys
-import os
 import getopt
 
 # Force standard c settings for floating point (. rather than ,)
 import locale
 locale.setlocale(locale.LC_NUMERIC,'C')
 
-#
-# Activate derived band pixel functions used by application
-#
-try:
-    import _vxdisplay
-    _vxdisplay.RegisterDerivedBandPixelFunctions();
-except:
-    print "Ignoring vxdisplay functions"
+def set_debug():
+    from osgeo import gdal
+    gdal.SetConfigOption('CPL_DEBUG', 'ON')
+    gdal.SetConfigOption('CPL_TIMESTAMP', 'ON')
+    gdal.PushErrorHandler('CPLLoggingErrorHandler')
 
 def main():
     # get command line options and args
     # openev -m menufile -i iconfile -t toolfile image1 image2 ......
-    (options, ifiles) = getopt.getopt(sys.argv[1:], 'm:i:t:p:')
+    options, ifiles = getopt.getopt(sys.argv[1:], 'm:i:t:p:d')
 
-    if os.path.isdir(os.path.join(gview.home_dir, 'xmlconfig')):
-        mfile = 'DefaultMenuFile.xml'
-        if not os.path.isfile(os.path.join(gview.home_dir, 'xmlconfig',mfile)):
+    xml_dir = os.path.join(gview.home_dir, 'xmlconfig')
+    if os.path.isdir(xml_dir):
+        mfile = 'NewMenuFile.xml'
+        if not os.path.isfile(os.path.join(xml_dir, mfile)):
             mfile = None
 
-        ifile = 'DefaultIconFile.xml'
-        if not os.path.isfile(os.path.join(gview.home_dir, 'xmlconfig',ifile)):
+        ifile = 'NewIconFile.xml'
+        if not os.path.isfile(os.path.join(xml_dir, ifile)):
             ifile = None
 
         pfile = 'DefaultPyshellFile.xml'
-        if not os.path.isfile(os.path.join(gview.home_dir, 'xmlconfig',pfile)):
+        if not os.path.isfile(os.path.join(xml_dir, pfile)):
             pfile = None
 
     else:
-        mfile=None
-        ifile=None
-        pfile=None
+        mfile = None
+        ifile = None
+        pfile = None
 
     tfile = None
 
     for opt in options[0:]:
         if opt[0] == '-m':
-            mfile=opt[1]
+            mfile = opt[1]
         elif opt[0] == '-i':
-            ifile=opt[1]
+            ifile = opt[1]
         elif opt[0] == '-p':
-            pfile=opt[1]
+            pfile = opt[1]
         elif opt[0] == '-t':
-            tfile=opt[1]
+            tfile = opt[1]
+        elif opt[0] == '-d':
+            set_debug()
 
-    app = gviewapp.GViewApp(toolfile=tfile,menufile=mfile,iconfile=ifile,pyshellfile=pfile)
+    gviewapp.add_stock_icons()
+    app = gviewapp.GViewApp(toolfile=tfile, menufile=mfile, iconfile=ifile, pyshellfile=pfile)
     gview.app = app
-    app.subscribe('quit',gtk.main_quit)
-    app.show_layerdlg()
+    app.subscribe('quit', gtk.main_quit)
     app.new_view(title=None)
     app.do_auto_imports()
 
@@ -91,7 +92,6 @@ def main():
         app.file_open_by_name(item)
 
     gtk.main()
-
 
 if __name__ == '__main__':
     main()
