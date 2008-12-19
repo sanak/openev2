@@ -42,7 +42,6 @@ SMAverage = 0
 SMSample = 1
 SMAverage8bitPhase = 2
 
-###############################################################################
 class GvViewArea(_gv.ViewArea):
     """Gtk geographic view area.
 
@@ -182,7 +181,8 @@ class GvViewArea(_gv.ViewArea):
 
         Arguments
 
-          layer -- abc A GvLayer derived object to add to the view."""
+          layer -- abc A GvLayer derived object to add to the view.
+        """
         _gv.ViewArea.add_layer(self, layer)
 
     def remove_layer(self, layer):
@@ -190,14 +190,15 @@ class GvViewArea(_gv.ViewArea):
 
         Arguments
 
-          layer -- the layer to remove"""
+          layer -- the layer to remove
+        """
         _gv.ViewArea.remove_layer(self, layer)
 
     def get_named_layer(self, name):
         """Fetch the named layer from this view
 
-        Returns None if no such layer exists on the view."""
-
+        Returns None if no such layer exists on the view.
+        """
         return _gv.ViewArea.get_named_layer(self, name)
 
     def active_layer(self):
@@ -212,8 +213,8 @@ class GvViewArea(_gv.ViewArea):
 
         Arguments
 
-          layer -- GvLayer to make active."""
-
+          layer -- GvLayer to make active.
+        """
         _gv.ViewArea.set_active_layer(self, layer)
 
     def list_layers(self):
@@ -240,7 +241,8 @@ class GvViewArea(_gv.ViewArea):
 
           w -- Width in pixels of thumbnail.
 
-          h -- Height in pixel of thumbnail."""
+          h -- Height in pixel of thumbnail.
+        """
         return _gv.ViewArea.create_thumbnail(self, layer, w, h)
 
     def zoom(self, zoom):
@@ -251,7 +253,8 @@ class GvViewArea(_gv.ViewArea):
         a factor of 8 you would pass 3.  To zoom out by a factor of eight
         you would pass -8.
 
-        zoom -- the value to add to the current zoom factor."""
+        zoom -- the value to add to the current zoom factor.
+        """
         _gv.ViewArea.zoom(self, zoom)
 
     def get_zoom(self):
@@ -262,22 +265,23 @@ class GvViewArea(_gv.ViewArea):
         Similarly, a value of 3 means zoomed in by a factor of 8.  Negative
         values indicate zoomed out.
         """
-
         return _gv.ViewArea.get_zoom(self)
 
     def rotate(self, angle):
         """Rotate view about center.
 
         angle -- the angle to rotate about the center by in degrees.  Positive
-        is causes view contents to rotate counter-clockwise."""
-        _gv.ViewArea.rotate(self,angle)
+        is causes view contents to rotate counter-clockwise.
+        """
+        _gv.ViewArea.rotate(self, angle)
 
     def translate(self, dx, dy):
         """Translate view by dx and dy.
 
         dx -- the amount to translate along the x axis in georeferenced units
-        dy -- the amount to translate along the y axis in georeferenced units """
-        _gv.ViewArea.translate(self,dx,dy)
+        dy -- the amount to translate along the y axis in georeferenced units
+        """
+        _gv.ViewArea.translate(self, dx, dy)
 
     def set_translation(self, x, y):
         """Set view center translation.
@@ -287,8 +291,9 @@ class GvViewArea(_gv.ViewArea):
         (-1000,-2000) is needed.
 
         x -- the X (easting) value for view center translation.
-        y -- the Y (northing) value for view center translation."""
-        _gv.ViewArea.set_translation(self,x,y)
+        y -- the Y (northing) value for view center translation.
+        """
+        _gv.ViewArea.set_translation(self, x, y)
 
     def get_translation(self):
         """Get view center translation.
@@ -296,25 +301,25 @@ class GvViewArea(_gv.ViewArea):
         The translation values are in georeferenced coordinates, and to
         put the value (1000,2000) at the view center a translation of
         (-1000,-2000) would be returned.  The value is returned as an
-        (x,y) tuple."""
-
+        (x,y) tuple.
+        """
         return _gv.ViewArea.get_translation(self)
 
-    def get_flip_x( self ):
+    def get_flip_x(self):
         """Fetch X flip flag.
 
         Normally 1, but will be -1 if an X flip (mirroring) has been applied.
         """
         return _gv.ViewArea.get_flip_x(self)
 
-    def get_flip_y( self ):
+    def get_flip_y(self):
         """Fetch Y flip flag.
 
         Normally 1, but will be -1 if a Y flip (mirroring) has been applied.
         """
         return _gv.ViewArea.get_flip_y(self)
 
-    def set_flip_xy( self, flip_x, flip_y ):
+    def set_flip_xy(self, flip_x, flip_y):
         """Set x/y flip flags.
 
         flip_x -- x mirroring flag, 1 or -1.
@@ -322,15 +327,16 @@ class GvViewArea(_gv.ViewArea):
 
         A value of 1 is unflipped, and -1 is flipped (mirrored).
         """
-        _gv.ViewArea.set_flip_xy( self, flip_x, flip_y )
+        _gv.ViewArea.set_flip_xy(self, flip_x, flip_y)
 
     def copy_state(self, src_view):
         """Copy the view state of another view.
 
         This includes translation, rotation, and zoom factor.
 
-        src_view -- the GvViewArea to copy the state from."""
-        _gv.ViewArea.copy_state(self,src_view)
+        src_view -- the GvViewArea to copy the state from.
+        """
+        _gv.ViewArea.copy_state(self, src_view)
 
     def map_location(self, xy):
         """ Translates a point from the current view projection (line/pixel or lat/long)
@@ -339,15 +345,16 @@ class GvViewArea(_gv.ViewArea):
 
         returns a (x,y) tuple in georeferenced coordinates
 
-        xy -- (x,y) tuple in current view coordinates"""
-
+        xy -- (x,y) tuple in current view coordinates
+        """
         return _gv.ViewArea.map_location(self, xy)
 
     def get_pointer(self):
         """Fetch current pointer position.
 
         The pointer value is returned as an (X,Y) tuple in georeferenced
-        coordinates."""
+        coordinates.
+        """
         return _gv.ViewArea.map_pointer(self, _gv.ViewArea.get_pointer(self))
 
     def map_pointer(self, xy):
@@ -359,7 +366,8 @@ class GvViewArea(_gv.ViewArea):
 
         Returns an (x,y) tuple in georeferenced coordinates.
 
-        xy -- (x,y) tuple in GvViewArea pixel coordinates"""
+        xy -- (x,y) tuple in GvViewArea pixel coordinates
+        """
         return _gv.ViewArea.map_pointer(self, xy)
 
     def inverse_map_pointer(self, xy):
@@ -370,7 +378,8 @@ class GvViewArea(_gv.ViewArea):
 
         Returns an (x,y) tuple in pixel/line coordinates.
 
-        xy -- (x,y) tuple in georeferenced coordinates"""
+        xy -- (x,y) tuple in georeferenced coordinates
+        """
         return _gv.ViewArea.inverse_map_pointer(self, xy)
 
     def get_volume(self):
@@ -384,14 +393,14 @@ class GvViewArea(_gv.ViewArea):
         NOTE: At this time the zmin/zmax are not computed, and are always
         the default 0,1000 values.
         """
-
         return _gv.ViewArea.get_volume(self)
 
     def get_extents(self):
         """Fetch extents of view window.
 
         The extents are returned as an (xmin,ymin,xmax,ymax) tuple
-        in georeferenced coordinates."""
+        in georeferenced coordinates.
+        """
         return _gv.ViewArea.get_extents(self)
 
     def fit_extents(self,llx, lly, width, height):
@@ -407,7 +416,8 @@ class GvViewArea(_gv.ViewArea):
         llx -- X (easting) position of the lower left corner.
         lly -- Y (northing) position of the lower left corner.
         width -- Width of view region.
-        height -- Height of view region."""
+        height -- Height of view region.
+        """
         _gv.ViewArea.fit_extents(self, llx, lly, width, height)
 
     def fit_all_layers(self):
@@ -425,8 +435,9 @@ class GvViewArea(_gv.ViewArea):
         """Return view coordinate system.
 
         The coordinate system is returned in OGC WKT format, and will
-        likely be an empty string if there is no coordinate system."""
-        return _gv.ViewArea.get_projection( self )
+        likely be an empty string if there is no coordinate system.
+        """
+        return _gv.ViewArea.get_projection(self)
 
     def set_projection(self, proj):
         """Set the coordinate system of the view.
@@ -436,8 +447,9 @@ class GvViewArea(_gv.ViewArea):
         to the view, they will attempt to reproject themselves to match the
         view if possible.  Vector layers do not currently do this.
 
-        proj -- new coordinate system in OGC WKT."""
-        _gv.ViewArea.set_projection( self, proj )
+        proj -- new coordinate system in OGC WKT.
+        """
+        _gv.ViewArea.set_projection(self, proj)
 
     def set_background_color(self, color):
         """Set the background color of the view.
@@ -445,7 +457,7 @@ class GvViewArea(_gv.ViewArea):
         color -- an RGBA tuple with the color value (scaled 0.0 to 1.0).
         For reasonable operation alpha should always be 1.0.
         """
-        _gv.ViewArea.set_background_color( self, color )
+        _gv.ViewArea.set_background_color(self, color)
 
     def get_background_color(self):
         """Get the background color of the view.
@@ -453,10 +465,9 @@ class GvViewArea(_gv.ViewArea):
         Returns the background color as an RGBA tuple with the color
         values scaled 0.0 to 1.0.
         """
-        return _gv.ViewArea.get_background_color( self )
+        return _gv.ViewArea.get_background_color(self)
 
-    def print_to_file(self, width, height, filename, format='GTiff',
-                      is_rgb = 1):
+    def print_to_file(self, width, height, filename, format='GTiff', is_rgb=1):
         """Print view (at indicated resolution) to raster file.
 
         width -- the desired raster width at which to render the image.
@@ -469,10 +480,9 @@ class GvViewArea(_gv.ViewArea):
         aspect ratio of the view, the extents will be extended in one
         direction to ensure the entire view data is visible.
 
-        This method return 0 on success or non-zero on failure."""
-
-        return _gv.ViewArea.print_to_file(self, width, height,
-                                              filename, format, is_rgb)
+        This method return 0 on success or non-zero on failure.
+        """
+        return _gv.ViewArea.print_to_file(self, width, height, filename, format, is_rgb)
 
     def print_postscript_to_file(self, width, height,
                                  ulx, uly, lrx, lry,
@@ -492,15 +502,14 @@ class GvViewArea(_gv.ViewArea):
         aspect ratio of the view, the extents will be extended in one
         direction to ensure the entire view data is visible.
 
-        This method return 0 on success or non-zero on failure."""
-
-        return _gv.ViewArea.print_postscript_to_file(
-            self, width, height, ulx, uly, lrx, lry,
-            is_rgb, filename)
+        This method return 0 on success or non-zero on failure.
+        """
+        return _gv.ViewArea.print_postscript_to_file(self, width, height,
+                                                     ulx, uly, lrx, lry,
+                                                     is_rgb, filename)
 
     def print_to_windriver(self, width, height, 
-                           ulx, uly, lrx, lry,
-                           is_rgb = 1):
+                           ulx, uly, lrx, lry, is_rgb=1):
         """Print view to Windows Print Driver
 
         width -- the desired raster width at which to render the image.
@@ -515,17 +524,17 @@ class GvViewArea(_gv.ViewArea):
         aspect ratio of the view, the extents will be extended in one
         direction to ensure the entire view data is visible.
 
-        This method return 0 on success or non-zero on failure."""
-
+        This method return 0 on success or non-zero on failure.
+        """
         return _gv.ViewArea.print_to_windriver(self, width, height,
-                                                   ulx, uly, lrx, lry, is_rgb)
+                                               ulx, uly, lrx, lry, is_rgb)
 
     def get_mode(self):
         """Get 2D/3D Mode
 
         Returns either gview.MODE_2D or gview.MODE_3D depending on the
-        current mode of the view."""
-
+        current mode of the view.
+        """
         return _gv.ViewArea.get_mode(self)
 
     def set_mode(self, flag_3D=MODE_2D):
@@ -534,11 +543,11 @@ class GvViewArea(_gv.ViewArea):
         Set the view mode to either 2D orthonormal projection or
         3D perspective projection.
 
-        flag_3D -- Either gview.MODE_2D or gview.MODE_3D"""
-
+        flag_3D -- Either gview.MODE_2D or gview.MODE_3D
+        """
         _gv.ViewArea.set_mode(self, flag_3D)
 
-    def set_3d_view(self, eye_pos, eye_dir ):
+    def set_3d_view(self, eye_pos, eye_dir):
         """Set 3D view.
 
         Set the 3D view position, and direction. 
@@ -549,10 +558,9 @@ class GvViewArea(_gv.ViewArea):
         eye_dir -- (x,y,z) tuple indicating the direction of view.  (0,0,-1)
         is straight down
         """
+        _gv.ViewArea.set_3d_view(self, eye_pos, eye_dir)
 
-        _gv.ViewArea.set_3d_view( self, eye_pos, eye_dir )
-
-    def set_3d_view_look_at(self, eye_pos, eye_look_at ):
+    def set_3d_view_look_at(self, eye_pos, eye_look_at):
         """Set 3D view.
 
         Set the 3D view position, and direction. 
@@ -563,27 +571,27 @@ class GvViewArea(_gv.ViewArea):
         eye_look_at -- (x,y) tuple indicating the position in the z-plane to
         look at.
         """
-
-        _gv.ViewArea.set_3d_view_look_at( self, eye_pos, eye_look_at)
+        _gv.ViewArea.set_3d_view_look_at(self, eye_pos, eye_look_at)
 
     def get_eye_pos(self):
         """Fetch 3D eye position
 
-        The 3D eye position is returned as an (x,y,z) tuple."""
-
+        The 3D eye position is returned as an (x,y,z) tuple.
+        """
         return _gv.ViewArea.get_eye_pos(self)
 
     def get_eye_dir(self):
         """Fetch 3D eye direction
 
-        The 3D eye direction is returned as an (x,y,z) tuple."""
-
+        The 3D eye direction is returned as an (x,y,z) tuple.
+        """
         return _gv.ViewArea.get_eye_dir(self)
 
     def get_look_at_pos(self):
         """Fetch georeference location in z-plane that eye is looking
 
-        Location is returned as an (x,y) tuple, or None if looking above z-plane"""
+        Location is returned as an (x,y) tuple, or None if looking above z-plane
+        """
         return _gv.ViewArea.get_look_at_pos(self)
 
     def height_scale(self, scale=1.0):
@@ -596,11 +604,9 @@ class GvViewArea(_gv.ViewArea):
         scale -- scale factor (originally 1.0)
         """
         _gv.ViewArea.height_scale(self, scale)
+    get_height_scale = height_scale
 
-    def get_height_scale(self):
-        return _gv.ViewArea.get_height_scale(self)
-
-    def queue_draw( self ):
+    def queue_draw(self):
         """Force queuing of a redraw.
 
         This method should not normally be needed, as a redraw should be
@@ -608,15 +614,15 @@ class GvViewArea(_gv.ViewArea):
         """
         _gv.ViewArea.queue_draw(self)
 
-    def get_fontnames( self ):
+    def get_fontnames(self):
         """Get list of available fontnames.
 
         Returns a Python list of font name strings suitable for using with
         LABEL() tools on this view area.  Generally the same for all views.
         """
-        return _gv.ViewArea.get_fontnames( self )
+        return _gv.ViewArea.get_fontnames(self)
 
-    def get_raw( self, ref_layer = None ):
+    def get_raw(self, ref_layer=None):
         """Check if in Raw Mode
 
         This returns true if the view is in raw mode relative to the identified
@@ -626,13 +632,12 @@ class GvViewArea(_gv.ViewArea):
         ref_layer -- a GvRasterLayer to check against.  If ref_layer is None,
                      always returns 0. 
         """
-
         if ref_layer is None:
             return 0
         else:
             return _gv.ViewArea.get_raw(self, ref_layer)
 
-    def set_raw( self, ref_layer, raw_enable ):
+    def set_raw(self, ref_layer, raw_enable):
         """Set Raw Mode Enable
 
         Force the layer to be in raw mode (raw_enable=TRUE) or in georeferenced
@@ -652,27 +657,27 @@ class GvViewArea(_gv.ViewArea):
 
         return _gv.ViewArea.set_raw(self, ref_layer, raw_enable)
 
-    def get_property(self,name):
+    def get_property(self, name):
         """Get a GvViewArea property.
 
         name -- the key or name of the property being set.  Should be a
         well behaved token (no spaces, equal signs, or colons).
 
-        NOTE: Returns None if property does not exist."""
-
+        NOTE: Returns None if property does not exist.
+        """
         return _gv.ViewArea.get_property(self, name)
 
-    def set_property(self,name,value):
+    def set_property(self, name, value):
         """Set a GvViewArea property.
 
         name -- the key or name of the property being set.  Should be a
         well behaved token (no spaces, equal signs, or colons).
 
-        value -- the value to be assigned.  Any text is acceptable."""
+        value -- the value to be assigned.  Any text is acceptable.
+        """
+        return _gv.ViewArea.set_property(self, name, value)
 
-        return _gv.ViewArea.set_property(self, name,value)
-
-    def format_point_query( self, x, y ):
+    def format_point_query(self, x, y):
         """Format a point as text
 
            x - the x coordinate to format
@@ -680,16 +685,15 @@ class GvViewArea(_gv.ViewArea):
 
            TODO: provide information on formatting using preferences
                  to control output.
+        MB: doesn't work properly...
         """
-
-        return _gv.ViewArea.format_point_query( self, x, y )
+        return _gv.ViewArea.format_point_query(self, x, y)
 
     def remove_all_layers(self):
         for layer in self.list_layers():
             self.remove_layer(layer)
             layer = None
 
-###############################################################################
 def GvShapeFromXML(tree, parent, filename=None):
     """construct a gvshape object from an xml tree"""
     shape = GvShape()
@@ -880,6 +884,7 @@ def gv_shape_line_from_nodes(xlist,ylist,zlist):
                 zlist- z coordinates
         xlist, ylist, and zlist must be the same
         length.
+        MB: untested
     """
     # cast so that tuples and numeric arrays are
     # accepted
@@ -905,6 +910,7 @@ def gv_shapes_lines_for_vecplot(xlist,ylist,zlist,oklist):
                         should be included
         xlist, ylist, zlist, and oklist must be the same
         length.
+        MB: untested
     """
     if type(xlist) != type([1]):
         xlist=list(xlist)
@@ -920,7 +926,7 @@ def gv_shapes_lines_for_vecplot(xlist,ylist,zlist,oklist):
     else:
         return GvShapes(_obj=obj)
 
-###############################################################################
+
 # new functions for XML support (moved from GvData)
 def serialize(obj, base=None, filename=None):
     """serialize this object in a format suitable for XML representation."""
@@ -1106,8 +1112,6 @@ class GvDataDoc:
 def gv_data_registry_dump():
     _gv.gv_data_registry_dump()
 
-
-###############################################################################
 def GvShapesFromXML(node, parent, filename=None):
     """construct a gvshapes object from an xml tree.
 
@@ -1221,7 +1225,7 @@ class GvShapes(_gv.Shapes):
         """
         _gv.Shapes.delete_shapes(self, shapes)
 
-    def save_to(self, filename, type = 0):
+    def save_to(self, filename, type=0):
         """Save layer to ESRI Shapefile
 
         Shapefiles can only hold a single geometric type.  By default this
@@ -1256,7 +1260,7 @@ class GvShapes(_gv.Shapes):
         """
         return _gv.Shapes.get_change_info(c_object)
 
-    def add_height( self, raster, offset=0.0, default_height = 0.0 ):
+    def add_height(self, raster, offset=0.0, default_height = 0.0):
         """Set vertex heights from raster DEM.
 
         Sets the Z component of each vertex to the value sampled from
@@ -1273,7 +1277,7 @@ class GvShapes(_gv.Shapes):
         offset -- optional offset to apply to the vertices.
         """
         # Actually add the height.
-        _gv.Shapes.add_height( self, raster, offset, default_height )
+        _gv.Shapes.add_height(self, raster, offset, default_height)
 
     def get_schema(self, fieldname=None):
         """Fetch attribute schema.
@@ -1306,7 +1310,7 @@ class GvShapes(_gv.Shapes):
         cur_field = 1
         key_name = '_field_name_' + str(cur_field)
 
-        while prop.has_key(key_name):
+        while key_name in prop:
             fid = '_field_name_%s' % cur_field
             name = prop[fid]
 
@@ -1334,7 +1338,7 @@ class GvShapes(_gv.Shapes):
         else:
             return schema
 
-    def get_layout( self ):
+    def get_layout(self):
         """Get tabular layout information.
 
         This returns a list of field names, and their suggested width.  The
@@ -1345,6 +1349,7 @@ class GvShapes(_gv.Shapes):
 
         The return result is a list of (field_name, width) tuples in the
         same order as in the schema.
+        MB: unused...
         """
 
         schema = self.get_schema()
@@ -1422,7 +1427,7 @@ class GvShapes(_gv.Shapes):
         if not schema:
             schema = self.get_schema()
 
-        return [ field[0] for field in schema ]
+        return [field[0] for field in schema]
 
     def new_field(self, fdef):
         """Only a wrapper around add_field to accept a field def as a tuple."""
@@ -1446,7 +1451,7 @@ class GvShapes(_gv.Shapes):
 
     def copy_fields(self, schema):
         """Copy fields from given schema."""
-        fnames = [ field[0] for field in self.get_schema() ]
+        fnames = self.get_fieldnames(schema)
         for field in schema:
             if field[0] not in fnames:
                 self.new_field(field)
@@ -1456,7 +1461,7 @@ class GvShapes(_gv.Shapes):
         ftype = self.get_schema(fname)[1]
         return [shp.get_typed_property(fname, ftype) for shp in self]
 
-###############################################################################
+
 # GvPoints, GvPolylines and GvAreas deprecated
 class GvPoints(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
@@ -1467,7 +1472,6 @@ class GvPoints(_gv.Shapes):
         if name:
             self.set_name(name)
 
-###############################################################################
 class GvPolylines(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
         if _obj is None:
@@ -1477,7 +1481,6 @@ class GvPolylines(_gv.Shapes):
         if name:
             self.set_name(name)
 
-###############################################################################
 class GvAreas(_gv.Shapes):
     def __init__(self, name=None, _obj=None):
         if _obj is None:
@@ -1487,7 +1490,6 @@ class GvAreas(_gv.Shapes):
         if name:
             self.set_name(name)
 
-###############################################################################
 def GvRasterFromXML(node, parent, filename=None):
     band = int(XMLFindValue(node,"band","1"))
     portable_path = XMLFindValue(node, 'portable_path')
@@ -1514,8 +1516,7 @@ class GvRaster(_gv.Raster):
     by the GvRasterLayer to ensure updates to mesh and display.
     """
 
-    def __init__(self, filename=None, dataset=None, _obj=None,
-                 sample=SMSample, real=1 ):
+    def __init__(self, filename=None, dataset=None, _obj=None, sample=SMSample, real=1):
         """Create new raster.
 
         All the arguments of this method are optional, and can be passed
@@ -1533,8 +1534,6 @@ class GvRaster(_gv.Raster):
         real -- The band from the raster file to use as the band.
 
         """
-
-
         if _obj is None:
             if dataset:
                 dataset_raw = dataset.this
@@ -1545,7 +1544,7 @@ class GvRaster(_gv.Raster):
             # MB: I don't like it but it will do for now...
             _gv.Raster.__init__(self, _obj=_obj)
 
-    def flush_cache(self,x_off=0,y_off=0,width=0,height=0):
+    def flush_cache(self, x_off=0, y_off=0, width=0, height=0):
         """Flush data cache.
 
         This will cause the data caches of GDAL, and this GvRaster to be
@@ -1559,7 +1558,7 @@ class GvRaster(_gv.Raster):
         width -- width of area to be flushed (zero for whole image).
         height -- height of area to be flushed (zero for whole image).
         """
-        _gv.Raster.flush_cache(self,x_off,y_off,width,height)
+        _gv.Raster.flush_cache(self, x_off, y_off, width, height)
 
     def get_sample(self, x, y):
         """Fetch sample value from raster.
@@ -1572,42 +1571,41 @@ class GvRaster(_gv.Raster):
         returned.
 
         x -- x offset from top left corner of pixel to fetch.
-        y -- y offset from top left corner of pixel to fetch."""
-
+        y -- y offset from top left corner of pixel to fetch.
+        """
         return _gv.Raster.get_sample(self, x, y)
 
-    def georef_to_pixel(self, x, y ):
+    def georef_to_pixel(self, x, y):
         """Translate georeferenced coordinates to pixel/line.
 
         x -- X (easting or longitude) in raster layer georeferencing system.
         y -- Y (northing or latitude) in raster layer georeferencing system.
 
-        Returns a (pixel,line) coordinate tuple on the raster."""
-
+        Returns a (pixel,line) coordinate tuple on the raster.
+        """
         return _gv.Raster.georef_to_pixel(self, x, y)
 
-    def cursor_link_georef_to_pixel(self, x, y ):
+    def cursor_link_georef_to_pixel(self, x, y):
         """Translate cursor/link georeferenced coordinates to pixel/line.
 
         x -- X (easting or longitude) in raster layer georeferencing system.
         y -- Y (northing or latitude) in raster layer georeferencing system.
 
-        Returns a (pixel,line) coordinate tuple on the raster."""
-
+        Returns a (pixel,line) coordinate tuple on the raster.
+        """
         return _gv.Raster.cursor_link_georef_to_pixel(self, x, y)
 
-    def pixel_to_georef(self, x, y ):
+    def pixel_to_georef(self, x, y):
         """Translate pixel/line to georeferenced coordinate.
 
         x -- pixel on raster layer (0.0 is left side of leftmost pixel)
         y -- line on raster layer (0.0 is top side of topmost pixel)
 
-        Returns an (x,y) coordinate tuple in the raster georeferencing
-        system."""
-
+        Returns an (x,y) coordinate tuple in the raster georeferencing system.
+        """
         return _gv.Raster.pixel_to_georef(self, x, y)
 
-    def cursor_link_pixel_to_georef(self, x, y ):
+    def cursor_link_pixel_to_georef(self, x, y):
         """Translate pixel/line to cursor/link georeferenced coordinate.
 
         x -- pixel on raster layer (0.0 is left side of leftmost pixel)
@@ -1616,8 +1614,8 @@ class GvRaster(_gv.Raster):
         Returns an (x,y) coordinate tuple in the raster georeferencing
         system defined for the cursor and link mechanism (defaults
         to the standard pixel_to_georef if no separate gcps have
-        been defined for the cursor/link)."""
-
+        been defined for the cursor/link).
+        """
         return _gv.Raster.pixel_to_georefCL(self, x, y)
 
     def data_changing(self, x_off, y_off, width, height):
@@ -1630,8 +1628,9 @@ class GvRaster(_gv.Raster):
         x_off -- pixel offset to top left corner of change region.
         y_off -- line offset to top left corner of change region.
         width -- width of window that is changing. 
-        height -- width of window that is changing."""
-        _gv.Raster.data_changing(self, x_off, y_off, width, height )
+        height -- width of window that is changing.
+        """
+        _gv.Raster.data_changing(self, x_off, y_off, width, height)
 
     def get_change_info(self, c_object):
         """Used to convert a PyCObject as returned from a changed/changing
@@ -1657,8 +1656,7 @@ class GvRaster(_gv.Raster):
     def get_band(self):
         """Get GDAL raster band
 
-        Fetch the band associated with the GvRaster as a
-        gdal.RasterBand object.
+        Fetch the band associated with the GvRaster as a gdal.RasterBand object.
         """
         if hasattr(self, 'gdal_band'):
             return self.gdal_band
@@ -1673,8 +1671,7 @@ class GvRaster(_gv.Raster):
     def get_dataset(self):
         """Get GDAL raster dataset
 
-        Fetch the dataset associated with the GvRaster as a
-        gdal.Dataset object.
+        Fetch the dataset associated with the GvRaster as a gdal.Dataset object.
         """
         if hasattr(self, 'gdal_dataset'):
             return self.gdal_dataset
@@ -1686,7 +1683,7 @@ class GvRaster(_gv.Raster):
         self.gdal_dataset = ds
         return self.gdal_dataset
 
-    def autoscale(self, alg = ASAAutomatic, alg_param = -1.0, assign = 0):
+    def autoscale(self, alg=ASAAutomatic, alg_param=-1.0, assign=0):
         """Force autoscaling to be recomputed.
 
         alg -- Algorithm to use (see below)
@@ -1715,20 +1712,21 @@ class GvRaster(_gv.Raster):
         If the autoscale() fails (for instance due to an IO error, or if all
         the sample data is the nodata value) the method will throw an
         exception otherwise a (min,max) tuple is returned.
-
         """
         return _gv.Raster.autoscale(self, alg, alg_param, assign)
 
     def get_min(self):
         """Get the minimum for default scaling
 
-        See the autoscale() method for information on this is established."""
+        See the autoscale() method for information on this is established.
+        """
         return self.min
 
     def get_max(self):
         """Get the maximum for default scaling
 
-        See the autoscale() method for information on this is established."""
+        See the autoscale() method for information on this is established.
+        """
         return self.max
 
     def force_load(self):
@@ -1739,8 +1737,8 @@ class GvRaster(_gv.Raster):
         be discarded as later tiles are fetched.  This is a blocking
         operation and should be use with care.  It's main purpose is to
         provide speculative "preloading" of smallish files to provide smooth
-        animation effects."""
-
+        animation effects.
+        """
         _gv.Raster.force_load(self)
 
     def get_gcps(self):
@@ -1777,41 +1775,30 @@ class GvRaster(_gv.Raster):
 
         return gcp_list
 
-    def set_gcps(self, gcp_list ):
+    def set_gcps(self, gcp_list):
         tuple_list = []
         for gcp in gcp_list:
             tuple_list.append( (gcp.Id, gcp.Info, gcp.GCPPixel, gcp.GCPLine,
                                 gcp.GCPX, gcp.GCPY, gcp.GCPZ) )
 
-        return _gv.Raster.set_gcps( self, tuple_list )
+        return _gv.Raster.set_gcps(self, tuple_list)
 
-    def set_cursor_link_gcps(self, gcp_list, poly_order=1 ):
+    def set_cursor_link_gcps(self, gcp_list, poly_order=1):
         tuple_list = []
         for gcp in gcp_list:
             tuple_list.append( (gcp.Id, gcp.Info, gcp.GCPPixel, gcp.GCPLine,
                                 gcp.GCPX, gcp.GCPY, gcp.GCPZ) )
 
-        return _gv.Raster.set_gcpsCL( self, tuple_list, poly_order )
+        return _gv.Raster.set_gcpsCL(self, tuple_list, poly_order)
 
     def set_poly_order_preference(self, poly_order):
-        # Set preferred polynomial order for this raster (for use in
-        # display).  This is only used if it is appropriate for
-        # the current number of gcp's (ground control points).
-        # If order is <1 or >3 it will be reset to fall within this
-        # range.
+        """Set preferred polynomial order for this raster (for use in display).
+        This is only used if it is appropriate for
+        the current number of gcp's (ground control points).
+        If order is <1 or >3 it will be reset to fall within this range.
+        """
         _gv.Raster.set_poly_order_preference(self, poly_order)
 
-#def GvLayerFromXML( node, parent, filename=None ):
-#    band = int(XMLFindValue(node,"band","1"))
-#    for child in node[2:]:
-#        if child[0] == gdal.CXT_Text:
-#            filename = child[1]
-
-#    ds = manager.get_dataset( filename )
-#    raster = manager.get_dataset_raster( ds, band )
-#    return raster
-
-###############################################################################
 class GvLayer(_gv.Layer):
     """Base class for display layers.
 
@@ -1872,7 +1859,8 @@ class GvLayer(_gv.Layer):
     def extents(self):
         """Return extents of layer.
 
-        The extents are returned as a tuple (xmin,ymin,width,height)."""
+        The extents are returned as a tuple (xmin,ymin,width,height).
+        """
         return _gv.Layer.extents(self)
 
     def reproject(self, projection):
@@ -1883,13 +1871,15 @@ class GvLayer(_gv.Layer):
         Currently this only works for rasters, but eventually it will
         modify the display projection of any kind of GvLayer.
 
-        Returns 0 on failure, or non-zero on success."""
+        Returns 0 on failure, or non-zero on success.
+        """
         return _gv.Layer.reproject(self, projection)
 
     def launch_properties(self):
         """Launch a properties panel for this layer.
 
-        Returns the dialog object, or None if none can be created."""
+        Returns the dialog object, or None if none can be created.
+        """
         return None
 
     def display_change(self):
@@ -1924,7 +1914,6 @@ class GvLayer(_gv.Layer):
         if cls.count:
             return gvlegenddlg.show_legend(self)
 
-###############################################################################
 class GvShapeLayer(GvLayer, _gv.ShapeLayer):
     """Display layer of vector shape objects.
 
@@ -1956,7 +1945,6 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
 
         Adds properties for the current selection
         """
-
         if base is None:
             base = [gdal.CXT_Element, 'GvShapeLayer']
 
@@ -1973,11 +1961,6 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
         """
         _gv.ShapeLayer.set_color(self, color)
 
-    def pick_shape( self, view, x, y ):
-        """
-        """
-        return _gv.ShapeLayer.pick_shape( self, view, x, y )
-
     def get_selected(self):
         """Get list of currently selected objects.
 
@@ -1992,8 +1975,8 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
         is the one shape out the current set of selected shapes that has
         special focus of attention from the user.  The return value will be
         -1 if there is no subselection ... generally because there is no
-        selection."""
-
+        selection.
+        """
         return _gv.ShapeLayer.get_subselection(self)
 
     def subselect_shape(self, shape_id):
@@ -2002,25 +1985,25 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
         shape_id -- the new subselection. This may be -1, otherwise it must
         be in the current selected shape set.
         """
-        _gv.ShapeLayer.subselect_shape( self, shape_id )
+        _gv.ShapeLayer.subselect_shape(self, shape_id)
 
     def clear_selection(self):
         """Clear selection
 
         Clear the current shape selection for this layer, sending a
-        selection-changed signal if there was anything selected."""
-
+        selection-changed signal if there was anything selected.
+        """
         _gv.ShapeLayer.clear_selection(self)
 
     def select_all(self):
         """Select all shapes in layer
 
         All shapes in the layer are marked as selected, and if this is a
-        change, a selection-changed signal is sent."""
-
+        change, a selection-changed signal is sent.
+        """
         _gv.ShapeLayer.select_all(self)
 
-    def select_shape(self,shape_id):
+    def select_shape(self, shape_id):
         """Add a shape to selection
 
         Adds the indicated shape to the current selection, triggering a
@@ -2030,21 +2013,21 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
 
         Nothing will happen if the shape is already selected.
 
-        shape_id -- the id (index) of the shape to be selected."""
+        shape_id -- the id (index) of the shape to be selected.
+        """
+        _gv.ShapeLayer.select_shape(self, shape_id)
 
-        _gv.ShapeLayer.select_shape(self,shape_id)
-
-    def deselect_shape(self,shape_id):
+    def deselect_shape(self, shape_id):
         """Remove shape from selection
 
         Removes the indicated shape from the current selection, triggering a
         selection-changed signal if that shape was previously selected.
 
-        shape_id -- the id (index) of the shape to be deselected."""
-
+        shape_id -- the id (index) of the shape to be deselected.
+        """
         _gv.ShapeLayer.deselect_shape(self, shape_id)
 
-    def set_selection_mode(self,mode=0,clear=1):
+    def set_selection_mode(self, mode=0, clear=1):
         """Set selection mode
 
         mode=0:  multiple selection (default)
@@ -2052,7 +2035,6 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
 
         clear=0: do not clear existing selections before changing mode
         clear=1: clear existing selections before changing mode (default)
-
         """
         if clear == 1:
             self.clear_selection()
@@ -2063,8 +2045,6 @@ class GvShapeLayer(GvLayer, _gv.ShapeLayer):
         else:
             self.set_property("selection_mode","multiple")
 
-
-###############################################################################
 def GvShapesLayerFromXML(base, parent, filename=None):
     """Create a GvShapesLayer from an XML tree
 
@@ -2171,9 +2151,6 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
         from gvvectorpropdlg import LaunchVectorPropDialog
         return LaunchVectorPropDialog(self)
 
-    def get_symbol_manager(self, ok_to_create=0):
-        return _gv.ShapesLayer.get_symbol_manager(self, ok_to_create)
-
     def initialize_from_xml(self, tree, filename=None):
         """initialize this object from the XML tree"""
 
@@ -2198,7 +2175,6 @@ class GvShapesLayer(GvShapeLayer, _gv.ShapesLayer):
             shp.set_properties(props)
         GvLayer.declassify(self)
 
-###############################################################################
 # GvPointLayer, GvLineLayer and GvAreaLayer deprecated
 class GvPointLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, points=None, _obj=None):
@@ -2210,7 +2186,6 @@ class GvPointLayer(GvShapeLayer, _gv.ShapesLayer):
         GvShapeLayer.__init__(self, _obj)
         self.layer_type = GVSHAPE_POINT
 
-###############################################################################
 class GvLineLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, plines=None, _obj=None):
         if _obj is None:
@@ -2221,7 +2196,6 @@ class GvLineLayer(GvShapeLayer, _gv.ShapesLayer):
         GvShapeLayer.__init__(self, _obj)
         self.layer_type = GVSHAPE_LINE
 
-###############################################################################
 class GvAreaLayer(GvShapeLayer, _gv.ShapesLayer):
     def __init__(self, areas=None, _obj=None):
         if _obj is None:
@@ -2232,7 +2206,6 @@ class GvAreaLayer(GvShapeLayer, _gv.ShapesLayer):
         GvShapeLayer.__init__(self, _obj)
         self.layer_type = GVSHAPE_AREA
 
-###############################################################################
 def GvPqueryLayerFromXML(base, parent, filename=None):
     shape_tree = XMLFind(base, 'GvShapes')
     if shape_tree is not None:
@@ -2282,16 +2255,14 @@ class GvPqueryLayer(GvShapesLayer, _gv.PqueryLayer):
     shapes to override drawing style on a per-shape basis.
     """
     def __init__(self, shapes=None, _obj=None):
-        if (_obj == None):
+        if _obj is None:
             _gv.PqueryLayer.__init__(self, shapes)
             _obj = self
         GvShapesLayer.__init__(self, _obj=_obj)
 
-        #self.sink()
-
     def launch_properties(self):
         import gvpquerypropdlg
-        return gvpquerypropdlg.LaunchPQueryPropDialog( self )
+        return gvpquerypropdlg.LaunchPQueryPropDialog(self)
 
     def serialize(self, base=None, filename=None):
         """Create a representation of this object suitable for XMLing.
@@ -2304,7 +2275,7 @@ class GvPqueryLayer(GvShapesLayer, _gv.PqueryLayer):
 
         return base
 
-###############################################################################
+
 def GvRasterLayerFromXML(node, parent, filename=None):
     prototype_node = XMLFind(node, 'Prototype')
     if prototype_node is not None:
@@ -2368,8 +2339,7 @@ def GvRasterLayerFromXML(node, parent, filename=None):
     return layer
 
 class GvRasterLayer(GvLayer, _gv.RasterLayer):
-    def __init__(self, raster=None, creation_properties=None, _obj=None,
-                 rl_mode = RLM_AUTO ):
+    def __init__(self, raster=None, creation_properties=None, _obj=None, rl_mode=RLM_AUTO):
         """Create a raster layer.
 
         raster -- the primary GvRaster to which this layer is tied.  It
@@ -2408,7 +2378,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         else:
             self.sources = 3
 
-    def serialize(self, layer = None, filename=None ):
+    def serialize(self, layer = None, filename=None):
         # for clarity...
         Attr, Elem, Text = gdal.CXT_Attribute, gdal.CXT_Element, gdal.CXT_Text
         if layer is None:
@@ -2465,25 +2435,25 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         return layer
 
-    def view_to_pixel(self, x, y ):
+    def view_to_pixel(self, x, y):
         """Translate view coordinates to pixel/line.
 
         x -- X (easting or longitude) in view georeferencing system.
         y -- Y (northing or latitude) in view georeferencing system.
 
-        Returns a (pixel,line) coordinate tuple on the raster."""
-
+        Returns a (pixel,line) coordinate tuple on the raster.
+        """
         return _gv.RasterLayer.view_to_pixel(self, x, y)
 
-    def pixel_to_view(self, x, y ):
+    def pixel_to_view(self, x, y):
         """Translate pixel/line to view coordinate.
 
         x -- pixel on raster layer (0.0 is left side of leftmost pixel)
         y -- line on raster layer (0.0 is top side of topmost pixel)
 
         Returns an (x,y) coordinate tuple in the view georeferencing
-        system."""
-
+        system.
+        """
         return _gv.RasterLayer.pixel_to_view(self, x, y)
 
     def get_mode(self):
@@ -2493,8 +2463,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         raster band), gview.RLM_RGBA (RGBA composite from individual GvRaster
         bands), gview.RLM_PSCI (Pseudocolor/Intensity composite from
         individual GvRaster bands), or gview.RLM_COMPLEX (complex GvRaster
-        pseudocolored with 2D lookup table)."""
-        return _gv.RasterLayer.get_mode(self);
+        pseudocolored with 2D lookup table).
+        """
+        return _gv.RasterLayer.get_mode(self)
 
     def get_data(self, isource=0):
         """Fetch the GvRaster for a source.
@@ -2517,11 +2488,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         GvRasterLayer.set_source().
 
         isource -- the source to fetch from."""
-        return _gv.RasterLayer.get_source_lut(self, isource);
+        return _gv.RasterLayer.get_source_lut(self, isource)
 
     def get_nodata(self, isource):
         """Fetch NODATA value. DEPRECATED: use nodata_get()."""
-        return _gv.RasterLayer.nodata_get( self, isource )
+        return _gv.RasterLayer.nodata_get(self, isource)
 
     def set_source(self, isource, data, min=None, max=None, const_value=0,
                    lut=None, nodata=None):
@@ -2549,7 +2520,6 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         a string of exactly 256 characters mapping input values to output
         values in the range 0-255. 
         """
-
         if min is None:
             if data is not None:
                 min = data.min
@@ -2583,9 +2553,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                         max = float(md[GV_LUT_MAX])
 
         return _gv.RasterLayer.set_source(self, isource, data,
-                                      min, max, const_value, lut, nodata)
+                                          min, max, const_value, lut, nodata)
 
-    def min_set(self,isource,min):
+    def min_set(self, isource, min):
         """Set the scaling minimum.
 
         This will trigger a redraw via the display-change signal if it
@@ -2594,13 +2564,13 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         isource -- the source index (from 0 to 3).
         min -- new minimum value for scaling.
         """
-        return _gv.RasterLayer.min_set(self, isource, min )
+        return _gv.RasterLayer.min_set(self, isource, min)
 
-    def min_get(self,isource):
+    def min_get(self, isource):
         """Fetch the scaling minimum."""
-        return _gv.RasterLayer.min_get(self,isource)
+        return _gv.RasterLayer.min_get(self, isource)
 
-    def max_set(self,isource,max):
+    def max_set(self, isource, max):
         """Set the scaling maximum.
 
         This will trigger a redraw via the display-change signal if it
@@ -2611,11 +2581,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         """
         return _gv.RasterLayer.max_set(self, isource, max)
 
-    def max_get(self,isource):
+    def max_get(self, isource):
         """Fetch the scaling maximum."""
-        return _gv.RasterLayer.max_get(self,isource)
+        return _gv.RasterLayer.max_get(self, isource)
 
-    def nodata_set(self,isource,real,imaginary):
+    def nodata_set(self, isource, real, imaginary):
         """Set the NODATA value.
 
         This will trigger a redraw via the display-change signal if it
@@ -2624,21 +2594,21 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         isource -- the source index (from 0 to 3).
         nodata -- new nodata value.
         """
-        return _gv.RasterLayer.nodata_set(self,isource,real,imaginary)
+        return _gv.RasterLayer.nodata_set(self, isource, real, imaginary)
 
-    def nodata_get(self,isource):
+    def nodata_get(self, isource):
         """Fetch the NODATA value."""
-        return _gv.RasterLayer.nodata_get(self,isource)
+        return _gv.RasterLayer.nodata_get(self, isource)
 
-    def type_get(self,isource):
+    def type_get(self, isource):
         """Fetch GDAL type of the raster object."""
-        return _gv.RasterLayer.type_get(self,isource)
+        return _gv.RasterLayer.type_get(self, isource)
 
-    def get_const_value(self,isource):
+    def get_const_value(self, isource):
         """Fetch source constant value"""
-        return _gv.RasterLayer.get_const_value(self,isource)
+        return _gv.RasterLayer.get_const_value(self, isource)
 
-    def zoom_set(self,mag_mode,min_mode):
+    def zoom_set(self, mag_mode, min_mode):
         """Set interpolation method
 
         I believe mag_mode sets the interpolation mode when zooming in past
@@ -2649,17 +2619,17 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         mag_mode -- One of gview.RL_FILTER_BILINEAR or gview.RL_FILTER_NEAREST.
         min_mode -- One of gview.RL_FILTER_BILINEAR or gview.RL_FILTER_NEAREST.
         """
-        return _gv.RasterLayer.zoom_set( self, mag_mode, min_mode )
+        return _gv.RasterLayer.zoom_set(self, mag_mode, min_mode)
 
     def zoom_get(self):
         """Fetch zoom mode
 
         Returns the mag_mode, and min_mode interploation modes as a tuple.
-        See also: zoom_set()"""
-
+        See also: zoom_set()
+        """
         return _gv.RasterLayer.zoom_get(self)
 
-    def texture_mode_set(self,texture_mode,color):
+    def texture_mode_set(self, texture_mode, color):
         """Set the texture mode.
 
         The default mode is replace in which case the fragment color is
@@ -2667,20 +2637,20 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         provided fragment color.
 
         texture_mode -- gview.RL_TEXTURE_REPLACE or gview.GL_TEXTURE_MODULATE
-        color -- fragment color as an RGBA tuple."""
-        return _gv.RasterLayer.texture_mode_set(self, texture_mode,
-                                                    color )
+        color -- fragment color as an RGBA tuple.
+        """
+        return _gv.RasterLayer.texture_mode_set(self, texture_mode, color)
 
-    def blend_mode_set(self,mode,sfactor=0,dfactor=0):
+    def blend_mode_set(self, mode, sfactor=0, dfactor=0):
         """Set blend mode
 
         mode -- 0=off, non-0=on
         sfactor -- ...
-        dfactor -- ..."""
+        dfactor -- ...
+        """
+        return _gv.RasterLayer.blend_mode_set(self, mode, sfactor, dfactor)
 
-        return _gv.RasterLayer.blend_mode_set(self, mode, sfactor, dfactor )
-
-    def lut_put(self,lut=None):
+    def lut_put(self, lut=None):
         """Set the lut.
 
         This method will reset the compositing lut on a rasterlayer.  The lut
@@ -2720,11 +2690,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
     def lut_type_get(self):
         """Fetch the LUT type.
 
-        Returns one of RL_LUT_NONE, RL_LUT_1D, or RL_LUT_2D (defined in
-        gvconst.py)."""
-        return _gv.RasterLayer.lut_type_get( self )
+        Returns one of RL_LUT_NONE, RL_LUT_1D, or RL_LUT_2D (defined in gvconst.py).
+        """
+        return _gv.RasterLayer.lut_type_get(self)
 
-    def lut_color_wheel_new(self,h_mode,h_param,s_mode,s_param,v_mode,v_param):
+    def lut_color_wheel_new(self, h_mode, h_param, s_mode, s_param, v_mode, v_param):
         """Generate 2D LUT
 
         Returns a lut suitable for applying to a RLM_COMPLEX layer with the
@@ -2749,11 +2719,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         v_param -- if v_mode is RL_LUT_SCALAR this should be the constant value
         value between 0.0 and 1.0.
         """
-        return _gv.RasterLayer.lut_color_wheel_new(self,h_mode,h_param,
-                                                       s_mode,s_param,
-                                                       v_mode,v_param)
+        return _gv.RasterLayer.lut_color_wheel_new(self, h_mode, h_param,
+                                                   s_mode, s_param,
+                                                   v_mode, v_param)
 
-    def lut_color_wheel_new_ev(self,set_phase=1, set_magnitude=1):
+    def lut_color_wheel_new_ev(self, set_phase=1, set_magnitude=1):
         """Generate 2D LUT
 
         Applies a lut suitable for an RLM_COMPLEX layer with the
@@ -2769,13 +2739,10 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         set_magnitude -- One if magnitude is to be used to modify the
         intensity of the selected color, or zero to use a constant magnitude
         factor of 1.0.
-
         """
-        return _gv.RasterLayer.lut_color_wheel_new_ev(self,
-                                                          set_phase,
-                                                          set_magnitude)
+        return _gv.RasterLayer.lut_color_wheel_new_ev(self, set_phase, set_magnitude)
 
-    def autoscale_view(self, alg = ASAAutomatic, alg_param = -1.0, isource=0 ):
+    def autoscale_view(self, alg=ASAAutomatic, alg_param=-1.0, isource=0):
         """Force autoscaling to be recomputed.
 
         alg -- Algorithm to use (see below)
@@ -2790,13 +2757,10 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         If the autoscale_view() method fails (for instance due to an IO error,
         or if all the sample data is the nodata value) the method will throw an
         exception otherwise a (min,max) tuple is returned.
-
         """
-        return _gv.RasterLayer.autoscale_view(self, alg, alg_param,
-                                                  isource)
+        return _gv.RasterLayer.autoscale_view(self, alg, alg_param, isource)
 
-    def autoscale( self, alg = ASAAutomatic, alg_param = -1.0, isource=0,
-                   viewonly = 0):
+    def autoscale(self, alg=ASAAutomatic, alg_param=-1.0, isource=0, viewonly=0):
         if viewonly:
             try:
                 return self.autoscale_view(alg, alg_param, isource)
@@ -2809,8 +2773,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
             else:
                 return (self.min_get(isource), self.max_get(isource))
 
-    def histogram_view(self, isource = 0, scale_min = 0.0, scale_max = 255.0,
-                       hist_size = 256 ):
+    def histogram_view(self, isource=0, scale_min=0.0, scale_max=255.0, hist_size=256):
         """Compute histogram of viewed pixels.
 
         isource -- the GvRaster to collect histogram from.
@@ -2832,29 +2795,27 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         The function returns a list object with histogram entry counts of
         size hist_size, or an exception in the case of failure.
-
         """
         return _gv.RasterLayer.histogram_view(self, isource,
-                                                  scale_min, scale_max,
-                                                  hist_size )
+                                              scale_min, scale_max,
+                                              hist_size )
 
     def launch_properties(self):
         import gvrasterpropdlg
-        return gvrasterpropdlg.LaunchRasterPropDialog( self )
+        return gvrasterpropdlg.LaunchRasterPropDialog(self)
 
-    def add_height(self, height_raster, default_height = 0.0):
+    def add_height(self, height_raster, default_height=0.0):
         """ Adds height to raster layer for 3D effect.
 
         Georeferrencing information will be used to place height_raster
         with respect to layer.
 
         height_raster -- a GvRaster containing elevation information in a
-        compatible georeferencing system with this raster layer."""
-
+        compatible georeferencing system with this raster layer.
+        """
         # Actually add the height.
 
-        _gv.RasterLayer.add_height(self, height_raster,
-                                       default_height)
+        _gv.RasterLayer.add_height(self, height_raster, default_height)
 
         # In order to be able to reconstitute with elevation data,
         # we need to store information about where the elevation came from.
@@ -2867,25 +2828,25 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                            str(default_height) )
 
     def clamp_height(self, bclamp_min=0, bclamp_max=0, 
-                     min_height=-30000.0,max_height=30000.0):
+                     min_height=-30000.0, max_height=30000.0):
         """ Sets lower mesh height bound to min_height if bclamp_min is 1.
-        Sets upper mesh height bound to max_height if bclamp_max is 1. """
-
+        Sets upper mesh height bound to max_height if bclamp_max is 1.
+        """
         _gv.RasterLayer.clamp_height(self, bclamp_min, bclamp_max,
-                                         min_height, max_height)
+                                     min_height, max_height)
 
     def complex_lut(self, method='magnitude'):
         # Magnitude
         if method == 'magnitude':
-            self.lut_color_wheel_new_ev( 0, 1 )
+            self.lut_color_wheel_new_ev(0, 1)
 
         # Phase
         elif method == 'phase':
-            self.lut_color_wheel_new_ev( 1, 0 )
+            self.lut_color_wheel_new_ev(1, 0)
 
         # Magnitude and Phase
         elif method == 'magphase':
-            self.lut_color_wheel_new_ev( 1, 1 )
+            self.lut_color_wheel_new_ev(1, 1)
 
         # Real
         elif method == 'real':
@@ -2899,25 +2860,25 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                                       RL_LUT_SCALAR, 0.75,
                                       RL_LUT_IMAGINARY, 1 )
 
-    def equalize(self, viewonly = 0):
+    def equalize(self, viewonly=0):
         """Compute a histogram equalized source LUT, and apply.
 
         This method is not meaningful for RLM_COMPLEX layers, and will
-        be ignored."""
-
+        be ignored.
+        """
         for isrc in range(self.sources):
             raster = self.get_data(isrc)
             if raster is None:
                 continue
 
-            (smin, smax) = self.autoscale(viewonly=viewonly,isource=isrc)
+            (smin, smax) = self.autoscale(viewonly=viewonly, isource=isrc)
 
             if viewonly == 0:
                 gdal_band = raster.get_band()
-                histogram = gdal_band.GetHistogram(smin, smax, approx_ok = 1)
+                histogram = gdal_band.GetHistogram(smin, smax, approx_ok=1)
             else:
                 try:
-                    histogram = self.histogram_view(isrc, smin, smax, 256 )
+                    histogram = self.histogram_view(isrc, smin, smax, 256)
                 except:
                     # normally this means we are "off" the raster.
                     continue
@@ -2946,10 +2907,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), lut,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'equalize' )
+        self.set_property('last_stretch', 'equalize')
 
-    def linear( self, viewonly = 0 ):
-
+    def linear(self, viewonly=0):
         for isrc in range(self.sources):
             (smin, smax) = self.autoscale( isource=isrc, viewonly = viewonly )
 
@@ -2957,10 +2917,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), None,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'linear' )
+        self.set_property('last_stretch', 'linear')
 
-    def none_lut( self, viewonly = 0 ):
-
+    def none_lut(self, viewonly=0):
         for isrc in range(self.sources):
             raster = self.get_data(isrc)
             if raster is None:
@@ -2976,10 +2935,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), None,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'none_lut' )
+        self.set_property('last_stretch', 'none_lut')
 
-    def log( self, viewonly = 0 ):
-
+    def log(self, viewonly=0):
         from math import log
 
         lut = ''
@@ -2997,10 +2955,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), lut,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'log' )
+        self.set_property('last_stretch', 'log')
 
-    def root( self, viewonly = 0 ):
-
+    def root(self, viewonly=0):
         from math import sqrt
 
         lut = ''
@@ -3019,10 +2976,9 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), lut,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'root' )
+        self.set_property('last_stretch', 'root')
 
-    def square( self, viewonly = 0 ):
-
+    def square(self, viewonly=0):
         from math import pow
 
         lut = ''
@@ -3041,7 +2997,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
                             self.get_const_value(isrc), lut,
                             self.nodata_get(isrc))
 
-        self.set_property( 'last_stretch', 'square' )
+        self.set_property('last_stretch', 'square')
 
     def window_restretch(self):
         # Re-apply the last stretch operation.
@@ -3055,7 +3011,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
         func(viewonly=1)
 
-    def get_height( self, x, y ):
+    def get_height(self, x, y):
         """Fetch 3D mesh height at location
 
         Returns the elevation as extracted from the mesh used for 3D
@@ -3066,7 +3022,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         x -- Georeferenced X location to sample at. 
         y -- Georeferenced Y location to sample at.
         """
-        return _gv.RasterLayer.get_height( self, x, y )
+        return _gv.RasterLayer.get_height(self, x, y)
 
     def build_skirt(self, base_height=0.0):
         """Build a skirt around the edges of layer.
@@ -3085,14 +3041,13 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
             layer_o.layer_type = 0
             return layer_o
 
-    def refresh( self ):
+    def refresh(self):
         """Refresh raster data from disk."""
         for isource in range(4):
             raster = self.get_data(isource)
             if raster is not None:
                 raster.changed()
 
-###############################################################################
 # most tools now in _gv, what's left here only for backward compatibility
 # and for the docstrings
 GvSelectionTool = _gv.SelectionTool
@@ -3124,7 +3079,6 @@ class GvTool(_gv.Tool):
         """
         return _gv.Tool.set_cursor(self, cursor_type)
 
-###############################################################################
 class GvRoiTool(_gv.RoiTool):
     """Region of Interest Selection Tool
 
@@ -3143,7 +3097,6 @@ class GvRoiTool(_gv.RoiTool):
         else:
             _gv.RoiTool.__init__(_obj, boundary)
 
-###############################################################################
 class GvPoiTool(_gv.PoiTool):
     """Point of Interest Selection Tool
 
@@ -3169,31 +3122,19 @@ class GvPoiTool(_gv.PoiTool):
         """
         return _gv.PoiTool.new_point(self, point)
 
-###############################################################################
 class GvViewLink(_gv.ViewLink):
     def __init__(self):
         _gv.ViewLink.__init__(self)
 
-    def set_cursor_mode(self,mode=0):
+    def set_cursor_mode(self, mode=0):
         try:
             _gv.ViewLink.set_cursor_mode(self, mode)
         except:
             pass
 
-###############################################################################
 class GvSymbolManager(_gv.SymbolManager):
-
     def __init__(self):
         _gv.SymbolManager.__init__(self)
-
-    def get_symbol( self, name ):
-        result = _gv.SymbolManager.get_symbol( self, name )
-        if result is not None and result[0] == 1:
-            result = (result[0], GvShape( _obj = result[1] ) )
-        return result
-
-    def inject_vector_symbol(self, name, shape):
-        _gv.SymbolManager.inject_vector_symbol(self, name, shape._o)
 
     def serialize(self):
         tree = [gdal.CXT_Element, 'GvSymbolManager']
@@ -3221,7 +3162,6 @@ class GvSymbolManager(_gv.SymbolManager):
                 shape = GvShapeFromXML(XMLFind(item,'GvShape'), None, filename)
                 self.inject_vector_symbol(name, shape)
 
-###############################################################################
 class GvManager(_gv.Manager):
     def __init__(self):
         _gv.Manager.__init__(self)
@@ -3341,7 +3281,6 @@ class GvManager(_gv.Manager):
     def raster_destroyed(self, raster):
         self.remove_dataset(self.get_raster_dataset(raster))
 
-###############################################################################
 def undo_register(data):
     """Register GvData for undo.
 
@@ -3350,37 +3289,31 @@ def undo_register(data):
     This call registers the passed GvData with the undo system.  As long
     as it exists, and the undo system is enabled any changes to it will
     be recorded for undo.  There is no way to unregister an individual GvData
-    once registered."""
+    once registered.
+    """
     _gv.gv_undo_register_data(data)
 
-
-###############################################################################
 def can_undo():
     """Returns TRUE if undo system is enabled."""
     return _gv.gv_undo_can_undo()
 
-
-###############################################################################
 def undo_pop():
     """Undo the most recent undo group."""
-    _gv.gv_undo_pop();
+    _gv.gv_undo_pop()
 
-###############################################################################
 def undo_clear():
     """Destroy all saved undo steps."""
-    _gv.gv_undo_clear();
+    _gv.gv_undo_clear()
 
-###############################################################################
 def undo_close():
     """Temporarily disable capture of undo steps."""
-    _gv.gv_undo_close();
+    _gv.gv_undo_close()
 
-###############################################################################
 def undo_open():
     """Enable capture of undo steps."""
-    _gv.gv_undo_open();
+    _gv.gv_undo_open()
 
-###############################################################################
+
 def undo_start_group():
     """Establish a multi operation undo group.
 
@@ -3393,26 +3326,23 @@ def undo_start_group():
     should appear to be a single operation to the user. 
 
     Returns the undo group integer identifier.  This should be kept and
-    passed to the undo_end_group() method to terminate the grouping."""
+    passed to the undo_end_group() method to terminate the grouping.
+    """
     return _gv.gv_undo_start_group()
 
-###############################################################################
-def undo_end_group( group ):
+def undo_end_group(group):
     """Close off a multi operation undo group.
 
     group -- the group id to be terminated.  This should be the value
     returned by the corresponding undo_start_group()."""
-    return _gv.gv_undo_end_group( group )
+    return _gv.gv_undo_end_group(group)
 
-
-
-###############################################################################
 # Manage Application Properties:
 
 app_preferences = None
 app_preffile = None
 
-def set_default_preferences( defaults ):
+def set_default_preferences(defaults):
     """
     add a set of default preferences to the gview preference manager if they are not already
     loaded.
@@ -3425,12 +3355,11 @@ def set_default_preferences( defaults ):
 
     if app_preferences is None:
         load_preferences()
-    for key in defaults.keys():
+    for key,value in defaults.iteritems():
         if get_preference(str(key)) is None:
-            set_preference( str(key), str(defaults[key]))
+            set_preference(str(key), str(value))
 
-
-def get_preference(name, default = None):
+def get_preference(name, default=None):
     """Fetch preference value
 
     This method will return a String value, or None if the preference is
@@ -3449,7 +3378,7 @@ def get_preference(name, default = None):
     else:
         return res
 
-def set_preference(name,value):
+def set_preference(name, value):
     """Set preference value
 
     This method will set the preference value in a global application list,
@@ -3464,7 +3393,7 @@ def set_preference(name,value):
     if app_preferences is None:
         load_preferences()
 
-    return manager.set_preference(name,value)
+    return manager.set_preference(name, value)
 
 def load_preferences():
     global app_preferences
@@ -3474,11 +3403,7 @@ def load_preferences():
     if not os.path.exists(get_preffile()):
         return
 
-    file = open(get_preffile(),'r')
-    contents = file.readlines()
-    file.close()
-
-    for line in contents:
+    for line in open(get_preffile(),'r'):
         tokens = line.split('=', 1)
         if len(tokens) == 2:
             name,value = tokens
@@ -3496,9 +3421,8 @@ def save_preferences():
         return
 
     file = open(get_preffile(), 'w')
-    for item in prefs.items():
-        name, value = item
-        file.write(name + '=' + value + '\n')
+    for name,value in prefs.iteritems():
+        file.write('%s=%s\n' % (name, value))
     file.close()
 
 def get_preffile():
@@ -3511,8 +3435,6 @@ def get_preffile():
 
     return app_preffile
 
-
-###############################################################################
 def find_gview():
     try:
         gv_path = os.environ['OPENEV_HOME']
@@ -3544,7 +3466,6 @@ def find_gview():
     print 'Unable to find OpenEV tree ... some problems may be encountered.'
     return ''
 
-###############################################################################
 def raster_cache_get_max():
     return _gv.gv_raster_cache_get_max()
 
@@ -3566,8 +3487,6 @@ def texture_cache_get_used():
 def texture_cache_dump():
     return _gv.gv_texture_cache_dump()
 
-###############################################################################
-
 def rgba_to_rgb(rgba):
     #Convert RGBA data to RGB.
     #
@@ -3576,7 +3495,6 @@ def rgba_to_rgb(rgba):
     #gvrasterpropdlg.py.
     return _gv.gv_rgba_to_rgb(rgba)
 
-###############################################################################
 
 manager = GvManager()
 
@@ -3584,17 +3502,17 @@ manager = GvManager()
 etc"""
 home_dir = find_gview()
 
-if get_preference('gdal_cache') != None:
+if get_preference('gdal_cache') is not None:
     gdal.SetCacheMax( int(get_preference('gdal_cache')) )
 else:
-    gdal.SetCacheMax( 12582912 )
+    gdal.SetCacheMax(12582912)
 
-if get_preference('gvraster_cache') != None:
+if get_preference('gvraster_cache') is not None:
     raster_cache_set_max( int(get_preference('gvraster_cache')) )
 else:
-    raster_cache_set_max( 39845888 )
+    raster_cache_set_max(39845888)
 
-if get_preference('texture_cache') != None:
+if get_preference('texture_cache') is not None:
     texture_cache_set_max( int(get_preference('texture_cache')) )
 else:
-    texture_cache_set_max( 33554432 )
+    texture_cache_set_max(33554432)
