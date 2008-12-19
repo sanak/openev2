@@ -69,7 +69,7 @@ import gtk
 from gtk.keysyms import *
 from gtk.gdk import *
 from gvsignaler import Signaler
-import Numeric
+import numpy as Numeric
 import gview
 import gvutils
 

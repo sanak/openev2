@@ -34,7 +34,7 @@ import gtk
 from gtk.gdk import *
 
 import gview
-import Numeric
+import numpy as Numeric
 from gvsignaler import Signaler
 
 class pguShapesGrid( gtk.Table, Signaler ):
@@ -707,7 +707,7 @@ class pguShapesGrid( gtk.Table, Signaler ):
         pix.draw_rectangle(style.white_gc, True, 
                              0, 0, width, height )
 
-        if self.source == None or self.source._o == None or len(self.source) == 0:
+        if self.source is None or len(self.source) == 0:
             msg = "NO DATA TO DISPLAY"
             msg_width = self.title_font.string_width( msg )
             msg_height = self.title_font.string_height( msg )
