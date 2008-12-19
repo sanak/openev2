@@ -29,26 +29,17 @@ from gvsignaler import Signaler
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *
+import pgu
 
-# TEMP GTK2 PORT
-#
-#import gtkmissing
 import sys
 import gview
-import layerdlg
-#import gvenhdlg
-import gdal
+from osgeo import gdal
 import gvutils
 import os
-import pgufilesel
-import gvviewwindow
+from gvviewwindow import GvViewWindow
 import gvhtml
-import gvselbrowser
 
-import pgufont
-default_font = pgufont.XLFDFontSpec()
-default_font.set_font_part('Family', 'Arial')
-default_font.set_font_part('Point Size', '120')
+default_font = 'Sans 12'
 
 default_preferences = {
             'legend-background-color': (1.0, 1.0, 1.0, 1.0),
@@ -59,10 +50,24 @@ default_preferences = {
             'default-font': default_font,
 }
 
-gview.set_default_preferences( default_preferences )
+gview.set_default_preferences(default_preferences)
+# for brievity
+get_pref = gview.get_preference
+set_pref = gview.set_preference
+
+pics_dir = os.path.join(gview.home_dir, 'pics')
+def add_stock_icons():
+    factory = gtk.IconFactory()
+    for xpm in os.listdir(pics_dir):
+        if xpm.endswith('xpm'):
+            pix = pixbuf_new_from_file(os.path.join(pics_dir, xpm))
+            factory.add(os.path.basename(xpm)[:-4], gtk.IconSet(pix))
+
+    factory.add_default()
 
 class GViewApp(Signaler):
     def __init__(self,toolfile=None,menufile=None,iconfile=None,pyshellfile=None,notools=0):
+        import gvselbrowser
         self.view_manager = ViewManager()
         self.sel_manager = gvselbrowser.GvSelectionManager( self.view_manager )
         self.pref_dialog = None
@@ -71,10 +76,6 @@ class GViewApp(Signaler):
         # Toolbar
         self.toolbar = Toolbar()
         self.view_manager.set_toolbar( self.toolbar )
-
-        # Other dialogs, etc.
-        self.layerdlg = layerdlg.Launch()
-        self.view_manager.set_layerdlg(self.layerdlg)
 
         self.publish('quit')
         self.publish('rfl-change')
@@ -154,13 +155,14 @@ class GViewApp(Signaler):
         self.add_to_rfl( filename )
 
     def save_project_as( self ):
+        from pgufilesel import SimpleFileSelect
         if self.filename is None:
             default_filename = 'default.opf'
         else:
             default_filename = self.filename
-        pgufilesel.SimpleFileSelect( self.save_project_with_name_cb,
-                                     title = 'Project Filename',
-                                     default_filename = default_filename )
+        SimpleFileSelect(self.save_project_with_name_cb,
+                         title='Project Filename',
+                         default_filename=default_filename)
 
     def save_project(self, filename = None):
         if filename is None and self.filename is not None:
@@ -270,8 +272,8 @@ class GViewApp(Signaler):
         next_value = filename
         for i in range(1,6):
             rbl_name = 'recent_file_'+str(i)
-            rbl_value = gview.get_preference(rbl_name)
-            gview.set_preference(rbl_name, next_value)
+            rbl_value = get_pref(rbl_name)
+            set_pref(rbl_name, next_value)
 
             if rbl_value is None or rbl_value == filename:
                 break;
@@ -284,23 +286,22 @@ class GViewApp(Signaler):
         list = []
         for i in range(1,6):
             rbl_name = 'recent_file_'+str(i)
-            rbl_value = gview.get_preference(rbl_name)
+            rbl_value = get_pref(rbl_name)
             if rbl_value is not None:
                 list.append(rbl_value)
         return list
 
-    def show_layerdlg(self, *args):
-        self.layerdlg.show()
-        self.layerdlg.window.raise_()
-
     def show_toolbardlg(self, *args):
-        self.toolbar.show()
-        self.toolbar.window.raise_()
+        self.toolbar.present()
 
     def show_enhdlg(self, *args):
         self.enhdlg = gvenhdlg.EnchancementDialog()
 
-    def load_menus_file_from_xml(self,menufile,view_name):
+    def load_menus_file_from_xml(self, menufile, view_name):
+        # MB: haven't figured out how to deal with Tools entries so just
+        #     return the same command used in the view for now
+        return 'self.UImgr.add_ui_from_file(fullmenufile)'
+
         # Scan the XML menu file to find which tools to
         # load, and where to position them.
 
@@ -545,8 +546,11 @@ class GViewApp(Signaler):
         menu_cmd =  "self.menuf.add_entries([" + string.join(menu_list,',') + "])"
         return menu_cmd
 
+    def load_icons_file_from_xml(self, iconfile):
+        # MB: haven't figured out how to deal with Tools entries so just
+        #     return the same command used in the view for now
+        return 'self.UImgr.add_ui_from_file(fulliconfile)'
 
-    def load_icons_file_from_xml(self,iconfile):
         # Scan the XML icon file to find which tools to
         # load, and where to position them.
 
@@ -923,8 +927,7 @@ class GViewApp(Signaler):
         if self.pref_dialog is None:
             self.pref_dialog = PrefDialog()
             self.pref_dialog.connect('destroy', self.destroy_preferences)
-        self.pref_dialog.show()
-        self.pref_dialog.window.raise_()
+        self.pref_dialog.present()
 
     def destroy_preferences(self,*args):
         self.pref_dialog = None
@@ -935,7 +938,7 @@ class GViewApp(Signaler):
 
     def do_auto_imports(self):
         i = 1
-        al = gview.get_preference('auto_load_'+str(i))
+        al = get_pref('auto_load_%d'%i)
         while al is not None:
             try:
                 exec 'import '+al
@@ -944,7 +947,7 @@ class GViewApp(Signaler):
                 print sys.exc_info()[0], sys.exc_info()[1]
 
             i = i + 1
-            al = gview.get_preference('auto_load_'+str(i))
+            al = get_pref('auto_load_%d'%i)
 
     def active_layer(self):
         return self.view_manager.active_view.viewarea.active_layer()
@@ -1079,9 +1082,9 @@ class Toolbar(gtk.Window):
             self.link.disable()
 
     def cursor(self, but):
-        if (but.get_active()):
-            if ((gview.get_preference('cursor_type') is not None) and
-            (gview.get_preference('cursor_type') == 'nonadaptive')):
+        if but.get_active():
+            ctype = get_pref('cursor_type')
+            if ctype == 'nonadaptive':
                 self.link.set_cursor_mode(1)
             else:
                 self.link.set_cursor_mode(2)     
@@ -1101,19 +1104,11 @@ class Toolbar(gtk.Window):
 class ViewManager(Signaler):
 
     def __init__(self):
-        self.layerdlg = None
         self.toolbar = None
         self.active_view = None
         self.view_list = []
         self.publish( 'active-view-changed' )
         self.updating = False
-
-    def set_layerdlg(self,layerdlg):
-        self.layerdlg = layerdlg
-        self.layerdlg.subscribe('active-view-changed',self.layerdlg_cb)
-
-    def layerdlg_cb(self,*args):
-        self.set_active_view( self.layerdlg.get_active_view() )
 
     def set_toolbar(self,toolbar):
         self.toolbar = toolbar
@@ -1127,8 +1122,6 @@ class ViewManager(Signaler):
         self.view_list.append( new_view )
         if self.toolbar is not None:
             self.toolbar.add_view(new_view.viewarea)
-        if self.layerdlg is not None:
-            self.layerdlg.add_view(new_view.title, new_view.viewarea)
         new_view.connect('destroy', self.view_closing_cb)
         self.updating = False
         self.set_active_view( new_view )
@@ -1152,9 +1145,6 @@ class ViewManager(Signaler):
                 self.set_active_view( self.view_list[0] )
             else:
                 self.set_active_view( None );
-
-        if self.layerdlg is not None:
-            self.layerdlg.remove_view( view_window.title )
 
         if self.toolbar is not None:
             self.toolbar.toolbox.deactivate( view_window.viewarea )
@@ -1210,12 +1200,9 @@ class ViewManager(Signaler):
 
         self.active_view = new_view
         if new_view is not None and new_view.window is not None:
-            new_view.window.raise_()
+            new_view.present()
 
         Signaler.notify(self,'active-view-changed')
-
-        if self.layerdlg is not None and new_view is not None:
-            self.layerdlg.view_selected( None, new_view.title )
 
         if self.toolbar is not None and new_view is not None:
             self.toolbar.toolbox.activate(new_view.viewarea)
