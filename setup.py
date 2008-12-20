@@ -28,8 +28,7 @@ if os_name == 'windows' and sys.argv[1] == 'sdist':
     print 'The sdist command is not available under Windows.  Exiting.'
     sys.exit(1)
 
-from distutils.core import setup, Extension
-from distutils.util import change_root, convert_path
+from distutils.core import setup
 
 # borrowed from pygtk dsextras.py
 def getoutput(cmd):
@@ -61,6 +60,10 @@ def have_pkgconfig():
 def pkgc_version_check(name, req_version):
     """Check the existence and version number of a package:
     returns 0 if not installed or too old, 1 otherwise."""
+    if os_name == 'windows':
+        # TODO: return something meaningful...
+        return 1
+
     is_installed = not os.system('pkg-config --exists %s' % name)
     if not is_installed:
         return 0
@@ -84,12 +87,21 @@ def get_config(names, cmd):
     return retval
 
 def get_include_dirs(names):
+    if os_name == 'windows':
+        # TODO: return something...
+        return ''
     return get_config(names, 'pkg-config --cflags-only-I %s')
 
 def get_libraries(names):
+    if os_name == 'windows':
+        # TODO: return something...
+        return ''
     return get_config(names, 'pkg-config --libs-only-l %s')
 
 def get_library_dirs(names):
+    if os_name == 'windows':
+        # TODO: return something...
+        return ''
     return get_config(names, 'pkg-config --libs-only-L %s')
 
 # Script to be run by the windows binary installer after the default setup
@@ -103,81 +115,106 @@ if 'bdist_wininst' in sys.argv:
 
 html_data = glob('resource/html/*')
 
-# check for pkgconfig first, no point in going further if not present...
-if not have_pkgconfig():
-    print 'pkgconfig required, exiting...'
-    sys.exit(1)
+# unfortunately for those who have the VC Toolkit 2003 (like me!),
+# distutils will refuse to build or even install if it doesn't find
+# a "true" Visual Studio installation so detect this here.
+# Note that building with Visual Studio itself has not been tested though
+build_it = True
+if os_name == 'windows':
+    if 'MSSdk' in os.environ:
+        if 'VCToolkitInstallDir' in os.environ:
+            print "This extension cannot be built with the MSVC Toolkit."
+            print "The pre-built extension will be installed instead"
+            build_it = False
+    else:
+        print "MSVC compiler not found, the pre-built extension will be installed instead"
+        build_it = False
 
-# check for gtkglext
-if not pkgc_version_check('gtkglext-1.0', '1.0'):
-    print 'gtkglext 1.0 or higher required, exiting'
-    sys.exit(1)
+if build_it:    
+    from distutils.core import Extension
 
-# check for GTK version, assuming that its dependencies are present if GTK is
-if not pkgc_version_check('gtk+-2.0', '2.6'):
-    print 'GTK+ 2.6 or higher required, exiting'
-    sys.exit(1)
+    if os_name != 'windows':
+        # check for pkgconfig first, no point in going further if not present...
+        if not have_pkgconfig():
+            print 'pkgconfig required, exiting...'
+            sys.exit(1)
 
-gtk = ['gtk+-2.0','atk','pango','gdk-2.0','glib-2.0','gtkglext-1.0']
+    # check for gtkglext
+    if not pkgc_version_check('gtkglext-1.0', '1.0'):
+        print 'gtkglext 1.0 or higher required, exiting'
+        sys.exit(1)
 
-# check for pygtk, assuming it matches GTK
-try:
-    import pygtk
-except ImportError:
-    print 'pygtk not found, exiting' 
-    sys.exit(1)
+    # check for GTK version, assuming that its dependencies are present if GTK is
+    if not pkgc_version_check('gtk+-2.0', '2.6'):
+        print 'GTK+ 2.6 or higher required, exiting'
+        sys.exit(1)
 
-# check for GDAL
-ret = getstatusoutput('gdalinfo --version')
-if ret[0]:
-    print 'GDAL not found, exiting'
-    sys.exit(1)
+    gtk = ['gtk+-2.0','atk','pango','gdk-2.0','glib-2.0','gtkglext-1.0']
 
-gv_root = 'src/lib/gv'
-gv_srcs = ['crs.c', 'dbfopen.c', 'gextra.c', 'gvareatool.c', 'gvdata.c',
-          'gvlayer.c', 'gvlinetool.c', 'gvmanager.c', 'gvmarshal.c',
-          'gvmesh.c', 'gvnodetool.c', 'gvogr.c', 'gv_override.c',
-          'gvpointtool.c', 'gvpoitool.c', 'gvpquerylayer.c', 'gvprint.c',
-          'gvproperties.c', 'gvraster.c', 'gvrasteraverage.c',
-          'gvrastercache.c', 'gvrasterconvert.c', 'gvrasterize.c',
-          'gvrasterlayer.c', 'gvrasterlut.c', 'gvrastersource.c',
-          'gvrecttool.c', 'gvrenderinfo.c', 'gvroitool.c', 'gvrotatetool.c',
-          'gvselecttool.c', 'gvshape.c', 'gvshapefile.c', 'gvshapelayer.c',
-          'gvshapes.c', 'gvshapeslayer.c', 'gvskirt.c', 'gvsymbolmanager.c',
-          'gvtessshape.c', 'gvtexturecache.c', 'gvtool.c', 'gvtoolbox.c',
-          'gvtracktool.c', 'gvundo.c', 'gvutils.c', 'gvviewarea.c',
-          'gvviewlink.c', 'gvwinprint.c', 'gvzoompantool.c', 'invdistance.c',
-          'llrasterize.c', 'shpopen.c', 'gv_pwrap.c', 'gv-enum-types.c', 'gvmodule.c']
+    # check for pygtk, assuming it matches GTK
+    try:
+        import pygtk
+    except ImportError:
+        print 'pygtk not found, exiting' 
+        sys.exit(1)
 
-gv_srcs = [os.path.join(gv_root, src) for src in gv_srcs]
+    # check for GDAL
+    ret = getstatusoutput('gdalinfo --version')
+    if ret[0]:
+        print 'GDAL not found, exiting'
+        sys.exit(1)
 
-includes = [gv_root, 'resource']
-# GDAL includes
-output = getoutput('gdal-config --cflags')
-includes.extend(output.replace('-I', '').split())
+    gv_root = 'src/lib/gv'
+    gv_srcs = ['crs.c', 'dbfopen.c', 'gextra.c', 'gvareatool.c', 'gvdata.c',
+              'gvlayer.c', 'gvlinetool.c', 'gvmanager.c', 'gvmarshal.c',
+              'gvmesh.c', 'gvnodetool.c', 'gvogr.c', 'gv_override.c',
+              'gvpointtool.c', 'gvpoitool.c', 'gvpquerylayer.c', 'gvprint.c',
+              'gvproperties.c', 'gvraster.c', 'gvrasteraverage.c',
+              'gvrastercache.c', 'gvrasterconvert.c', 'gvrasterize.c',
+              'gvrasterlayer.c', 'gvrasterlut.c', 'gvrastersource.c',
+              'gvrecttool.c', 'gvrenderinfo.c', 'gvroitool.c', 'gvrotatetool.c',
+              'gvselecttool.c', 'gvshape.c', 'gvshapefile.c', 'gvshapelayer.c',
+              'gvshapes.c', 'gvshapeslayer.c', 'gvskirt.c', 'gvsymbolmanager.c',
+              'gvtessshape.c', 'gvtexturecache.c', 'gvtool.c', 'gvtoolbox.c',
+              'gvtracktool.c', 'gvundo.c', 'gvutils.c', 'gvviewarea.c',
+              'gvviewlink.c', 'gvwinprint.c', 'gvzoompantool.c', 'invdistance.c',
+              'llrasterize.c', 'shpopen.c', 'gv_pwrap.c', 'gv-enum-types.c', 'gvmodule.c']
 
-# GTK/PyGTK includes
-includes.extend(get_include_dirs(gtk))
+    gv_srcs = [os.path.join(gv_root, src) for src in gv_srcs]
 
-# find a way to get pygtk include dir, for now use most likely location on linux
-includes.append('/usr/include/pygtk-2.0')
+    includes = [gv_root, 'resource']
+    # GDAL includes
+    output = getoutput('gdal-config --cflags')
+    includes.extend(output.replace('-I', '').split())
 
-lib_dirs = get_library_dirs(gtk)
-# GDAL libs dirs
-dir,lib = getoutput('gdal-config --libs').split()
-if dir[2:] not in lib_dirs:
-    lib_dirs.append(dir[2:])
+    # GTK/PyGTK includes
+    includes.extend(get_include_dirs(gtk))
 
-libs = [lib[2:]]
-# GTK link libs
-libs.extend(get_libraries(gtk))
+    # find a way to get pygtk include dir, for now use most likely location on linux
+    if os_name == 'windows':
+        includes.append('C:\\Python25\\include\\pygtk-2.0')
+    else:
+        includes.append('/usr/include/pygtk-2.0')
 
-_gv = Extension('openev._gv', gv_srcs,
-                include_dirs=includes,
-                define_macros=[('HAVE_OGR',1)],
-                library_dirs=lib_dirs,
-                libraries=libs
-                )
+    lib_dirs = get_library_dirs(gtk)
+    # GDAL libs dirs
+    dir,lib = getoutput('gdal-config --libs').split()
+    if dir[2:] not in lib_dirs:
+        lib_dirs.append(dir[2:])
+
+    libs = [lib[2:]]
+    # GTK link libs
+    libs.extend(get_libraries(gtk))
+
+    _gv = Extension('openev._gv', gv_srcs,
+                    include_dirs=includes,
+                    define_macros=[('HAVE_OGR',1)],
+                    library_dirs=lib_dirs,
+                    libraries=libs
+                    )
+    ext_modules = [_gv]
+else:
+    ext_modules = None
 
 # Call the setup() routine which does most of the work
 setup(name             = 'openev',
@@ -192,7 +229,7 @@ setup(name             = 'openev',
       license          = 'LGPL',
       platforms        = 'UNIX/Linux, Windows',
       keywords         = '',
-      ext_modules      = [_gv],
+      ext_modules      = ext_modules,
       scripts          = ['resource/scripts/openev2'],
       packages         = ['openev'],
       package_dir      = {'openev':'src/pymod'}, 
@@ -204,3 +241,7 @@ setup(name             = 'openev',
                           ]
       )
 
+# MB: until a better solution is found...
+if os_name == 'windows' and not build_it:
+    from distutils.file_util import copy_file
+    copy_file('resource/binaries/_gv.pyd', os.path.join(sys.prefix, 'lib', 'site-packages', 'openev'))
