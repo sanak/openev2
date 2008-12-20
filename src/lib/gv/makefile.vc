@@ -35,33 +35,30 @@ CHEADERS = crs.h dllfct.h gextra.h \
            gvtool.h gvtoolbox.h gvtracktool.h gvtypes.h gvundo.h gvutils.h \
            gvviewarea.h gvzoompantool.h invdistance.h gvshape.h
 
-LIB = gv
 ULIB = GV
-GVLIB = $(LIB).lib
+GVLIB = gv.lib
 
 default: $(GVLIB) pymodule
 
-PYPREFIX = _
-PYENUMSRC = $(LIB)-enum-types.c
-PYOVERRIDE = $(LIB).override
-PYMODSRC = $(LIB)_pwrap.c
-PYMODMOD = $(LIB)module.c
-PYMODDEFS = $(LIB).defs
+PYENUMSRC = gv-enum-types.c
+PYOVERRIDE = gv.override
+PYMODSRC = gv_pwrap.c
+PYMODMOD = gvmodule.c
+PYMODDEFS = gv.defs
 PYMODSRCS = $(PYMODSRC) $(PYENUMSRC) $(PYMODMOD)
-PYMODOBJS = $(LIB)-enum-types.obj $(LIB)_pwrap.obj $(LIB)module.obj
-PYMODFILES = $(PYMODDEFS) $(PYPREFIX)$(LIB).dll \
-           lib$(PYPREFIX)$(LIB)dll.a $(LIB)-enum-types.h \
-           $(LIB)-enum-types.c
+PYMODOBJS = gv-enum-types.obj gv_pwrap.obj gvmodule.obj
+PYMODFILES = $(PYMODDEFS) _gv.pyd \
+           lib_gvdll.a gv-enum-types.h \
+           gv-enum-types.c
 #PYMODINST = $($(USHAREDTYPE)LIBDIR)/$(PYPREFIX)$($(USHAREDTYPE)) \
-#          $($(USHAREDTYPE)LIBDIR)/lib$(PYPREFIX)$(LIB)dll.a
-PYINCS = $(LIB)-enum-types.h
+#          $($(USHAREDTYPE)LIBDIR)/lib_gvdll.a
+PYINCS = gv-enum-types.h
 
-# you may have to add /LIBPATH to link command (I had to, dunno why)
 pymodule: $(PYMODSRC) $(PYMODOBJS)
-    link /dll $(PYMODOBJS) $(GVLIB) $(LIBS) /out:$(PYPREFIX)$(LIB).dll
+    link /dll $(PYMODOBJS) $(GVLIB) $(LIBS) /out:_gv.pyd
 
 $(PYMODSRC): $(PYMODDEFS) $(PYENUMSRC) $(PYMODMOD) $(PYOVERRIDE) $(PYINCS)
-          $(PYTHON) $(PYCODEGEN) --prefix $(PYPREFIX)$(LIB) $(PYREGISTER) \
+          $(PYTHON) $(PYCODEGEN) --prefix _gv $(PYREGISTER) \
           --override $(PYOVERRIDE) $(PYMODDEFS) > $(PYMODSRC)
 
 $(GVLIB): gv_config.h $(OBJ)
