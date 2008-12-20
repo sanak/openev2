@@ -1,0 +1,1595 @@
+<?xml version='1.0' encoding="ISO-8859-1" standalone="no" ?>
+<!DOCTYPE WMT_MS_Capabilities SYSTEM "http://schemas.opengis.net/wms/1.1.0/capabilities_1_1_0.dtd"
+ >  <!-- end of DOCTYPE declaration -->
+
+<WMT_MS_Capabilities version="1.1.0">
+
+<!-- MapServer version 5.0.2-AoC OUTPUT=GIF OUTPUT=PNG OUTPUT=JPEG OUTPUT=WBMP OUTPUT=SVG SUPPORTS=PROJ SUPPORTS=AGG SUPPORTS=FREETYPE SUPPORTS=WMS_SERVER SUPPORTS=WMS_CLIENT SUPPORTS=WFS_SERVER INPUT=EPPL7 INPUT=POSTGIS INPUT=OGR INPUT=GDAL INPUT=SHAPEFILE -->
+
+<Service>
+  <Name>OGC:WMS</Name>
+  <Title>Atlas of Canada Framework Data Sets WMS</Title>
+  <Abstract>The Atlas of Canada&#39;s Web Mapping Service (WMS) is an Internet-based service designed to provide developers of on-line mapping tools access to the Atlas of Canada&#39;s Framework Data Sets.   By using this service, developers gain access to our most current and accurate base data for rendering customized maps.  Our OGC-compliant WMS technology will be provided free of charge and does not require a contract, license agreement or any special software systems - only a web browser such as Internet Explorer or Firefox.  This WMS provides access to five different Framework Data Sets (world, North ciccumpolar region, North America, Canada 7.5 million, and Canada 1 million).  Each Framework Data sets provides is a set of integrated base map layers depicting the locations of features such as hydrology, roads, railways, populated places and administrative boundaries.  A number of non-standard projections are available via this WMS.  They are: 54003 - World Miller Cylindrical, 54004 - World Mercator, 54008 - World Sinusoidal, 54009 - World Mollweide, 54030 - World Robinson, 102016 - North Pole Azimuthal Equidistant, 102017 - North Pole Lambert Azimuthal Equal Area, 102018 - North Pole Stereographic, 102008 - North America Albers Equal Area Conic, and 102009 - North America Lambert Conformal Conic.</Abstract>
+        <KeywordList>
+          <Keyword>topographic</Keyword>
+          <Keyword>base</Keyword>
+          <Keyword>framework</Keyword>
+          <Keyword>hydrographic</Keyword>
+          <Keyword>road</Keyword>
+          <Keyword>rail</Keyword>
+          <Keyword>hydrography</Keyword>
+        </KeywordList>
+  <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/site/english/dataservices/web_map_service.html"/>
+  <ContactInformation>
+    <ContactPersonPrimary>
+      <ContactPerson>Peter Bruton</ContactPerson>
+      <ContactOrganization>Natural Resources Canada</ContactOrganization>
+    </ContactPersonPrimary>
+      <ContactPosition>Project Officer</ContactPosition>
+    <ContactAddress>
+        <AddressType>Mailing address</AddressType>
+        <Address>615 Booth Street 6th Floor Room 650</Address>
+        <City>Ottawa</City>
+        <StateOrProvince>Ontario</StateOrProvince>
+        <PostCode>K1A 0E9</PostCode>
+        <Country>Canada</Country>
+    </ContactAddress>
+  <ContactElectronicMailAddress>info@atlas.gc.ca</ContactElectronicMailAddress>
+  </ContactInformation>
+  <Fees>none</Fees>
+  <AccessConstraints>none</AccessConstraints>
+</Service>
+
+<Capability>
+  <Request>
+    <GetCapabilities>
+      <Format>application/vnd.ogc.wms_xml</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetCapabilities>
+    <GetMap>
+      <Format>image/gif</Format>
+      <Format>image/png</Format>
+      <Format>image/jpeg</Format>
+      <Format>image/png; mode=24bit</Format>
+      <Format>image/wbmp</Format>
+      <Format>image/tiff</Format>
+      <Format>image/svg+xml</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetMap>
+    <GetFeatureInfo>
+      <Format>text/plain</Format>
+      <Format>application/vnd.ogc.gml</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Post>
+        </HTTP>
+      </DCPType>
+    </GetFeatureInfo>
+    <DescribeLayer>
+      <Format>text/xml</Format>
+      <DCPType>
+        <HTTP>
+          <Get><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Get>
+          <Post><OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?"/></Post>
+        </HTTP>
+      </DCPType>
+    </DescribeLayer>
+  </Request>
+  <Exception>
+    <Format>application/vnd.ogc.se_xml</Format>
+    <Format>application/vnd.ogc.se_inimage</Format>
+    <Format>application/vnd.ogc.se_blank</Format>
+  </Exception>
+  <VendorSpecificCapabilities />
+  <UserDefinedSymbolization SupportSLD="1" UserLayer="0" UserStyle="1" RemoteWFS="0"/>
+  <Layer>
+    <Name>wms_atlasofcanada_eng</Name>
+    <Title>Atlas of Canada Framework Data Sets WMS</Title>
+    <SRS>EPSG:42304 EPSG:42101 EPSG:4269 EPSG:4326 EPSG:2294 EPSG:2295 EPSG:26922 EPSG:26921 EPSG:26920 EPSG:26919 EPSG:26918 EPSG:26917 EPSG:26916 EPSG:26915 EPSG:26914 EPSG:26913 EPSG:26912 EPSG:26911 EPSG:26910 EPSG:26909 EPSG:26908 EPSG:26907 EPSG:26722 EPSG:26721 EPSG:26720 EPSG:26719 EPSG:26718 EPSG:26717 EPSG:26716 EPSG:26715 EPSG:26714 EPSG:26713 EPSG:26712 EPSG:26711 EPSG:26710 EPSG:26709 EPSG:26708 EPSG:26707 EPSG:2295 EPSG:2294 EPSG:54003 EPSG:54004 EPSG:54008 EPSG:54009 EPSG:54030 EPSG:102016 EPSG:102017 EPSG:102018 EPSG:102008 EPSG:102009</SRS>
+    <LatLonBoundingBox minx="-6e+06" miny="-6e+06" maxx="6e+06" maxy="6e+06" />
+    <BoundingBox SRS="EPSG:4326"
+                minx="-6e+06" miny="-6e+06" maxx="6e+06" maxy="6e+06" />
+    <Attribution>
+        <Title>The Atlas of Canada</Title>
+        <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="http://atlas.gc.ca/site/english/index.html"/>
+        <LogoURL width="132" height="88">
+             <Format>image/jpeg</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/site/english/atlas_logo.jpg"/>
+          </LogoURL>
+    </Attribution>
+    <Layer>
+    <Title>World Framework Data Set</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_ocean</Name>
+        <Title>Ocean Background</Title>
+        <Abstract>Background for the world&#39;s oceans.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-90" maxx="180" maxy="90" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-90" maxx="180" maxy="90" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_ocean&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_land</Name>
+        <Title>Land Area</Title>
+        <Abstract>Land area of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_land&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_freshwat</Name>
+        <Title>Lakes</Title>
+        <Abstract>Large lakes of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-155.901" miny="-46.764" maxx="132.876" maxy="81.9609" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-155.901" miny="-46.764" maxx="132.876" maxy="81.9609" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_freshwat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_freshwat_outline</Name>
+        <Title>Lake Outline</Title>
+        <Abstract>Outline of large lakes of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-155.901" miny="-46.764" maxx="132.876" maxy="81.9609" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-155.901" miny="-46.764" maxx="132.876" maxy="81.9609" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_freshwat_outline&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_coast</Name>
+        <Title>Ocean Coastline</Title>
+        <Abstract>Ocean coastline of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_coast&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_riv</Name>
+        <Title>Rivers</Title>
+        <Abstract>Large rivers of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-164.81" miny="-50.0055" maxx="175.864" maxy="81.8317" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-164.81" miny="-50.0055" maxx="175.864" maxy="81.8317" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_riv&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_bound</Name>
+        <Title>Boundaries</Title>
+        <Abstract>World boundaries.  The representation of political features on this map may not necessarily represent the position of the Government of Canada on international issues of recognition, sovereignty or jurisdiction.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-54.8511" maxx="180" maxy="70.1374" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-54.8511" maxx="180" maxy="70.1374" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_bound&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_cap</Name>
+        <Title>Country Capital Cities</Title>
+        <Abstract>Country capital cities of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.417" miny="-54.8" maxx="179.515" maxy="82.5" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.417" miny="-54.8" maxx="179.515" maxy="82.5" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wld_cap&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_cap_nam</Name>
+        <Title>Country Capital City Names</Title>
+        <Abstract>Countryl capital city names of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.417" miny="-54.8" maxx="179.515" maxy="82.5" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.417" miny="-54.8" maxx="179.515" maxy="82.5" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wld_nat_nam</Name>
+        <Title>Country Names</Title>
+        <Abstract>Country names of the world.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-90" maxx="180" maxy="83.8264" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>North Circumpolar Framework Data Set</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_bath</Name>
+        <Title>Bathymetry</Title>
+        <Abstract>Bathymetry of the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-178.377" miny="40.7191" maxx="179.988" maxy="65.5645" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.89249e+06" miny="-3.87406e+06" maxx="3.8936e+06" maxy="2.72769e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_bath&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_nat</Name>
+        <Title>Countries</Title>
+        <Abstract>Countries in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.624" miny="40.6643" maxx="179.1" maxy="59.1052" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.78372e+06" miny="-3.8843e+06" maxx="3.89199e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_nat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_freshwat</Name>
+        <Title>Lakes and Major Rivers</Title>
+        <Abstract>Lakes and major rivers in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-178.704" miny="40.6621" maxx="179.991" maxy="59.372" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.89249e+06" miny="-3.88303e+06" maxx="3.8936e+06" maxy="3.41785e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_freshwat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_glac</Name>
+        <Title>Glaciers and Icefields</Title>
+        <Abstract>Glaciers and icefields in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-178.883" miny="49.7842" maxx="178.696" maxy="76.6579" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-2.98827e+06" miny="-3.02882e+06" maxx="3.30796e+06" maxy="1.48968e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_glac&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_drain</Name>
+        <Title>Drainage</Title>
+        <Abstract>Drainage in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.624" miny="40.6643" maxx="179.1" maxy="59.1052" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.78372e+06" miny="-3.8843e+06" maxx="3.89199e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_drain&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_road</Name>
+        <Title>Roads</Title>
+        <Abstract>Road network in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.825" miny="40.8938" maxx="179.038" maxy="63.531" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-2.95434e+06" miny="-3.84845e+06" maxx="3.89167e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_road&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_rail</Name>
+        <Title>Railways</Title>
+        <Abstract>Railway network in the North circumpolar region.</Abstract>
+        <SRS>EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.637" miny="40.8888" maxx="179.314" maxy="68.3201" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-2.42032e+06" miny="-3.84946e+06" maxx="3.89146e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_rail&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_intdate</Name>
+        <Title>International Dateline</Title>
+        <Abstract>International dateline in the North circumpolar region.</Abstract>
+        <SRS>EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-171.873" miny="49.678" maxx="-12.262" maxy="88.9929" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-4.42752e+06" miny="-517144" maxx="-112396" maxy="787120" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_intdate&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_bound</Name>
+        <Title>Boundaries</Title>
+        <Abstract>Boundaries in the North circumpolar region.  The representation of political features on this map may not necessarily represent the position of the Government of Canada on international issues of recognition, sovereignty or jurisdiction.</Abstract>
+        <SRS>EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.667" miny="40.739" maxx="179.062" maxy="59.1053" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.76741e+06" miny="-3.8843e+06" maxx="3.88027e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_bound&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_icelimit</Name>
+        <Title>Ice-Edge</Title>
+        <Abstract>Sea ice-edge limits in the North circumpolar region.</Abstract>
+        <SRS>EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.667" miny="40.739" maxx="179.062" maxy="59.1053" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.76741e+06" miny="-3.8843e+06" maxx="3.88027e+06" maxy="3.44751e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cirpolar_icelimit&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cirpolar_nat_nam</Name>
+        <Title>Country Names</Title>
+        <Abstract>Country names in the North circumpolar region.</Abstract>
+        <SRS>EPSG:4326 EPSG:102016</SRS>
+        <LatLonBoundingBox minx="-179.624" miny="40.6643" maxx="179.1" maxy="59.1052" />
+        <BoundingBox SRS="EPSG:102016"
+                    minx="-3.78372e+06" miny="-3.8843e+06" maxx="3.89199e+06" maxy="3.44751e+06" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>North America Framework Data Set</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_bath</Name>
+        <Title>Bathymetry</Title>
+        <Abstract>Bathymetry for the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_bath&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_nat</Name>
+        <Title>Countries</Title>
+        <Abstract>Countries in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_nat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_freshwat</Name>
+        <Title>Lakes and Reservoirs</Title>
+        <Abstract>Lakes and reservoirs in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_freshwat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_glac</Name>
+        <Title>Glaciers and Icefields</Title>
+        <Abstract>Glaciers and icefields in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-159.567" miny="44.6651" maxx="-12.152" maxy="83.5741" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-159.567" miny="44.6651" maxx="-12.152" maxy="83.5741" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_glac&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_seaice</Name>
+        <Title>Seaice</Title>
+        <Abstract>Seaice in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="67.7459" maxx="179.998" maxy="89.9959" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="67.7459" maxx="179.998" maxy="89.9959" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_seaice&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_drain</Name>
+        <Title>Rivers</Title>
+        <Abstract>Rivers in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_drain&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_coast</Name>
+        <Title>Ocean Coastline</Title>
+        <Abstract>Ocean coastline in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_coast&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_rail</Name>
+        <Title>Railways</Title>
+        <Abstract>Railways in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-150.082" miny="5.2248" maxx="-0.101901" maxy="64.931" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-150.082" miny="5.2248" maxx="-0.101901" maxy="64.931" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_rail&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_road</Name>
+        <Title>Transportation Network</Title>
+        <Abstract>Roads and ferry routes in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-166.532" miny="4.05046" maxx="-0.206818" maxy="70.287" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-166.532" miny="4.05046" maxx="-0.206818" maxy="70.287" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_road&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_bound</Name>
+        <Title>Boundaries</Title>
+        <Abstract>Boundaries in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_bound&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_cap</Name>
+        <Title>Capital Cities</Title>
+        <Abstract>National, provincial, territorial and state capital cities in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_cap&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_pop_place</Name>
+        <Title>Populated Places</Title>
+        <Abstract>Populated places in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=na_pop_place&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_cap_nam</Name>
+        <Title>Capital City Names</Title>
+        <Abstract>Country, provincial, territorial, and state capital city names in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_pop_place_nam</Name>
+        <Title>Populated Place Names</Title>
+        <Abstract>Populated place names in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-179.6" miny="5.5336" maxx="179.333" maxy="82.4895" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_freshwat_nam</Name>
+        <Title>Lake Names</Title>
+        <Abstract>Names of lakes in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_drain_nam</Name>
+        <Title>River Names</Title>
+        <Abstract>Names of rivers in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>na_division_nam</Name>
+        <Title>Province, Territory, State Names</Title>
+        <Abstract>Province, territory, and state names in the North America region.</Abstract>
+        <SRS>EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+        <BoundingBox SRS="EPSG:4326"
+                    minx="-180" miny="-4.94415" maxx="180" maxy="89.9992" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>Canada 7.5 Million Framework Data Set</Title>
+    <Layer>
+    <Title>General Layers</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>nat_bounds</Name>
+        <Title>Provincial and Territorial Boundaries</Title>
+        <Abstract>Provincial and territorial boundaries.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-179.805" miny="42.0819" maxx="178.866" maxy="89.9488" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.20127e+06" miny="-192493" maxx="2.45917e+06" maxy="4.65444e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=nat_bounds&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>int_bounds</Name>
+        <Title>International Boundaries</Title>
+        <Abstract>Canadian international boundaries and offshore limits.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-179.96" miny="34.2409" maxx="178.833" maxy="89.9051" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.69358e+06" miny="-724162" maxx="3.38519e+06" maxy="4.6545e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=int_bounds&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cap_symb_e</Name>
+        <Title>Capitals Cities</Title>
+        <Abstract>National, provincial and territorial capitals.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-135.917" miny="38.1197" maxx="-42.3058" maxy="66.7758" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.03692e+06" miny="-442015" maxx="2.96177e+06" maxy="1.93702e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=cap_symb_e&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>cap_labels</Name>
+        <Title>Capital City Names</Title>
+        <Abstract>National, provincial and territorial capital names.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-135.917" miny="38.1197" maxx="-42.3058" maxy="66.7758" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.03692e+06" miny="-442015" maxx="2.96177e+06" maxy="1.93702e+06" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>60 Million Subset</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wa_60m</Name>
+        <Title>Water Areas (1:60 000 000)</Title>
+        <Abstract>The surface area of oceans and major lakes intended for display at the scale of 1:60 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75057e+06" miny="-936639" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wa_60m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>drain_60m</Name>
+        <Title>Rivers (1:60 000 000)</Title>
+        <Abstract>Rivers intended for display at a scale of 1:60 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=drain_60m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>15 Million Subset</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wa_15m</Name>
+        <Title>Water Areas (1:15 000 000)</Title>
+        <Abstract>The surface area of oceans, lakes and large rivers intended for display at the scale of 1:15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936639" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wa_15m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roc_15m</Name>
+        <Title>Regions Outside Canada (1:15 000 000)</Title>
+        <Abstract>Land areas outside Canada intended for display at the scale of 1: 15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roc_15m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>drain_15m</Name>
+        <Title>Rivers (1:15 000 000)</Title>
+        <Abstract>Rivers intended for display at a scale of 1:15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=drain_15m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roads_15m</Name>
+        <Title>Transportation Network (1:15 000 000)</Title>
+        <Abstract>Road network and ferry routes intended for display at the scale of 1:15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-153.902" miny="34.4595" maxx="-32.1291" maxy="73.7918" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.59727e+06" miny="-936638" maxx="2.96573e+06" maxy="2.70112e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roads_15m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_symb_15m</Name>
+        <Title>Populated Places (1:15 000 000)</Title>
+        <Abstract>A selection of populated places divided into four classes based on 1991 Census data.  This layer is intended for display at 1:15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-171.12" miny="37.3234" maxx="-14.1977" maxy="83.4839" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.17895e+06" miny="-659436" maxx="2.76068e+06" maxy="3.79886e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=places_symb_15m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_labels_15m</Name>
+        <Title>Populated Place Names (1:15 000 000)</Title>
+        <Abstract>A selection of populated place names intended for display at 1:15 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-171.12" miny="37.3234" maxx="-14.1977" maxy="83.4839" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.17895e+06" miny="-659436" maxx="2.76068e+06" maxy="3.79886e+06" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>7.5 Million Subset</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wa_7.5m</Name>
+        <Title>Water Areas (1:7 500 000)</Title>
+        <Abstract>The surface area of oceans, lakes and large rivers intended for display at the scale of 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936639" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wa_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roc_7.5m</Name>
+        <Title>Regions Outside Canada (1:7 500 000)</Title>
+        <Abstract>Land areas outside Canada intended for display at the scale of 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roc_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_7.5m</Name>
+        <Title>Landmass outline (1:7 500 000)</Title>
+        <Abstract>The outline of the landmass of Canada.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-173.537" miny="35.8452" maxx="-11.9603" maxy="83.8009" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.3406e+06" miny="-724162" maxx="3.00943e+06" maxy="3.83661e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>drain_7.5m</Name>
+        <Title>Rivers (1:7 500 000)</Title>
+        <Abstract>Rivers intended for display at 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=drain_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roads_7.5m</Name>
+        <Title>Transportation Network (1:7 500 000)</Title>
+        <Abstract>Road network and ferry routes intended for display at the scale of 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-154.144" miny="34.3231" maxx="-31.7891" maxy="73.7913" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.618e+06" miny="-936638" maxx="3.00053e+06" maxy="2.70112e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roads_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_symb_7.5m</Name>
+        <Title>Populated Places (1:7 500 000)</Title>
+        <Abstract>A selection of populated places divided into four classes based on 1991 Census data.  This layer is intended for display at 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-171.906" miny="36.6984" maxx="-13.2277" maxy="83.4825" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.26074e+06" miny="-659436" maxx="2.91733e+06" maxy="3.79886e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=places_symb_7.5m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_labels_7.5m</Name>
+        <Title>Populated Place Names (1:7 500 000)</Title>
+        <Abstract>Selection of Canadian populated places in four classes based on 1991 Census data. It is intended for display at 1:7 500 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-171.906" miny="36.6984" maxx="-13.2277" maxy="83.4825" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.26074e+06" miny="-659436" maxx="2.91733e+06" maxy="3.79886e+06" />
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>2 Million Subset</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>wa_2m</Name>
+        <Title>Water Areas (1:2 000 000)</Title>
+        <Abstract>The surface area of oceans, lakes and large rivers intended for display at the scale of 1:2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=wa_2m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roc_2m</Name>
+        <Title>Regions Outside Canada (1:2 000 000)</Title>
+        <Abstract>Land areas outside Canada intended for display at the scale of 1: 2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936638" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roc_2m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>drain_2m</Name>
+        <Title>Rivers (1:2 000 000)</Title>
+        <Abstract>Rivers intended for display at 1:2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.838" miny="31.8844" maxx="179.94" maxy="89.8254" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75056e+06" miny="-936639" maxx="3.58387e+06" maxy="4.67312e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=drain_2m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>roads_2m</Name>
+        <Title>Transportation Netowork (1:2 000 000)</Title>
+        <Abstract>Road network and ferry routes intended for display at the scale of 1:2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-154.144" miny="34.3231" maxx="-31.7891" maxy="73.7913" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.618e+06" miny="-936638" maxx="3.00053e+06" maxy="2.70112e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=roads_2m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_symb_2m</Name>
+        <Title>Populated Places (1:2 000 000)</Title>
+        <Abstract>A selection of populated places divided into four classes based on 1991 Census data.  This layer is intended for display at 1:2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.301" miny="36.4991" maxx="-13.1758" maxy="83.484" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30386e+06" miny="-681503" maxx="2.92617e+06" maxy="3.79886e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=places_symb_2m&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>places_labels_2m</Name>
+        <Title>Populated Place Names (labels 1:2 000 000)</Title>
+        <Abstract>Selection of Canadian populated places in four classes based on 1991 Census data. It is intended for display at 1:2 000 000.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.301" miny="36.4991" maxx="-13.1758" maxy="83.484" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30386e+06" miny="-681503" maxx="2.92617e+06" maxy="3.79886e+06" />
+    </Layer>
+    </Layer>
+    </Layer>
+    <Layer>
+    <Title>Canada 1 Million Framework Data Set</Title>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_ocean</Name>
+        <Title>Ocean (1:1 000 000)</Title>
+        <Abstract>Ocean waters in and around Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304 EPSG:4326</SRS>
+        <LatLonBoundingBox minx="-178.835" miny="31.8841" maxx="179.943" maxy="89.8258" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75059e+06" miny="-936694" maxx="3.58386e+06" maxy="4.67298e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_ocean&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_provterr</Name>
+        <Title>Provinces and Territories (1:1 000 000)</Title>
+        <Abstract>Canadian provinces and territories (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.837" miny="34.2305" maxx="179.973" maxy="89.864" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.70769e+06" miny="-724724" maxx="3.38664e+06" maxy="4.65418e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_provterr&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_roc</Name>
+        <Title>Regions Outside Canada (1:1 000 000)</Title>
+        <Abstract>Regions outside Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.834" miny="31.8848" maxx="179.944" maxy="89.8259" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.75046e+06" miny="-936671" maxx="3.58374e+06" maxy="4.67297e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_roc&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_mountain</Name>
+        <Title>Terrain Features (1:1 000 000)</Title>
+        <Abstract>Mountains, hills, valleys and plains (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.645" miny="38.0444" maxx="-12.7976" maxy="83.4854" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.34208e+06" miny="-434848" maxx="2.99152e+06" maxy="3.79903e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_mountain&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_freshwat</Name>
+        <Title>Lakes, Inlets and Major Rivers (1:1 000 000)</Title>
+        <Abstract>Lakes, inlets and major rivers (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.8705" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-856964" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_freshwat&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_glac</Name>
+        <Title>Glacier and Icefield (1:1 000 000)</Title>
+        <Abstract>Glaciers and icefields in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-170.007" miny="49.0913" maxx="-30.0418" maxy="83.4522" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.08063e+06" miny="502318" maxx="1.40257e+06" maxy="3.79514e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_glac&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_protect</Name>
+        <Title>Protected Areas (1:1 000 000)</Title>
+        <Abstract>The Protected Areas data set was created using polygon data supplied by the Canadian Wildlife Service at Environment Canada, on behalf of the Canadian Council on Ecological Areas, and integrated with the existing National Scale Frameworks layers. It provides a representation of Canada&#39;s terrestrial and marine protected areas that are 1000 hectares or larger.</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.156" miny="36.0526" maxx="-12.14" maxy="83.7268" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44194e+06" miny="-696442" maxx="3.00843e+06" maxy="3.82775e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_protect&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_atl_oceandr</Name>
+        <Title>Ocean Drainage Areas (1:1 000 000)</Title>
+        <Abstract>Atlas of Canada ocean drainage areas (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_atl_oceandr&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_majordr</Name>
+        <Title>Water Survey of Canada Major Drainage Areas (1:1 000 000)</Title>
+        <Abstract>Water Survey of Canada (WSC) major drainage areas (1 million).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_env_majordr&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_subdr</Name>
+        <Title>Water Survey of Canada Sub-drainage Areas (1:1 000 000)</Title>
+        <Abstract>Water Survey of Canada (WSC) sub-drainage areas (1:1 000 000)</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_env_subdr&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_s_subdr</Name>
+        <Title>Water Survey of Canada Sub-sub-drainage Area (1:1 000 000)</Title>
+        <Abstract>Water Survey of Canada sub-sub-drainage areas (1:1 000 000)</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_env_s_subdr&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_drain</Name>
+        <Title>Rivers (1:1 000 000)</Title>
+        <Abstract>Rivers (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.669" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-884466" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_drain&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_coastline</Name>
+        <Title>Ocean Coastline (1:1 000 000)</Title>
+        <Abstract>Ocean coastline (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.669" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-884466" maxx="3.00973e+06" maxy="3.83327e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_coastline&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_rail</Name>
+        <Title>Railways (1:1 000 000)</Title>
+        <Abstract>Railway network in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-137.426" miny="37.7537" maxx="-46.5113" maxy="66.667" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.14876e+06" miny="-680740" maxx="2.60584e+06" maxy="1.92524e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_rail&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_road</Name>
+        <Title>Transportation Network (1:1 000 000)</Title>
+        <Abstract>Roads and ferry routes in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-148.23" miny="35.8709" maxx="-33.6331" maxy="72.6189" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30783e+06" miny="-723709" maxx="3.00395e+06" maxy="2.57249e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_road&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_bound</Name>
+        <Title>Boundaries (1:1 000 000)</Title>
+        <Abstract>Boundaries in Canada and surrounding area (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.837" miny="34.2305" maxx="179.973" maxy="89.864" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.70769e+06" miny="-724724" maxx="3.38664e+06" maxy="4.65418e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_bound&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_cap</Name>
+        <Title>Capital Cities (1:1 000 000)</Title>
+        <Abstract>National, provivcial and territorial capitals cities of Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.537" miny="35.9427" maxx="-12.5488" maxy="83.5711" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30141e+06" miny="-716501" maxx="2.99936e+06" maxy="3.80947e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_cap&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_pop_place</Name>
+        <Title>Populated Places (1:1 000 000)</Title>
+        <Abstract>Populated places in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.537" miny="35.9427" maxx="-12.5488" maxy="83.5711" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30141e+06" miny="-716501" maxx="2.99936e+06" maxy="3.80947e+06" />
+        <Style>
+          <Name>default</Name>
+          <Title>default</Title>
+          <LegendURL width="20" height="20">
+             <Format>image/png</Format>
+             <OnlineResource xmlns:xlink="http://www.w3.org/1999/xlink" xlink:type="simple" xlink:href="http://atlas.gc.ca/cgi-bin/atlaswms_en?version=1.1.1&amp;service=WMS&amp;request=GetLegendGraphic&amp;layer=can_1m_pop_place&amp;format=image/png"/>
+          </LegendURL>
+        </Style>
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_cap_nam</Name>
+        <Title>Capital City Names (1:1 000 000)</Title>
+        <Abstract>National, provincial and territorial capital city names in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.537" miny="35.9427" maxx="-12.5488" maxy="83.5711" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30141e+06" miny="-716501" maxx="2.99936e+06" maxy="3.80947e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_freshwat_nam</Name>
+        <Title>Lake and Major River Names (1:1 000 000)</Title>
+        <Abstract>Names of lakes and major rivers in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.8705" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-856964" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_protect_nam</Name>
+        <Title>Protected Area Names (1:1 000 000)</Title>
+        <Abstract>Names of protected areas in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.156" miny="36.0526" maxx="-12.14" maxy="83.7268" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44194e+06" miny="-696442" maxx="3.00843e+06" maxy="3.82775e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_drain_nam</Name>
+        <Title>River Names (1:1 000 000)</Title>
+        <Abstract>Names of rivers in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.669" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-884466" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_pop_place_nam</Name>
+        <Title>Populated Place Names (1:1 000 000)</Title>
+        <Abstract>Names of populated places in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.537" miny="35.9427" maxx="-12.5488" maxy="83.5711" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.30141e+06" miny="-716501" maxx="2.99936e+06" maxy="3.80947e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_provterr_nam</Name>
+        <Title>Province and Territory Names (1:1 000 000)</Title>
+        <Abstract>Names of Canadian provinces and territories (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.837" miny="34.2305" maxx="179.973" maxy="89.864" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.70769e+06" miny="-724724" maxx="3.38664e+06" maxy="4.65418e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_provterr_nam_abb</Name>
+        <Title>Abbreviated Province and Territory Names (1:1 000 000)</Title>
+        <Abstract>Abbreviated names of Canadian provinces and territories (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-178.837" miny="34.2305" maxx="179.973" maxy="89.864" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.70769e+06" miny="-724724" maxx="3.38664e+06" maxy="4.65418e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_mountain_nam</Name>
+        <Title>Terrain Feature Names (1:1 000 000)</Title>
+        <Abstract>Names of selected mountains, hills peaks, plains and valleys (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.645" miny="38.0444" maxx="-12.7976" maxy="83.4854" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.34208e+06" miny="-434848" maxx="2.99152e+06" maxy="3.79903e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_cape_poly_nam</Name>
+        <Title>Large Cape Names (1:1 000 000)</Title>
+        <Abstract>Names of large capes in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-172.583" miny="36.4092" maxx="-12.0243" maxy="83.7725" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.24153e+06" miny="-647078" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_cape_pnt_nam</Name>
+        <Title>Small Cape Names (1:1 000 000)</Title>
+        <Abstract>Names of small capes in Canada (1 million).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-173.427" miny="35.8762" maxx="-12.0479" maxy="83.7637" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.34016e+06" miny="-719971" maxx="3.00935e+06" maxy="3.83218e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_bay_nam</Name>
+        <Title>Bay Names (1:1 000 000)</Title>
+        <Abstract>Names of bays in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-179.882" miny="35.8784" maxx="179.661" maxy="87.224" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.34005e+06" miny="-720222" maxx="3.00836e+06" maxy="4.25812e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_glac_nam</Name>
+        <Title>Glacier and Icefield Names (1:1 000 000)</Title>
+        <Abstract>Names of glaciers and icefields in Canada (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-170.007" miny="49.0913" maxx="-30.0418" maxy="83.4522" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.08063e+06" miny="502318" maxx="1.40257e+06" maxy="3.79514e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_isl_nam_ocn</Name>
+        <Title>Ocean Island Names (1:1 000 000)</Title>
+        <Abstract>Names of Canadian islands in the ocean (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-173.46" miny="40.6875" maxx="-12.1307" maxy="83.7737" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.34103e+06" miny="-75335.4" maxx="2.99001e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_isl_nam_lak</Name>
+        <Title>Lake Island Names (1:1 000 000)</Title>
+        <Abstract>Names of Canadian islands in lakes (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-166.49" miny="37.3078" maxx="-17.5507" maxy="82.4714" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.03315e+06" miny="-721011" maxx="2.64295e+06" maxy="3.67995e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_isl_nam_lak_add</Name>
+        <Title>Additional Island Names (1:1 000 000)</Title>
+        <Abstract>Names of additional Canadian islands (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.8705" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-856964" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_atl_oceandr_nam</Name>
+        <Title>Ocean Drainage Areas Names (1:1 000 000)</Title>
+        <Abstract>Names of Atlas of Canada ocean drainage areas (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_majordr_nam</Name>
+        <Title>Water Survey of Canada Major Drainage Area Names (1:1 000 000)</Title>
+        <Abstract>Names of Water Survey of Canada major drainage areas (1 million)</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_subdr_nam</Name>
+        <Title>Water Survey of Canada Sub-drainage Areas Names (1:1 000 000)</Title>
+        <Abstract>Names of Water Survey of Canada sub-drainage areas (1:1 000 000)</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    <Layer queryable="0" opaque="0" cascaded="0">
+        <Name>can_1m_env_s_subdr_nam</Name>
+        <Title>Water Survey of Canada Sub-sub-drainage Area Names (1:1 000 000)</Title>
+        <Abstract>Names of Water Survey of Canada sub-sub-drainage areas (1:1 000 000).</Abstract>
+        <SRS>EPSG:42304</SRS>
+        <LatLonBoundingBox minx="-174.278" miny="34.5525" maxx="-12.0243" maxy="83.7731" />
+        <BoundingBox SRS="EPSG:42304"
+                    minx="-2.44106e+06" miny="-900367" maxx="3.00973e+06" maxy="3.83327e+06" />
+    </Layer>
+    </Layer>
+  </Layer>
+</Capability>
+</WMT_MS_Capabilities>
