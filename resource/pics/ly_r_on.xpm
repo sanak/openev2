@@ -1,0 +1,33 @@
+/* XPM */
+static char *ly_r_on[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        8            1",
+/* colors */
+"` c #a4d4ff",
+". c #0056a2",
+"# c #007be7",
+"a c #48a9ff",
+"b c #000000",
+"c c #ffffff",
+"d c None",
+"e c #000000",
+/* pixels */
+"dddddddddddddddddddddd",
+"dbbbbbbbbbbbbbbbbbbbdd",
+"dbcccccccccccccccccbdd",
+"dbcccc```aaa###...cbdd",
+"dbcccc```aaa###...cbdd",
+"dbcccc```aaa###...cbdd",
+"dbc```aaa###...aaacbdd",
+"dbc```aaa###...aaacbdd",
+"dbc```aaa###...aaacbdd",
+"dbcaaa###...aaaccccbdd",
+"dbcaaa###...aaaccccbdd",
+"dbcaaa###...aaaccccbdd",
+"dbc###...aaaccc```cbdd",
+"dbc###...aaaccc```cbdd",
+"dbc###...aaaccc```cbdd",
+"dbcccccccccccccccccbdd",
+"dbbbbbbbbbbbbbbbbbbbdd",
+"dddddddddddddddddddddd"
+};

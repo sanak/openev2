@@ -1,0 +1,33 @@
+/* XPM */
+static char *ly_r_off[] = {
+/* width height num_colors chars_per_pixel */
+"    22    18        8            1",
+/* colors */
+"` c #e4e4e4",
+". c #a2a2a2",
+"# c #cacaca",
+"a c #ffffff",
+"b c #b0b0b0",
+"c c None",
+"d c #000000",
+"e c #000000",
+/* pixels */
+"cccccccccccccccccccccc",
+"cbbbbbbbbbbbbbbbbbbbcc",
+"cbaaaaaaaaaaaaaaaaabcc",
+"cbaaaa```###bbb...abcc",
+"cbaaaa```###bbb...abcc",
+"cbaaaa```###bbb...abcc",
+"cba```###bbb...###abcc",
+"cba```###bbb...###abcc",
+"cba```###bbb...###abcc",
+"cba###bbb...###aaaabcc",
+"cba###bbb...###aaaabcc",
+"cba###bbb...###aaaabcc",
+"cbabbb...###aaa```abcc",
+"cbabbb...###aaa```abcc",
+"cbabbb...###aaa```abcc",
+"cbaaaaaaaaaaaaaaaaabcc",
+"cbbbbbbbbbbbbbbbbbbbcc",
+"cccccccccccccccccccccc"
+};
