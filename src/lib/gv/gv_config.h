@@ -21,3 +21,8 @@
 #define HAVE_BROKEN_GL_POINTS 1
 
 #undef SHOW_TESS_LINES
+
+/* Necessary for some unknown reason...  */
+#ifdef _WIN32
+#include <windows.h>
+#endif
