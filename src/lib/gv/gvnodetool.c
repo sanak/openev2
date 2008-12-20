@@ -488,8 +488,8 @@ gv_node_tool_configure(GvNodeTool *tool)
     return tool->layer != NULL;
 }
 
-#include "pics/node_cursor.xbm"
-#include "pics/node_cursor_mask.xbm"
+#include "node_cursor.xbm"
+#include "node_cursor_mask.xbm"
 
 static GdkCursor *
 gv_node_tool_make_cursor(void)
