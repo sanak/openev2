@@ -236,6 +236,7 @@ setup(name             = 'openev',
       data_files       = [('share/openev/pics', glob('resource/pics/*')),
                           ('share/openev/ramps', glob('resource/ramps/*')),
                           ('share/openev/symbols', glob('resource/symbols/*')),
+                          ('share/openev/wms', glob('resource/wms/*')),
                           ('share/openev/xmlconfig', glob('resource/xmlconfig/*')),
                           ('share/openev/tools', glob('src/pymod/tools/*.py'))
                           ]
