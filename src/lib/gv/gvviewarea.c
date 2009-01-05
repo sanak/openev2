@@ -363,19 +363,18 @@ gv_view_area_class_init(GvViewAreaClass *klass)
     klass->view_state_changed = NULL;
 }
 
+static GdkGLContext *_share_list = NULL;
+
 static void
 gv_view_area_init(GvViewArea *view)
 {
-    GdkGLContext *glcontext = NULL;
-    GdkGLConfig *glconfig;
-
-    /* ---- Obtain shared GL context ---- */
-    glcontext = gv_view_area_get_share_list(view);
-    glconfig = gdk_gl_context_get_gl_config(glcontext);
+    GdkGLConfig *glconfig = gdk_gl_config_new_by_mode (GDK_GL_MODE_RGB |
+                                            GDK_GL_MODE_DEPTH |
+                                            GDK_GL_MODE_DOUBLE);
 
     /* ---- Enable GL capability ---- */
     gtk_widget_set_gl_capability (GTK_WIDGET(view), glconfig,
-                                  glcontext, TRUE, GDK_GL_RGBA_TYPE);
+                                  _share_list, TRUE, GDK_GL_RGBA_TYPE);
 
     view->state.tx = view->state.ty = view->state.rot = 0.0;
     view->state.zoom = 0.0;
@@ -1991,6 +1990,10 @@ gv_view_area_realize(GtkWidget *widget)
     GTK_WIDGET_CLASS(parent_class)->realize(widget);
 
     g_return_if_fail(GTK_WIDGET_REALIZED(widget));
+
+    if (NULL==_share_list && gtk_widget_is_gl_capable(widget)) {
+        _share_list = gtk_widget_get_gl_context(widget);
+    }
 
     /* Make gl area current so layers can create gl handles */
     if (!gv_view_area_make_current(view)) return;
