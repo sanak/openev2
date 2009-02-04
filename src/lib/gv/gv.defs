@@ -192,7 +192,6 @@
   (c-name "GvViewArea")
   (gtype-id "GV_TYPE_VIEW_AREA")
   (fields
-    '("GObject*" "active_layer")
     '("char*" "projection")
   )
 )
@@ -306,57 +305,7 @@
 
 
 
-;; From gextra.h
-
-(define-function g_sort
-  (c-name "g_sort")
-  (return-type "none")
-  (parameters
-    '("gpointer" "mem")
-    '("guint" "nmemb")
-    '("gsize" "size")
-    '("GCompareValFunc" "compare")
-  )
-)
-
-(define-function g_compare_gint
-  (c-name "g_compare_gint")
-  (return-type "gint")
-  (parameters
-    '("gconstpointer" "a")
-    '("gconstpointer" "b")
-  )
-)
-
-(define-method insert_fast
-  (of-object "GPtrArray")
-  (c-name "g_ptr_array_insert_fast")
-  (return-type "none")
-  (parameters
-    '("guint" "index")
-    '("gpointer" "data")
-  )
-)
-
-(define-function g_get_current_time_as_double
-  (c-name "g_get_current_time_as_double")
-  (return-type "double")
-  (parameters
-  )
-)
-
-
-
-;; From gv_config.h
-
-
-
 ;; From gvareatool.h
-
-(define-function gv_area_tool_get_type
-  (c-name "gv_area_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_area_tool_new
   (c-name "gv_area_tool_new")
@@ -385,11 +334,6 @@
 
 
 ;; From gvdata.h
-
-(define-function gv_data_get_type
-  (c-name "gv_data_get_type")
-  (return-type "GType")
-)
 
 (define-method set_parent
   (of-object "GvData")
@@ -558,11 +502,6 @@
 
 ;; From gvlayer.h
 
-(define-function gv_layer_get_type
-  (c-name "gv_layer_get_type")
-  (return-type "GType")
-)
-
 (define-method setup
   (of-object "GvLayer")
   (c-name "gv_layer_setup")
@@ -660,11 +599,6 @@
 
 ;; From gvlinetool.h
 
-(define-function gv_line_tool_get_type
-  (c-name "gv_line_tool_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_line_tool_new
   (c-name "gv_line_tool_new")
   (is-constructor-of "GvLineTool")
@@ -692,11 +626,6 @@
 
 
 ;; From gvmanager.h
-
-(define-function gv_manager_get_type
-  (c-name "gv_manager_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_manager_new
   (c-name "gv_manager_new")
@@ -812,11 +741,6 @@
 
 ;; From gvmesh.h
 
-(define-function gv_mesh_get_type
-  (c-name "gv_mesh_get_type")
-  (return-type "GType")
-)
-
 (define-method get
   (of-object "GvMesh")
   (c-name "gv_mesh_get")
@@ -910,11 +834,6 @@
 
 ;; From gvnodetool.h
 
-(define-function gv_node_tool_get_type
-  (c-name "gv_node_tool_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_node_tool_new
   (c-name "gv_node_tool_new")
   (is-constructor-of "GvNodeTool")
@@ -933,11 +852,6 @@
 
 
 ;; From gvpointtool.h
-
-(define-function gv_point_tool_get_type
-  (c-name "gv_point_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_point_tool_new
   (c-name "gv_point_tool_new")
@@ -966,11 +880,6 @@
 
 
 ;; From gvpoitool.h
-
-(define-function gv_poi_tool_get_type
-  (c-name "gv_poi_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_poi_tool_new
   (c-name "gv_poi_tool_new")
@@ -1082,11 +991,6 @@
 
 
 ;; From gvraster.h
-
-(define-function gv_raster_get_type
-  (c-name "gv_raster_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_raster_new
   (c-name "gv_raster_new")
@@ -1523,11 +1427,6 @@
 
 
 ;; From gvrasterlayer.h
-
-(define-function gv_raster_layer_get_type
-  (c-name "gv_raster_layer_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_raster_layer_new
   (c-name "gv_raster_layer_new")
@@ -2057,11 +1956,6 @@
 
 ;; From gvrecttool.h
 
-(define-function gv_rect_tool_get_type
-  (c-name "gv_rect_tool_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_rect_tool_new
   (c-name "gv_rect_tool_new")
   (is-constructor-of "GvRectTool")
@@ -2209,11 +2103,6 @@
 
 ;; From gvroitool.h
 
-(define-function gv_roi_tool_get_type
-  (c-name "gv_roi_tool_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_roi_tool_new
   (c-name "gv_roi_tool_new")
   (is-constructor-of "GvRoiTool")
@@ -2241,11 +2130,6 @@
 
 
 ;; From gvrotatetool.h
-
-(define-function gv_rotate_tool_get_type
-  (c-name "gv_rotate_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_rotate_tool_new
   (c-name "gv_rotate_tool_new")
@@ -2275,11 +2159,6 @@
 
 ;; From gvselecttool.h
 
-(define-function gv_selection_tool_get_type
-  (c-name "gv_selection_tool_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_selection_tool_new
   (c-name "gv_selection_tool_new")
   (is-constructor-of "GvSelectionTool")
@@ -2298,11 +2177,6 @@
 
 
 ;; From gvshapelayer.h
-
-(define-function gv_shape_layer_get_type
-  (c-name "gv_shape_layer_get_type")
-  (return-type "GType")
-)
 
 (define-method select_shape
   (of-object "GvShapeLayer")
@@ -2534,11 +2408,6 @@
 
 ;; From gvshapes.h
 
-(define-function gv_shapes_get_type
-  (c-name "gv_shapes_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_shapes_new
   (c-name "gv_shapes_new")
   (is-constructor-of "GvShapes")
@@ -2684,11 +2553,6 @@
   )
 )
 
-(define-function gv_shapes_layer_get_type
-  (c-name "gv_shapes_layer_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_shapes_layer_new
   (c-name "gv_shapes_layer_new")
   (is-constructor-of "GvShapesLayer")
@@ -2790,11 +2654,6 @@
 
 ;; From gvsymbolmanager.h
 
-(define-function gv_symbol_manager_get_type
-  (c-name "gv_symbol_manager_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_symbol_manager_new
   (c-name "gv_symbol_manager_new")
   (is-constructor-of "GvSymbolManager")
@@ -2875,11 +2734,6 @@
 
 ;; From gvtool.h
 
-(define-function gv_tool_get_type
-  (c-name "gv_tool_get_type")
-  (return-type "GType")
-)
-
 (define-method activate
   (of-object "GvTool")
   (c-name "gv_tool_activate")
@@ -2946,11 +2800,6 @@
 
 ;; From gvtoolbox.h
 
-(define-function gv_toolbox_get_type
-  (c-name "gv_toolbox_get_type")
-  (return-type "GType")
-)
-
 (define-function gv_toolbox_new
   (c-name "gv_toolbox_new")
   (is-constructor-of "GvToolbox")
@@ -2979,11 +2828,6 @@
 
 
 ;; From gvtracktool.h
-
-(define-function gv_track_tool_get_type
-  (c-name "gv_track_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_track_tool_new
   (c-name "gv_track_tool_new")
@@ -3162,13 +3006,6 @@
 
 ;; From gvviewarea.h
 
-(define-function gv_view_area_get_type
-  (c-name "gv_view_area_get_type")
-  (return-type "GType")
-  (parameters
-  )
-)
-
 (define-function gv_view_area_new
   (c-name "gv_view_area_new")
   (is-constructor-of "GvViewArea")
@@ -3346,15 +3183,6 @@
   )
 )
 
-(define-function gv_view_area_expose
-  (c-name "gv_view_area_expose")
-  (return-type "gint")
-  (parameters
-    '("GtkWidget*" "view")
-    '("GdkEventExpose*" "event")
-  )
-)
-
 (define-method get_extents
   (of-object "GvViewArea")
   (c-name "gv_view_area_get_extents")
@@ -3403,15 +3231,6 @@
   (return-type "none")
   (parameters
     '("GvViewArea*" "copy")
-  )
-)
-
-(define-method set_state
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_set_state")
-  (return-type "none")
-  (parameters
-    '("GvViewAreaState*" "state")
   )
 )
 
@@ -3525,52 +3344,10 @@
   )
 )
 
-(define-method create_thumbnail
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_create_thumbnail")
-  (return-type "GdkPixmap*")
-  (parameters
-    '("GObject*" "layer")
-    '("gint" "width")
-    '("gint" "height")
-  )
-)
-
 (define-method get_fontnames
   (of-object "GvViewArea")
   (c-name "gv_view_area_get_fontnames")
   (return-type "GPtrArray*")
-)
-
-(define-method bmfont_load
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_bmfont_load")
-  (return-type "gint")
-  (parameters
-    '("gchar*" "name")
-  )
-)
-
-(define-method bmfont_get_info
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_bmfont_get_info")
-  (return-type "GvBMFontInfo*")
-  (parameters
-    '("gint" "font")
-  )
-)
-
-(define-method bmfont_draw
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_bmfont_draw")
-  (return-type "none")
-  (parameters
-    '("gint" "font")
-    '("gvgeocoord" "x")
-    '("gvgeocoord" "y")
-    '("gchar*" "text")
-    '("int" "force_simple")
-  )
 )
 
 (define-method set_background_color
@@ -3588,16 +3365,6 @@
   (return-type "none")
   (parameters
     '("GvColor" "color")
-  )
-)
-
-(define-method set_adjustments
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_set_adjustments")
-  (return-type "none")
-  (parameters
-    '("GtkAdjustment*" "hadj")
-    '("GtkAdjustment*" "vadj")
   )
 )
 
@@ -3644,40 +3411,13 @@
     '("const-char*" "filename")
   )
 )
-
-(define-method render_postscript
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_render_postscript")
-  (return-type "gint")
-  (parameters
-    '("int" "width")
-    '("int" "height")
-    '("float" "ulx")
-    '("float" "uly")
-    '("float" "lrx")
-    '("float" "lry")
-    '("int" "is_rgb")
-    '("gint-(*" "cb_func")
-  )
-)
-
-(define-method render_to_func
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_render_to_func")
-  (return-type "gint")
-  (parameters
-    '("gint" "width")
-    '("gint" "height")
-    '("gint-(*" "scanline_handler")
-  )
-)
-
-(define-function gv_view_area_page_setup
-  (c-name "gv_view_area_page_setup")
-  (return-type "none")
-  (parameters
-  )
-)
+; FIXME
+;(define-function gv_view_area_page_setup
+;  (c-name "gv_view_area_page_setup")
+;  (return-type "none")
+;  (parameters
+;  )
+;)
 
 (define-method print_to_windriver
   (of-object "GvViewArea")
@@ -3691,34 +3431,6 @@
     '("float" "lrx")
     '("float" "lry")
     '("int" "is_rgb")
-  )
-)
-
-(define-method zoompan_event
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_zoompan_event")
-  (return-type "none")
-  (parameters
-    '("GdkEventButton*" "event")
-  )
-)
-
-(define-method redraw_timeout
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_redraw_timeout")
-  (return-type "int")
-)
-
-(define-method pending_idle_work
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_pending_idle_work")
-  (return-type "int")
-)
-
-(define-function gv_get_render_counter
-  (c-name "gv_get_render_counter")
-  (return-type "int")
-  (parameters
   )
 )
 
@@ -3747,53 +3459,6 @@
   (return-type "GvProperties*")
 )
 
-(define-method queue_cursor_draw
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_queue_cursor_draw")
-  (return-type "none")
-  (parameters
-    '("int" "next_valid")
-    '("gvgeocoord" "x")
-    '("gvgeocoord" "y")
-  )
-)
-
-(define-method gl_begin
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_gl_begin")
-  (return-type "gint")
-)
-
-(define-method gl_end
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_gl_end")
-  (return-type "none")
-)
-
-(define-method make_current
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_make_current")
-  (return-type "gint")
-)
-
-(define-method get_gl_context
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_get_gl_context")
-  (return-type "GdkGLContext*")
-)
-
-(define-method begin
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_begin")
-  (return-type "gint")
-)
-
-(define-method swap_buffers
-  (of-object "GvViewArea")
-  (c-name "gv_view_area_swap_buffers")
-  (return-type "none")
-)
-
 (define-method format_point_query
   (of-object "GvViewArea")
   (c-name "gv_view_area_format_point_query")
@@ -3808,11 +3473,6 @@
 
 
 ;; From gvviewlink.h
-
-(define-function gv_view_link_get_type
-  (c-name "gv_view_link_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_view_link_new
   (c-name "gv_view_link_new")
@@ -3862,11 +3522,6 @@
 
 
 ;; From gvzoompantool.h
-
-(define-function gv_zoompan_tool_get_type
-  (c-name "gv_zoompan_tool_get_type")
-  (return-type "GType")
-)
 
 (define-function gv_zoompan_tool_new
   (c-name "gv_zoompan_tool_new")

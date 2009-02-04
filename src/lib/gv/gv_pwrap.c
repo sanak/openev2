@@ -5,11 +5,10 @@
 
 
 #line 4 "gv.override"
-#include <Python.h>
 #include "pygobject.h"
+#include "gextra.h"
 #include "gvareatool.h"
 #include "gvdata.h"
-#include "gextra.h"
 #include "gview.h"
 #include "gvlayer.h"
 #include "gvlinetool.h"
@@ -48,7 +47,7 @@
 #include "gvrecords_wrap.c"
 #endif
 
-#line 49 "gv.c"
+#line 51 "gv.c"
 
 
 /* ---------- types from other modules ---------- */
@@ -94,7 +93,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvViewArea_Type;
 PyTypeObject G_GNUC_INTERNAL PyGvViewLink_Type;
 PyTypeObject G_GNUC_INTERNAL PyGvZoompanTool_Type;
 
-#line 95 "gv.c"
+#line 97 "gv.c"
 
 
 
@@ -166,7 +165,7 @@ _wrap_gv_data_destroy(PyGObject *self)
     return Py_None;
 }
 
-#line 840 "gv.override"
+#line 857 "gv.override"
 static PyObject *
 _wrap_gv_data_changing(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -202,10 +201,10 @@ _wrap_gv_data_changing(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 203 "gv.c"
+#line 205 "gv.c"
 
 
-#line 877 "gv.override"
+#line 894 "gv.override"
 static PyObject *
 _wrap_gv_data_changed(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -246,7 +245,7 @@ _wrap_gv_data_changed(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 247 "gv.c"
+#line 249 "gv.c"
 
 
 static PyObject *
@@ -367,7 +366,7 @@ _wrap_gv_data_get_property(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-#line 772 "gv.override"
+#line 789 "gv.override"
 static PyObject *
 _wrap_gv_data_get_properties(PyGObject *self)
 {
@@ -401,10 +400,10 @@ _wrap_gv_data_get_properties(PyGObject *self)
 
     return psDict;
 }
-#line 402 "gv.c"
+#line 404 "gv.c"
 
 
-#line 807 "gv.override"
+#line 824 "gv.override"
 static PyObject *
 _wrap_gv_data_set_properties(PyGObject *self, PyObject *args)
 {
@@ -436,7 +435,7 @@ _wrap_gv_data_set_properties(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 437 "gv.c"
+#line 439 "gv.c"
 
 
 static const PyMethodDef _PyGvData_methods[] = {
@@ -624,7 +623,7 @@ _wrap_gv_layer_draw(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-#line 919 "gv.override"
+#line 936 "gv.override"
 static PyObject *
 _wrap_gv_layer_extents(PyGObject *self)
 {
@@ -634,10 +633,10 @@ _wrap_gv_layer_extents(PyGObject *self)
 
     return Py_BuildValue( "(" CCCC ")", rect.x, rect.y, rect.width, rect.height);
 }
-#line 635 "gv.c"
+#line 637 "gv.c"
 
 
-#line 930 "gv.override"
+#line 947 "gv.override"
 static PyObject *
 _wrap_gv_layer_display_change(PyGObject *self)
 {
@@ -646,7 +645,7 @@ _wrap_gv_layer_display_change(PyGObject *self)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 647 "gv.c"
+#line 649 "gv.c"
 
 
 static PyObject *
@@ -854,7 +853,7 @@ _wrap_gv_manager_get_preference(PyGObject *self, PyObject *args, PyObject *kwarg
     return Py_None;
 }
 
-#line 2948 "gv.override"
+#line 2959 "gv.override"
 static PyObject *
 _wrap_gv_manager_get_preferences(PyGObject *self)
 {
@@ -888,7 +887,7 @@ _wrap_gv_manager_get_preferences(PyGObject *self)
 
     return psDict;
 }
-#line 889 "gv.c"
+#line 891 "gv.c"
 
 
 static PyObject *
@@ -906,7 +905,7 @@ _wrap_gv_manager_set_preference(PyGObject *self, PyObject *args, PyObject *kwarg
     return Py_None;
 }
 
-#line 2983 "gv.override"
+#line 2994 "gv.override"
 static PyObject *
 _wrap_gv_manager_add_dataset(PyGObject *self, PyObject *args)
 {
@@ -928,10 +927,10 @@ _wrap_gv_manager_add_dataset(PyGObject *self, PyObject *args)
     SWIG_SimpleMakePtr(swig_ptr, dataset, "_GDALDatasetH");
     return Py_BuildValue("s", swig_ptr);
 }
-#line 929 "gv.c"
+#line 931 "gv.c"
 
 
-#line 3006 "gv.override"
+#line 3017 "gv.override"
 static PyObject *
 _wrap_gv_manager_get_dataset(PyGObject *self, PyObject *args)
 {
@@ -955,10 +954,10 @@ _wrap_gv_manager_get_dataset(PyGObject *self, PyObject *args)
         return Py_BuildValue("s", swig_ptr);
     }
 }
-#line 956 "gv.c"
+#line 958 "gv.c"
 
 
-#line 3031 "gv.override"
+#line 3042 "gv.override"
 static PyObject *
 _wrap_gv_manager_get_dataset_raster(PyGObject *self, PyObject *args)
 {
@@ -982,7 +981,7 @@ _wrap_gv_manager_get_dataset_raster(PyGObject *self, PyObject *args)
 
     return pygobject_new( G_OBJECT(raster) );
 }
-#line 993 "gv.c"
+#line 985 "gv.c"
 
 
 static PyObject *
@@ -1011,7 +1010,7 @@ _wrap_gv_manager_get_busy(PyGObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 3066 "gv.override"
+#line 3101 "gv.override"
 static PyObject *
 _wrap_gv_manager_queue_task(PyGObject *self, PyObject *args)
 {
@@ -1042,7 +1041,10 @@ _wrap_gv_manager_queue_task(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
+#line 1045 "gv.c"
 
+
+#line 3067 "gv.override"
 static PyObject *
 _wrap_gv_manager_active_rasters(PyGObject *self, PyObject *args)
 {
@@ -1075,8 +1077,7 @@ _wrap_gv_manager_active_rasters(PyGObject *self, PyObject *args)
 
     return PyInt_FromLong(active_rasters);
 }
-
-#line 1053 "gv.c"
+#line 1081 "gv.c"
 
 
 static const PyMethodDef _PyGvManager_methods[] = {
@@ -1430,7 +1431,7 @@ _wrap_gv_shape_layer_is_selected(PyGObject *self, PyObject *args, PyObject *kwar
     return PyInt_FromLong(ret);
 }
 
-#line 1600 "gv.override"
+#line 1616 "gv.override"
 static PyObject *
 _wrap_gv_shape_layer_get_selected(PyGObject *self, PyObject *args)
 {
@@ -1459,7 +1460,7 @@ _wrap_gv_shape_layer_get_selected(PyGObject *self, PyObject *args)
 
     return list;
 }
-#line 1434 "gv.c"
+#line 1464 "gv.c"
 
 
 static PyObject *
@@ -1542,7 +1543,7 @@ _wrap_gv_shape_layer_node_motion(PyGObject *self, PyObject *args, PyObject *kwar
     return Py_None;
 }
 
-#line 1630 "gv.override"
+#line 1646 "gv.override"
 static PyObject *
 _wrap_gv_shape_layer_pick_shape(PyGObject *self, PyObject *args)
 {
@@ -1577,7 +1578,7 @@ _wrap_gv_shape_layer_pick_shape(PyGObject *self, PyObject *args)
         return Py_None;
     }
 }
-#line 1552 "gv.c"
+#line 1582 "gv.c"
 
 
 static PyObject *
@@ -1595,7 +1596,7 @@ _wrap_gv_shape_layer_set_num_shapes(PyGObject *self, PyObject *args, PyObject *k
     return Py_None;
 }
 
-#line 1577 "gv.override"
+#line 1593 "gv.override"
 static PyObject *
 _wrap_gv_shape_layer_set_color(PyGObject *self, PyObject *args)
 {
@@ -1617,7 +1618,7 @@ _wrap_gv_shape_layer_set_color(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 1592 "gv.c"
+#line 1622 "gv.c"
 
 
 static const PyMethodDef _PyGvShapeLayer_methods[] = {
@@ -1723,7 +1724,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvShapeLayer_Type = {
 
 /* ----------- GvShapesLayer ----------- */
 
-#line 1666 "gv.override"
+#line 1682 "gv.override"
 static int
 _wrap_gv_shapes_layer_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -1760,7 +1761,7 @@ _wrap_gv_shapes_layer_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 1735 "gv.c"
+#line 1765 "gv.c"
 
 
 static PyObject *
@@ -1778,7 +1779,7 @@ _wrap_gv_shapes_layer_set_data(PyGObject *self, PyObject *args, PyObject *kwargs
     return Py_None;
 }
 
-#line 1706 "gv.override"
+#line 1722 "gv.override"
 static PyObject *
 _wrap_gv_shapes_layer_get_symbol_manager(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -1795,7 +1796,7 @@ _wrap_gv_shapes_layer_get_symbol_manager(PyGObject *self, PyObject *args, PyObje
     /* pygobject_new handles NULL checking */
     return pygobject_new((GObject *)ret);
 }
-#line 1770 "gv.c"
+#line 1800 "gv.c"
 
 
 static const PyMethodDef _PyGvShapesLayer_methods[] = {
@@ -1855,7 +1856,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvShapesLayer_Type = {
 
 /* ----------- GvPqueryLayer ----------- */
 
-#line 1724 "gv.override"
+#line 1740 "gv.override"
 static int
 _wrap_gv_pquery_layer_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -1894,7 +1895,7 @@ _wrap_gv_pquery_layer_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 1869 "gv.c"
+#line 1899 "gv.c"
 
 
 PyTypeObject G_GNUC_INTERNAL PyGvPqueryLayer_Type = {
@@ -1946,7 +1947,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvPqueryLayer_Type = {
 
 /* ----------- GvRaster ----------- */
 
-#line 1766 "gv.override"
+#line 1782 "gv.override"
 static int
 _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2020,10 +2021,10 @@ _wrap_gv_raster_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 1995 "gv.c"
+#line 2025 "gv.c"
 
 
-#line 1908 "gv.override"
+#line 1924 "gv.override"
 static PyObject *
 _wrap_gv_raster_flush_cache(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2039,10 +2040,10 @@ _wrap_gv_raster_flush_cache(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 2014 "gv.c"
+#line 2044 "gv.c"
 
 
-#line 1939 "gv.override"
+#line 1955 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_sample(PyGObject *self, PyObject *args)
 {
@@ -2061,7 +2062,7 @@ _wrap_gv_raster_get_sample(PyGObject *self, PyObject *args)
     else
         return Py_BuildValue( "f", real );
 }
-#line 2036 "gv.c"
+#line 2066 "gv.c"
 
 
 static PyObject *
@@ -2075,7 +2076,7 @@ _wrap_gv_raster_pixel_size(PyGObject *self)
     return PyFloat_FromDouble(ret);
 }
 
-#line 1980 "gv.override"
+#line 1996 "gv.override"
 static PyObject *
 _wrap_gv_raster_pixel_to_georef(PyGObject *self, PyObject *args)
 {
@@ -2095,10 +2096,10 @@ _wrap_gv_raster_pixel_to_georef(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 2070 "gv.c"
+#line 2100 "gv.c"
 
 
-#line 1959 "gv.override"
+#line 1975 "gv.override"
 static PyObject *
 _wrap_gv_raster_georef_to_pixel(PyGObject *self, PyObject *args)
 {
@@ -2118,10 +2119,10 @@ _wrap_gv_raster_georef_to_pixel(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 2093 "gv.c"
+#line 2123 "gv.c"
 
 
-#line 1843 "gv.override"
+#line 1859 "gv.override"
 static PyObject *
 _wrap_gv_raster_autoscale(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2166,10 +2167,10 @@ _wrap_gv_raster_autoscale(PyGObject *self, PyObject *args, PyObject *kwargs)
         return Py_BuildValue("(dd)", out_min, out_max );
     }
 }
-#line 2141 "gv.c"
+#line 2171 "gv.c"
 
 
-#line 2098 "gv.override"
+#line 2114 "gv.override"
 static PyObject *
 _wrap_gv_raster_set_gcps(PyGObject *self, PyObject *args)
 {
@@ -2216,7 +2217,7 @@ _wrap_gv_raster_set_gcps(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("d", success);
 }
-#line 2191 "gv.c"
+#line 2221 "gv.c"
 
 
 static PyObject *
@@ -2230,7 +2231,7 @@ _wrap_gv_raster_get_gcp_count(PyGObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 2067 "gv.override"
+#line 2083 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_gcps(PyGObject *self)
 {
@@ -2260,10 +2261,10 @@ _wrap_gv_raster_get_gcps(PyGObject *self)
 
     return psList;
 }
-#line 2235 "gv.c"
+#line 2265 "gv.c"
 
 
-#line 2177 "gv.override"
+#line 2193 "gv.override"
 static PyObject *
 _wrap_gv_raster_set_gcpsCL(PyGObject *self, PyObject *args)
 {
@@ -2313,7 +2314,7 @@ _wrap_gv_raster_set_gcpsCL(PyGObject *self, PyObject *args)
     return Py_BuildValue("d", success);
 }
 
-#line 2288 "gv.c"
+#line 2318 "gv.c"
 
 
 static PyObject *
@@ -2327,7 +2328,7 @@ _wrap_gv_raster_get_gcp_countCL(PyGObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 2146 "gv.override"
+#line 2162 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_gcpsCL(PyGObject *self)
 {
@@ -2357,7 +2358,7 @@ _wrap_gv_raster_get_gcpsCL(PyGObject *self)
 
     return psList;
 }
-#line 2332 "gv.c"
+#line 2362 "gv.c"
 
 
 static PyObject *
@@ -2375,7 +2376,7 @@ _wrap_gv_raster_set_poly_order_preference(PyGObject *self, PyObject *args, PyObj
     return Py_None;
 }
 
-#line 2242 "gv.override"
+#line 2258 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_dataset(PyGObject *self)
 {
@@ -2392,10 +2393,10 @@ _wrap_gv_raster_get_dataset(PyGObject *self)
     SWIG_SimpleMakePtr( swig_ptr, dataset, "_GDALDatasetH" );
     return Py_BuildValue("s", swig_ptr);
 }
-#line 2367 "gv.c"
+#line 2397 "gv.c"
 
 
-#line 2260 "gv.override"
+#line 2276 "gv.override"
 static PyObject *
 _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
 {
@@ -2430,10 +2431,10 @@ _wrap_gv_raster_rasterize_shapes(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("i", ret_value);
 }
-#line 2405 "gv.c"
+#line 2435 "gv.c"
 
 
-#line 2001 "gv.override"
+#line 2017 "gv.override"
 static PyObject *
 _wrap_gv_raster_cursor_link_georef_to_pixel(PyGObject *self, PyObject *args)
 {
@@ -2453,10 +2454,10 @@ _wrap_gv_raster_cursor_link_georef_to_pixel(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 2428 "gv.c"
+#line 2458 "gv.c"
 
 
-#line 2043 "gv.override"
+#line 2059 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_change_info(PyGObject *self, PyObject *args)
 {
@@ -2479,10 +2480,10 @@ _wrap_gv_raster_get_change_info(PyGObject *self, PyObject *args)
                           change_info->height
                          );
 }
-#line 2454 "gv.c"
+#line 2484 "gv.c"
 
 
-#line 2022 "gv.override"
+#line 2038 "gv.override"
 static PyObject *
 _wrap_gv_raster_cursor_link_pixel_to_georef(PyGObject *self, PyObject *args)
 {
@@ -2502,10 +2503,10 @@ _wrap_gv_raster_cursor_link_pixel_to_georef(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 2477 "gv.c"
+#line 2507 "gv.c"
 
 
-#line 1889 "gv.override"
+#line 1905 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_band(PyGObject *self)
 {
@@ -2523,19 +2524,19 @@ _wrap_gv_raster_get_band(PyGObject *self)
     SWIG_SimpleMakePtr( swig_ptr, band, "_GDALRasterBandH" );
     return Py_BuildValue("s", swig_ptr);
 }
-#line 2498 "gv.c"
+#line 2528 "gv.c"
 
 
-#line 2235 "gv.override"
+#line 2251 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_max(PyGObject *self)
 {
     return PyFloat_FromDouble(GV_RASTER(self->obj)->max);
 }
-#line 2507 "gv.c"
+#line 2537 "gv.c"
 
 
-#line 1925 "gv.override"
+#line 1941 "gv.override"
 static PyObject *
 _wrap_gv_raster_force_load(PyGObject *self)
 {
@@ -2548,19 +2549,19 @@ _wrap_gv_raster_force_load(PyGObject *self)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 2523 "gv.c"
+#line 2553 "gv.c"
 
 
-#line 2228 "gv.override"
+#line 2244 "gv.override"
 static PyObject *
 _wrap_gv_raster_get_min(PyGObject *self)
 {
     return PyFloat_FromDouble(GV_RASTER(self->obj)->min);
 }
-#line 2532 "gv.c"
+#line 2562 "gv.c"
 
 
-#line 2296 "gv.override"
+#line 2312 "gv.override"
 static PyObject *
 _wrap_gv_raster_wid_interpolate(PyGObject *self, PyObject *args)
 {
@@ -2613,7 +2614,7 @@ _wrap_gv_raster_wid_interpolate(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("i", nErr);
 }
-#line 2588 "gv.c"
+#line 2618 "gv.c"
 
 
 static const PyMethodDef _PyGvRaster_methods[] = {
@@ -2759,7 +2760,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvRaster_Type = {
 
 /* ----------- GvRasterLayer ----------- */
 
-#line 2350 "gv.override"
+#line 2366 "gv.override"
 static int
 _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
 {
@@ -2809,7 +2810,7 @@ _wrap_gv_raster_layer_new(PyGObject *self, PyObject *args)
 
     return 0;
 }
-#line 2788 "gv.c"
+#line 2814 "gv.c"
 
 
 static PyObject *
@@ -2844,7 +2845,7 @@ _wrap_gv_raster_layer_zoom_set(PyGObject *self, PyObject *args, PyObject *kwargs
 
 }
 
-#line 2774 "gv.override"
+#line 2786 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_zoom_get(PyGObject *self)
 {
@@ -2860,7 +2861,7 @@ _wrap_gv_raster_layer_zoom_get(PyGObject *self)
         return Py_BuildValue("(ii)", min, mag);
     }
 }
-#line 2839 "gv.c"
+#line 2865 "gv.c"
 
 
 static PyObject *
@@ -2880,7 +2881,7 @@ _wrap_gv_raster_layer_alpha_set(PyGObject *self, PyObject *args, PyObject *kwarg
 
 }
 
-#line 2576 "gv.override"
+#line 2588 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_texture_mode_set(PyGObject *self, PyObject *args)
 {
@@ -2894,10 +2895,10 @@ _wrap_gv_raster_layer_texture_mode_set(PyGObject *self, PyObject *args)
     return PyInt_FromLong(gv_raster_layer_texture_mode_set(GV_RASTER_LAYER(self->obj),
                                                             texture_mode, color));
 }
-#line 2873 "gv.c"
+#line 2899 "gv.c"
 
 
-#line 2836 "gv.override"
+#line 2847 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_blend_mode_set(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -2913,7 +2914,7 @@ _wrap_gv_raster_layer_blend_mode_set(PyGObject *self, PyObject *args, PyObject *
 
     return PyInt_FromLong(ret);
 }
-#line 2892 "gv.c"
+#line 2918 "gv.c"
 
 
 static PyObject *
@@ -2937,7 +2938,7 @@ _wrap_gv_raster_layer_get_mode(PyGObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 2631 "gv.override"
+#line 2643 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_blend_mode_get(PyGObject *self)
 {
@@ -2956,10 +2957,10 @@ _wrap_gv_raster_layer_blend_mode_get(PyGObject *self)
         return Py_BuildValue("(iii)", blend_mode, sfactor, dfactor);
     }
 }
-#line 2935 "gv.c"
+#line 2961 "gv.c"
 
 
-#line 2613 "gv.override"
+#line 2625 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_alpha_get(PyGObject *self)
 {
@@ -2976,10 +2977,10 @@ _wrap_gv_raster_layer_alpha_get(PyGObject *self)
         return Py_BuildValue("(if)", alpha_mode, alpha_val);
     }
 }
-#line 2955 "gv.c"
+#line 2981 "gv.c"
 
 
-#line 2591 "gv.override"
+#line 2603 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_texture_mode_get(PyGObject *self)
 {
@@ -3000,7 +3001,7 @@ _wrap_gv_raster_layer_texture_mode_get(PyGObject *self)
         return py_retval;
     }
 }
-#line 2979 "gv.c"
+#line 3005 "gv.c"
 
 
 static PyObject *
@@ -3049,7 +3050,7 @@ _wrap_gv_raster_layer_get_data(PyGObject *self, PyObject *args, PyObject *kwargs
     return pygobject_new((GObject *)ret);
 }
 
-#line 2519 "gv.override"
+#line 2531 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_set_source(PyGObject *self, PyObject *args)
 {
@@ -3105,7 +3106,7 @@ _wrap_gv_raster_layer_set_source(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("i", ret);
 }
-#line 3084 "gv.c"
+#line 3110 "gv.c"
 
 
 static PyObject *
@@ -3153,7 +3154,7 @@ _wrap_gv_raster_layer_nodata_set(PyGObject *self, PyObject *args, PyObject *kwar
     return PyInt_FromLong(ret);
 }
 
-#line 2687 "gv.override"
+#line 2699 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_nodata_get(PyGObject *self, PyObject *args)
 {
@@ -3182,10 +3183,10 @@ _wrap_gv_raster_layer_nodata_get(PyGObject *self, PyObject *args)
         return Py_None;
     }
 }
-#line 3161 "gv.c"
+#line 3187 "gv.c"
 
 
-#line 2809 "gv.override"
+#line 2821 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_type_get(PyGObject *self, PyObject *args)
 {
@@ -3197,10 +3198,10 @@ _wrap_gv_raster_layer_type_get(PyGObject *self, PyObject *args)
     return PyInt_FromLong((long)gv_raster_layer_type_get
               (GV_RASTER_LAYER(self->obj), isource));
 }
-#line 3176 "gv.c"
+#line 3202 "gv.c"
 
 
-#line 2498 "gv.override"
+#line 2510 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_pixel_to_view(PyGObject *self, PyObject *args)
 {
@@ -3220,10 +3221,10 @@ _wrap_gv_raster_layer_pixel_to_view(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 3199 "gv.c"
+#line 3225 "gv.c"
 
 
-#line 2477 "gv.override"
+#line 2489 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_view_to_pixel(PyGObject *self, PyObject *args)
 {
@@ -3243,10 +3244,10 @@ _wrap_gv_raster_layer_view_to_pixel(PyGObject *self, PyObject *args)
         return NULL;
     }
 }
-#line 3222 "gv.c"
+#line 3248 "gv.c"
 
 
-#line 2407 "gv.override"
+#line 2419 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_autoscale_view(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3270,10 +3271,10 @@ _wrap_gv_raster_layer_autoscale_view(PyGObject *self, PyObject *args, PyObject *
 
     return Py_BuildValue("(dd)", out_min, out_max);
 }
-#line 3249 "gv.c"
+#line 3275 "gv.c"
 
 
-#line 2439 "gv.override"
+#line 2451 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_histogram_view(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3310,7 +3311,7 @@ _wrap_gv_raster_layer_histogram_view(PyGObject *self, PyObject *args, PyObject *
 
     return py_list;
 }
-#line 3289 "gv.c"
+#line 3315 "gv.c"
 
 
 static PyObject *
@@ -3324,7 +3325,7 @@ _wrap_gv_raster_layer_pixel_size(PyGObject *self)
     return PyFloat_FromDouble(ret);
 }
 
-#line 2895 "gv.override"
+#line 2906 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_add_height(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3341,10 +3342,10 @@ _wrap_gv_raster_layer_add_height(PyGObject *self, PyObject *args, PyObject *kwar
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3320 "gv.c"
+#line 3346 "gv.c"
 
 
-#line 2913 "gv.override"
+#line 2924 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_clamp_height(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3361,7 +3362,7 @@ _wrap_gv_raster_layer_clamp_height(PyGObject *self, PyObject *args, PyObject *kw
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3340 "gv.c"
+#line 3366 "gv.c"
 
 
 static PyObject *
@@ -3433,7 +3434,7 @@ _wrap_gv_raster_layer_reset_texture(PyGObject *self, PyObject *args, PyObject *k
     return Py_None;
 }
 
-#line 2879 "gv.override"
+#line 2890 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_lut_color_wheel_new_ev(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3448,7 +3449,7 @@ _wrap_gv_raster_layer_lut_color_wheel_new_ev(PyGObject *self, PyObject *args, Py
 
     return PyInt_FromLong(ret);
 }
-#line 3427 "gv.c"
+#line 3453 "gv.c"
 
 
 static PyObject *
@@ -3481,7 +3482,7 @@ _wrap_gv_raster_layer_lut_color_wheel_1d_new(PyGObject *self, PyObject *args, Py
     return PyInt_FromLong(ret);
 }
 
-#line 2853 "gv.override"
+#line 2864 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_lut_put(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3506,10 +3507,10 @@ _wrap_gv_raster_layer_lut_put(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3485 "gv.c"
+#line 3511 "gv.c"
 
 
-#line 2651 "gv.override"
+#line 2663 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_lut_get(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3544,7 +3545,7 @@ _wrap_gv_raster_layer_lut_get(PyGObject *self, PyObject *args, PyObject *kwargs)
         return py_retval;
     }
 }
-#line 3523 "gv.c"
+#line 3549 "gv.c"
 
 
 static PyObject *
@@ -3570,7 +3571,7 @@ _wrap_gv_raster_layer_lut_type_get(PyGObject *self)
 
 }
 
-#line 2717 "gv.override"
+#line 2729 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_get_nodata(PyGObject *self, PyObject *args)
 {
@@ -3599,19 +3600,19 @@ _wrap_gv_raster_layer_get_nodata(PyGObject *self, PyObject *args)
         return Py_None;
     }
 }
-#line 3578 "gv.c"
+#line 3604 "gv.c"
 
 
-#line 2432 "gv.override"
+#line 2444 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_get_mesh_lod(PyGObject *self)
 {
     return Py_BuildValue("i", GV_RASTER_LAYER(self->obj)->mesh->detail);
 }
-#line 3587 "gv.c"
+#line 3613 "gv.c"
 
 
-#line 2931 "gv.override"
+#line 2942 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_build_skirt(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3627,10 +3628,10 @@ _wrap_gv_raster_layer_build_skirt(PyGObject *self, PyObject *args, PyObject *kwa
 
     return pygobject_new((GObject *)gv_build_skirt(rlayer, base_z));
 }
-#line 3606 "gv.c"
+#line 3632 "gv.c"
 
 
-#line 2791 "gv.override"
+#line 2803 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_get_height(PyGObject *self, PyObject *args)
 {
@@ -3647,10 +3648,10 @@ _wrap_gv_raster_layer_get_height(PyGObject *self, PyObject *args)
     PyErr_SetString(PyExc_RuntimeError, "gv_mesh_get_height failed.");
     return NULL;
 }
-#line 3626 "gv.c"
+#line 3652 "gv.c"
 
 
-#line 2822 "gv.override"
+#line 2834 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_get_const_value(PyGObject *self, PyObject *args)
 {
@@ -3662,10 +3663,10 @@ _wrap_gv_raster_layer_get_const_value(PyGObject *self, PyObject *args)
     return PyInt_FromLong(gv_raster_layer_get_const_value
                             (GV_RASTER_LAYER(self->obj), isource));
 }
-#line 3642 "gv.c"
+#line 3667 "gv.c"
 
 
-#line 2747 "gv.override"
+#line 2759 "gv.override"
 static PyObject *
 _wrap_gv_raster_layer_get_source_lut(PyGObject *self, PyObject *args)
 {
@@ -3691,7 +3692,7 @@ _wrap_gv_raster_layer_get_source_lut(PyGObject *self, PyObject *args)
 
     return py_lut;
 }
-#line 3671 "gv.c"
+#line 3696 "gv.c"
 
 
 static const PyMethodDef _PyGvRasterLayer_methods[] = {
@@ -3837,7 +3838,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvRasterLayer_Type = {
 
 /* ----------- GvShapes ----------- */
 
-#line 1177 "gv.override"
+#line 1194 "gv.override"
 static int
 _wrap_gv_shapes_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3858,10 +3859,10 @@ _wrap_gv_shapes_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 3838 "gv.c"
+#line 3863 "gv.c"
 
 
-#line 1559 "gv.override"
+#line 1575 "gv.override"
 static PyObject *
 _wrap_gv_shapes_add_height(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -3878,10 +3879,10 @@ _wrap_gv_shapes_add_height(PyGObject *self, PyObject *args, PyObject *kwargs)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3858 "gv.c"
+#line 3883 "gv.c"
 
 
-#line 1518 "gv.override"
+#line 1534 "gv.override"
 static PyObject *
 _wrap_gv_shapes_get_extents(PyGObject *self)
 {
@@ -3891,10 +3892,10 @@ _wrap_gv_shapes_get_extents(PyGObject *self)
 
     return Py_BuildValue("(" CCCC ")", rect.x, rect.y, rect.width, rect.height);
 }
-#line 3871 "gv.c"
+#line 3896 "gv.c"
 
 
-#line 1463 "gv.override"
+#line 1479 "gv.override"
 static PyObject *
 _wrap_gv_shapes_replace_shapes(PyGObject *self, PyObject *args)
 {
@@ -3948,10 +3949,10 @@ _wrap_gv_shapes_replace_shapes(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3928 "gv.c"
+#line 3953 "gv.c"
 
 
-#line 1431 "gv.override"
+#line 1447 "gv.override"
 static PyObject *
 _wrap_gv_shapes_delete_shapes(PyGObject *self, PyObject *args)
 {
@@ -3982,10 +3983,10 @@ _wrap_gv_shapes_delete_shapes(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 3962 "gv.c"
+#line 3987 "gv.c"
 
 
-#line 2043 "gv.override"
+#line 2059 "gv.override"
 static PyObject *
 _wrap_gv_shapes_get_change_info(PyGObject *self, PyObject *args)
 {
@@ -4014,10 +4015,10 @@ _wrap_gv_shapes_get_change_info(PyGObject *self, PyObject *args)
                          change_info->num_shapes,
                          id_list );
 }
-#line 3994 "gv.c"
+#line 4019 "gv.c"
 
 
-#line 1375 "gv.override"
+#line 1391 "gv.override"
 static PyObject *
 _wrap_gv_shapes_get_shape(PyGObject *self, PyObject* args)
 {
@@ -4040,10 +4041,10 @@ _wrap_gv_shapes_get_shape(PyGObject *self, PyObject* args)
         return Py_None;
     }
 }
-#line 4020 "gv.c"
+#line 4045 "gv.c"
 
 
-#line 1415 "gv.override"
+#line 1431 "gv.override"
 static PyObject *
 _wrap_gv_shapes_append_last(PyGObject *self, PyObject *args)
 {
@@ -4058,10 +4059,10 @@ _wrap_gv_shapes_append_last(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("i", shp_index);
 }
-#line 4038 "gv.c"
+#line 4063 "gv.c"
 
 
-#line 1315 "gv.override"
+#line 1332 "gv.override"
 static PyObject *
 _wrap_gv_shapes_save_to_dbf(PyGObject *self, PyObject *args)
 {
@@ -4072,10 +4073,10 @@ _wrap_gv_shapes_save_to_dbf(PyGObject *self, PyObject *args)
 
     return PyInt_FromLong(gv_shapes_to_dbf(filename, GV_DATA(self->obj)));
 }
-#line 4052 "gv.c"
+#line 4077 "gv.c"
 
 
-#line 1327 "gv.override"
+#line 1344 "gv.override"
 static PyObject *
 _wrap_gv_shapes_save_to(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -4091,19 +4092,19 @@ _wrap_gv_shapes_save_to(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return PyInt_FromLong(ret);
 }
-#line 4071 "gv.c"
+#line 4096 "gv.c"
 
 
-#line 583 "gv.override"
+#line 600 "gv.override"
 static PyObject *
 _wrap_gv_shapes_num_shapes(PyGObject *self)
 {
     return PyInt_FromLong(gv_shapes_num_shapes(GV_SHAPES(self->obj)));
 }
-#line 4080 "gv.c"
+#line 4105 "gv.c"
 
 
-#line 1399 "gv.override"
+#line 1415 "gv.override"
 static PyObject *
 _wrap_gv_shapes_append(PyGObject *self, PyObject *args)
 {
@@ -4118,10 +4119,10 @@ _wrap_gv_shapes_append(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("i", shp_index);
 }
-#line 4098 "gv.c"
+#line 4123 "gv.c"
 
 
-#line 1275 "gv.override"
+#line 1292 "gv.override"
 static PyObject *
 _wrap_gv_shapes_get_fid(PyGObject *self, PyObject *args)
 {
@@ -4160,7 +4161,7 @@ _wrap_gv_shapes_get_fid(PyGObject *self, PyObject *args)
         return Py_None;
     }
 }
-#line 4140 "gv.c"
+#line 4165 "gv.c"
 
 
 static const PyMethodDef _PyGvShapes_methods[] = {
@@ -4191,7 +4192,7 @@ static const PyMethodDef _PyGvShapes_methods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-#line 1201 "gv.override"
+#line 1218 "gv.override"
 static int
 _wrap_gv_shapes_sq_length(PyGObject *self)
 {
@@ -4264,7 +4265,7 @@ static PySequenceMethods _wrap_gv_shapes_tp_as_sequence = {
     0,
     0,
 };
-#line 4244 "gv.c"
+#line 4269 "gv.c"
 
 
 PyTypeObject G_GNUC_INTERNAL PyGvShapes_Type = {
@@ -4351,7 +4352,7 @@ _wrap_gv_symbol_manager_has_symbol(PyGObject *self, PyObject *args, PyObject *kw
     return PyInt_FromLong(ret);
 }
 
-#line 661 "gv.override"
+#line 678 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_get_symbol(PyGObject *self, PyObject *args)
 {
@@ -4393,10 +4394,10 @@ _wrap_gv_symbol_manager_get_symbol(PyGObject *self, PyObject *args)
         return py_result;
     }
 }
-#line 4373 "gv.c"
+#line 4398 "gv.c"
 
 
-#line 632 "gv.override"
+#line 649 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_inject_raster_symbol(PyGObject *self, PyObject *args)
 {
@@ -4424,10 +4425,10 @@ _wrap_gv_symbol_manager_inject_raster_symbol(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 4404 "gv.c"
+#line 4429 "gv.c"
 
 
-#line 612 "gv.override"
+#line 629 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_inject_vector_symbol(PyGObject *self, PyObject *args)
 {
@@ -4446,7 +4447,7 @@ _wrap_gv_symbol_manager_inject_vector_symbol(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 4426 "gv.c"
+#line 4451 "gv.c"
 
 
 static PyObject *
@@ -4464,7 +4465,7 @@ _wrap_gv_symbol_manager_eject_symbol(PyGObject *self, PyObject *args, PyObject *
     return PyInt_FromLong(ret);
 }
 
-#line 704 "gv.override"
+#line 721 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_save_vector_symbol(PyGObject *self, PyObject *args)
 {
@@ -4492,10 +4493,10 @@ _wrap_gv_symbol_manager_save_vector_symbol(PyGObject *self, PyObject *args)
 
     return NULL;
 }
-#line 4472 "gv.c"
+#line 4497 "gv.c"
 
 
-#line 590 "gv.override"
+#line 607 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_get_names(PyGObject *self)
 {
@@ -4516,10 +4517,10 @@ _wrap_gv_symbol_manager_get_names(PyGObject *self)
 
     return py_name_list;
 }
-#line 4496 "gv.c"
+#line 4521 "gv.c"
 
 
-#line 733 "gv.override"
+#line 750 "gv.override"
 static PyObject *
 _wrap_gv_symbol_manager_serialize(PyGObject *self)
 {
@@ -4557,7 +4558,7 @@ _wrap_gv_symbol_manager_serialize(PyGObject *self)
 
     return py_xml;
 }
-#line 4537 "gv.c"
+#line 4562 "gv.c"
 
 
 static const PyMethodDef _PyGvSymbolManager_methods[] = {
@@ -4671,7 +4672,7 @@ _wrap_gv_tool_get_view(PyGObject *self)
     return pygobject_new((GObject *)ret);
 }
 
-#line 1157 "gv.override"
+#line 1174 "gv.override"
 static PyObject *
 _wrap_gv_tool_set_boundary(PyGObject *self, PyObject *args)
 {
@@ -4690,7 +4691,7 @@ _wrap_gv_tool_set_boundary(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 4670 "gv.c"
+#line 4695 "gv.c"
 
 
 static PyObject *
@@ -4891,7 +4892,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvSelectionTool_Type = {
 
 /* ----------- GvRotateTool ----------- */
 
-#line 1015 "gv.override"
+#line 1032 "gv.override"
 static int
 _wrap_gv_rotate_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -4913,7 +4914,7 @@ _wrap_gv_rotate_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 4893 "gv.c"
+#line 4918 "gv.c"
 
 
 static PyObject *
@@ -5003,7 +5004,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvRotateTool_Type = {
 
 /* ----------- GvRoiTool ----------- */
 
-#line 1065 "gv.override"
+#line 1082 "gv.override"
 static int
 _wrap_gv_roi_tool_new(PyGObject *self, PyObject *args)
 {
@@ -5026,10 +5027,10 @@ _wrap_gv_roi_tool_new(PyGObject *self, PyObject *args)
 
     return 0;
 }
-#line 5006 "gv.c"
+#line 5031 "gv.c"
 
 
-#line 1091 "gv.override"
+#line 1108 "gv.override"
 static PyObject *
 _wrap_gv_roi_tool_get_rect(PyGObject *self)
 {
@@ -5042,10 +5043,10 @@ _wrap_gv_roi_tool_get_rect(PyGObject *self)
 
     return Py_BuildValue("(" CCCC ")", rect.x, rect.y, rect.width, rect.height);
 }
-#line 5022 "gv.c"
+#line 5047 "gv.c"
 
 
-#line 1105 "gv.override"
+#line 1122 "gv.override"
 static PyObject *
 _wrap_gv_roi_tool_new_rect(PyGObject *self, PyObject *args)
 {
@@ -5063,7 +5064,7 @@ _wrap_gv_roi_tool_new_rect(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 5043 "gv.c"
+#line 5068 "gv.c"
 
 
 static const PyMethodDef _PyGvRoiTool_methods[] = {
@@ -5123,7 +5124,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvRoiTool_Type = {
 
 /* ----------- GvRectTool ----------- */
 
-#line 990 "gv.override"
+#line 1007 "gv.override"
 static int
 _wrap_gv_rect_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -5145,7 +5146,7 @@ _wrap_gv_rect_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 5125 "gv.c"
+#line 5150 "gv.c"
 
 
 static PyObject *
@@ -5235,7 +5236,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvRectTool_Type = {
 
 /* ----------- GvPointTool ----------- */
 
-#line 940 "gv.override"
+#line 957 "gv.override"
 static int
 _wrap_gv_point_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -5257,7 +5258,7 @@ _wrap_gv_point_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 5237 "gv.c"
+#line 5262 "gv.c"
 
 
 static PyObject *
@@ -5367,7 +5368,7 @@ _wrap_gv_poi_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
     return 0;
 }
 
-#line 1124 "gv.override"
+#line 1141 "gv.override"
 static PyObject *
 _wrap_gv_poi_tool_get_point(PyGObject *self)
 {
@@ -5380,10 +5381,10 @@ _wrap_gv_poi_tool_get_point(PyGObject *self)
 
     return Py_BuildValue("(" CC ")", point.x, point.y);
 }
-#line 5360 "gv.c"
+#line 5385 "gv.c"
 
 
-#line 1138 "gv.override"
+#line 1155 "gv.override"
 static PyObject *
 _wrap_gv_poi_tool_new_point(PyGObject *self, PyObject *args)
 {
@@ -5401,7 +5402,7 @@ _wrap_gv_poi_tool_new_point(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 5381 "gv.c"
+#line 5406 "gv.c"
 
 
 static const PyMethodDef _PyGvPoiTool_methods[] = {
@@ -5551,7 +5552,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvNodeTool_Type = {
 
 /* ----------- GvLineTool ----------- */
 
-#line 965 "gv.override"
+#line 982 "gv.override"
 static int
 _wrap_gv_line_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -5573,7 +5574,7 @@ _wrap_gv_line_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 5553 "gv.c"
+#line 5578 "gv.c"
 
 
 static PyObject *
@@ -5663,7 +5664,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvLineTool_Type = {
 
 /* ----------- GvAreaTool ----------- */
 
-#line 1040 "gv.override"
+#line 1057 "gv.override"
 static int
 _wrap_gv_area_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -5685,7 +5686,7 @@ _wrap_gv_area_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 
     return 0;
 }
-#line 5665 "gv.c"
+#line 5690 "gv.c"
 
 
 static PyObject *
@@ -5926,7 +5927,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvToolbox_Type = {
 
 /* ----------- GvTrackTool ----------- */
 
-#line 3341 "gv.override"
+#line 3376 "gv.override"
 static int
 _wrap_gv_track_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -5946,7 +5947,7 @@ _wrap_gv_track_tool_new(PyGObject *self, PyObject *args, PyObject *kwargs)
     GV_TRACK_TOOL(self->obj)->label = GTK_OBJECT(label->obj);
     return 0;
 }
-#line 5926 "gv.c"
+#line 5951 "gv.c"
 
 
 PyTypeObject G_GNUC_INTERNAL PyGvTrackTool_Type = {
@@ -6044,7 +6045,7 @@ _wrap_gv_view_area_get_mode(PyGObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 236 "gv.override"
+#line 254 "gv.override"
 static PyObject *
 _wrap_gv_view_area_height_scale(PyGObject *self, PyObject *args)
 {
@@ -6058,19 +6059,19 @@ _wrap_gv_view_area_height_scale(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6038 "gv.c"
+#line 6063 "gv.c"
 
 
-#line 251 "gv.override"
+#line 269 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_height_scale(PyGObject *self)
 {
     return PyFloat_FromDouble(gv_view_area_get_height_scale(GV_VIEW_AREA(self->obj)));
 }
-#line 6047 "gv.c"
+#line 6072 "gv.c"
 
 
-#line 440 "gv.override"
+#line 458 "gv.override"
 static PyObject *
 _wrap_gv_view_area_set_3d_view(PyGObject *self, PyObject *args)
 {
@@ -6086,10 +6087,10 @@ _wrap_gv_view_area_set_3d_view(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6066 "gv.c"
+#line 6091 "gv.c"
 
 
-#line 457 "gv.override"
+#line 475 "gv.override"
 static PyObject *
 _wrap_gv_view_area_set_3d_view_look_at(PyGObject *self, PyObject *args)
 {
@@ -6106,10 +6107,10 @@ _wrap_gv_view_area_set_3d_view_look_at(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6086 "gv.c"
+#line 6111 "gv.c"
 
 
-#line 499 "gv.override"
+#line 517 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_look_at_pos(PyGObject *self)
 {
@@ -6123,7 +6124,7 @@ _wrap_gv_view_area_get_look_at_pos(PyGObject *self)
 
     return Py_BuildValue("(" CC ")", x, y);
 }
-#line 6103 "gv.c"
+#line 6128 "gv.c"
 
 
 static PyObject *
@@ -6166,7 +6167,7 @@ _wrap_gv_view_area_queue_draw(PyGObject *self)
     return Py_None;
 }
 
-#line 154 "gv.override"
+#line 172 "gv.override"
 static PyObject *
 _wrap_gv_view_area_zoom(PyGObject *self, PyObject *args)
 {
@@ -6180,19 +6181,19 @@ _wrap_gv_view_area_zoom(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6160 "gv.c"
+#line 6185 "gv.c"
 
 
-#line 169 "gv.override"
+#line 187 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_zoom(PyGObject *self)
 {
     return PyFloat_FromDouble(gv_view_area_get_zoom(GV_VIEW_AREA(self->obj)));
 }
-#line 6169 "gv.c"
+#line 6194 "gv.c"
 
 
-#line 176 "gv.override"
+#line 194 "gv.override"
 static PyObject *
 _wrap_gv_view_area_rotate(PyGObject *self, PyObject *args)
 {
@@ -6206,10 +6207,10 @@ _wrap_gv_view_area_rotate(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6186 "gv.c"
+#line 6211 "gv.c"
 
 
-#line 191 "gv.override"
+#line 209 "gv.override"
 static PyObject *
 _wrap_gv_view_area_translate(PyGObject *self, PyObject *args)
 {
@@ -6223,10 +6224,10 @@ _wrap_gv_view_area_translate(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6203 "gv.c"
+#line 6228 "gv.c"
 
 
-#line 206 "gv.override"
+#line 224 "gv.override"
 static PyObject *
 _wrap_gv_view_area_set_translation(PyGObject *self, PyObject *args)
 {
@@ -6240,7 +6241,7 @@ _wrap_gv_view_area_set_translation(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6220 "gv.c"
+#line 6245 "gv.c"
 
 
 static PyObject *
@@ -6290,7 +6291,7 @@ _wrap_gv_view_area_fit_all_layers(PyGObject *self)
     return Py_None;
 }
 
-#line 221 "gv.override"
+#line 239 "gv.override"
 static PyObject *
 _wrap_gv_view_area_fit_extents(PyGObject *self, PyObject *args)
 {
@@ -6304,10 +6305,10 @@ _wrap_gv_view_area_fit_extents(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6284 "gv.c"
+#line 6309 "gv.c"
 
 
-#line 347 "gv.override"
+#line 365 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_extents(PyGObject *self)
 {
@@ -6317,10 +6318,10 @@ _wrap_gv_view_area_get_extents(PyGObject *self)
 
     return Py_BuildValue("(" CCCC ")", xmin, ymin, xmax, ymax );
 }
-#line 6297 "gv.c"
+#line 6322 "gv.c"
 
 
-#line 358 "gv.override"
+#line 376 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_volume(PyGObject *self)
 {
@@ -6334,10 +6335,10 @@ _wrap_gv_view_area_get_volume(PyGObject *self)
                          volume[4], volume[5] );
 }
 
-#line 6314 "gv.c"
+#line 6339 "gv.c"
 
 
-#line 304 "gv.override"
+#line 322 "gv.override"
 static PyObject *
 _wrap_gv_view_area_map_location(PyGObject *self, PyObject *args)
 {
@@ -6350,7 +6351,7 @@ _wrap_gv_view_area_map_location(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("(" CC ")", x, y );
 }
-#line 6330 "gv.c"
+#line 6355 "gv.c"
 
 
 static PyObject *
@@ -6368,7 +6369,7 @@ _wrap_gv_view_area_copy_state(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-#line 333 "gv.override"
+#line 351 "gv.override"
 static PyObject *
 _wrap_gv_view_area_map_pointer(PyGObject *self, PyObject *args)
 {
@@ -6381,10 +6382,10 @@ _wrap_gv_view_area_map_pointer(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("(" CC ")", x, y );
 }
-#line 6361 "gv.c"
+#line 6386 "gv.c"
 
 
-#line 373 "gv.override"
+#line 391 "gv.override"
 static PyObject *
 _wrap_gv_view_area_inverse_map_pointer(PyGObject *self, PyObject *args)
 {
@@ -6397,7 +6398,7 @@ _wrap_gv_view_area_inverse_map_pointer(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("(" CC ")", x, y );
 }
-#line 6377 "gv.c"
+#line 6402 "gv.c"
 
 
 static PyObject *
@@ -6415,7 +6416,7 @@ _wrap_gv_view_area_add_layer(PyGObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-#line 258 "gv.override"
+#line 276 "gv.override"
 static PyObject *
 _wrap_gv_view_area_remove_layer(PyGObject *self, PyObject *args)
 {
@@ -6429,7 +6430,7 @@ _wrap_gv_view_area_remove_layer(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6409 "gv.c"
+#line 6434 "gv.c"
 
 
 static PyObject *
@@ -6495,7 +6496,7 @@ _wrap_gv_view_area_get_named_layer(PyGObject *self, PyObject *args, PyObject *kw
     return pygobject_new((GObject *)ret);
 }
 
-#line 273 "gv.override"
+#line 291 "gv.override"
 static PyObject *
 _wrap_gv_view_area_list_layers(PyGObject *self)
 {
@@ -6516,7 +6517,7 @@ _wrap_gv_view_area_list_layers(PyGObject *self)
     g_list_free(list);
     return py_list;
 }
-#line 6496 "gv.c"
+#line 6521 "gv.c"
 
 
 static PyObject *
@@ -6546,52 +6547,7 @@ _wrap_gv_view_area_swap_layers(PyGObject *self, PyObject *args, PyObject *kwargs
     return Py_None;
 }
 
-#line 533 "gv.override"
-static PyObject *
-_wrap_gv_view_area_create_thumbnail(PyGObject *self, PyObject *args)
-{
-#ifndef PENDING_GTK2
-    PyErr_SetString(PyExc_RuntimeError, "not supported on this platform");
-    return NULL;
-#else
-
-    GvViewArea *view;
-    PyGObject *py_layer;
-    PyObject *ret;
-    GvLayer *layer;
-    GdkPixmap *pixmap;
-    int width, height;
-
-    if (!PyArg_ParseTuple(args, "O!ii:gv_view_area_create_thumbnail",
-              &PyGvLayer_Type, &py_layer, &width, &height)) {
-    return NULL;
-    }
-
-    view = GV_VIEW_AREA(self->obj);
-    if (!GV_IS_VIEW_AREA(view)) {
-    PyErr_SetString(PyExc_TypeError, "argument must be a GvViewArea");
-    return NULL;
-    }
-    layer = GV_LAYER(py_layer->obj);
-    if (!GV_IS_LAYER(layer)) {
-    PyErr_SetString(PyExc_TypeError, "argument must be a GvLayer");
-    return NULL;
-    }
-
-    pixmap = gv_view_area_create_thumbnail(view, layer, width, height);
-    if (!pixmap) {
-        PyErr_SetString(PyExc_RuntimeError, "could not create pixmap");
-        return NULL;
-    }
-    ret = PyGdkWindow_New(pixmap);
-    gdk_pixmap_unref(pixmap);
-    return ret;
-#endif
-}
-#line 6568 "gv.c"
-
-
-#line 387 "gv.override"
+#line 405 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_fontnames(PyGObject *self)
 {
@@ -6616,25 +6572,10 @@ _wrap_gv_view_area_get_fontnames(PyGObject *self)
 
     return py_list;
 }
-#line 6596 "gv.c"
+#line 6576 "gv.c"
 
 
-static PyObject *
-_wrap_gv_view_area_bmfont_load(PyGObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "name", NULL };
-    char *name;
-    int ret;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"s:GvViewArea.bmfont_load", kwlist, &name))
-        return NULL;
-    
-    ret = gv_view_area_bmfont_load(GV_VIEW_AREA(self->obj), name);
-    
-    return PyInt_FromLong(ret);
-}
-
-#line 413 "gv.override"
+#line 431 "gv.override"
 static PyObject *
 _wrap_gv_view_area_set_background_color(PyGObject *self, PyObject *args)
 {
@@ -6649,10 +6590,10 @@ _wrap_gv_view_area_set_background_color(PyGObject *self, PyObject *args)
     Py_INCREF(Py_None);
     return Py_None;
 }
-#line 6629 "gv.c"
+#line 6594 "gv.c"
 
 
-#line 429 "gv.override"
+#line 447 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_background_color(PyGObject *self)
 {
@@ -6662,23 +6603,8 @@ _wrap_gv_view_area_get_background_color(PyGObject *self)
 
     return Py_BuildValue("(ffff)", color[0], color[1], color[2], color[3] );
 }
-#line 6642 "gv.c"
+#line 6607 "gv.c"
 
-
-static PyObject *
-_wrap_gv_view_area_set_adjustments(PyGObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "hadj", "vadj", NULL };
-    PyGObject *hadj, *vadj;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!O!:GvViewArea.set_adjustments", kwlist, &PyGtkAdjustment_Type, &hadj, &PyGtkAdjustment_Type, &vadj))
-        return NULL;
-    
-    gv_view_area_set_adjustments(GV_VIEW_AREA(self->obj), GTK_ADJUSTMENT(hadj->obj), GTK_ADJUSTMENT(vadj->obj));
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
 
 static PyObject *
 _wrap_gv_view_area_set_projection(PyGObject *self, PyObject *args, PyObject *kwargs)
@@ -6756,50 +6682,6 @@ _wrap_gv_view_area_print_to_windriver(PyGObject *self, PyObject *args, PyObject 
 }
 
 static PyObject *
-_wrap_gv_view_area_zoompan_event(PyGObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "event", NULL };
-    GdkEvent *event = NULL;
-    PyObject *py_event;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O:GvViewArea.zoompan_event", kwlist, &py_event))
-        return NULL;
-    if (pyg_boxed_check(py_event, GDK_TYPE_EVENT))
-        event = pyg_boxed_get(py_event, GdkEvent);
-    else {
-        PyErr_SetString(PyExc_TypeError, "event should be a GdkEvent");
-        return NULL;
-    }
-    
-    gv_view_area_zoompan_event(GV_VIEW_AREA(self->obj), (GdkEventButton *)event);
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gv_view_area_redraw_timeout(PyGObject *self)
-{
-    int ret;
-
-    
-    ret = gv_view_area_redraw_timeout(GV_VIEW_AREA(self->obj));
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
-_wrap_gv_view_area_pending_idle_work(PyGObject *self)
-{
-    int ret;
-
-    
-    ret = gv_view_area_pending_idle_work(GV_VIEW_AREA(self->obj));
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
 _wrap_gv_view_area_set_property(PyGObject *self, PyObject *args, PyObject *kwargs)
 {
     static char *kwlist[] = { "name", "value", NULL };
@@ -6832,60 +6714,7 @@ _wrap_gv_view_area_get_property(PyGObject *self, PyObject *args, PyObject *kwarg
     return Py_None;
 }
 
-static PyObject *
-_wrap_gv_view_area_gl_begin(PyGObject *self)
-{
-    int ret;
-
-    
-    ret = gv_view_area_gl_begin(GV_VIEW_AREA(self->obj));
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
-_wrap_gv_view_area_gl_end(PyGObject *self)
-{
-    
-    gv_view_area_gl_end(GV_VIEW_AREA(self->obj));
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gv_view_area_make_current(PyGObject *self)
-{
-    int ret;
-
-    
-    ret = gv_view_area_make_current(GV_VIEW_AREA(self->obj));
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
-_wrap_gv_view_area_begin(PyGObject *self)
-{
-    int ret;
-
-    
-    ret = gv_view_area_begin(GV_VIEW_AREA(self->obj));
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
-_wrap_gv_view_area_swap_buffers(PyGObject *self)
-{
-    
-    gv_view_area_swap_buffers(GV_VIEW_AREA(self->obj));
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-#line 514 "gv.override"
+#line 532 "gv.override"
 static PyObject *
 _wrap_gv_view_area_format_point_query(PyGObject *self, PyObject *args)
 {
@@ -6903,28 +6732,28 @@ _wrap_gv_view_area_format_point_query(PyGObject *self, PyObject *args)
 
     return Py_BuildValue("s", text);
 }
-#line 6883 "gv.c"
+#line 6736 "gv.c"
 
 
-#line 140 "gv.override"
+#line 158 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_width(PyGObject *self)
 {
     return PyInt_FromLong(gv_view_area_get_width(GV_VIEW_AREA(self->obj)));
 }
-#line 6892 "gv.c"
+#line 6745 "gv.c"
 
 
-#line 2791 "gv.override"
+#line 2803 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_height(PyGObject *self)
 {
     return PyInt_FromLong(gv_view_area_get_height(GV_VIEW_AREA(self->obj)));
 }
-#line 6901 "gv.c"
+#line 6754 "gv.c"
 
 
-#line 475 "gv.override"
+#line 493 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_eye_pos(PyGObject *self)
 {
@@ -6935,10 +6764,10 @@ _wrap_gv_view_area_get_eye_pos(PyGObject *self)
                           view->state.eye_pos[1],
                           view->state.eye_pos[2] );
 }
-#line 6915 "gv.c"
+#line 6768 "gv.c"
 
 
-#line 487 "gv.override"
+#line 505 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_eye_dir(PyGObject *self)
 {
@@ -6949,10 +6778,10 @@ _wrap_gv_view_area_get_eye_dir(PyGObject *self)
                           view->state.eye_dir[1],
                           view->state.eye_dir[2] );
 }
-#line 6929 "gv.c"
+#line 6782 "gv.c"
 
 
-#line 295 "gv.override"
+#line 313 "gv.override"
 static PyObject *
 _wrap_gv_view_area_get_translation(PyGObject *self)
 {
@@ -6960,7 +6789,7 @@ _wrap_gv_view_area_get_translation(PyGObject *self)
 
     return Py_BuildValue( "(" CC ")", view->state.tx, view->state.ty );
 }
-#line 6940 "gv.c"
+#line 6793 "gv.c"
 
 
 static const PyMethodDef _PyGvViewArea_methods[] = {
@@ -7034,17 +6863,11 @@ static const PyMethodDef _PyGvViewArea_methods[] = {
       NULL },
     { "swap_layers", (PyCFunction)_wrap_gv_view_area_swap_layers, METH_VARARGS|METH_KEYWORDS,
       NULL },
-    { "create_thumbnail", (PyCFunction)_wrap_gv_view_area_create_thumbnail, METH_VARARGS,
-      NULL },
     { "get_fontnames", (PyCFunction)_wrap_gv_view_area_get_fontnames, METH_NOARGS,
-      NULL },
-    { "bmfont_load", (PyCFunction)_wrap_gv_view_area_bmfont_load, METH_VARARGS|METH_KEYWORDS,
       NULL },
     { "set_background_color", (PyCFunction)_wrap_gv_view_area_set_background_color, METH_VARARGS,
       NULL },
     { "get_background_color", (PyCFunction)_wrap_gv_view_area_get_background_color, METH_NOARGS,
-      NULL },
-    { "set_adjustments", (PyCFunction)_wrap_gv_view_area_set_adjustments, METH_VARARGS|METH_KEYWORDS,
       NULL },
     { "set_projection", (PyCFunction)_wrap_gv_view_area_set_projection, METH_VARARGS|METH_KEYWORDS,
       NULL },
@@ -7056,25 +6879,9 @@ static const PyMethodDef _PyGvViewArea_methods[] = {
       NULL },
     { "print_to_windriver", (PyCFunction)_wrap_gv_view_area_print_to_windriver, METH_VARARGS|METH_KEYWORDS,
       NULL },
-    { "zoompan_event", (PyCFunction)_wrap_gv_view_area_zoompan_event, METH_VARARGS|METH_KEYWORDS,
-      NULL },
-    { "redraw_timeout", (PyCFunction)_wrap_gv_view_area_redraw_timeout, METH_NOARGS,
-      NULL },
-    { "pending_idle_work", (PyCFunction)_wrap_gv_view_area_pending_idle_work, METH_NOARGS,
-      NULL },
     { "set_property", (PyCFunction)_wrap_gv_view_area_set_property, METH_VARARGS|METH_KEYWORDS,
       NULL },
     { "get_property", (PyCFunction)_wrap_gv_view_area_get_property, METH_VARARGS|METH_KEYWORDS,
-      NULL },
-    { "gl_begin", (PyCFunction)_wrap_gv_view_area_gl_begin, METH_NOARGS,
-      NULL },
-    { "gl_end", (PyCFunction)_wrap_gv_view_area_gl_end, METH_NOARGS,
-      NULL },
-    { "make_current", (PyCFunction)_wrap_gv_view_area_make_current, METH_NOARGS,
-      NULL },
-    { "begin", (PyCFunction)_wrap_gv_view_area_begin, METH_NOARGS,
-      NULL },
-    { "swap_buffers", (PyCFunction)_wrap_gv_view_area_swap_buffers, METH_NOARGS,
       NULL },
     { "format_point_query", (PyCFunction)_wrap_gv_view_area_format_point_query, METH_VARARGS,
       NULL },
@@ -7092,16 +6899,6 @@ static const PyMethodDef _PyGvViewArea_methods[] = {
 };
 
 static PyObject *
-_wrap_gv_view_area__get_active_layer(PyObject *self, void *closure)
-{
-    GObject *ret;
-
-    ret = GV_VIEW_AREA(pygobject_get(self))->active_layer;
-    /* pygobject_new handles NULL checking */
-    return pygobject_new((GObject *)ret);
-}
-
-static PyObject *
 _wrap_gv_view_area__get_projection(PyObject *self, void *closure)
 {
     const gchar *ret;
@@ -7114,7 +6911,6 @@ _wrap_gv_view_area__get_projection(PyObject *self, void *closure)
 }
 
 static const PyGetSetDef gv_view_area_getsets[] = {
-    { "active", (getter)_wrap_gv_view_area__get_active_layer, (setter)0 },
     { "projection", (getter)_wrap_gv_view_area__get_projection, (setter)0 },
     { NULL, (getter)0, (setter)0 },
 };
@@ -7386,17 +7182,6 @@ PyTypeObject G_GNUC_INTERNAL PyGvZoompanTool_Type = {
 /* ----------- functions ----------- */
 
 static PyObject *
-_wrap_g_get_current_time_as_double(PyObject *self)
-{
-    double ret;
-
-    
-    ret = g_get_current_time_as_double();
-    
-    return PyFloat_FromDouble(ret);
-}
-
-static PyObject *
 _wrap_gv_data_registry_dump(PyObject *self)
 {
     
@@ -7535,7 +7320,7 @@ _wrap_gv_shapes_from_ogr(PyObject *self, PyObject *args, PyObject *kwargs)
     return pygobject_new((GObject *)ret);
 }
 
-#line 1344 "gv.override"
+#line 1361 "gv.override"
 static PyObject *
 _wrap_gv_shapes_from_ogr_layer(PyObject *self, PyObject *args)
 {
@@ -7564,7 +7349,7 @@ _wrap_gv_shapes_from_ogr_layer(PyObject *self, PyObject *args)
 
     return pygobject_new( G_OBJECT(data) );
 }
-#line 7545 "gv.c"
+#line 7353 "gv.c"
 
 
 static PyObject *
@@ -7742,7 +7527,7 @@ _wrap_gv_make_latlong_srs(PyObject *self, PyObject *args, PyObject *kwargs)
     return Py_None;
 }
 
-#line 3158 "gv.override"
+#line 3193 "gv.override"
 static PyObject *
 _wrap_gv_launch_url(PyObject *self, PyObject *args)
 {
@@ -7753,10 +7538,10 @@ _wrap_gv_launch_url(PyObject *self, PyObject *args)
 
     return Py_BuildValue("i",gv_launch_url(url));
 }
-#line 7734 "gv.c"
+#line 7542 "gv.c"
 
 
-#line 3170 "gv.override"
+#line 3205 "gv.override"
 static PyObject *
 _wrap_gv_short_path_name(PyObject *self, PyObject *args)
 {
@@ -7777,52 +7562,8 @@ _wrap_gv_short_path_name(PyObject *self, PyObject *args)
 
     return result;
 }
-#line 7758 "gv.c"
+#line 7566 "gv.c"
 
-
-static PyObject *
-_wrap_gv_view_area_expose(PyObject *self, PyObject *args, PyObject *kwargs)
-{
-    static char *kwlist[] = { "view", "event", NULL };
-    PyGObject *view;
-    GdkEvent *event = NULL;
-    int ret;
-    PyObject *py_event;
-
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs,"O!O:gv_view_area_expose", kwlist, &PyGtkWidget_Type, &view, &py_event))
-        return NULL;
-    if (pyg_boxed_check(py_event, GDK_TYPE_EVENT))
-        event = pyg_boxed_get(py_event, GdkEvent);
-    else {
-        PyErr_SetString(PyExc_TypeError, "event should be a GdkEvent");
-        return NULL;
-    }
-    
-    ret = gv_view_area_expose(GTK_WIDGET(view->obj), (GdkEventExpose *)event);
-    
-    return PyInt_FromLong(ret);
-}
-
-static PyObject *
-_wrap_gv_view_area_page_setup(PyObject *self)
-{
-    
-    gv_view_area_page_setup();
-    
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-_wrap_gv_get_render_counter(PyObject *self)
-{
-    int ret;
-
-    
-    ret = gv_get_render_counter();
-    
-    return PyInt_FromLong(ret);
-}
 
 static PyObject *
 _wrap_gv_shape_get_count(PyObject *self)
@@ -7835,7 +7576,7 @@ _wrap_gv_shape_get_count(PyObject *self)
     return PyInt_FromLong(ret);
 }
 
-#line 3098 "gv.override"
+#line 3133 "gv.override"
 static PyObject *
 _wrap_gv_rgba_to_rgb(PyObject *self, PyObject *args)
 {
@@ -7866,21 +7607,19 @@ _wrap_gv_rgba_to_rgb(PyObject *self, PyObject *args)
 
     return rgb_obj;
 }
-#line 7847 "gv.c"
+#line 7611 "gv.c"
 
 
-#line 576 "gv.override"
+#line 593 "gv.override"
 static PyObject *
 _wrap_gv_have_ogr_support(PyObject *self)
 {
     return PyInt_FromLong(gv_have_ogr_support());
 }
-#line 7856 "gv.c"
+#line 7620 "gv.c"
 
 
 const PyMethodDef _gv_functions[] = {
-    { "g_get_current_time_as_double", (PyCFunction)_wrap_g_get_current_time_as_double, METH_NOARGS,
-      NULL },
     { "gv_data_registry_dump", (PyCFunction)_wrap_gv_data_registry_dump, METH_NOARGS,
       NULL },
     { "gv_get_manager", (PyCFunction)_wrap_gv_get_manager, METH_NOARGS,
@@ -7937,12 +7676,6 @@ const PyMethodDef _gv_functions[] = {
       NULL },
     { "gv_short_path_name", (PyCFunction)_wrap_gv_short_path_name, METH_VARARGS,
       NULL },
-    { "gv_view_area_expose", (PyCFunction)_wrap_gv_view_area_expose, METH_VARARGS|METH_KEYWORDS,
-      NULL },
-    { "gv_view_area_page_setup", (PyCFunction)_wrap_gv_view_area_page_setup, METH_NOARGS,
-      NULL },
-    { "gv_get_render_counter", (PyCFunction)_wrap_gv_get_render_counter, METH_NOARGS,
-      NULL },
     { "gv_shape_get_count", (PyCFunction)_wrap_gv_shape_get_count, METH_NOARGS,
       NULL },
     { "gv_rgba_to_rgb", (PyCFunction)_wrap_gv_rgba_to_rgb, METH_VARARGS,
@@ -7958,6 +7691,9 @@ const PyMethodDef _gv_functions[] = {
 void
 _gv_add_constants(PyObject *module, const gchar *strip_prefix)
 {
+#ifdef VERSION
+    PyModule_AddStringConstant(module, "__version__", VERSION);
+#endif
   pyg_enum_add(module, "SampleMethod", strip_prefix, GV_TYPE_SAMPLE_METHOD);
   pyg_enum_add(module, "AutoScaleAlg", strip_prefix, GV_TYPE_AUTO_SCALE_ALG);
   pyg_enum_add(module, "RasterLayerMode", strip_prefix, GV_TYPE_RASTER_LAYER_MODE);
@@ -8023,7 +7759,8 @@ _gv_register_classes(PyObject *d)
         return ;
     }
 
-#line 8005 "gv.c"
+
+#line 7764 "gv.c"
     pygobject_register_class(d, "GvData", GV_TYPE_DATA, &PyGvData_Type, Py_BuildValue("(O)", &PyGObject_Type));
     pyg_set_object_has_new_constructor(GV_TYPE_DATA);
     pygobject_register_class(d, "GvLayer", GV_TYPE_LAYER, &PyGvLayer_Type, Py_BuildValue("(O)", &PyGvData_Type));
