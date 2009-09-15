@@ -47,5 +47,4 @@ PYTHON_LIBS = python$(PYTHON_VER).lib
 PYGTK_DEFS = $(PYGTK)\$(PYGTK_VER)\defs
 PYH2DEF = $(PYGTK)\$(PYGTK_VER)\codegen\h2def.py
 PYCODEGEN = $(PYTHON_ROOT)\Lib\site-packages\gtk-$(PYGTK_VER)\codegen\codegen.py
-PYREGISTER = --register $(PYGTK_DEFS)\gdk-types.defs \
-       --register $(PYGTK_DEFS)\gtk-types.defs
+PYREGISTER = --register $(PYGTK_DEFS)\gtk-base-types.defs
