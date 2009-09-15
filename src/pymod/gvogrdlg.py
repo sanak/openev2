@@ -35,7 +35,7 @@ class GvOGRDlg(gtk.Window):
     def __init__(self, ds, viewwindow):
         gtk.Window.__init__(self)
         self.set_title('Vector Layer Selection')
-        self.set_size_request(500, 500)
+        self.set_size_request(350, 600)
         self.set_border_width(3)
         self.set_resizable(True)
         self.connect('delete-event',self.close)
@@ -46,15 +46,13 @@ class GvOGRDlg(gtk.Window):
         # Layer list
         layerbox = gtk.ScrolledWindow()
         shell.pack_start(layerbox)
-        layerlist = gtk.CList(cols=2)
+        layerstore = gtk.ListStore(str)
+        layerlist = gtk.TreeView(layerstore)
+        column = gtk.TreeViewColumn('Layer', gtk.CellRendererText(), text=0)
+        layerlist.append_column(column)
+        layerlist.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
 
         layerbox.add_with_viewport(layerlist)
-        layerlist.set_shadow_type(gtk.SHADOW_NONE)
-        layerlist.set_selection_mode(gtk.SELECTION_SINGLE)
-        layerlist.set_row_height(30)
-        layerlist.set_column_width(0, 24)
-        #layerlist.connect('select-row', self.layer_selected)
-        layerlist.connect('button-press-event', self.list_clicked)
 
         # Clip to view?
 
@@ -80,7 +78,7 @@ class GvOGRDlg(gtk.Window):
 
         # buttons
         button_box = gtk.HButtonBox()
-        button_box.set_layout_default(gtk.BUTTONBOX_START)
+        button_box.set_layout(gtk.BUTTONBOX_START)
         ok_button = gtk.Button('Accept')
         ok_button.connect('clicked', self.accept)
         loadall_button = gtk.Button('Load All')
@@ -95,25 +93,17 @@ class GvOGRDlg(gtk.Window):
         button_box.pack_start(help_button, expand=False)
         shell.pack_start(button_box,expand=False)
 
-        self.connect('realize', self.realize)
-        self.sel_pixmap = gtk.Image().set_from_file(os.path.join(gview.home_dir,'pics',
-                                        'ck_on_l.xpm'))
-        self.not_sel_pixmap = gtk.Image().set_from_file( os.path.join(gview.home_dir,'pics',
-                                        'ck_off_l.xpm'))
-
         shell.show_all()
 
         self.ds = ds
         self.viewwindow = viewwindow
+        self.layerstore = layerstore
         self.layerlist = layerlist
 
         layer_count = ds.GetLayerCount()
-        self.layer_names = []
-        self.layer_sel = []
         for i in range(layer_count):
             layer = ds.GetLayer( i )
-            self.layer_names.append( layer.GetName() )
-            self.layer_sel.append( 0 )
+            layerstore.append([ '%s' % layer.GetName() ])
 
         self.show_all()
 
@@ -141,56 +131,21 @@ class GvOGRDlg(gtk.Window):
         else:
             rect = None
 
-        for i in range(len(self.layer_sel)):
-            if self.layer_sel[i]:
-                layer = self.ds.GetLayer( i )
+        for i in self.layerlist.get_selection().get_selected_rows()[1]:
+            layer = self.ds.GetLayer( i[0] )
 
-                if rect is not None:
-                    layer.SetSpatialFilter( rect )
+            if rect is not None:
+                layer.SetSpatialFilter( rect )
 
-                self.viewwindow.file_open_ogr_by_layer( layer )
+            self.viewwindow.file_open_ogr_by_layer( layer )
 
-                if rect is not None:
-                    layer.SetSpatialFilter( None )
+            if rect is not None:
+                layer.SetSpatialFilter( None )
 
         if rect is not None:
             rect.Destroy()
 
         self.close()
-
-    def realize(self, widget):
-        lst = self.layerlist
-
-        lst.freeze()
-        lst.clear()
-
-        i = 0
-        for entry in self.layer_names:
-            lst.append(('', entry))
-
-            lst.set_pixmap(i, 0, self.not_sel_pixmap)
-
-            i = i + 1
-
-        lst.thaw()        
-
-    def list_clicked(self, lst, event):
-        row, col = lst.get_selection_info(int(event.x), int(event.y))
-        lst.emit_stop_by_name('button-press-event')
-
-        if event.type is gtk.gdk._2BUTTON_PRESS:
-            for i in range(len(self.layer_sel)):
-                self.layer_sel[i] = 0
-
-            self.layer_sel[row] = 1
-            self.accept()
-        else:
-            self.layer_sel[row] = not self.layer_sel[row]
-
-        if self.layer_sel[row]:
-            lst.set_pixmap(row, 0, self.sel_pixmap)
-        else:
-            lst.set_pixmap(row, 0, self.not_sel_pixmap)
 
     def execute_sql(self, *args):
 
