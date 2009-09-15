@@ -279,10 +279,11 @@ class FontControl(gtk.FontButton):
     """
     def __init__(self, fontname=None, use_font=True):
         gtk.FontButton.__init__(self)
-        if fontname.startswith('-'):
-            self.set_from_xlfd(fontname)
-        else:
-            self.set_font_name(fontname)
+        if fontname:
+            if fontname.startswith('-'):
+                self.set_from_xlfd(fontname)
+            else:
+                self.set_font_name(fontname)
         self.set_use_font(use_font)
         self.show()
 
