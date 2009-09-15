@@ -382,11 +382,15 @@ class ColorControl(gtk.HBox):
             self.invoke_callback()
 
     def set_color(self, new_color):
+        if isinstance(new_color, str):
+            new_color = color_string_to_tuple(new_color)
         if new_color == self.current_color:
             return
 
         self.current_color = new_color
+        self.updating = True
         self.colorsCB.set_active_text("Custom")
+        self.updating = False
         self.cbut.set_color(new_color)
 
     def invoke_callback(self):
