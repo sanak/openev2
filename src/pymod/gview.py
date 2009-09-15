@@ -275,6 +275,16 @@ class GvViewArea(_gv.ViewArea):
         """
         _gv.ViewArea.rotate(self, angle)
 
+    def get_rotation(self):
+        """Gets the rotation angle
+        """
+        return _gv.ViewArea.get_rotation(self)
+    
+    def set_rotation(self, angle):
+        """Rotate the view to a given angle from 0.
+        """
+        return _gv.ViewArea.set_rotation(self, angle)
+
     def translate(self, dx, dy):
         """Translate view by dx and dy.
 
@@ -1158,17 +1168,19 @@ class GvShapes(_gv.Shapes):
 
     """
 
-    def __init__(self, name=None, _obj=None, shapefilename=None):
+    def __init__(self, name=None, _obj=None, shapefilename=None, ogrlayer=None):
         """Create a GvShapes
 
         name -- name to assign to GvShapes, defaults to None.
         shapefilename -- name of ESRI shapefile to create from, or None
                          (default) to create an empty container.
         """
-        if _obj is None:
-            _gv.Shapes.__init__(self, shapefilename)
+        if _obj:
+            _gv.Shapes.__init__(self, _obj=_obj)
+        elif ogrlayer:
+            _gv.Shapes.__init__(self, ogrlayer='_%s_OGRLayerH' % hex(ogrlayer.this))
         else:
-            _gv.Shapes.__init__(_obj, None)
+            _gv.Shapes.__init__(self, shapefilename)
         if name:
             self.set_name(name)
 
@@ -1536,10 +1548,10 @@ class GvRaster(_gv.Raster):
         """
         if _obj is None:
             if dataset:
-                dataset_raw = dataset.this
+                dataset_raw = '_%s_GDALDatasetH' % hex(dataset.this)
             else:
                 dataset_raw = None
-            _gv.Raster.__init__(self, filename, sample, real, dataset_raw)
+            _gv.Raster.__init__(self, filename, sample, real, dataset=dataset_raw)
         else:
             # MB: I don't like it but it will do for now...
             _gv.Raster.__init__(self, _obj=_obj)
@@ -3050,6 +3062,7 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
 
 # most tools now in _gv, what's left here only for backward compatibility
 # and for the docstrings
+GvAutopanTool = _gv.AutopanTool
 GvSelectionTool = _gv.SelectionTool
 GvZoompanTool = _gv.ZoompanTool
 GvPointTool = _gv.PointTool
@@ -3121,6 +3134,241 @@ class GvPoiTool(_gv.PoiTool):
         point -- a tuple (column, row)
         """
         return _gv.PoiTool.new_point(self, point)
+
+# This class is only for documenting GvAutopanTool.
+class GvAutopanToolDoc:
+    """This is the documentation for GvAutopanTool
+    GvAutopanTool inherits from GvTool
+    
+    This class supports a panning of the activated view.
+    
+    The main view should be activated in this tool through GvTool.activate(view).  This tool can zoom in on the main view,
+    and pan over the entire image.  There are functions to start, stop, pause, fast-forward, rewind, and control play speed.
+    Panning can follow a number of pre-set paths or a user defined path (defined by passing a shape layer containing lines)
+    
+    A second view can be registered to display an overview of the entire image, the path to be followed and a highlighted box 
+    showing the area currently displayed in the main view.
+
+    Signals:
+
+    """
+    
+    def __init__(self, boundary=None, _obj=None):
+        pass
+
+    def set_extents(self, rect):
+        """ Sets the panning extents.
+
+        rect -- a tuple (column, row, width, height)
+        """
+        pass
+    
+    def get_extents(self):
+        """ Gets the panning extents.
+            Returns a tuple (column, row, width, height)
+        """
+        pass
+    
+    def play(self):
+        """ Start panning. """
+        pass
+    
+    def pause(self):
+        """ Pause panning. Regions remain drawn in secondary views."""
+        pass
+    
+    def stop(self):
+        """ Stop panning. Regions do not remain drawn in secondary views."""
+        pass
+
+    def set_speed(self, speed):
+        """ Set the relative speed (a value between -1 and 1: -1
+            for maximum speed backwards; 1 for maximum speed
+            forwards).
+        """
+        pass
+
+    def get_speed(self):
+        """ Returns the current speed setting. """
+        
+        pass
+
+    def set_overlap(self, overlap):
+        """ Set block overlap perpendicular to panning direction
+            (a value between 0 and 1).
+        """
+        pass
+
+    def get_overlap(self):
+        """ Returns the current overlap setting. """
+        pass
+
+    def set_block_x_size(self, xsize, mode):
+        """ Set size of high-resolution block.
+            Inputs:
+                xsize- width of block, as a fraction of the
+                       full panning region width if mode == 0
+                       (in this case 0 < xsize < 1), or in
+                       view coordinates if mode == 1.
+                mode- block size setting mode.
+        """
+        pass
+
+    def set_x_resolution(self, resolution):
+        """ Set the resolution of the zoomed extents:
+            Inputs:
+                resolution- view resolution
+        """
+        pass
+
+    def set_standard_path(self, path_type):
+        """ Set the standard path to follow in panning:
+            Inputs:
+                path_type- an integer (0-4, currently)
+
+                0- start top left, go right, down, left, down,...
+                1- start bottom left, go right, up, left, up,...
+                2- start top right, go left, down, right, down,...
+                3- start bottom right, go left, up, left, up,...
+                4- start top left, go right, jump down and back
+                   to the left edge, go right,...
+        """
+        pass
+
+    def set_lines_path(self, lines):
+        """ Sets the path to follow based on a GvShapes object
+            that contains line shapes.
+        """
+        pass
+
+    def set_location(self, x, y):
+        """ Set the current location within the panning
+            extents (snaps to nearest computed location).
+        """
+        # z is in case we ever do anything with 3d panning, but
+        # for now only 2d has been considered.
+        pass
+
+    def get_location(self):
+        """ Get the current location within the panning extents.
+            Raises an error if there is no current location.
+        """
+        pass
+
+    def get_state(self):
+        """ Gets the current settings of the following autopan
+            tool parameters (returned as a tuple):
+            
+                play_flag: 0- stopped, 1- playing, 2- paused
+                
+                path_type: 0- starts top left, goes right, down, left...
+                           1- starts bottom left, goes right, up, left...
+                           2- starts top right, goes left, down, right...
+                           3- starts bottom right, goes left, up, right...
+                           
+                
+                block_size_mode, block_x_size, resolution:
+                  block_size_mode = 0:
+                      - user sets block_x_size to a float between 0 and 1,
+                        corresponding to the block size as a fraction of the
+                        total x extents (block_y_size will be determined by
+                        block_x_size and the window's aspect ratio).
+                        resolution is ignored in this mode.
+
+                  block_size_mode = 1:
+                      - same as mode 0, except that block_x_size is in view
+                        coordinates rather than a fraction of total x extents
+                        to be panned.
+
+                  block_size_mode = 2:
+                      - block size is set so that the size of pixels in the 
+                        view will be constant at resolution.
+
+                num_views: number of secondary views associated with
+                           the tool.
+        """
+        pass
+
+    def clear_trail(self):
+        """ Clear the stored trail and refresh secondary views. """
+        pass
+
+    def set_trail_color(self, view, red, green, blue, alpha):
+        """ Set the trail color for a secondary view.
+
+            Inputs:
+                view- view to reset the trail color of.
+                red, green, blue, alpha- floating point values in
+                                         the range 0-1.
+        """
+        pass
+
+    def set_trail_mode(self, view, trail_mode):
+        """ Set whether or not to display a trail in a secondary
+            view.
+
+            Inputs:
+                view- view to reset the trail mode on.
+                trail_mode- integer 0 or 1.
+        """
+        pass
+
+    def set_trail_parameters(self, overview_extents, overview_width_pixels):
+        """ Set the rough predicted extents that the trail will cover, and
+            the width that this should correspond to in screen pixels. """
+        pass
+
+    def get_trail_parameters(self):
+        """ Get the trail parameters and number of trail tiles.
+        
+            Returns a tuple (extents,width,num tiles):
+                extents, width- parameters used to decide trail tile
+                                coverage and resolution (see
+                                set_trail_parameters)
+                num tiles- number of trail tiles created so far.
+        """
+        pass
+                
+
+    def save_trail_tiles(self, basename):
+        """ Saves trail tiles to files named basename+'0',
+            basename+'1', etc.  Returns the number of tiles saved
+            (-1 if an error occured).  Tiles are always saved
+            to Geotiff format (requires metadata capability).
+        """
+        pass
+    
+    def load_trail_tiles(self, basename, num_trail_tiles):
+        """ Loads trail tiles from files named basename+'0',
+            basename+'1', etc., up to basename+str(num_trail_tiles-1)
+            Returns the number of tiles loaded
+            (-1 if an error occured).
+        """
+        pass
+
+    def register_view(self, view, can_resize=0, can_reposition=0,
+                      trail_mode=0):
+        """ Register a secondary view.  Current panning extents will
+            be drawn as a blue-green rectangle in this view.
+            Inputs:
+                view- view to register
+                can_resize- integer 0 or 1: 1 if user can resize the
+                            current panning block size by banding
+                            the rectangle in the secondary view, 0
+                            if they can't. NOT IMPLEMENTED YET: set
+                            to 0.
+                can_reposition- integer 0 or 1: 1 if user can reposition the
+                            current panning block size by dragging
+                            the rectangle in the secondary view, 0
+                            if they can't.
+                trail_mode- integer 0 or 1: 0 if view should not show
+                            trail already traveled; 1 if it should.
+        """
+        pass
+
+    def remove_view(self, view):
+        """ De-register a secondary view. """
+        pass
 
 class GvViewLink(_gv.ViewLink):
     def __init__(self):
@@ -3228,6 +3476,9 @@ class GvManager(_gv.Manager):
         ensuring that only one GvRaster is instantiated for the band
         across the whole application.
         """
+        #it is an error to ask _gv.Manager for a raster from an unmanaged dataset - so add the dataset first
+        #add_dataset does nothing if the dataset was already added
+        dataset = self.add_dataset(dataset)
         swig_ds = self.get_swig_ds(dataset)
         raster = _gv.Manager.get_dataset_raster(self, swig_ds, band)
         if raster:
