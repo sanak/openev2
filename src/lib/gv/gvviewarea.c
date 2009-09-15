@@ -368,9 +368,11 @@ static GdkGLContext *_share_list = NULL;
 static void
 gv_view_area_init(GvViewArea *view)
 {
-    GdkGLConfig *glconfig = gdk_gl_config_new_by_mode (GDK_GL_MODE_RGB |
-                                            GDK_GL_MODE_DEPTH |
-                                            GDK_GL_MODE_DOUBLE);
+    GdkGLConfig *glconfig = gdk_gl_config_new_by_mode ( GDK_GL_MODE_RGBA
+                                                      | GDK_GL_MODE_DEPTH
+                                                      | GDK_GL_MODE_STENCIL
+                                                      | GDK_GL_MODE_DOUBLE
+                                                      );
 
     /* ---- Enable GL capability ---- */
     gtk_widget_set_gl_capability (GTK_WIDGET(view), glconfig,
@@ -761,6 +763,13 @@ gv_view_area_rotate(GvViewArea *view, gvgeocoord angle)
 }
 
 void
+gv_view_area_set_rotation(GvViewArea *view, gvgeocoord angle)
+{
+    view->state.rot = angle;
+    gv_view_area_state_changed(view);
+}
+
+void
 gv_view_area_translate(GvViewArea *view, gvgeocoord dx, gvgeocoord dy)
 {
     gvgeocoord cr, sr;
@@ -922,6 +931,9 @@ gv_view_area_add_layer(GvViewArea *view, GObject *layer_obj)
     g_return_if_fail(GV_IS_LAYER(layer_obj));
     layer = GV_LAYER(layer_obj);
 
+    //first check if the layer is in this view - if it is already added, warn and return
+    g_return_if_fail( g_list_find(view->layers, layer) == NULL );
+
     if (GTK_WIDGET_REALIZED(GTK_WIDGET(view)))
     {
         /* Call the one time setup function for the layer */
@@ -972,6 +984,16 @@ gv_view_area_remove_layer(GvViewArea *view, GObject *layer_obj)
     g_return_if_fail(GV_IS_LAYER(layer_obj));
     layer = GV_LAYER(layer_obj);
 
+    //first check if the layer is in this view - if not, just return
+    link = g_list_find(view->layers, layer);
+    if (link == NULL)
+    {
+        CPLDebug( "OpenEV",
+                  "gv_view_area_remove_link(): layer %s is not in view",
+                    g_type_name (G_TYPE_FROM_INSTANCE(layer)));
+        return;
+    }
+
     if (GTK_WIDGET_REALIZED(GTK_WIDGET(view)))
     {
         /* Allow layer to destroy gl handles if necessary */
@@ -984,15 +1006,6 @@ gv_view_area_remove_layer(GvViewArea *view, GObject *layer_obj)
 
     g_assert( layer->view == view );
     layer->view = NULL;
-
-    link = g_list_find(view->layers, layer);
-    if (link == NULL)
-    {
-        CPLDebug( "OpenEV",
-                  "gv_view_area_remove_link(): layer %s is not in view",
-                    g_type_name (G_TYPE_FROM_INSTANCE(layer)));
-        return;
-    }
 
     view->layers = g_list_remove_link(view->layers, link);
     view->volume_current = FALSE;

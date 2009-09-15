@@ -210,6 +210,13 @@
   (gtype-id "GV_TYPE_ZOOMPAN_TOOL")
 )
 
+(define-object AutopanTool
+  (in-module "Gv")
+  (parent "GvTool")
+  (c-name "GvAutopanTool")
+  (gtype-id "GV_TYPE_AUTOPAN_TOOL")
+)
+
 ;; Enumerations and flags ...
 
 (define-enum SampleMethod
@@ -3797,6 +3804,243 @@
   (return-type "gint")
   (parameters
     '("double" "new_scale")
+  )
+)
+
+;GvAutopanTool
+
+(define-function gv_autopan_tool_new
+  (c-name "gv_autopan_tool_new")
+  (is-constructor-of "GvAutopanTool")
+  (return-type "GvTool*")
+)
+
+(define-method set_extents
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_new_rect")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method get_extents
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_rect")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "rect")
+  )
+)
+
+(define-method play
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_play")
+  (return-type "gint")
+)
+
+(define-method pause
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_pause")
+  (return-type "gint")
+)
+
+(define-method stop
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_stop")
+  (return-type "gint")
+)
+
+(define-method set_speed
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_speed")
+  (return-type "double")
+  (parameters
+    '("double" "speed")
+  )
+)
+
+(define-method get_speed
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_speed")
+  (return-type "double")
+)
+
+(define-method set_overlap
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_overlap")
+  (return-type "gint")
+  (parameters
+    '("double" "overlap")
+  )
+)
+
+(define-method get_overlap
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_overlap")
+  (return-type "double")
+)
+
+(define-method set_block_x_size
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_block_x_size")
+  (return-type "gint")
+  (parameters
+    '("double" "block_x_size")
+    '("gint" "mode")
+  )
+)
+
+(define-method set_x_resolution
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_x_resolution")
+  (return-type "gint")
+  (parameters
+    '("double" "resolution")
+  )
+)
+
+(define-method set_standard_path
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_standard_path")
+  (return-type "gint")
+  (parameters
+    '("gint" "path_type")
+  )
+)
+
+(define-method set_lines_path
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_lines_path")
+  (return-type "gint")
+  (parameters
+    '("GvShapes*" "lines")
+  )
+)
+
+(define-method set_location
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_location")
+  (return-type "gint")
+  (parameters
+    '("double" "x")
+    '("double" "y")
+    '("double" "z")
+  )
+)
+
+(define-method get_location
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_location")
+  (return-type "gint")
+  (parameters
+    '("gvgeocoord*" "x")
+    '("gvgeocoord*" "y")
+    '("gvgeocoord*" "z")
+  )
+)
+
+(define-method get_state
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_state")
+  (return-type "none")
+  (parameters
+    '("gint*" "play_flag")
+    '("gint*" "path_type")
+    '("gint*" "block_size_mode")
+    '("gvgeocoord*" "block_x_size")
+    '("gvgeocoord*" "x_resolution")
+    '("gint*" "num_views")
+  )
+)
+
+(define-method clear_trail
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_clear_trail")
+  (return-type "none")
+)
+
+(define-method set_trail_color
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_trail_color")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
+    '("float" "red")
+    '("float" "green")
+    '("float" "blue")
+    '("float" "alpha")
+  )
+)
+
+(define-method set_trail_mode
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_trail_mode")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
+    '("gint" "trail_mode")
+  )
+)
+
+(define-method set_trail_parameters
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_set_trail_parameters")
+  (return-type "gint")
+  (parameters
+    '("GvRect*" "overview_extents")
+    '("int" "overview_width_pixels")
+  )
+)
+
+(define-method get_trail_parameters
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_get_trail_parameters")
+  (return-type "none")
+  (parameters
+    '("GvRect*" "overview_extents")
+    '("int*" "overview_width_pixels")
+    '("int*" "num_trail_tiles")
+  )
+)
+
+(define-method save_trail_tiles
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_save_trail_tiles")
+  (return-type "gint")
+  (parameters
+    '("char*" "basename")
+  )
+)
+
+(define-method load_trail_tiles
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_load_trail_tiles")
+  (return-type "gint")
+  (parameters
+  	'("char*" "basename")
+    '("int" "num_trail_tiles")
+  )
+)
+
+(define-method register_view
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_register_view")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
+    '("gint" "can_resize")
+    '("gint" "can_reposition")
+    '("gint" "trail_mode")
+  )
+)
+
+(define-method remove_view
+  (of-object "GvAutopanTool")
+  (c-name "gv_autopan_tool_remove_view")
+  (return-type "gint")
+  (parameters
+    '("GvViewArea*" "view")
   )
 )
 

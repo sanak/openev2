@@ -174,6 +174,7 @@ gv_raster_class_init(GvRasterClass *klass)
     object_class->dispose = gv_raster_dispose;
     object_class->finalize = gv_raster_finalize;
 
+    klass->geotransform_changed = NULL;
     klass->disconnected = NULL;
 }
 
@@ -273,138 +274,17 @@ GvData *
 gv_raster_new( GDALDatasetH dataset, int real_band, 
                GvSampleMethod sm )
 {
-    char     *name;
+	//create the new (empty) raster
     GvRaster *raster = g_object_new (GV_TYPE_RASTER, NULL);
 
-    g_signal_connect(raster, "changed",
-                    G_CALLBACK (gv_raster_changed), NULL);
+	//read in from the dataset.
+    gv_raster_read(raster, dataset, real_band, sm);
 
-    raster->dataset = dataset;
-    GDALReferenceDataset( dataset );
-
-    raster->gdal_band = GDALGetRasterBand(dataset,real_band);
-
-    raster->sm = sm;
-
-    /* set the name */
-    name = (char *) g_malloc(strlen(GDALGetDescription(dataset))+8);
-    sprintf( name, "%s:%d", GDALGetDescription(dataset), real_band );
-    gv_data_set_name( GV_DATA(raster), name );
-    g_free( name );
-
-    switch( GDALGetRasterDataType(raster->gdal_band) )
+    //check if the read was successful - return NULL if not
+	if( raster->cache  == NULL )
     {
-    case GDT_Byte:
-          if( sm == GvSMAverage )
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_byte_real_average;
-          else if( sm == GvSMAverage8bitPhase )
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_byte_realphase_average;
-          else
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_byte_real_sample;
-          raster->type = GV_RASTER_BYTE_REAL;
-          raster->gdal_type = GDT_Byte;
-          break;
-
-        case GDT_CInt16:
-        case GDT_CInt32:
-        case GDT_CFloat32:
-        case GDT_CFloat64:
-          if( sm == GvSMAverage )
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_float_complex_average;
-          else
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_float_complex_sample;
-          raster->type = GV_RASTER_FLOAT_COMPLEX;
-          raster->gdal_type = GDT_CFloat32;
-          break;
-          
-        default:
-          if( sm == GvSMAverage && gv_raster_get_nodata( raster, NULL ) )
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_float_real_average_nodata;
-          else if( sm == GvSMAverage )
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_float_real_average;
-          else
-              raster->average = (void *(*)(GvRaster*,void*,int,int))
-                  gv_raster_float_real_sample;
-          raster->type = GV_RASTER_FLOAT_REAL;
-          raster->gdal_type = GDT_Float32;
-          break;
-    }
-
-    if( raster->type == GV_RASTER_BYTE_REAL 
-        || !gv_raster_autoscale(raster,GvASAAutomatic,-1.0,0,NULL,NULL,NULL) )
-    {
-        raster->min = 0;
-        raster->max = 255;
-    }
-
-    raster->tile_x = 256;
-    raster->tile_y = 256;
-    raster->width = GDALGetRasterXSize(dataset);
-    raster->height = GDALGetRasterYSize(dataset);
-    raster->tiles_across = (raster->width + raster->tile_x-GV_TILE_OVERLAP-1)
-        / (raster->tile_x-GV_TILE_OVERLAP);
-    raster->tiles_down = (raster->height + raster->tile_y-GV_TILE_OVERLAP-1)
-        / (raster->tile_y-GV_TILE_OVERLAP);
-    raster->max_lod = 7;
-    raster->item_size = GDALGetDataTypeSize(raster->gdal_type) / 8;
-    
-    if( GDALGetGeoTransform(dataset, raster->geotransform) != CE_None )
-    {
-        raster->geotransform[0] = 0.0;
-        raster->geotransform[1] = 1.0;
-        raster->geotransform[2] = 0.0;
-        raster->geotransform[3] = 0.0;
-        raster->geotransform[4] = 0.0;
-        raster->geotransform[5] = 1.0;
-    }
-
-    if( GDALGetGCPCount(dataset) > 0
-        && raster->geotransform[0] == 0.0
-        && raster->geotransform[1] == 1.0
-        && raster->geotransform[2] == 0.0
-        && raster->geotransform[3] == 0.0
-        && raster->geotransform[4] == 0.0
-        && raster->geotransform[5] == 1.0 )
-    {
-        gv_data_set_projection( GV_DATA(raster), 
-                                GDALGetGCPProjection( dataset ) );
-
-        gv_raster_set_gcps( raster, 
-                            GDALGetGCPCount(dataset), 
-                            GDALGetGCPs(dataset) );
-    }
-    else
-    {
-        if( EQUAL(GDALGetProjectionRef( dataset ),"") 
-            && raster->geotransform[0] == 0.0
-            && raster->geotransform[1] == 1.0
-            && raster->geotransform[2] == 0.0
-            && raster->geotransform[3] == 0.0
-            && raster->geotransform[4] == 0.0
-            && raster->geotransform[5] == 1.0 )
-        {
-            gv_data_set_projection( GV_DATA(raster), "PIXEL" );
-        }
-        else
-        {
-            gv_data_set_projection( GV_DATA(raster), 
-                                    GDALGetProjectionRef( dataset ) );
-        }
-    }
-
-    raster->max_tiles = raster->tiles_across * raster->tiles_down;
-    if( ( raster->cache = gv_raster_cache_new( raster->max_tiles,
-                                               raster->max_lod ) ) == NULL )
-    {
-    g_free( raster );
-    return NULL;
+        g_free( raster );
+        return NULL;
     }
 
     return GV_DATA(raster);
@@ -540,11 +420,8 @@ gv_raster_read( GvRaster *raster, GDALDatasetH dataset, int real_band,
     }
 
     raster->max_tiles = raster->tiles_across * raster->tiles_down;
-    if( ( raster->cache = gv_raster_cache_new( raster->max_tiles,
-                                               raster->max_lod ) ) == NULL )
-    {
-        g_free( raster->cache );
-    }
+    //gv_raster_cache_new() can return NULL if something goes wrong
+    raster->cache = gv_raster_cache_new( raster->max_tiles, raster->max_lod );
 }
 
 gint *

@@ -52,7 +52,7 @@ typedef struct {
 
 void *SWIG_SimpleGetPtr(char *_c, char *_t);
 void SWIG_SimpleMakePtr(char *_c, const void *_ptr, char *type);
-int PyProgressProxy(double dfComplete, const char *pszMessage, void *pData);
+int CPL_STDCALL PyProgressProxy(double dfComplete, const char *pszMessage, void *pData);
 CPLXMLNode *PyListToXMLTree(PyObject *pyList);
 PyObject *XMLTreeToPyList(CPLXMLNode *psTree);
 int PyIdleTaskProxy(void *task_info);

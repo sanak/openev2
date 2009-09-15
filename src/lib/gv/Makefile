@@ -50,6 +50,7 @@ include $(MKINCLDIR)/generic
           dbfopen.c \
           gextra.c \
           gvareatool.c \
+          gvautopan.c \
           gvdata.c \
           gvlayer.c \
           gvlinetool.c \
@@ -107,6 +108,7 @@ include $(MKINCLDIR)/generic
              gextra.h \
              gv_config.h \
              gvareatool.h \
+             gvautopan.h \
              gvdata.h \
              gview.h \
              gvlayer.h \
@@ -159,7 +161,7 @@ include $(MKINCLDIR)/generic
 #
 
   INCLUDES += -I$(SYSTEM)/resource
-  INCLUDES += $(EV_INCS)
+  INCLUDES += $(EV_INCS) -I/usr/include/pygtk-2.0 `python-config --includes`
 #
 # Libraries to use in library dependency order
 # INSTLIBS depends on ARCHLIBS depends on POSTLIBS

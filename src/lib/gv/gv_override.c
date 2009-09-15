@@ -82,7 +82,7 @@ void SWIG_SimpleMakePtr(char *_c, const void *_ptr, char *type)
 /*      Copied from gdal.i                                              */
 /************************************************************************/
 
-int PyProgressProxy(double dfComplete, const char *pszMessage, void *pData)
+int CPL_STDCALL PyProgressProxy(double dfComplete, const char *pszMessage, void *pData)
 {
     PyProgressData *psInfo = (PyProgressData *) pData;
     PyObject *psArgs, *psResult;
