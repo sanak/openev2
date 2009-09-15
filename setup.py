@@ -165,8 +165,8 @@ if build_it:
         sys.exit(1)
 
     gv_root = 'src/lib/gv'
-    gv_srcs = ['crs.c', 'dbfopen.c', 'gextra.c', 'gvareatool.c', 'gvdata.c',
-              'gvlayer.c', 'gvlinetool.c', 'gvmanager.c', 'gvmarshal.c',
+    gv_srcs = ['crs.c', 'dbfopen.c', 'gextra.c', 'gvareatool.c', 'gvautopan.c',
+              'gvdata.c', 'gvlayer.c', 'gvlinetool.c', 'gvmanager.c', 'gvmarshal.c',
               'gvmesh.c', 'gvnodetool.c', 'gvogr.c', 'gv_override.c',
               'gvpointtool.c', 'gvpoitool.c', 'gvpquerylayer.c', 'gvprint.c',
               'gvproperties.c', 'gvraster.c', 'gvrasteraverage.c',
