@@ -267,7 +267,7 @@ class GvViewWindow(gtk.Window):
         if self.app is None or not hasattr(self.app, 'Tool_List'):
             return
 
-        actions = []
+        actions = self.tool_actions
         for name, ctool in self.app.Tool_List:
             stock_id = None
             accelerator = None
@@ -276,19 +276,19 @@ class GvViewWindow(gtk.Window):
             if items:
                 path, (pos, callback, accelerator) = items[0]
                 splitted = path.split('/')
-                path,label = '/'.join(splitted[:-1]), splitted[-1]
+                path,label = '/OEMenuBar/' + '/'.join(splitted[:-1]), splitted[-1]
+                actions.add_actions([(name, stock_id, label, accelerator, hint, callback)],
+                                     self.view_title)
                 id = self.UImgr.new_merge_id()
-                # MB TODO: handle position
-                self.UImgr.add_ui(id, '/OEMenuBar/'+path, label, name, gtk.UI_MANAGER_MENUITEM, False)
+                self.UImgr.add_ui(id, path, label, name, gtk.UI_MANAGER_MENUITEM, False)
+                menu = self.UImgr.get_widget(path).get_submenu()
+                menu.reorder_child(self.UImgr.get_widget(path+'/'+label), pos+1)
             if ctool.icon_entries.entries:
                 items = ctool.icon_entries.entries[0]
                 filename, duh, hint, pos, callback, help, itype = items
                 stock_id = os.path.basename(filename)[:-4]
                 if help:
                     gvhtml.set_help_topic(item, help)
-            actions.append((name, stock_id, label, accelerator, hint, callback))
-
-        self.tool_actions.add_actions(actions, self.view_title)
 
     def serialize(self,base=None, filename=None ):
         if base is None:
@@ -612,30 +612,28 @@ class GvViewWindow(gtk.Window):
 
         self.app.add_to_rfl(filename)
 
-        GvOGRDlg(hDS, self)
+        if hDS.GetLayerCount() == 1:
+            self.file_open_ogr_by_layer(hDS.GetLayer(0))
+        else:
+            GvOGRDlg(hDS, self)
 
         return True
 
     def file_open_ogr_by_layer(self, layer):
-
-        import _gv
-
-        raw_data = _gv.gv_shapes_from_ogr_layer( layer )
-        if raw_data is None:
-            return False
-
-        shape_data = gview.GvShapes(_obj=raw_data)
+        shape_data = gview.GvShapes(ogrlayer=layer)
         if shape_data is None:
             return
 
         if len(shape_data) > 0:
             gview.undo_register(shape_data)
 
-            layer = gview.GvShapesLayer( shape_data )
+            layer = gview.GvShapesLayer(shape_data)
             self.viewarea.add_layer(layer)
             self.viewarea.set_active_layer(layer)
         else:
             # I am not sure how to blow away the GvShapes properly.
+            # MB: I don't know who wrote the above comment but I don't think
+            #     anything needs to be done here...
             pass
 
         return True
@@ -908,27 +906,13 @@ class GvViewWindow(gtk.Window):
             self.app.load_project(filename)
             return
 
+        if self.file_open_ogr_by_name(filename):
+            return
+
         dataset = gview.manager.get_dataset(filename)
         if dataset is None:
-            err = gdal.GetLastErrorNo()
-            if err not in (0,4):
-                show_error(filename)
-                return
-
-        # catch ogr file open failure and pop up
-        # a warning rather than dumping to screen.
-        try:
-            if dataset is None and self.file_open_ogr_by_name(filename):
-                show_error(filename)
-                return
-
-            if dataset is None:
-                show_error(filename)
-                return
-        except:
-            if dataset is None:
-                show_error(filename)
-                return
+            show_error(filename)
+            return
 
         self.open_gdal_dataset(dataset, lut, sds_check, add_to_rfl=1)
 
