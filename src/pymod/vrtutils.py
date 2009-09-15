@@ -1408,12 +1408,12 @@ class VRTDatasetConstructor:
         prjbase=[gdal.CXT_Element,'SRS',[gdal.CXT_Text,projection]]      
         self.base.append(prjbase)
 
-    def SetGeoTransform(self, gt):
+    def SetGeoTransform(self, gt, vrt_options=None):
         """ Add a geotransform (input is a tuple of 6 numbers) """
-        gbase=serializeGeoTransform(geotransform=gt)
+        gbase=serializeGeoTransform(geotransform=gt, vrt_options=vrt_options)
         self.base.append(gbase)
 
-    def SetGCPs(self, gcps, projection='', reprojection=None):
+    def SetGCPs(self, gcps, projection='', reprojection=None, vrt_options=None):
         """ Add gcps from a list of GDAL GCP objects.
             Optional projection argument should be a WKT string.
             Optional reprojection argument should also be a WKT
@@ -1421,7 +1421,7 @@ class VRTDatasetConstructor:
             argument is also specified.
         """
         gcpbase=serializeGCPs(gcplist=gcps,projection_attr_txt=projection,
-                              reproj=reprojection)
+                              reproj=reprojection, vrt_options=vrt_options)
         self.base.append(gcpbase)
 
     def GetVRTLines(self):
