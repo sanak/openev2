@@ -72,9 +72,8 @@
 #
 #PYTHON_INC = `python -c "import distutils.sysconfig;\
 #             print distutils.sysconfig.get_python_inc()"`
-#PYTHON_VER = `python -c "import sys;print sys.version[0]+sys.version[2]"`
 
-  PYTHON_VER = 2.4
+  PYTHON_VER = `python -V 2>&1 | sed -r 's|.* (.\..)\..|\1|'`
   PYTHON_ROOT = ${INSTALL_PREFIX}
   PYGTK = $(PYTHON_ROOT)/share/pygtk
   PYGTK_VER = 2.0
@@ -105,7 +104,7 @@
 
   GL_INCS =
   GL_LIBSL =
-  GL_LIBS = -levtess -lGLU -lGL
+  GL_LIBS = -lGLU -lGL
 
 #
 # Tie it all together 
