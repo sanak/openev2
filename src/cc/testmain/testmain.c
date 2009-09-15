@@ -140,7 +140,7 @@ create_view(GvShapes *shapes, GvRaster *raster,  GvRaster *height)
 
     if( raster != NULL )
     {
-        GtkObject *raster_layer;
+        GObject *raster_layer;
         raster_layer = gv_raster_layer_new(GV_RLM_AUTO, raster, NULL);
 
         gv_view_area_add_layer(GV_VIEW_AREA(view), 
@@ -343,7 +343,7 @@ static void _load_ogr(GtkWidget *view, char *filename)
 {
     GvData     *raw_data;
     GvShapes   *shape_data;
-    GtkObject  *layer;
+    GObject  *layer;
 
     int index = 0;
 

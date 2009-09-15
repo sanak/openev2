@@ -45,7 +45,7 @@ include $(MKINCLDIR)/generic
 # Locations of needed header files
 #
 
-  INCLUDES += -I$(SYSTEM)/resource
+  INCLUDES += -I$(SYSTEM)/resource -I$(SYSTEM)/src/lib/gv
   INCLUDES += $(EV_INCS)
 
 #
