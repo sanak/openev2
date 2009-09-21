@@ -2491,6 +2491,11 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         """
         return _gv.RasterLayer.get_data(self, isource)
 
+    def get_dataset_raster(self, band):
+        """Convenience method to get a GvRaster from parent raster's dataset"""
+        dataset = self.parent.get_dataset()
+        return manager.get_dataset_raster(dataset, band)
+
     def source_get_lut(self, isource=0):
         """Fetch the lut for a source
 
@@ -2544,10 +2549,10 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
             else:
                 max = 255
 
-        prop = self.get_property("_scale_lock")
-        if prop and prop == "locked":
-            if self.get_property("_scale_limits"): 
-                min, max = map(float, prop.split())
+        if self.get_property("_scale_lock") == "locked":
+            limits = self.get_property("_scale_limits")
+            if limits: 
+                min, max = map(float, limits.split())
 
         #
         # Check for GvRasterLut default enhancement type set for
@@ -3481,7 +3486,9 @@ class GvManager(_gv.Manager):
         dataset = self.add_dataset(dataset)
         swig_ds = self.get_swig_ds(dataset)
         raster = _gv.Manager.get_dataset_raster(self, swig_ds, band)
-        if raster:
+        if raster and isinstance(raster, GvRaster):
+            return raster
+        else:
             gvraster = GvRaster(_obj=raster)
             gvraster.connect('destroy', self.raster_destroyed)
             return gvraster
