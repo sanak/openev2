@@ -52,16 +52,14 @@ def LaunchRasterPropDialog(layer):
 ##    return new_dialog
 
 class GvRasterSource(gtk.Frame):
-    def __init__(self, name, layer, src_index, master_dialog):
-        gtk.Frame.__init__(self,name)
-        self.master_dialog = master_dialog
+    def __init__(self, name, layer, src_index):
+        gtk.Frame.__init__(self, name)
         self.updating = False
         self.src_index = src_index
 
         # Eventually the following will have to be more sophisticated.
         if layer is not None:
             self.layer = layer
-##            self.gvraster = layer.get_parent()
             self.display_change_id = layer.connect('display-change', self.gui_refresh)
 
         vbox = gtk.VBox(spacing=3)
@@ -74,32 +72,29 @@ class GvRasterSource(gtk.Frame):
         ds = self.layer.parent.get_dataset()
         band_count = ds.RasterCount
 
-        # Fill in the dictionary
-        #
-        self.__bandDic = {}
-        self.__allBands = []
-        self.__bandNums = []
-        for band in range(band_count) :
-            bandKey = self.band_desc(band+1)
-            self.__allBands.append( bandKey )
-            self.__bandNums.append( str(band+1) )
-            self.__bandDic[bandKey] = str(band+1)
-
-        for band in range(min(30,band_count)):
-            band_list.append( self.band_desc(band+1) )
-
-        if band_count > 30:
-            band_list.append( '...'+self.__allBands[-1] )
+        for band in range(1, band_count+1) :
+            desc = ds.GetRasterBand(band).GetDescription()
+            if desc:
+                band_desc = '%d: %s' % (band, desc)
+            else:
+                band_desc = str(band)
+            band_list.append(band_desc)
 
         hbox = gtk.HBox(spacing=5)
         vbox.pack_start(hbox, expand=False)
-        hbox.pack_start(gtk.Label('Band:'))
-        self.band_combo = pgu.ComboBoxEntry(band_list, self.set_band_cb)
-        hbox.pack_start(self.band_combo)
-##        self.band_combo.child.connect('changed', self.set_band_cb)
-        self.band_combo.entry.connect('key_press_event', self.combo_entry_key_press_cb)
+        hbox.pack_start(pgu.Label('Band:'))
+        self.band_combo = pgu.ComboText(band_list, action=self.set_band_cb)
+        if ds.RasterCount > 20:
+            self.band_combo.set_wrap_width(2)
+        hbox.pack_start(self.band_combo, expand=False)
 
-##        [self.band_combo.append_text(b) for b in band_list]
+        # ------- Constant Value -----
+        self.const_entry = gtk.Entry()
+        self.const_entry.set_max_length(8)
+        self.const_entry.set_size_request(80, -1)
+        self.const_entry.connect('activate', self.const_cb)
+        self.const_entry.connect('leave-notify-event', self.const_cb)
+        hbox.pack_start(self.const_entry, expand=False)
 
         # ------ Establish scaling range ------
 
@@ -150,8 +145,9 @@ class GvRasterSource(gtk.Frame):
 
         self.min_entry = gtk.Entry()
         self.min_entry.set_max_length(8)
+        self.min_entry.set_size_request(80, -1)
         self.min_entry.connect('activate', self.entry_cb)
-##        self.min_entry.connect('leave-notify-event', self.entry_cb)
+        self.min_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.min_entry, expand=False)
 
         # ------ Scale Max -------
@@ -168,8 +164,9 @@ class GvRasterSource(gtk.Frame):
 
         self.max_entry = gtk.Entry()
         self.max_entry.set_max_length(8)
+        self.max_entry.set_size_request(80, -1)
         self.max_entry.connect('activate', self.entry_cb)
-##        self.max_entry.connect('leave-notify-event', self.entry_cb)
+        self.max_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.max_entry, expand=False)
 
         # ------ NODATA -------
@@ -179,157 +176,77 @@ class GvRasterSource(gtk.Frame):
         hbox.pack_start(gtk.Label('NODATA value:'), expand=False)
 
         self.nodata_entry = gtk.Entry()
-        self.nodata_entry.set_max_length(19)
+#        self.nodata_entry.set_max_length(19)
         self.nodata_entry.connect('activate', self.entry_cb)
-##        self.nodata_entry.connect('leave-notify-event', self.entry_cb)
+        self.nodata_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.nodata_entry, expand=False)
 
-        if (src_index < 3) and (ds.RasterCount > src_index):
+        if src_index < 3 and ds.RasterCount > src_index:
             nodata = ds.GetRasterBand(src_index+1).GetNoDataValue()
             if nodata is not None:
-                if (type(nodata) != type(complex(1,0))):
-                    nodata = complex(nodata,0)
+                if not isinstance(nodata, complex):
+                    nodata = complex(nodata, 0)
                 self.layer.nodata_set(src_index, nodata.real, nodata.imag)
-
-        # ------- Constant Value -----
-        self.const_entry = gtk.Entry()
-        self.const_entry.set_max_length(8)
-        self.const_entry.connect('activate', self.const_cb)
-##        self.const_entry.connect('leave-notify-event', self.const_cb)
-        vbox.pack_start(self.const_entry, expand=False)
 
         self.updating = False
 
-        self.gui_refresh()
-#        print self.__allBands,  self.__bandDic, self.__bandNums
-
         self.connect('destroy', self.cleanup)
-
-    def combo_entry_key_press_cb( self, entryBox, event, *args ) :
-        if self.updating:
-            return
-
-        if( event.keyval == gtk.keysyms.Right ) :
-            try :
-                currentIndex = self.__allBands.index( entryBox.get_text() )
-                nextIndex = min( len(self.__allBands)-1, currentIndex+1 )
-                entryBox.set_text( self.__allBands[nextIndex] )
-            except ValueError : 
-                return
-
-        elif( event.keyval == gtk.keysyms.Left ) : 
-            try :
-                currentIndex = self.__allBands.index( entryBox.get_text() )
-                prevIndex = max( 0, currentIndex - 1 )
-                entryBox.set_text( self.__allBands[prevIndex] )
-            except ValueError : 
-                return
-
-        elif( event.keyval == gtk.keysyms.Return ) : 
-            entryText = entryBox.get_text()
-            if( entryText in self.__bandDic.keys() ) : 
-                pass
-            else : 
-                try :
-                    bandIndex = self.__bandNums.index(entryText)
-                    entryBox.set_text( self.__allBands[bandIndex] )
-                except ValueError : 
-                    entryBox.set_text("")
-                except KeyError :
-                    entryBox.set_text("")
 
     def __del__(self):
         print 'Destroying GvRasterSource'
 
     def cleanup(self, *args):
         self.layer = None
-##        self.gvraster = None
-
-    def band_desc(self,iband):
-        ds = self.layer.parent.get_dataset()
-        desc = ds.GetRasterBand(iband).GetDescription()
-        if desc:
-            # XXX: band descriptions must be different, because we will use
-            # them as keys in dictionary. That's why we print band number
-            # here.
-            return '%d: %s' % (iband, desc)
-        else:
-            return '%d' % iband
 
     def gui_refresh(self, *args):
-        if self.layer is None:
-            return
-
-        if self.updating:
+        if self.layer is None or self.updating:
             return
 
         self.updating = True
+        idx = self.src_index
+
         mode = self.layer.get_mode()
+        new_min = self.layer.min_get(idx)
+        new_max = self.layer.max_get(idx)
         if mode == RLM_COMPLEX:
-            new_min = max(0.0, self.layer.min_get(self.src_index))
-        else:
-            new_min = self.layer.min_get(self.src_index)
+            new_min = max(0.0, new_min)
 
-        if self.layer.min_get(self.src_index) < self.min_adjustment.lower:               
-            self.min_adjustment.set_all( new_min,
-                                         new_min,
-                                         self.min_adjustment.upper,
-                                         self.min_adjustment.step_increment,
-                                         self.min_adjustment.page_increment,
-                                         self.min_adjustment.page_size)
+        if new_min < self.min_adjustment.lower:
+            self.min_adjustment.value = new_min
+            self.min_adjustment.lower = new_min
             self.min_adjustment.changed()                
-            self.max_adjustment.set_all( new_min,
-                                         new_min,
-                                         self.max_adjustment.upper,
-                                         self.max_adjustment.step_increment,
-                                         self.max_adjustment.page_increment,
-                                         self.max_adjustment.page_size)
+
+        if new_max > self.max_adjustment.upper:
+            self.max_adjustment.value = new_max
+            self.max_adjustment.lower = new_max
             self.max_adjustment.changed()
 
-        if self.layer.max_get(self.src_index) > self.max_adjustment.upper:
-            self.min_adjustment.set_all( new_min,
-                                         self.min_adjustment.lower,
-                                         self.layer.max_get(self.src_index),
-                                         self.min_adjustment.step_increment,
-                                         self.min_adjustment.page_increment,
-                                         self.min_adjustment.page_size)
-            self.min_adjustment.changed()
-            self.max_adjustment.set_all( new_min,
-                                         self.max_adjustment.lower,
-                                         self.layer.max_get(self.src_index),
-                                         self.max_adjustment.step_increment,
-                                         self.max_adjustment.page_increment,
-                                         self.max_adjustment.page_size)
-            self.max_adjustment.changed()
-
-        self.min_adjustment.set_value(new_min)
         self.min_entry.set_text(str(new_min))
+        self.max_entry.set_text(str(new_max))
 
-        self.max_adjustment.set_value(self.layer.max_get(self.src_index))
-        self.max_entry.set_text(str(self.layer.max_get(self.src_index)))
-        nodata = self.layer.nodata_get(self.src_index)
+        nodata = self.layer.nodata_get(idx)
         if isinstance(nodata, tuple):
-            self.nodata_entry.set_text(str(nodata[0])+'+'+str(nodata[1])+'j')
+            self.nodata_entry.set_text('%s+%sj' % nodata)
         else:
             self.nodata_entry.set_text(str(nodata))
 
-        self.const_entry.set_text(str(self.layer.get_const_value(self.src_index)))
+        self.const_entry.set_text(str(self.layer.get_const_value(idx)))
 
-        raster = self.layer.get_data(self.src_index)
+        raster = self.layer.get_data(idx)
         if raster is None:
-            self.const_entry.show()
-            self.min_hbox.hide()
-            self.max_hbox.hide()
-            self.nodata_hbox.hide()
+            self.const_entry.set_sensitive(True)
+            self.min_hbox.set_sensitive(False)
+            self.max_hbox.set_sensitive(False)
+            self.nodata_hbox.set_sensitive(False)
             self.band_combo.set_active_text('constant')
         else:
-            self.const_entry.hide()
-            self.max_hbox.show()
-            if mode != RLM_COMPLEX and not band_is_complex(self.layer, self.src_index):
-                self.min_hbox.show()
+            self.const_entry.set_sensitive(False)
+            self.max_hbox.set_sensitive(True)
+            if mode != RLM_COMPLEX and not band_is_complex(self.layer, idx):
+                self.min_hbox.set_sensitive(True)
             else:
-                self.min_hbox.hide()
-            self.nodata_hbox.show()
+                self.min_hbox.set_sensitive(False)
+            self.nodata_hbox.set_sensitive(True)
 
             # Set the band selector.
             band = raster.get_band()
@@ -337,68 +254,42 @@ class GvRasterSource(gtk.Frame):
             for iband in range(dataset.RasterCount):
                 test_band = dataset.GetRasterBand(iband+1)
                 if test_band.this == band.this:
-                    self.band_combo.set_active_text(self.band_desc(iband+1))
+                    self.band_combo.set_active(iband+1)
                     break
 
         self.updating = False
 
     def set_band_cb(self, combo):
-        text = combo.get_active_text()
-        if not text.strip():
-            # this happens when the entry is cleared during
-            # text replacement
-            return
         if self.updating:
             return
 
-        print text
-        if text == 'constant':
-            self.layer.set_source(self.src_index, None,
-                                  self.layer.min_get(self.src_index),
-                                  self.layer.max_get(self.src_index),
-                                  self.layer.get_const_value(self.src_index),
-                                  self.layer.get_source_lut(self.src_index),
+        self.updating = True
+        band_number = combo.get_active()
+        idx = self.src_index
+        if band_number == 0:
+            self.layer.set_source(idx, None,
+                                  self.layer.min_get(idx),
+                                  self.layer.max_get(idx),
+                                  self.layer.get_const_value(idx),
+                                  self.layer.source_get_lut(idx),
                                   None)
         else:
-            try:            
-                tokens = self.__bandDic[text]
-            except KeyError :
-                print self.__bandDic
-                traceback.print_exc()
-                tokens = ""
-
-            try:
-                band_number = int(tokens[0])
-            except:
-                traceback.print_exc()
-                return
-
-            raster = self.layer.get_data(self.src_index)
-            if raster is not None:
-                dataset = raster.get_dataset()
-                if self.layer.get_property('_scale_lock') and \
-                    self.layer.get_property('_scale_lock') == 'locked': 
-
-                    if self.layer.get_property("_scale_limits"):
-                        rasterMin, rasterMax = \
-                            map(float, split(self.layer.get_property("_scale_limits")))
-                else :
-                    rasterMin = raster.get_min()
-                    rasterMax = raster.get_max()
-
-                self.layer.set_source(self.src_index, raster,
-                                    rasterMin, rasterMax,
-                                    self.layer.get_const_value(self.src_index),
-                                    self.layer.get_source_lut(self.src_index),
+            dataset = self.layer.parent.get_dataset()
+            raster = self.layer.get_dataset_raster(band_number)
+            if raster:
+                self.layer.set_source(idx, raster,
+                                    raster.min, raster.max,
+                                    self.layer.get_const_value(idx),
+                                    self.layer.source_get_lut(idx),
                           dataset.GetRasterBand(band_number).GetNoDataValue())
 
-        if self.src_index < 3 and self.master_dialog.greyscale_is_set():
-            self.master_dialog.enforce_greyscale(self.src_index)
+        self.enforce_greyscale()
 
         # enable alpha support if user modifies alpha band.
-        if self.src_index == 3:
-            self.layer.blend_mode_set( RL_BLEND_FILTER )
+        if idx == 3:
+            self.layer.blend_mode_set(RL_BLEND_FILTER)
 
+        self.updating = False
         self.gui_refresh()
 
     def adjustment_cb(self, adjustment, *args):
@@ -414,8 +305,7 @@ class GvRasterSource(gtk.Frame):
         else:
             self.layer.max_set(self.src_index, value)
 
-        if self.src_index < 3 and self.master_dialog.greyscale_is_set():
-            self.master_dialog.enforce_greyscale(self.src_index)
+        self.enforce_greyscale()
 
     def entry_cb(self, entry, *args):
         if self.updating:
@@ -428,37 +318,48 @@ class GvRasterSource(gtk.Frame):
             return
 
         if entry == self.min_entry:
-            self.layer.min_set(self.src_index, value.real)
+            self.min_adjustment.value = value.real
         elif entry == self.max_entry:
-            self.layer.max_set(self.src_index, value.real)
+            self.max_adjustment.value = value.real
         else:
             self.layer.nodata_set(self.src_index, value.real, value.imag)
 
-        if self.src_index < 3 and self.master_dialog.greyscale_is_set():
-            self.master_dialog.enforce_greyscale(self.src_index)
+        self.enforce_greyscale()
 
     def const_cb(self,entry,*args):
         if self.updating:
             return
 
-        try:
-            self.layer.set_source(self.src_index,
-                                  self.layer.get_data(self.src_index),
-                                  self.layer.min_get(self.src_index),
-                                  self.layer.max_get(self.src_index),
-                                  int(entry.get_text()),
-                                  self.layer.get_source_lut(self.src_index),
-                                  self.layer.nodata_get(self.src_index))
-        except:
-            traceback.print_exc()
-            self.const_entry.set_text(str(self.layer.get_const_value(self.src_index)))
+        idx = self.src_index
+        const = entry.get_text()
+        if const.isdigit():
+            self.layer.set_source(idx,
+                                  self.layer.get_data(idx),
+                                  self.layer.min_get(idx),
+                                  self.layer.max_get(idx),
+                                  int(const),
+                                  self.layer.source_get_lut(idx),
+                                  self.layer.nodata_get(idx))
 
         # enable alpha support if user modifies alpha band.
-        if self.src_index == 3:
+        if idx == 3:
             self.layer.blend_mode_set(RL_BLEND_FILTER)
 
-        if self.src_index < 3 and self.master_dialog.greyscale_is_set():
-            self.master_dialog.enforce_greyscale(self.src_index)
+        self.enforce_greyscale()
+
+    def set_scaling(self, min_scale=None, max_scale=None):
+        raster = self.layer.get_data(self.src_index)
+        if min_scale is None:
+            min_scale = raster.min
+        if max_scale is None:
+            max_scale = raster.max
+        self.min_adjustment.value = min_scale
+        self.max_adjustment.value = max_scale
+
+    def enforce_greyscale(self):
+        master_dialog = self.get_toplevel()
+        if self.src_index < 3 and master_dialog.greyscale_is_set():
+            master_dialog.enforce_greyscale(self.src_index)
 
 class GvRasterPropDialog(gtk.Window):
     def __init__(self, layer):
@@ -535,49 +436,34 @@ class GvRasterPropDialog(gtk.Window):
         self.notebook.append_page(self.source_pane, gtk.Label('Raster Source'))
 
         if self.layer.get_mode() == RLM_RGBA:
-
-            source = GvRasterSource('Red',self.layer,0,self)
-            self.source_pane.pack_start(source, expand=False)
-            self.sources.append(source)
-
-            source = GvRasterSource('Green',self.layer,1,self)
-            self.source_pane.pack_start(source, expand=False)
-            self.sources.append(source)
-
-            source = GvRasterSource('Blue',self.layer,2,self)
-            self.source_pane.pack_start(source, expand=False)
-            self.sources.append(source)
-
-            source = GvRasterSource('Alpha',self.layer,3,self)
-            self.source_pane.pack_start(source, expand=False)
-            self.sources.append(source)
+            for iSource,channel in enumerate(['Red','Green','Blue','Alpha']):
+                source = GvRasterSource(channel, self.layer, iSource)
+                self.source_pane.pack_start(source, expand=False)
+                self.sources.append(source)
 
             self.grey_toggle = gtk.CheckButton(label='Greyscale Lock')
             self.grey_toggle.connect('toggled', self.greyscale_cb)
             self.source_pane.pack_start(self.grey_toggle, expand=False)
-            self.grey_toggle.set_active( self.greyscale_is_set() )
+            self.grey_toggle.set_active(self.greyscale_is_set())
 
             scaleHBox = gtk.HBox(spacing=10)
             self.scale_toggle = gtk.CheckButton(label="Scale Lock")
             self.scale_min_entry = gtk.Entry()
             self.scale_max_entry = gtk.Entry()
-            self.scale_min_entry.connect( "activate", self.activateLockEntry_cb )
-            self.scale_max_entry.connect( "activate", self.activateLockEntry_cb )
-            w, h = self.scale_min_entry.size_request()
-            self.scale_min_entry.set_size_request(50, h)
-            self.scale_max_entry.set_size_request(50, h)
+            self.scale_min_entry.connect("activate", self.activateLockEntry_cb)
+            self.scale_max_entry.connect("activate", self.activateLockEntry_cb)
+            self.scale_min_entry.set_size_request(50, -1)
+            self.scale_max_entry.set_size_request(50, -1)
 
+            scaleHBox.pack_start(self.scale_toggle) 
+            scaleHBox.pack_start(self.scale_min_entry)
+            scaleHBox.pack_start(self.scale_max_entry)
 
-            scaleHBox.pack_start( self.scale_toggle    ) 
-            scaleHBox.pack_start( self.scale_min_entry )
-            scaleHBox.pack_start( self.scale_max_entry )
-
-            self.scale_toggle.connect( "toggled", self.scalelock_cb)
-            self.source_pane.pack_start( scaleHBox, expand=False )
-            self.scale_toggle.set_active( self.scalelock_is_set() )
-
+            self.scale_toggle.connect("toggled", self.scalelock_cb)
+            self.source_pane.pack_start(scaleHBox, expand=False)
+            self.scale_toggle.set_active(self.scalelock_is_set())
         else:
-            source = GvRasterSource('Raster',self.layer,0,self)
+            source = GvRasterSource('Raster', self.layer, 0)
             self.source_pane.pack_start(source, expand=False)
             self.sources.append(source)
 
@@ -929,102 +815,68 @@ class GvRasterPropDialog(gtk.Window):
             self.lut_pane.show()
             self.complex_lut_om.show()
 
-        #elif lut_tuple[2] == 1:
-        #    lut_rgba = lut_tuple[0]
-        #    lut_rgb = gview.rgba_to_rgb(lut_rgba)
-        #    
-        #    self.lut_pane.show()
-        #    self.lut_preview.size(256,32)
-#
-        #    for i in range(32):
-        #        self.lut_preview.draw_row( lut_rgb, 0, i, 256)
-#
-        #    self.complex_lut_om.hide()
-        #    self.lut_preview.queue_draw()
-        #else:
-        #    lut_rgba = lut_tuple[0]
-        #    lut_rgb = gview.rgba_to_rgb(lut_rgba)
-        #    
-        #    self.lut_pane.show()
-        #    self.lut_preview.size(256,256)
-        #    for row in range(256):
-        #        row_data = lut_rgb[row*768:(row+1)*768]
-        #        self.lut_preview.draw_row( row_data, 0, row, 256)
-#
-        #    self.complex_lut_om.show()
-        #    self.lut_preview.queue_draw()
-
     def name_cb(self, *args):
         if self.layer_name.get_text() != self.layer.get_name():
             self.layer.set_name( self.layer_name.get_text() )
 
     # Visibility changing
-    def visibility_cb( self, widget ):
+    def visibility_cb(self, widget):
         self.layer.set_visible( self.vis_yes.get_active())
 
     # Readonly changing
-    def edit_cb( self, widget ):
+    def edit_cb(self, widget):
         self.layer.set_read_only( self.edit_no.get_active() )
 
-    def scalelock_is_set( self ) : 
-        if( self.layer.get_property('_scale_lock') is not None and
-            self.layer.get_property('_scale_lock') == 'locked' ) :
-                return 1
-        else :
-            return 0
+    def scalelock_is_set(self): 
+        return self.layer.get_property('_scale_lock') == 'locked'
 
-    def activateLockEntry_cb( self, *args ) : 
-        if( self.scale_toggle.get_active() ) :
-            self.scalelock_cb()
+    def activateLockEntry_cb(self, *args):
+        if not self.scale_toggle.get_active():
+            self.scale_toggle.set_active(True)
+        else:
+            self.scalelock_cb(self.scale_toggle)
 
-    def scalelock_cb( self, *args ) : 
-        if( self.scalelock_is_set() ) : 
-            self.layer.set_property('_scale_lock', 'unlocked')
-        else :
-            self.layer.set_property('_scale_lock', 'locked'  )
+    def scalelock_cb(self, toggle):
+        locked = toggle.get_active()
+        self.layer.set_property('_scale_lock', ('unlocked','locked')[locked])
+        min_scale, max_scale = None, None
 
-        if( self.scalelock_is_set() ):
-            try :
-                min_scale = atof( self.scale_min_entry.get_text() )
-                max_scale = atof( self.scale_max_entry.get_text() )
-            except ValueError : 
+        if locked:
+            min_text, max_text = self.scale_min_entry.get_text(), self.scale_max_entry.get_text()
+            if min_text and max_text:
+                min_scale, max_scale = float(min_text), float(max_text)
+            else: 
                 min_scale, max_scale = self.layer.min_get(0), self.layer.max_get(0)
-                self.scale_min_entry.set_text( str(min_scale) )
-                self.scale_max_entry.set_text( str(max_scale) )
+                self.scale_min_entry.set_text(str(min_scale))
+                self.scale_max_entry.set_text(str(max_scale))
 
-            self.layer.set_property \
-                ('_scale_limits', str(min_scale) + ' ' + str(max_scale) )
+            self.layer.set_property('_scale_limits', '%f %f' % (min_scale, max_scale))
 
-            for iSource in [0,1,2] :
-                self.layer.min_set(iSource, min_scale)
-                self.layer.max_set(iSource, max_scale)
+        for source in self.sources[:-1]:
+            source.set_scaling(min_scale, max_scale)
 
     def greyscale_is_set(self):
-        if self.layer.get_property('_greyscale_lock') is not None \
-           and self.layer.get_property('_greyscale_lock') == 'locked':
-            return 1
-        else:
-            return 0
+        return self.layer.get_property('_greyscale_lock') == 'locked'
 
-    def greyscale_cb(self, *args):
-        if self.greyscale_is_set():
-            self.layer.set_property('_greyscale_lock','unlocked')
+    def greyscale_cb(self, toggle):
+        locked = toggle.get_active()
+        self.layer.set_property('_greyscale_lock', ('unlocked','locked')[locked])
 
+        if locked:
             if self.layer.get_mode() == RLM_RGBA:
                 self.complex_lut_om.set_history(0)
                 self.layer.complex_lut('magnitude')
-        else:
-            self.layer.set_property('_greyscale_lock','locked')
 
-        self.grey_toggle.set_active( self.greyscale_is_set() )
-
-        if self.greyscale_is_set():
             self.enforce_greyscale(0)
+        else:
+            # MB: we should do something here but I am not sure what...
+            pass
 
         # show/hide lut as necessary    
         self.update_gui()
 
     def enforce_greyscale(self, isrc):
+        # MB: this needs to be redone...
         if isrc != 0:
             self.layer.set_source(0, self.layer.get_data(isrc),
                                   self.layer.min_get(isrc),
@@ -1142,7 +994,7 @@ class GvRasterPropDialog(gtk.Window):
             self.update_proj_text()
 
     # Dialog closed, remove references to python object
-    def close( self, *args ):
+    def close(self, *args):
         prop_dialog_list.remove(self)
         self.layer.disconnect(self.display_change_id)
         self.layer.disconnect(self.teardown_id)
@@ -1152,7 +1004,7 @@ class GvRasterPropDialog(gtk.Window):
         self.destroy()
 
     # Force GUI Refresh
-    def refresh_cb( self, widget, args ):
+    def refresh_cb(self, widget, *args):
         self.update_gui()
 
 def band_is_complex(layer,src_index):
