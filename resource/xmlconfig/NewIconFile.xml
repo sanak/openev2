@@ -17,7 +17,7 @@
   <toolitem action='ZoomOut'/>
   <toolitem action='Refresh'/>
   <separator/>
-  <placeholder name='RawGeo'/>
+  <toolitem action='RawGeo'/>
   <separator/>
   <toolitem action='HelpOpenEV'/>
   <placeholder name='IdleBusy'/>
