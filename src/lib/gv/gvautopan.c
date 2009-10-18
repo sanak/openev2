@@ -146,15 +146,15 @@ static void gv_autopan_tool_finalize(GObject *object);
 
 static void gv_autopan_tool_sv_draw(GvTool *tool, GvViewArea *view);
 
-static void gv_autopan_tool_sv_button_press(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_button_press(GtkWidget *view,
                                             GdkEventButton *event,
                                             gpointer *data_tool);
 
-static void gv_autopan_tool_sv_button_release(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_button_release(GtkWidget *view,
                                             GdkEventButton *event,
                                             gpointer *data_tool);
 
-static void gv_autopan_tool_sv_motion_notify(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_motion_notify(GtkWidget *view,
                                             GdkEventMotion *event,
                                             gpointer *data_tool);
 static gint
@@ -576,7 +576,10 @@ gint gv_autopan_tool_play(GvAutopanTool *tool)
         g_timer_start(timer);
         //run the main iteration (to handle any user input), passing FALSE means the function will not be blocking
         //i guess it will take control back after 2 seconds or if there are no more events waiting to be handled
+    	//if called from a signal handler, need to release the thread lock because g_main_context_iteration will block to acquire it
+        gdk_threads_leave();
         while( g_timer_elapsed(timer,NULL) < 2.0 && g_main_context_iteration(NULL, FALSE) );
+        gdk_threads_enter();
         g_timer_destroy(timer);
 
         //note: now that the main iteration has run, any function could have been called so no assumptions can be made here
@@ -1816,7 +1819,7 @@ static void gv_autopan_tool_sv_draw(GvTool *tool, GvViewArea *view)
 
 }
 
-static void gv_autopan_tool_sv_button_press(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_button_press(GtkWidget *view,
                                             GdkEventButton *event,
                                             gpointer *data_tool)
 {
@@ -1836,7 +1839,7 @@ static void gv_autopan_tool_sv_button_press(GtkWidget *view,
 
     if ( (event->type != GDK_BUTTON_PRESS) ||
          (event->button != 1) )
-        return;
+        return FALSE;
 
 
     tool = (GvAutopanTool *) data_tool;
@@ -1852,13 +1855,13 @@ static void gv_autopan_tool_sv_button_press(GtkWidget *view,
     if (viewidx < 0)
     {
         g_error("View not found in autopan tool list!");
-        return;
+        return FALSE;
     }
 
     item = &(g_array_index(tool->view_items, GvAutopanViewItem, viewidx));
 
     if ((item->can_resize == 0) && (item->can_reposition == 0))
-        return;
+        return FALSE;
 
     pick = gv_autopan_tool_pick(tool, (GvViewArea *) view, event->x, event->y);
     if (( pick == PICK_CENTER ) && ( item->can_reposition == 1 ) )
@@ -1866,10 +1869,14 @@ static void gv_autopan_tool_sv_button_press(GtkWidget *view,
         item->translating = 1;
         item->play_flag = tool->play_flag;
         gv_autopan_tool_pause(tool);
+        //the center is being repositioned - the signal has been handled so return TRUE
+        //don't want other tools to get the signal
+        return TRUE;
     }
+    return FALSE;
 }
 
-static void gv_autopan_tool_sv_button_release(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_button_release(GtkWidget *view,
                                             GdkEventButton *event,
                                             gpointer *data_tool)
 {
@@ -1887,7 +1894,7 @@ static void gv_autopan_tool_sv_button_release(GtkWidget *view,
     tool = (GvAutopanTool *) data_tool;
 
     //make sure the view has not been deactivated for the call to map_view_to_view_xy
-    g_return_if_fail(GV_TOOL(tool)->view != NULL);
+    g_return_val_if_fail(GV_TOOL(tool)->view != NULL, FALSE);
 
     viewidx = -1;
     for (i=0; i<tool->num_views; i++)
@@ -1900,13 +1907,13 @@ static void gv_autopan_tool_sv_button_release(GtkWidget *view,
     if (viewidx < 0)
     {
         g_error("View not found in autopan tool list!");
-        return;
+        return FALSE;
     }
 
     item = &(g_array_index(tool->view_items, GvAutopanViewItem, viewidx));
 
     if ((item->can_resize == 0) && (item->can_reposition == 0))
-        return;
+        return FALSE;
 
     if (item->translating == 1)
     {
@@ -1926,10 +1933,10 @@ static void gv_autopan_tool_sv_button_release(GtkWidget *view,
             item->translating = 0;
         }
     }
-
+    return FALSE;
 }
 
-static void gv_autopan_tool_sv_motion_notify(GtkWidget *view,
+static gboolean gv_autopan_tool_sv_motion_notify(GtkWidget *view,
                                             GdkEventMotion *event,
                                             gpointer *data_tool)
 {
@@ -1958,13 +1965,13 @@ static void gv_autopan_tool_sv_motion_notify(GtkWidget *view,
     if (viewidx < 0)
     {
         g_error("View not found in autopan tool list!");
-        return;
+        return FALSE;
     }
 
     item = &(g_array_index(tool->view_items, GvAutopanViewItem, viewidx));
 
     if ((item->can_resize == 0) && (item->can_reposition == 0))
-        return;
+        return FALSE;
 
     if ( item->translating == 1 )
     {
@@ -1983,6 +1990,7 @@ static void gv_autopan_tool_sv_motion_notify(GtkWidget *view,
         }
     }
 
+    return FALSE;
 }
 
 static gint

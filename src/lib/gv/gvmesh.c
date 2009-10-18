@@ -39,6 +39,7 @@
 
 static void gv_mesh_class_init(GvMeshClass *klass);
 static void gv_mesh_init(GvMesh *mesh);
+static void gv_mesh_dispose(GObject *gobject);
 static void gv_mesh_finalize(GObject *gobject);
 static GvDataClass *parent_class = NULL;
 
@@ -91,6 +92,7 @@ gv_mesh_class_init(GvMeshClass *klass)
     parent_class = g_type_class_peek_parent (klass);
 
     /* ---- Override finalize ---- */
+    G_OBJECT_CLASS(klass)->dispose = gv_mesh_dispose;
     G_OBJECT_CLASS(klass)->finalize = gv_mesh_finalize;
 }
 
@@ -173,9 +175,9 @@ gv_mesh_get_tile_corner_coords( GvMesh *mesh, int tile)
 
 }
 
-static void 
+static void
 gv_mesh_build_tex_coord( GvMesh *mesh, GArray *tex_coords, gint lod,
-                         gint ds_x, gint ds_y, 
+                         gint ds_x, gint ds_y,
                          gint stride_x, gint stride_y )
 
 {
@@ -184,10 +186,10 @@ gv_mesh_build_tex_coord( GvMesh *mesh, GArray *tex_coords, gint lod,
     gint   tile_y = mesh->tile_y;
     gint   edge_width;
 
-    /* 
+    /*
     ** Edge mesh tiles (bottom, right and bottom/right) that are not a
     ** reduced size, will be computed as having a remainder of zero, and
-    ** given a size of 2.  Adjust these. 
+    ** given a size of 2.  Adjust these.
     */
 
     if( ds_x == 2 )
@@ -234,7 +236,7 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
 
     GvMesh *mesh = g_object_new (GV_TYPE_MESH, NULL);
 
-    mesh->raster = raster;
+    mesh->raster = g_object_ref_sink(raster);
 
     while( (tile_x >> detail) == 0 || (tile_y >> detail) == 0 )
         detail--;
@@ -286,20 +288,20 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
         /* First we set the full tile s/t coordinate mappings */
         tex_coords = g_array_new( FALSE, FALSE, sizeof( float ) );
         g_ptr_array_add(mesh->tex_coords, tex_coords );
-        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod, 
+        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod,
                                  tile_x, tile_y, stride_x, stride_y );
 
         /* Generate right hand side partial tile s/t coordinates */
         tex_coords = g_array_new( FALSE, FALSE, sizeof( float ) );;
         g_ptr_array_add(mesh->tex_coords_right, tex_coords );
-        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod, 
+        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod,
                                  (mesh->width % (tile_x-GV_TILE_OVERLAP)) + 2,
-                                 tile_y, 
+                                 tile_y,
                                  stride_x, stride_y );
         /* Generate bottom side partial tile s/t coordinates */
         tex_coords = g_array_new( FALSE, FALSE, sizeof( float ) );;
         g_ptr_array_add(mesh->tex_coords_bottom, tex_coords );
-        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod, 
+        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod,
                                  tile_x,
                                  (mesh->height % (tile_y-GV_TILE_OVERLAP)) + 2,
                                  stride_x, stride_y );
@@ -307,14 +309,14 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
         /* Generate bottom/right partial tile s/t coordinates */
         tex_coords = g_array_new( FALSE, FALSE, sizeof( float ) );;
         g_ptr_array_add(mesh->tex_coords_bottom_right, tex_coords );
-        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod, 
+        gv_mesh_build_tex_coord( mesh, tex_coords, mesh_lod,
                                  (mesh->width  % (tile_x-GV_TILE_OVERLAP)) + 2,
                                  (mesh->height % (tile_y-GV_TILE_OVERLAP)) + 2,
                                  stride_x, stride_y );
     }
 
     /* generate output raster coordinates for every tile */
-    tile = 0; 
+    tile = 0;
     for( i = 0; i < tiles_down; i++ )
     {
         for( e = 0; e < tiles_across; e++ )
@@ -358,7 +360,7 @@ gv_mesh_new_identity( GvRaster *raster, gint detail )
     return mesh;
 }
 
-void 
+void
 gv_mesh_reset_to_identity( GvMesh *mesh )
 
 {
@@ -374,7 +376,7 @@ gv_mesh_reset_to_identity( GvMesh *mesh )
     tiles_down   = mesh->raster->tiles_down;
 
     /* generate output raster coordinates for every tile */
-    tile = 0; 
+    tile = 0;
     for( i = 0; i < tiles_down; i++ )
     {
         for( e = 0; e < tiles_across; e++ )
@@ -421,7 +423,7 @@ gv_mesh_reset_to_identity( GvMesh *mesh )
    - query height raster at x-y point and set mesh->verticies z value to it
  */
 void
-gv_mesh_add_height( GvMesh *mesh, GvRaster *raster, 
+gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
                     double default_height )
 {
     int     i, j, success, iteration, max_iteration;
@@ -471,8 +473,8 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
             {
                 if (!gv_raster_get_sample(raster, x, y, &z, &imaginary))
                 {
-                    fprintf(stderr, 
-                            "ERROR raster_get_sample failed for (x y z) %f %f\n", 
+                    fprintf(stderr,
+                            "ERROR raster_get_sample failed for (x y z) %f %f\n",
                             x, y);
                     z_float = (float)nodata_value;
                 }
@@ -491,7 +493,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
         g_array_insert_val(mesh->vertices, i, tile_vertices);
     }
 
-    /* 
+    /*
      * Make another pass, trying to fill in mesh elevations for vertices
      * where we got nodata, or fell off the available data.
      *
@@ -521,7 +523,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
             {
                 for( k = 0; k < mesh_xsize; k++ )
                 {
-                    float       sum = 0; 
+                    float       sum = 0;
                     int count = 0;
                     int t_i;
 
@@ -546,7 +548,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
                     }
 
                     /* check mesh entry above */
-                    if( j > 0 
+                    if( j > 0
                         && data[3*(t_i-mesh_xsize)+2] != (float)nodata_value )
                     {
                         sum += data[3*(t_i-mesh_xsize)+2];
@@ -554,7 +556,7 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
                     }
 
                     /* check mesh entry below */
-                    if( j+1 < mesh_ysize 
+                    if( j+1 < mesh_ysize
                         && data[3*(t_i+mesh_xsize)+2] != (float)nodata_value )
                     {
                         sum += data[3*(t_i+mesh_xsize)+2];
@@ -572,14 +574,14 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
                     }
                 }
             }
-        }    
+        }
     }
 }
 
-/* 
+/*
  * Set upper/lower bounds for the height (eg. if a DEM
  * defaults to -32767 for patches of missing data within
- * the image, gv_mesh_add_height will treat it as valid data.  
+ * the image, gv_mesh_add_height will treat it as valid data.
  * This function takes a pass through the vertices
  * and clamps if necessary).  This will also get rid of the
  * effects of a very low nodata_value (when the DEM doesn't
@@ -587,13 +589,13 @@ gv_mesh_add_height( GvMesh *mesh, GvRaster *raster,
  */
 
 void
-gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max, 
+gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
                     double min_height, double max_height )
 {
 
     int i;
 
-    /* 
+    /*
      * Clamp minimum z value to min_height if bclamp_min = 1
      * Clamp maximum z value to max_height if bclamp_max = 1
      */
@@ -630,7 +632,7 @@ gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
                     data[3*t_i+2] = max_height;
 
             }
-        }    
+        }
     }
 }
 
@@ -645,7 +647,7 @@ gv_mesh_clamp_height( GvMesh *mesh, int bclamp_min, int bclamp_max,
  */
 
 void
-gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize, 
+gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize,
                        double *geotransform )
 {
     int    tile;
@@ -663,11 +665,11 @@ gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize,
         {
             float     x_out, y_out;
 
-            x_out = geotransform[0] 
-                + xyz_verts[0] * geotransform[1] 
+            x_out = geotransform[0]
+                + xyz_verts[0] * geotransform[1]
                 + (ysize - xyz_verts[1]) * geotransform[2];
-            y_out = geotransform[3] 
-                + xyz_verts[0] * geotransform[4] 
+            y_out = geotransform[3]
+                + xyz_verts[0] * geotransform[4]
                 + (ysize - xyz_verts[1]) * geotransform[5];
 
             xyz_verts[0] = x_out;
@@ -681,7 +683,7 @@ gv_mesh_set_transform( GvMesh *mesh, gint xsize, gint ysize,
 
 
 GvMeshTile *
-gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail, 
+gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
              GvMeshTile *tile_info )
 {
     gint i, e, step;
@@ -704,7 +706,7 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
     {
         if( mesh->tex_coords )
         {
-            GArray  *tex_coords; 
+            GArray  *tex_coords;
 
             tex_coords = gv_mesh_get_tile_tex_coords( mesh, tile, detail );
             tile_info->tex_coords = (float *) tex_coords->data;
@@ -775,7 +777,7 @@ gv_mesh_get( GvMesh *mesh, gint tile, gint raster_lod, gint detail,
                 break;
             case GL_TRIANGLE_STRIP:
                 /* Only this case works right now */
-                tile_info->range = ( (1 << detail ) + 1 ) * 2; 
+                tile_info->range = ( (1 << detail ) + 1 ) * 2;
                 break;
             case 2:
                 tile_info->range = 2+dimensions;
@@ -909,8 +911,8 @@ float gv_mesh_get_height( GvMesh *mesh,
     if( pl_x < 0 || pl_x >= raster->width
         || pl_y < 0 || pl_y >= raster->height )
     {
-        CPLDebug( "OpenEV", 
-                  "Didn't get a value (1) for location Geo:(%g,%g) PL:(%g,%g) Size:(%d,%d)", 
+        CPLDebug( "OpenEV",
+                  "Didn't get a value (1) for location Geo:(%g,%g) PL:(%g,%g) Size:(%d,%d)",
                   x, y, pl_x, pl_y, raster->width, raster->height );
         return 0.0;
     }
@@ -932,13 +934,13 @@ float gv_mesh_get_height( GvMesh *mesh,
     mesh_pnts_per_column = factor + 1;
 
     if( tile_in_x == raster->tiles_across - 1 )
-        tile_width = mesh->width 
+        tile_width = mesh->width
             - (raster->tile_x - GV_TILE_OVERLAP) * tile_in_x;
     else
         tile_width = mesh->tile_x;
 
     if( tile_in_y == raster->tiles_down - 1 )
-        tile_height = mesh->height 
+        tile_height = mesh->height
             - (raster->tile_y - GV_TILE_OVERLAP) * tile_in_y;
     else
         tile_height = mesh->tile_y;
@@ -962,8 +964,8 @@ float gv_mesh_get_height( GvMesh *mesh,
 
     if( vert_off < 0 || vert_off*3 >= tile_vertices->len )
     {
-        CPLDebug( "OpenEV", 
-                  "Didn't get a value for location (%g,%g), vert_off=%d\n", 
+        CPLDebug( "OpenEV",
+                  "Didn't get a value for location (%g,%g), vert_off=%d\n",
                   x, y, vert_off );
         return 0.0;
     }
@@ -1032,16 +1034,16 @@ float gv_mesh_get_height( GvMesh *mesh,
 
 #ifdef notdef
     /* Note: this will produce false positives for "on the edges" conditions*/
-    if( x < MIN(x_vert[0],x_vert[1]) 
-        || x > MAX(x_vert[0],x_vert[1]) 
+    if( x < MIN(x_vert[0],x_vert[1])
+        || x > MAX(x_vert[0],x_vert[1])
         || y < MIN(y_vert[0],y_vert[2])
         || y > MAX(y_vert[0],y_vert[2]) )
     {
-        CPLDebug( "OpenEV", 
+        CPLDebug( "OpenEV",
                   "x/y outside of quadrant in gv_mesh_get_height(), uv=%g,%g\n"
                   "  x,y=%g,%g   quad=(%g,%g),(%g,%g),(%g,%g),(%g,%g)",
-                  u, v, 
-                  x, y, 
+                  u, v,
+                  x, y,
                   x_vert[0], y_vert[0],
                   x_vert[1], y_vert[1],
                   x_vert[2], y_vert[2],
@@ -1056,6 +1058,24 @@ float gv_mesh_get_height( GvMesh *mesh,
         + z_vert[1] * (u) * (1.0-v)
         + z_vert[2] * (1.0-u) * (v)
         + z_vert[3] * (u) * (v);
+}
+
+
+static void
+gv_mesh_dispose(GObject *gobject)
+{
+    GvMesh    *mesh = GV_MESH(gobject);
+
+
+    if (mesh->raster != NULL)
+    {
+        g_object_unref(mesh->raster);
+        mesh->raster = NULL;
+    }
+
+    /* Call parent class function */
+    G_OBJECT_CLASS(parent_class)->dispose(gobject);
+
 }
 
 /************************************************************************/
