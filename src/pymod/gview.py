@@ -1270,9 +1270,9 @@ class GvShapes(_gv.Shapes):
               num_shapes is an integer
               shape_ids is a list of shape IDs
         """
-        return _gv.Shapes.get_change_info(c_object)
+        return _gv.Shapes.get_change_info(self, c_object)
 
-    def add_height(self, raster, offset=0.0, default_height = 0.0):
+    def add_height(self, raster, offset=0.0, default_height=0.0):
         """Set vertex heights from raster DEM.
 
         Sets the Z component of each vertex to the value sampled from
@@ -1654,7 +1654,7 @@ class GvRaster(_gv.Raster):
         Returns (change_type, x_off, y_off, width, height)
            where change_type is defined in gvconst.py and the rest are integers.
         """
-        return _gv.Raster.get_change_info(c_object)
+        return _gv.Raster.get_change_info(self, c_object)
 
     def get_band_number(self):
         band = self.get_band()
@@ -1670,30 +1670,30 @@ class GvRaster(_gv.Raster):
 
         Fetch the band associated with the GvRaster as a gdal.RasterBand object.
         """
-        if hasattr(self, 'gdal_band'):
-            return self.gdal_band
+#        if hasattr(self, 'gdal_band'):
+#            return self.gdal_band
 
-        band = manager.get_raster_band(self)
-        if band is None:
-            return
+        return manager.get_raster_band(self)
+#        if band is None:
+#            return
 
-        self.gdal_band = band
-        return self.gdal_band
+#        self.gdal_band = band
+#        return self.gdal_band
 
     def get_dataset(self):
         """Get GDAL raster dataset
 
         Fetch the dataset associated with the GvRaster as a gdal.Dataset object.
         """
-        if hasattr(self, 'gdal_dataset'):
-            return self.gdal_dataset
+#        if hasattr(self, 'gdal_dataset'):
+#            return self.gdal_dataset
 
-        ds = manager.get_raster_dataset(self)
-        if ds is None:
-            return
+        return manager.get_raster_dataset(self)
+#        if ds is None:
+#            return
 
-        self.gdal_dataset = ds
-        return self.gdal_dataset
+#        self.gdal_dataset = ds
+#        return self.gdal_dataset
 
     def autoscale(self, alg=ASAAutomatic, alg_param=-1.0, assign=0):
         """Force autoscaling to be recomputed.
@@ -2311,11 +2311,10 @@ def GvRasterLayerFromXML(node, parent, filename=None):
             max = float(XMLFindValue(child,"max","0"))
             sources_min_max.append([min, max])
             const_value = float(XMLFindValue(child,"const_value","0"))
-            nodata = XMLFindValue( child, "nodata", None )
             nodata = eval(XMLFindValue(child, "nodata", "None"))
 
             layer.set_source(isource, raster, min=int(min), max=int(max),
-                              const_value=int(const_value), nodata=int(nodata))
+                              const_value=int(const_value), nodata=nodata)
         else:
             raster = None
 
@@ -2490,6 +2489,10 @@ class GvRasterLayer(GvLayer, _gv.RasterLayer):
         isource -- the source index (from 0 to 3).  
         """
         return _gv.RasterLayer.get_data(self, isource)
+
+    def get_dataset(self):
+        """Convenience method to get the parent raster's dataset"""
+        return self.parent.get_dataset()
 
     def get_dataset_raster(self, band):
         """Convenience method to get a GvRaster from parent raster's dataset"""
