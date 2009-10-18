@@ -33,6 +33,7 @@
 
 #include "gvdata.h"
 #include "gvshape.h"
+#include "ogr_api.h"
 #include "cpl_minixml.h"
 
 #define GV_TYPE_SHAPES            (gv_shapes_get_type ())
@@ -53,6 +54,11 @@ struct _GvShapes
     int actual_num_shapes;  /* not including NULLs in GPtrArray */
     GvRect extents;
     guint extents_valid : 1;
+
+#ifdef HAVE_OGR
+    //save the ogr data source
+    OGRDataSourceH hOGRds;
+#endif
 };
 
 struct _GvShapesClass
