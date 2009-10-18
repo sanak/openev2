@@ -343,7 +343,7 @@ class ColorControl(gtk.HBox):
                        _("White"): (1, 1, 1, 1),
                        _("Black"): (0, 0, 0, 1),
                        _("Transparent"): (0, 0, 0, 0),
-                       _("Custom"): (0, 0, 0, 0)
+                       _("Custom"): (0, 0, 0, 1)
                         }
 
         self.callback = callback

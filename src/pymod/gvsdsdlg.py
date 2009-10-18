@@ -25,120 +25,77 @@
 ###############################################################################
 
 import gtk
-import gview
-import os.path
-import gvhtml
 
+#indices into the liststore
+TOGGLE_COLUMN = 0
+TEXT_COLUMN = 1
+FILENAME_COLUMN = 2
 
-class GvSDSDlg(gtk.Window):
-    def __init__(self, dataset, viewwindow):
-        gtk.Window.__init__(self)
-        self.set_title('SubDataset Selection')
+class GvSDSDlg(gtk.Dialog):
+    '''Creates and a modal dialog to ask which subdatasets should be selected.
+    The run function shows the dialog and returns a list of the selected dataset filenames when the ok button is pressed.'''
+    
+    def __init__(self, parent, dataset):
+        '''creates and shows the window, populating the list and setting callbacks.'''
+        
+        #initialize the dialog
+        gtk.Dialog.__init__(self, 'SubDataset Selection', 
+                            parent, 
+                            gtk.DIALOG_MODAL|gtk.DIALOG_DESTROY_WITH_PARENT|gtk.DIALOG_NO_SEPARATOR,
+                            (gtk.STOCK_OK, gtk.RESPONSE_ACCEPT,
+                             gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
         self.set_size_request(400, 300)
         self.set_border_width(3)
         self.set_resizable(True)
-        self.connect('delete-event',self.close)
-        shell = gtk.VBox(spacing=3)
-        self.add(shell)
-        #gvhtml.set_help_topic(self, "layerdlg.html" );
 
-        # Layer list
+        #create the list
+        self.liststore = gtk.ListStore(bool, str, str)#contents are (is checked, display name, file name)
+        treeview = gtk.TreeView(self.liststore)
+        
+        #put list in scrolled window
         layerbox = gtk.ScrolledWindow()
-        shell.pack_start(layerbox)
-        layerlist = gtk.CList(cols=2)
+        self.vbox.pack_start(layerbox)
+        layerbox.add_with_viewport(treeview)
+        
+        #creating a single column that contains text and a checkbox - no headers
+        celltoggle = gtk.CellRendererToggle()
+        celltext = gtk.CellRendererText()
+        column = gtk.TreeViewColumn()
+        column.pack_start(celltoggle, expand=False)
+        column.add_attribute(celltoggle, 'active', TOGGLE_COLUMN)
+        column.pack_start(celltext, expand=True)
+        column.add_attribute(celltext, 'text', TEXT_COLUMN)
+        treeview.append_column(column)
+        treeview.set_headers_visible(False)
+        
+        #get callback on toggled
+        celltoggle.set_property('activatable', True)
+        celltoggle.connect('toggled', self.toggled_cb, self.liststore)
 
-        layerbox.add_with_viewport(layerlist)
-        layerlist.set_shadow_type(gtk.SHADOW_NONE)
-        layerlist.set_selection_mode(gtk.SELECTION_SINGLE)
-        layerlist.set_row_height(30)
-        layerlist.set_column_width(0, 24)
-        #layerlist.connect('select-row', self.layer_selected)
-        layerlist.connect('button-press-event', self.list_clicked)
+        #get the subdatasets and add to the list
+        for entry in dataset.GetSubDatasets(): #returns a list of tuples (file name, description)
+            #indices are TOGGLE_COLUMN, TEXT_COLUMN, FILENAME_COLUMN
+            self.liststore.append( [True, entry[1], entry[0]] )
 
-        # buttons
-        button_box = gtk.HButtonBox()
-        button_box.set_layout(gtk.BUTTONBOX_START)
-        ok_button = gtk.Button('Accept')
-        ok_button.connect('clicked', self.accept)
-        apply_button = gtk.Button('Cancel')
-        apply_button.connect('clicked', self.close)
-        cancel_button = gtk.Button('Help')
-        cancel_button.connect('clicked', self.help_cb)
-        button_box.pack_start(ok_button, expand=False)
-        button_box.pack_start(apply_button, expand=False)
-        button_box.pack_start(cancel_button, expand=False)
-        shell.pack_start(button_box,expand=False)
 
-        self.connect('realize', self.realize)
-
-        self.sel_pixmap = \
-            gtk.Image().set_from_file(os.path.join(gview.home_dir,'pics',
-                                        'ck_on_l.xpm'))
-        self.not_sel_pixmap = \
-            gtk.Image().set_from_file(os.path.join(gview.home_dir,'pics',
-                                        'ck_off_l.xpm'))
-
-        shell.show_all()
-
-        self.dataset = dataset
-        self.viewwindow = viewwindow
-        self.layerlist = layerlist
-
-        self.sds = dataset.GetSubDatasets()
-        self.sds_sel = []
-        for entry in self.sds:
-            self.sds_sel.append( 0 )
-
+    def run(self):
+        '''Overload the run function to return a list of the selected datasets when ok is pressed.'''
         self.show_all()
-
-    def help_cb(self,*args):
-        pass
-
-    def close(self,*args):
-        self.hide()
-        return True
-
-    def accept(self,*args):
-        for i in range(len(self.sds_sel)):
-            if self.sds_sel[i]:
-                self.viewwindow.file_open_by_name( self.sds[i][0] )
-        self.close()
-
-    def realize(self, widget):
-        lst = self.layerlist
-        sds = self.sds
-
-        lst.freeze()
-        lst.clear()
-
-        i = 0
-        for entry in sds:
-            lst.append(('', entry[1]))
-
-            lst.set_pixmap(i, 0, self.not_sel_pixmap)
-
-            i = i + 1
-
-        lst.thaw()        
-
-    def list_clicked(self, lst, event):
-        #print event.type
-
-        row, col = lst.get_selection_info(int(event.x), int(event.y))        
-	lst.emit_stop_by_name('button-press-event')
-
-        if event.type is gtk.gdk._2BUTTON_PRESS:
-            for i in range(len(self.sds_sel)):
-                self.sds_sel[i] = 0
-
-            self.sds_sel[row] = 1
-            self.accept()
+        ret = gtk.Dialog.run(self)
+        if ret == gtk.RESPONSE_ACCEPT:
+            #get the selected datasets
+            selectedDatasets = []
+            for item in self.liststore:
+                if item[TOGGLE_COLUMN]:
+                    selectedDatasets.append(item[FILENAME_COLUMN])
+            return selectedDatasets
         else:
-            self.sds_sel[row] = not self.sds_sel[row]
+            return ret
+        
 
-        if self.sds_sel[row]:
-            lst.set_pixmap(row, 0, self.sel_pixmap)
-        else:
-            lst.set_pixmap(row, 0, self.not_sel_pixmap)
-
-
+    def toggled_cb(self, cellrenderertoggle, path, liststore):
+        '''Callback for when an item is toggled.  
+        The change needs to be reflected in the liststore.'''
+        iter = liststore.get_iter(path)
+        liststore.set(iter, TOGGLE_COLUMN, not cellrenderertoggle.get_active())
+        

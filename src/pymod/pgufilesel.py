@@ -24,7 +24,7 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
-import gtk as _gtk
+import gtk
 import os.path
 
 simple_file_sel = None
@@ -100,15 +100,10 @@ def SimpleFileSelect( ok_cb,
     if simple_file_sel is not None:
         simple_file_sel.destroy()
 
-    simple_file_sel = _gtk.FileSelection()
-    simple_file_sel.hide_fileop_buttons()
-    simple_file_sel.ok_button.connect('clicked', SFSOkCB, ok_cb, cb_data )
-    simple_file_sel.cancel_button.connect('clicked', SFSCancelCB, cancel_cb, cb_data )
-    simple_file_sel.connect('destroy', SFSDestroyCB, cancel_cb, cb_data)
-
-    if title is not None:
-        simple_file_sel.set_title( title )
-
+    simple_file_sel = gtk.FileChooserDialog(title,None, gtk.FILE_CHOOSER_ACTION_SAVE,
+                                 (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                   gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+    simple_file_sel.set_default_response(gtk.RESPONSE_OK)
     if default_filename is not None:
         simple_file_sel.set_filename( default_filename )
     else:
@@ -119,9 +114,18 @@ def SimpleFileSelect( ok_cb,
         import gvhtml
         gvhtml.set_help_topic( simple_file_sel, help_topic )
 
+    response = simple_file_sel.run()
+    if response == gtk.RESPONSE_OK:
+        ok_cb(simple_file_sel.get_filename(), cb_data)
+    elif response == gtk.RESPONSE_CANCEL:
+        if cancel_cb!=None:
+            cancel_cb()
+    simple_file_sel.destroy()
 
-    simple_file_sel.show()
 
+    simple_file_sel.ok_button.connect('clicked', SFSOkCB, ok_cb, cb_data )
+    simple_file_sel.cancel_button.connect('clicked', SFSCancelCB, cancel_cb, cb_data )
+    
 
 def SimpleFileSelectCB( item, ok_cb, *args ):
 
@@ -157,39 +161,34 @@ def SimpleFileSelectCB( item, ok_cb, *args ):
 
 
 # For directly grabbing a filename within a single callback
-class pguFileSelection(_gtk.FileSelection):
+class pguFileSelection(gtk.FileChooserDialog):
     def __init__(self, title, default_filename = None):
-        _gtk.FileSelection.__init__(self)
-        self.set_title(title)
+        gtk.FileChooserDialog.__init__(title,None, gtk.FILE_CHOOSER_ACTION_OPEN,
+                                 (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                   gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        self.set_default_response(gtk.RESPONSE_OK)
+
+        self.set_modal(True)   
         if default_filename is not None:
             self.set_filename(default_filename)
 
         elif simple_file_sel_dir is not None:
             self.set_filename(simple_file_sel_dir)
 
-        self.ok_button.connect  ("clicked", self.ok_cb)
-        self.cancel_button.connect("clicked", self.cancel_cb)
-        self.connect("delete_event", self.cancel_cb)
-        self.ret = None
-        self.set_modal(True)
-
-    def ok_cb(self, *args):
-        self.ret = self.get_filename()
-	self.hide()
-	self.destroy()
-	_gtk.main_quit()
-
-    def cancel_cb(self, *args):
         self.ret = None
         self.selected = None
-	self.hide()
-	self.destroy()
-	_gtk.main_quit()
+        response = self.run()
+        if response == gtk.RESPONSE_OK:
+            self.ret = self.get_filename()
+        elif response == gtk.RESPONSE_CANCEL:
+            self.cancel_cb()
 
+        self.destroy()
+        gtk.main_quit()
 
 def GetFileName(title = 'Select File', default_filename = None):
     win = pguFileSelection(title, default_filename)
     win.show_all()
-    _gtk.main()
+    gtk.main()
     return win.ret
 

@@ -620,7 +620,7 @@ class ProgressDialog(gtk.Dialog):
             self.action_area.pack_start(button)
 
         self.pbar = pbar
-        vbox.show_all()
+        self.show_all()
 
     def CancelCB(self, *args):
         self.cancelled = True

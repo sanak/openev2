@@ -277,7 +277,7 @@ class FontControl(gtk.FontButton):
     action - optional action to connect to the 'font-set' signal
 
     """
-    def __init__(self, fontname=None, use_font=True):
+    def __init__(self, fontname='Arial', use_font=True):
         gtk.FontButton.__init__(self)
         if fontname:
             if fontname.startswith('-'):
