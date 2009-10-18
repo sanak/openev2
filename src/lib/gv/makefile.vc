@@ -9,7 +9,7 @@ GV_INSTALL_TOOLS = $(GV_INSTALL_HOME)\tools
 GV_INSTALL_RAMPS = $(GV_INSTALL_HOME)\ramps
 
 OBJ =  crs.obj dbfopen.obj gextra.obj \
-    gvareatool.obj gvautopan.c gvdata.obj  gvlayer.obj \
+    gvareatool.obj  gvautopan.obj gvdata.obj  gvlayer.obj \
     gvlinetool.obj  gvmanager.obj  gvmarshal.obj  gvmesh.obj \
     gvnodetool.obj  gvogr.obj  gv_override.obj gvpquerylayer.obj \
     gvpoitool.obj gvpointtool.obj \
@@ -25,7 +25,7 @@ OBJ =  crs.obj dbfopen.obj gextra.obj \
     llrasterize.obj shpopen.obj
 
 CHEADERS = crs.h dllfct.h gextra.h \
-           gv_config.h gvareatool.h gvautopan.h gvdata.h gview.h \
+           gv_config.h gvareatool.h gvdata.h gview.h \
            gvlayer.h gvlinetool.h gvmanager.h gvmarshal.h gvmesh.h \
            gvmodule.h gvnodetool.h gvpointtool.h gvpquerylayer.h \
            gvproperties.h gvraster.h gvrasteraverage.h \
