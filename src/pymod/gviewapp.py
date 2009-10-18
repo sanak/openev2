@@ -206,7 +206,7 @@ class GViewApp(Signaler):
         for file in files:
             # print file
             if file.endswith('.py'):
-                print "Loading tools from " + os.path.join(dir_name, file)
+                #print "Loading tools from " + os.path.join(dir_name, file)
                 module = file[:-3]
 
                 try:
@@ -1204,8 +1204,6 @@ class PrefDialog(gtk.Window):
         self.default_color = (0.5, 1.0, 0.5, 1.0)
         self.default_font = 'Sans 12'
 
-        self.tips = gtk.Tooltips()
-
         self.set_border_width(3)
         self.notebook = gtk.Notebook()
         self.add(self.notebook)
@@ -1261,55 +1259,71 @@ class PrefDialog(gtk.Window):
         vbox = gtk.VBox(spacing=10)
         vbox.set_border_width(10)
         self.notebook.append_page(vbox, gtk.Label("Raster"))
-        table = gtk.Table(rows=6, columns=2)
+        table = gtk.Table()
         table.set_border_width(5)
         table.set_row_spacings(5)
         table.set_col_spacings(5)
         vbox.pack_start(table, expand=False)
+        row = 0
 
         # Warp with GCPs
         label = pgu.Label("Display Georeferenced:")
-        table.attach(label, 0, 1, 0, 1)
+        table.attach(label, 0, 1, row, row+1)
 
         combo = pgu.ComboText(("Yes","No"))
-        table.attach(combo, 1, 2, 0, 1)
+        table.attach(combo, 1, 2, row, row+1)
         pref = get_pref('gcp_warp_mode','no').capitalize()
         combo.set_active_text(pref)
         combo.connect('changed', self.set_gcp_warp_mode)
 
+        row += 1
+        # Autoreproject
+        label = pgu.Label("Autoreproject:")
+        table.attach(label, 0, 1, row, row+1)
+
+        combo = pgu.ComboText(("Yes","No"))
+        table.attach(combo, 1, 2, row, row+1)
+        pref = get_pref('auto_reproject','no').capitalize()
+        combo.set_active_text(pref)
+        combo.connect('changed', self.set_combo_preference, 'auto_reproject')
+
+        row += 1
         # Sample Method
         label = pgu.Label("Overview Sampling:")
-        table.attach(label, 0, 1, 1, 2)
+        table.attach(label, 0, 1, row, row+1)
 
         combo = pgu.ComboText(("Decimate","Average"))
-        table.attach(combo, 1, 2, 1, 2)
+        table.attach(combo, 1, 2, row, row+1)
         pref = get_pref('default_raster_sample','average')
         combo.set_active(['sample','average'].index(pref))
         combo.connect('changed', self.set_sample_method)
 
+        row += 1
         # Pixel Interpolation
         label = pgu.Label("Subpixel Interpolation:")
-        table.attach(label, 0, 1, 2, 3)
+        table.attach(label, 0, 1, row, row+1)
 
         combo = pgu.ComboText(("Bilinear","Off (Nearest)"))
         pref = get_pref('interp_mode','nearest')
         combo.set_active(['linear','nearest'].index(pref))
         combo.connect('changed', self.set_interp_method)
-        table.attach(combo, 1, 2, 2, 3)
+        table.attach(combo, 1, 2, row, row+1)
 
+        row += 1
         # Default Autoscaling Method
         label = pgu.Label("Autoscaling Method:")
-        table.attach(label, 0, 1, 3, 4)
+        table.attach(label, 0, 1, row, row+1)
 
         combo = pgu.ComboText(("Percent Tail Trim","Standard Deviations"))
         pref = get_pref('scale_algorithm','std_deviation')
         combo.set_active(['percent_tail_trim','std_deviation'].index(pref))
         combo.connect('changed', self.set_scaling_method)
-        table.attach(combo, 1, 2, 3, 4)
+        table.attach(combo, 1, 2, row, row+1)
 
+        row += 1
         # Tail Trim Percentage.
         label = pgu.Label("Tail Trim Percentage:")
-        table.attach(label, 0, 1, 4, 5)
+        table.attach(label, 0, 1, row, row+1)
 
         entry = gtk.Entry()
         entry.set_max_length(9)
@@ -1317,18 +1331,19 @@ class PrefDialog(gtk.Window):
         entry.connect('leave-notify-event', self.tail_trim_cb)
         tt_val = get_pref('scale_percent_tail','0.02')
         entry.set_text(str(float(tt_val)*100.0))
-        table.attach(entry, 1, 2, 4, 5)
+        table.attach(entry, 1, 2, row, row+1)
 
+        row += 1
         # Scaling Standard Deviations.
         label = pgu.Label("Standard Deviations:")
-        table.attach(label, 0, 1, 5, 6)
+        table.attach(label, 0, 1, row, row+1)
 
         entry = gtk.Entry()
         entry.set_max_length(9)
         entry.connect('activate', self.std_dev_cb)
         entry.connect('leave-notify-event', self.std_dev_cb)
         entry.set_text(get_pref('scale_std_deviations', "2.5"))
-        table.attach(entry, 1, 2, 5, 6)
+        table.attach(entry, 1, 2, row, row+1)
 
     def create_paths_and_windows_prefs(self):
         vbox = gtk.VBox(spacing=10)
@@ -1462,12 +1477,10 @@ class PrefDialog(gtk.Window):
     def set_coordinate_mode(self, combo):
         mode = ('off','raster','georef','latlong')[combo.get_active()]
         set_pref('_coordinate_mode', mode)
-        print get_pref('_coordinate_mode')
 
     def set_pixel_mode(self, combo):
         mode = combo.get_active_text().lower()
         set_pref('_pixel_mode', mode)
-        print get_pref('_pixel_mode')
 
     def set_nodata_mode(self, combo):
         mode = combo.get_active_text().lower()
@@ -1533,7 +1546,7 @@ class PrefDialog(gtk.Window):
         cb = ColorButton(color)
         cb.connect('color-set', self.set_color_preference, 'legend-background-color')
         table.attach(cb, 1, 2, 0, 1, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb, "Click to change the default color for the legend background")
+        cb.set_tooltip_text("Click to change the default color for the legend background")
 
         # Title Font
         lbl = pgu.Label("Title Font:")
@@ -1543,7 +1556,7 @@ class PrefDialog(gtk.Window):
         cb = ColorButton(color)
         cb.connect('color-set', self.set_color_preference, 'legend-title-font-color')
         table.attach(cb, 1, 2, 1, 2, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb, "Click to change the default color for the legend font")
+        cb.set_tooltip_text("Click to change the default color for the legend font")
 
         # Get preference as XLFD font spec or pango name
         # MB: XLFD usage is discouraged...
@@ -1552,7 +1565,7 @@ class PrefDialog(gtk.Window):
         font_button.connect('font-set', self.set_font_preference, 'legend-title-font')
 
         table.attach(font_button, 2, 3, 1, 2, yoptions=gtk.SHRINK)
-        self.tips.set_tip(font_button, "Select a font for the legend title")
+        font_button.set_tooltip_text("Select a font for the legend title")
 
         # Label Font
         lbl = pgu.Label("Label Font:")
@@ -1561,7 +1574,7 @@ class PrefDialog(gtk.Window):
         cb = ColorButton(color)
         cb.connect('color-set', self.set_color_preference, 'legend-label-font-color')
         table.attach(cb, 1, 2, 2, 3, yoptions=gtk.SHRINK)
-        self.tips.set_tip(cb, "Click to change the default color for the legend font")
+        cb.set_tooltip_text("Click to change the default color for the legend font")
 
         # Get preference as XLFD font spec or pango name
         # MB: XLFD usage is discouraged...
@@ -1570,7 +1583,7 @@ class PrefDialog(gtk.Window):
         font_button.connect('font-set', self.set_font_preference, 'legend-label-font')
 
         table.attach(font_button, 2, 3, 2, 3, yoptions=gtk.SHRINK)
-        self.tips.set_tip(font_button, "Select a font for legend labels")
+        font_button.set_tooltip_text("Select a font for legend labels")
 
         # Sample Size
 
@@ -1590,7 +1603,7 @@ class PrefDialog(gtk.Window):
         spin.connect('value-changed', self.set_spin_preference, 'legend-sample-x-size')
         spin.connect('focus-out-event', self.check_spin_preference, 'legend-sample-x-size')
         table.attach(spin, 2, 3, 3, 4, yoptions=gtk.SHRINK)
-        self.tips.set_tip(spin, "The X Size of a sample on the legend dialog")
+        spin.set_tooltip_text("The X Size of a sample on the legend dialog")
 
         lbl = gtk.Label("Y Size:")
         table.attach(lbl, 3, 4, 3, 4, yoptions=gtk.SHRINK)
@@ -1602,7 +1615,7 @@ class PrefDialog(gtk.Window):
         spin.connect('value-changed', self.set_spin_preference, 'legend-sample-y-size')
         spin.connect('focus-out-event', self.check_spin_preference, 'legend-sample-y-size')
         table.attach(spin, 4, 5, 3, 4, yoptions=gtk.SHRINK)
-        self.tips.set_tip(spin, "The Y Size of a sample on the legend dialog")
+        spin.set_tooltip_text("The Y Size of a sample on the legend dialog")
 
         return vbox
 
@@ -1624,6 +1637,11 @@ class PrefDialog(gtk.Window):
         """set a preference from a toggle button
         """
         set_pref(pref, str(widget.get_active()))
+
+    def set_combo_preference(self, combo, pref):
+        """set a preference from a combobox
+        """
+        set_pref(pref, combo.get_active_text().lower())
 
     def set_any_preference(self, widget, pref, func):
         """
