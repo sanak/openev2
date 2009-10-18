@@ -116,6 +116,9 @@ gv_raster_layer_init(GvRasterLayer *layer)
     layer->source_count = 0;
     layer->mode = 0;
     layer->mesh = NULL;
+    layer->hTransform = NULL;
+    layer->hInverseTransform = NULL;
+    layer->origProjectionWKT = NULL;
     layer->pc_lut = NULL;
 
     for( i = 0; i < MAX_RASTER_SOURCE; i++ )
@@ -156,14 +159,26 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
                     GvProperties creation_properties)
 {
     GvRasterLayer *layer;
-    double nodata_real=-1e8, nodata_imaginary=0.0;
-    int nodata_active = FALSE;
-    const char *interp_pref;
 
     if( prototype_data == NULL )
         return NULL;
 
     layer = g_object_new (GV_TYPE_RASTER_LAYER, NULL);
+    gv_raster_layer_read(layer, mode, prototype_data, creation_properties);
+
+    return G_OBJECT(layer);
+}
+
+void
+gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data, 
+                    GvProperties creation_properties)
+{
+    double nodata_real=-1e8, nodata_imaginary=0.0;
+    int nodata_active = FALSE;
+    const char *interp_pref;
+
+    if( prototype_data == NULL )
+        return;
 
     layer->tile_x = prototype_data->tile_x;
     layer->tile_y = prototype_data->tile_y;
@@ -213,206 +228,8 @@ gv_raster_layer_new(int mode, GvRaster *prototype_data,
         gv_data_set_projection( GV_DATA(layer), 
                            gv_data_get_projection(GV_DATA(prototype_data)) );
 
-        layer->mesh_is_raw = FALSE;
-    }
-
-    memset( layer->source_list + 0, 0, 
-            sizeof(GvRasterSource) * MAX_RASTER_SOURCE);
-
-    /* Default GL parameters */
-    layer->gl_info.blend_enable = 0;
-    layer->gl_info.alpha_test = 0;
-
-    layer->gl_info.tex_env_mode = GL_REPLACE;
-    layer->gl_info.fragment_color[0] = 1.0;
-    layer->gl_info.fragment_color[1] = 1.0;
-    layer->gl_info.fragment_color[2] = 1.0;
-    layer->gl_info.fragment_color[3] = 1.0;
-
-    layer->gl_info.s_wrap = GL_CLAMP;
-    layer->gl_info.t_wrap = GL_CLAMP;
-
-    interp_pref = gv_properties_get(&creation_properties,"interp_mode");
-    if( interp_pref == NULL )
-        interp_pref = gv_manager_get_preference(gv_get_manager(),
-                                                "interp_mode");
-
-#ifdef ATLANTIS_BUILD
-    /* Default to nearest for atlantis builds */
-    if( interp_pref == NULL || strcmp(interp_pref,"linear") != 0 )
-    {
-        layer->gl_info.mag_filter = GL_NEAREST;
-        layer->gl_info.min_filter = GL_NEAREST;
-    }
-    else
-    {
-        layer->gl_info.mag_filter = GL_LINEAR;
-        layer->gl_info.min_filter = GL_LINEAR;
-    }
-#else
-    if( interp_pref == NULL || strcmp(interp_pref,"nearest") != 0 )
-    {
-        layer->gl_info.mag_filter = GL_LINEAR;
-        layer->gl_info.min_filter = GL_LINEAR;
-    }
-    else
-    {
-        layer->gl_info.mag_filter = GL_NEAREST;
-        layer->gl_info.min_filter = GL_NEAREST;
-    }
-#endif
-    /* Setup texture related information */
-    layer->tile_list = g_array_new( FALSE, FALSE, sizeof( int ) ) ;
-    layer->missing_tex = g_array_new( FALSE, FALSE, sizeof( int ) );
-
-    /* Allocate texture structures */
-
-    if( ( layer->textures = g_new0( GvRasterLayerTexObj *, 
-                                    prototype_data->max_tiles ) ) == NULL )
-    {
-    return NULL;
-    }
-
-    /* FIXME ... should we always do this? */
-    gv_data_set_parent(GV_DATA(layer), GV_DATA(prototype_data));
-
-    /* check for nodata value */
-    nodata_active = gv_raster_get_nodata( prototype_data, &nodata_real );
-
-    /* Setup mode dependent information */
-    switch( mode )
-    {
-      case GV_RLM_SINGLE:
-        layer->source_count = 1;
-        if( GDALGetRasterColorTable( prototype_data->gdal_band ) != NULL )
-        {
-            gv_raster_layer_set_source( layer, 0, prototype_data, 0, 255.0,
-                                        0, NULL, nodata_active, nodata_real, 
-                                        nodata_imaginary );
-            gv_raster_layer_apply_gdal_color_table( layer, 
-                    GDALGetRasterColorTable( prototype_data->gdal_band ) );
-        }
-        else
-            gv_raster_layer_set_source( layer, 0, prototype_data, 
-                                    prototype_data->min, prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-        break;
-
-      case GV_RLM_COMPLEX:
-        layer->source_count = 1;
-        layer->pc_lut = NULL;
-        gv_raster_layer_lut_color_wheel_new_ev(layer, FALSE, TRUE );
-        gv_raster_layer_set_source( layer, 0, prototype_data, 
-                                    prototype_data->min, 
-                                    prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-        break;
-
-      case GV_RLM_PSCI:
-        layer->source_count = 2;
-        gv_raster_layer_set_source( layer, 0, prototype_data,
-                    prototype_data->min, prototype_data->max,
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-    gv_raster_layer_apply_gdal_color_table
-        (layer, GDALGetRasterColorTable( prototype_data->gdal_band ) );
-        gv_raster_layer_set_source( layer, 1, prototype_data, 
-                                    prototype_data->min, prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-
-        break;
-
-      case GV_RLM_RGBA:
-        layer->source_count = 4;
-
-        layer->pc_lut_rgba_complex = NULL;
-        gv_raster_layer_lut_color_wheel_new_ev(layer, FALSE, TRUE );
-
-        gv_raster_layer_set_source( layer, 0, prototype_data, 
-                                    prototype_data->min, prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-        gv_raster_layer_set_source( layer, 1, prototype_data, 
-                                    prototype_data->min, prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-        gv_raster_layer_set_source( layer, 2, prototype_data, 
-                                    prototype_data->min, prototype_data->max, 
-                                    0, NULL, nodata_active, nodata_real, 
-                                    nodata_imaginary );
-        gv_raster_layer_set_source( layer, 3, NULL, 0, 255, 
-                                    255, NULL, FALSE, 0.0, 0.0 );
-        break;
-
-      default:
-        g_warning( "unexpected raster layer mode" );
-        return NULL;
-    }
-
-    return G_OBJECT(layer);
-}
-
-void
-gv_raster_layer_read(GvRasterLayer *layer, int mode, GvRaster *prototype_data, 
-                    GvProperties creation_properties)
-{
-    double nodata_real=-1e8, nodata_imaginary=0.0;
-    int nodata_active = FALSE;
-    const char *interp_pref;
-
-    if( prototype_data == NULL )
-        return;
-
-    layer->tile_x = prototype_data->tile_x;
-    layer->tile_y = prototype_data->tile_y;
-    layer->prototype_data = g_object_ref(prototype_data);
-    layer->pc_lut = NULL;
-    layer->pc_lut_composed = NULL;
-    layer->pc_lut_rgba_complex = NULL;
-
-    if( mode == GV_RLM_AUTO )
-    {
-        GDALColorInterp interp;
-
-        interp = GDALGetRasterColorInterpretation( prototype_data->gdal_band );
-        if( GDALDataTypeIsComplex( prototype_data->gdal_type ) )
-            mode = GV_RLM_COMPLEX;
-        else if( interp == GCI_RedBand 
-                 || interp == GCI_GreenBand
-                 || interp == GCI_BlueBand )
-            mode = GV_RLM_RGBA;
-    else if ((interp == GCI_HueBand) || (interp == GCI_PaletteIndex)) {
-        mode = GV_RLM_PSCI;
-    }
-        else
-            mode = GV_RLM_SINGLE;
-    }
-
-    layer->mode = mode;
-
-    if( gv_properties_get(&creation_properties,"mesh_lod") != NULL)
-    {
-        layer->mesh = gv_mesh_new_identity( prototype_data, 
-                    atoi(gv_properties_get(&creation_properties,"mesh_lod")));
-    } else {
-        layer->mesh = gv_mesh_new_identity( prototype_data, 0 );
-    }
-
-    layer->mesh_is_raw = TRUE;
-    layer->mesh_is_dirty = FALSE;
-    gv_mesh_transform_with_func( layer->mesh, gvrl_to_raw_cb, 
-                                 prototype_data );
-
-    if( gv_properties_get(&creation_properties,"raw") == NULL )
-    {
-        gv_mesh_transform_with_func( layer->mesh, gvrl_to_georef_cb, 
-                                     prototype_data );
-
-        gv_data_set_projection( GV_DATA(layer), 
-                           gv_data_get_projection(GV_DATA(prototype_data)) );
+        //save the original projection string
+        layer->origProjectionWKT = g_strdup( gv_data_get_projection(GV_DATA(prototype_data)) );
 
         layer->mesh_is_raw = FALSE;
     }
@@ -548,6 +365,15 @@ static void gv_raster_layer_dispose( GObject *gobject )
                                     FALSE, 0.0, 0.0 );
     }
 
+    if (rlayer->mesh != NULL) {
+        g_object_unref(rlayer->mesh);
+        rlayer->mesh = NULL;
+    }
+
+    if (rlayer->prototype_data != NULL) {
+        rlayer->prototype_data = NULL;
+    }
+
     G_OBJECT_CLASS(parent_class)->dispose(gobject);
 }
 
@@ -590,19 +416,23 @@ static void gv_raster_layer_finalize( GObject *gobject )
 {
     GvRasterLayer *rlayer = GV_RASTER_LAYER(gobject);
 
-    if (rlayer->mesh != NULL) {
-        g_object_unref(rlayer->mesh);
-        rlayer->mesh = NULL;
+    //free the coordinate transformations if they have been created
+    if (rlayer->hTransform != NULL)
+    {
+        OCTDestroyCoordinateTransformation( rlayer->hTransform );
+        rlayer->hTransform = NULL;
     }
+    if (rlayer->hInverseTransform != NULL)
+    {
+        OCTDestroyCoordinateTransformation( rlayer->hInverseTransform );
+        rlayer->hInverseTransform = NULL;
+    }
+
+    g_free(rlayer->origProjectionWKT);
 
     if ( rlayer->textures != NULL) {
         g_free( rlayer->textures );
         rlayer->textures = NULL;
-    }
-
-    if (rlayer->prototype_data != NULL) {
-        g_object_unref(rlayer->prototype_data);
-        rlayer->prototype_data = NULL;
     }
 
     if( rlayer->pc_lut != NULL )
@@ -1588,70 +1418,116 @@ static int gvrl_reproject_cb( int pt_count, double *x, double *y, double *z,
     return OCTTransform( ct, pt_count, x, y, z );
 }
 
-static gint 
-gv_raster_layer_reproject( GvLayer *layer, 
+/* gv_raster_layer_reproject() attempts to reproject the raster layer to the given projection.  This is done by adjusting the underlying mesh.
+ * new_projection should be a string in the WKT format.
+ * returns TRUE on success.
+ */
+static gint
+gv_raster_layer_reproject( GvLayer *layer,
                            const char * new_projection )
-
 {
     int success = TRUE;
-    OGRSpatialReferenceH   hSRSNew = NULL, hSRSOld = NULL;
-    OGRCoordinateTransformationH hTransform = NULL;
+    GvRasterLayer* rlayer = GV_RASTER_LAYER(layer);
+    OGRSpatialReferenceH   hSRSNew = NULL, hSRSOrig = NULL, hSRSCurrent;
+    OGRCoordinateTransformationH hTmpTransform = NULL, hTmpInverseTransform = NULL; //temp location for the transformations - will be moved if successful
 
-    /* 
+    /*
      * Try and establish if we can, or need to do reprojection.
      */
-    if( gv_data_get_projection(GV_DATA(layer)) == NULL )
+    //if the original projection was not set, it can be set here if set_projection was called.
+    if( rlayer->origProjectionWKT == NULL || EQUAL(rlayer->origProjectionWKT,"PIXEL"))
+    {
+        g_free(rlayer->origProjectionWKT);
+        rlayer->origProjectionWKT = g_strdup(gv_data_get_projection(GV_DATA(layer)));
+    }
+
+    if( rlayer->origProjectionWKT == NULL )
         return FALSE;
 
-    if( EQUAL(gv_data_get_projection(GV_DATA(layer)),"PIXEL") )
+    if( EQUAL(rlayer->origProjectionWKT,"PIXEL") )
         return FALSE;
 
+    //create the coordinate systems for the new and old projections
     hSRSNew = OSRNewSpatialReference( new_projection );
     if( hSRSNew == NULL )
         return FALSE;
 
-    hSRSOld = OSRNewSpatialReference(gv_data_get_projection(GV_DATA(layer)));
-    if( hSRSOld == NULL )
+    //hSRSOld = OSRNewSpatialReference(gv_data_get_projection(GV_DATA(layer)));
+    hSRSOrig = OSRNewSpatialReference(rlayer->origProjectionWKT);
+    if( hSRSOrig == NULL )
     {
         OSRDestroySpatialReference( hSRSNew );
         return FALSE;
     }
 
-    if( OSRIsSame( hSRSOld, hSRSNew ) )
+    //check if the current projection is the same as the requested projection
+    hSRSCurrent = OSRNewSpatialReference(gv_data_get_projection(GV_DATA(layer)));
+    if( hSRSCurrent != NULL )
     {
-        OSRDestroySpatialReference( hSRSOld );
-        OSRDestroySpatialReference( hSRSNew ); 
+        //if the new and old are the same, there is nothing to do
+        if( OSRIsSame( hSRSCurrent, hSRSNew ) )
+        {
+            OSRDestroySpatialReference( hSRSCurrent );
+            OSRDestroySpatialReference( hSRSOrig );
+            OSRDestroySpatialReference( hSRSNew );
 
-        return TRUE;
+            return TRUE;    //success - it is already in the right projection
+        }
+        OSRDestroySpatialReference( hSRSCurrent );  //no longer needed
     }
 
     /*
-     * Establish transformation.
+     * Establish transformation.  Always transforming from the original projection.
      */
 
-    hTransform = OCTNewCoordinateTransformation( hSRSOld, hSRSNew );
-    if( hTransform == NULL )
+    hTmpTransform = OCTNewCoordinateTransformation( hSRSOrig, hSRSNew );
+    if( hTmpTransform == NULL )
     {
-        OSRDestroySpatialReference( hSRSOld );
-        OSRDestroySpatialReference( hSRSNew ); 
+        OSRDestroySpatialReference( hSRSOrig );
+        OSRDestroySpatialReference( hSRSNew );
 
         return FALSE;
     }
 
+    //create the inverse transformation as well for mapping back to the old coordinates
+    //it probably doesn't matter if this fails but gv_raster_layer_view_to_pixel will probably return the wrong value
+    hTmpInverseTransform = OCTNewCoordinateTransformation( hSRSNew, hSRSOrig );
+    if (hTmpInverseTransform == NULL)
+        g_warning("Unable to create the inverse coordinate mapping - gv_raster_layer_view_to_pixel may return incorrect values.\n");
+
     /*
      * Transform all the mesh points.
+     * First revert back to the original projection
      */
 
-    success = gv_mesh_transform_with_func( GV_RASTER_LAYER(layer)->mesh, 
-                                           gvrl_reproject_cb,
-                                           (void *) hTransform );
+    gv_mesh_reset_to_identity(rlayer->mesh);
+    gv_mesh_transform_with_func( rlayer->mesh, gvrl_to_georef_cb, rlayer->prototype_data );
 
-    OCTDestroyCoordinateTransformation( hTransform );
-    OSRDestroySpatialReference( hSRSOld );
-    OSRDestroySpatialReference( hSRSNew ); 
+    success = gv_mesh_transform_with_func( rlayer->mesh, gvrl_reproject_cb, (void *) hTmpTransform );
+
 
     if( success )
+    {
+        //set the projection string
         gv_data_set_projection( GV_DATA(layer), new_projection );
+
+        //no longer a raw display
+        rlayer->mesh_is_raw = FALSE;
+
+        //if the layer's coordinate transformations already exist (ie from a previous projection), destroy them so they can be replaced with the new ones
+        if (rlayer->hTransform != NULL)
+            OCTDestroyCoordinateTransformation( rlayer->hTransform );
+        if (rlayer->hInverseTransform != NULL)
+            OCTDestroyCoordinateTransformation( rlayer->hInverseTransform );
+
+        //save the transformations for the mapping in pixel_to_view and view_to_pixel
+        rlayer->hTransform = hTmpTransform;
+        rlayer->hInverseTransform = hTmpInverseTransform;
+    }
+
+    //clean up
+    OSRDestroySpatialReference( hSRSOrig );
+    OSRDestroySpatialReference( hSRSNew );
 
     return success;
 }
@@ -1759,7 +1635,13 @@ gint gv_raster_layer_pixel_to_view(GvRasterLayer *layer,
         && !EQUAL(gv_data_get_projection(GV_DATA(layer->prototype_data)),
                   gv_data_get_projection(GV_DATA(layer))) )
     {
-        g_warning( "gv_raster_pixel_to_view doesn't reproject yet." );
+        if (layer->hTransform !=NULL)
+        {
+            //transform without printing error messages
+            CPLPushErrorHandler(CPLQuietErrorHandler);
+            success = OCTTransform( layer->hTransform, 1, x, y, z );
+            CPLPopErrorHandler();
+        }
     }
 
     return success;
@@ -1777,7 +1659,13 @@ gint gv_raster_layer_view_to_pixel(GvRasterLayer *layer,
         && !EQUAL(gv_data_get_projection(GV_DATA(layer->prototype_data)),
                   gv_data_get_projection(GV_DATA(layer))) )
     {
-        g_warning( "gv_raster_pixel_to_view doesn't reproject yet." );
+        if (layer->hInverseTransform !=NULL)
+        {
+            //transform without printing error messages
+            CPLPushErrorHandler(CPLQuietErrorHandler);
+            success = OCTTransform( layer->hInverseTransform, 1, x, y, z );
+            CPLPopErrorHandler();
+        }
     }
 
     if( success && !layer->mesh_is_raw )
