@@ -48,8 +48,6 @@ class GvSelBrowser(gtk.VBox):
         self.sel_manager.subscribe('selection-changed', self.update_gui)
         self.sel_manager.subscribe('subselection-changed', self.update_gui)
 
-        tips = gtk.Tooltips()
-
         hbox = gtk.HBox(spacing=3)
         self.pack_start(hbox, expand=False)
         self.hbox = hbox
@@ -63,13 +61,13 @@ class GvSelBrowser(gtk.VBox):
 
         left_button = create_stock_button(gtk.STOCK_GO_BACK, self.cycle_down)
         hbox.pack_start(left_button, expand=False)
-        tips.set_tip(left_button, 'Cycle Selection Down')
+        left_button.set_tooltip_text('Cycle Selection Down')
 
         self.n_of_n_label = gtk.Label('XXXX of XXXX')
         hbox.pack_start(self.n_of_n_label)
 
         right_button = create_stock_button(gtk.STOCK_GO_FORWARD, self.cycle_up)
-        tips.set_tip(right_button, 'Cycle Selection Up')
+        right_button.set_tooltip_text('Cycle Selection Up')
         hbox.pack_start(right_button, expand=False)
 
         hbox = gtk.HBox(spacing=3)
