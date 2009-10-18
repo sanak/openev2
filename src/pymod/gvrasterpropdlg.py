@@ -69,7 +69,7 @@ class GvRasterSource(gtk.Frame):
 
         # ------ Band Selection -------
         band_list = ['constant']
-        ds = self.layer.parent.get_dataset()
+        ds = self.layer.get_dataset()
         band_count = ds.RasterCount
 
         for band in range(1, band_count+1) :
@@ -93,7 +93,6 @@ class GvRasterSource(gtk.Frame):
         self.const_entry.set_max_length(8)
         self.const_entry.set_size_request(80, -1)
         self.const_entry.connect('activate', self.const_cb)
-        self.const_entry.connect('leave-notify-event', self.const_cb)
         hbox.pack_start(self.const_entry, expand=False)
 
         # ------ Establish scaling range ------
@@ -147,7 +146,6 @@ class GvRasterSource(gtk.Frame):
         self.min_entry.set_max_length(8)
         self.min_entry.set_size_request(80, -1)
         self.min_entry.connect('activate', self.entry_cb)
-        self.min_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.min_entry, expand=False)
 
         # ------ Scale Max -------
@@ -166,7 +164,6 @@ class GvRasterSource(gtk.Frame):
         self.max_entry.set_max_length(8)
         self.max_entry.set_size_request(80, -1)
         self.max_entry.connect('activate', self.entry_cb)
-        self.max_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.max_entry, expand=False)
 
         # ------ NODATA -------
@@ -176,9 +173,7 @@ class GvRasterSource(gtk.Frame):
         hbox.pack_start(gtk.Label('NODATA value:'), expand=False)
 
         self.nodata_entry = gtk.Entry()
-#        self.nodata_entry.set_max_length(19)
         self.nodata_entry.connect('activate', self.entry_cb)
-        self.nodata_entry.connect('leave-notify-event', self.entry_cb)
         hbox.pack_start(self.nodata_entry, expand=False)
 
         if src_index < 3 and ds.RasterCount > src_index:
@@ -274,7 +269,7 @@ class GvRasterSource(gtk.Frame):
                                   self.layer.source_get_lut(idx),
                                   None)
         else:
-            dataset = self.layer.parent.get_dataset()
+            dataset = self.layer.get_dataset()
             raster = self.layer.get_dataset_raster(band_number)
             if raster:
                 self.layer.set_source(idx, raster,
@@ -389,7 +384,7 @@ class GvRasterPropDialog(gtk.Window):
 
         self.create_openglprop()
         self.create_lutprop()
-#        self.create_projprop()
+        self.create_projprop()
         self.create_imageinfo()
 
         self.show_all()
@@ -527,37 +522,44 @@ class GvRasterPropDialog(gtk.Window):
 
     def create_projparms(self):
         """Create projection parameters controls"""
-        
         self.parm_dict = {}
-        if self.proj_table is not None:
-            self.proj_table.destroy()
-            num = len(self.proj_parms[self.proj_index])
-            if num == 0:
-                return
-        self.proj_table = gtk.Table(2, num)
-        self.proj_table.set_border_width(5)
-        self.proj_table.set_row_spacings(5)
-        self.proj_table.set_col_spacings(5)
-        self.proj_table.show()
+        self.proj_table.hide()
+        kids = self.proj_table.get_children()
+        if kids:
+            for kid in kids:
+                self.proj_table.remove(kid)
+                kid.destroy()
+
+        proj_parms = self.proj_parms[self.proj_index]
+        if not proj_parms:
+            return
+
         row = 0
-        for i in self.proj_parms[self.proj_index]:
-            parm_label = gtk.Label(i[1])
-            parm_label.set_alignment(0, 0.5)
+        if self.projs[self.proj_index] in (osr.SRS_PT_TRANSVERSE_MERCATOR,
+                                           osr.SRS_PT_TRANSVERSE_MERCATOR_SOUTH_ORIENTED):
+            self.proj_table.attach(pgu.Label("UTM Zone"), 0, 1, row, row+1)
+            zone = int((self.sr.GetProjParm(osr.SRS_PP_CENTRAL_MERIDIAN) + 183)/6)
+            spin_adjust = gtk.Adjustment(value=zone, lower=1, upper=36, step_incr=1)
+            spin = gtk.SpinButton(spin_adjust, digits=0)
+            spin.connect('value-changed', self.zone_spin_cb)
+            self.proj_table.attach(spin, 1, 2, row, row + 1)
+            row += 1
+
+        for i in proj_parms:
+            parm_label = pgu.Label(i[1])
             self.proj_table.attach(parm_label, 0, 1, row, row + 1)
-            parm_label.show()
+
             parm_value = self.sr.GetProjParm(i[0])
             if parm_value is None:
                 parm_value = str(i[3])
             parm_entry = gtk.Entry()
             parm_entry.set_text(str(parm_value))
             self.parm_dict[i[0]] = parm_value
-            parm_entry.set_editable(True)
             parm_entry.connect('changed', self.parm_entry_cb, i[0])
             self.proj_table.attach(parm_entry, 1, 2, row, row + 1)
-            parm_entry.show()
             row += 1
-        
-        self.proj_vbox.pack_end(self.proj_table, expand=False)
+
+        self.proj_vbox.show_all()
 
     def create_projprop(self):
         projpane = gtk.VBox(spacing=10)
@@ -565,12 +567,13 @@ class GvRasterPropDialog(gtk.Window):
         self.notebook.append_page(projpane, gtk.Label('Coordinate System'))
 
         self.projprop_vbox = gtk.VBox(spacing=5)
+        self.proj_text_buff = gtk.TextBuffer()
 
         # Projection frame
         proj_frame = gtk.Frame('Projection')
-        proj_frame.show()
         projpane.pack_start(proj_frame, expand=False)
         self.proj_vbox = gtk.VBox(spacing=5)
+        proj_frame.add(self.proj_vbox)
 
         # Fetch projection record
         self.proj_full = ''
@@ -578,9 +581,9 @@ class GvRasterPropDialog(gtk.Window):
         projection = self.layer.get_projection()
 
         self.sr = None
-        if projection is not None and len(projection) > 0:
+        if projection:
             self.sr = osr.SpatialReference()
-            if self.sr.ImportFromWkt( projection ) == 0:
+            if self.sr.ImportFromWkt(projection) == 0:
                 self.proj_full = self.sr.ExportToPrettyWkt(1)
         if self.proj_full is None:
             self.proj_full = ''
@@ -590,32 +593,38 @@ class GvRasterPropDialog(gtk.Window):
 
         # Create projection switch
         proj_hbox = gtk.HBox(spacing=5)
-        proj_hbox.pack_start(gtk.Label('Projection Name:'), \
-        expand=False, padding=5)
+        proj_hbox.pack_start(gtk.Label('Projection Name:'), expand=False, padding=5)
+        self.proj_vbox.pack_start(proj_hbox, expand=False)
+
         proj_methods = osr.GetProjectionMethods()
-        self.projs = map(lambda x: x.__getitem__(0), proj_methods)
+        self.projs = [x[0] for x in proj_methods]
         self.projs.insert(0, '')
-        proj_names = map(lambda x: x.__getitem__(1), proj_methods)
+
+        proj_names = [x[1] for x in proj_methods]
         proj_names.insert(0, 'None')
-        self.proj_parms = map(lambda x: x.__getitem__(2), proj_methods)
+
+        self.proj_parms = [x[2] for x in proj_methods]
         self.proj_parms.insert(0, [])
         self.proj_index = self.projs.index(proj_name)
 
-        self.proj_table = None
-        self.proj_om = gvutils.GvOptionMenu(proj_names, self.set_proj_cb)
-        self.create_projparms()
-        self.proj_om.set_history(self.proj_index)
-        proj_hbox.pack_start(self.proj_om, padding=5)
-        self.proj_vbox.pack_start(proj_hbox, expand=False)
+        self.proj_table = gtk.Table()
+        self.proj_table.set_border_width(5)
+        self.proj_table.set_row_spacings(5)
+        self.proj_table.set_col_spacings(5)
+        self.proj_vbox.pack_end(self.proj_table, expand=False)
 
-        proj_frame.add(self.proj_vbox)
+        combo = pgu.ComboText(strings=proj_names, action=self.set_proj_cb)
+        self.create_projparms()
+        combo.set_active(self.proj_index)
+        proj_hbox.pack_start(combo, padding=5)
 
         # Datum frame
         datum_frame = gtk.Frame('Datum')
-        datum_frame.show()
         projpane.pack_start(datum_frame, expand=False)
+
         datum_hbox = gtk.HBox(spacing=5)
         datum_hbox.pack_start(gtk.Label('Datum Name:'), expand=False, padding=5)
+        datum_frame.add(datum_hbox)
 
         try:
             self.datum_name = self.sr.GetAttrValue("DATUM")
@@ -623,58 +632,48 @@ class GvRasterPropDialog(gtk.Window):
             traceback.print_exc()
             self.datum_name = None
 
-        self.datum_names = {None:"None", osr.SRS_DN_NAD27:"NAD27", \
-        osr.SRS_DN_NAD83:"NAD83", osr.SRS_DN_WGS72:"WGS72", \
-        osr.SRS_DN_WGS84:"WGS84"}
+        self.datum_names = {None:"None",
+                            osr.SRS_DN_NAD27:"NAD27",
+                            osr.SRS_DN_NAD83:"NAD83",
+                            osr.SRS_DN_WGS72:"WGS72",
+                            osr.SRS_DN_WGS84:"WGS84"}
         try:
             self.datum_index = self.datum_names.keys().index(self.datum_name)
         except ValueError:
             self.datum_index = self.datum_names.keys().index(None)
-        self.datum_om = gvutils.GvOptionMenu(self.datum_names.values(), \
-            self.set_datum_cb)
-        self.datum_om.set_history(self.datum_index)
-        datum_hbox.pack_start(self.datum_om, expand=False, padding=5)
+        combo = pgu.ComboText(strings=self.datum_names.values(), action=self.set_datum_cb)
+        combo.set_active(self.datum_index)
+        datum_hbox.pack_start(combo, expand=False, padding=5)
 
-        datum_frame.add(datum_hbox)
+        # Units frame  (MB: unused?!?)
+#        units_frame = gtk.Frame('Units')
+#        projpane.pack_start(units_frame, expand=False)
+#        units_hbox = gtk.HBox(spacing=5)
+#        units_hbox.pack_start(gtk.Label('Units:'), expand=False, padding=5)
+#        units_frame.add(units_hbox)
 
-        # Units frame
-        units_frame = gtk.Frame('Units')
-        #units_frame.show()
-        #projpane.pack_start(units_frame, expand=False)
-        units_hbox = gtk.HBox(spacing=5)
-        units_hbox.pack_start(gtk.Label('Units:'), expand=False, padding=5)
-
-        units_frame.add(units_hbox)
+        but = gtk.Button(stock=gtk.STOCK_APPLY)
+        but.connect('clicked', self.apply_projection)
+        projpane.pack_end(but, expand=False)
 
         # WKT frame
         proj_text_frame = gtk.Frame('Well Known Text')
-        proj_text_frame.show()
-        projpane.pack_end(proj_text_frame, expand=True)
+        projpane.pack_end(proj_text_frame)
 
-        self.proj_text_buff = gtk.TextBuffer()
+        proj_scrollwin = gtk.ScrolledWindow()
+        proj_scrollwin.set_size_request(0, 300)
+        proj_text_frame.add(proj_scrollwin)
+        
         self.proj_text_buff.set_text(self.proj_full)
         self.proj_text_view = gtk.TextView(self.proj_text_buff)
         self.proj_text_view.set_wrap_mode(gtk.WRAP_CHAR)
         self.proj_text_view.set_editable(False)
-        self.proj_text_view.show()
-
-        # GTK2 Port...
-        #self.proj_text = gtk.Text()
-        #self.proj_text.set_line_wrap(True)
-        #self.proj_text.set_word_wrap(False)
-        #self.proj_text.set_editable(False)
-        #self.proj_text.show()
-        #self.proj_text.insert_defaults(self.proj_full)
-
-        proj_scrollwin = gtk.ScrolledWindow()
-        proj_scrollwin.set_size_request(0, 300)
         proj_scrollwin.add(self.proj_text_view)
-        proj_text_frame.add(proj_scrollwin)
 
     def create_imageinfo(self):
         iipane = gtk.VBox(spacing=10)
         iipane.set_border_width(10)
-        self.notebook.append_page( iipane, gtk.Label('Image Info') )
+        self.notebook.append_page(iipane, gtk.Label('Image Info'))
 
         self.ii_text_buff = gtk.TextBuffer()
         self.ii_text_view = gtk.TextView(self.ii_text_buff)
@@ -682,19 +681,12 @@ class GvRasterPropDialog(gtk.Window):
         self.ii_text_view.set_editable(False)
         self.ii_text_view.show()
 
-        # GTK2 Port...
-        #self.ii_text = gtk.Text()
-        #self.ii_text.set_line_wrap(False)
-        #self.ii_text.set_word_wrap(False)
-        #self.ii_text.set_editable(False)
-        #self.ii_text.show()
-
         self.ii_scrollwin = gtk.ScrolledWindow()
-        self.ii_scrollwin.add( self.ii_text_view)
-        iipane.pack_start(self.ii_scrollwin,expand=True)
+        self.ii_scrollwin.add(self.ii_text_view)
+        iipane.pack_start(self.ii_scrollwin)
 
         # Now create and assign the text contents.
-        gdal_ds = self.layer.parent.get_dataset()
+        gdal_ds = self.layer.get_dataset()
 
         text = ''
 
@@ -743,6 +735,12 @@ class GvRasterPropDialog(gtk.Window):
             if len(band.GetDescription()) > 0:
                 text = text + ' - ' + band.GetDescription()
             text = text + '\n'
+            #add metadata for each band if it exists
+            bandMetadata = band.GetMetadata()
+            if len(bandMetadata) > 0:
+                text = text + '    Metadata:\n'
+                for item in bandMetadata.items():
+                    text = text + '        '+item[0]+': '+item[1]+'\n'
 
         #self.ii_text.insert_defaults(text)
         self.ii_text_buff.set_text(text)
@@ -814,6 +812,20 @@ class GvRasterPropDialog(gtk.Window):
             self.lut_image.set_from_pixbuf(self.lut_pixbuf)
             self.lut_pane.show()
             self.complex_lut_om.show()
+
+
+        #scale lock
+        try: #a single channel image has no scale lock
+            self.scale_toggle.handler_block_by_func(self.scalelock_cb)
+            self.scale_toggle.set_active( self.layer.get_property('_scale_lock') == 'locked' )
+            self.scale_toggle.handler_unblock_by_func(self.scalelock_cb)
+
+            scalemin, scalemax = self.layer.get_property('_scale_limits').split()
+            self.scale_min_entry.set_text(scalemin)
+            self.scale_max_entry.set_text(scalemax)
+        except AttributeError:
+            #do nothing
+            pass
 
     def name_cb(self, *args):
         if self.layer_name.get_text() != self.layer.get_name():
@@ -945,7 +957,7 @@ class GvRasterPropDialog(gtk.Window):
            return
         if color[3] != 1.0:
             self.layer.blend_mode_set(RL_BLEND_FILTER)
-            self.layer.texture_mode_set(1, color)
+        self.layer.texture_mode_set(1, color)
 
     def set_interp_cb(self,*args):
         if self.interp_om.get_history() == 0:
@@ -955,7 +967,7 @@ class GvRasterPropDialog(gtk.Window):
 
     def update_proj_text(self):
         """Update text control showing projection information"""
-        self.proj_full = self.sr.ExportToPrettyWkt( simplify = 1 )
+        self.proj_full = self.sr.ExportToPrettyWkt(1)
         if self.proj_full is None:
             self.proj_full = ''
 
@@ -968,10 +980,20 @@ class GvRasterPropDialog(gtk.Window):
 
         self.update_proj_text()
 
-    def set_proj_cb(self,*args):
+    def zone_spin_cb(self, spin):
+        zone = spin.get_value()
+        north = self.projs[self.proj_index] == osr.SRS_PT_TRANSVERSE_MERCATOR
+        self.sr.SetAttrValue('PROJCS', 'unnamed')
+        self.sr.SetUTM(int(zone), north)
+
+        self.create_projparms()
+        self.update_proj_text()
+
+    def set_proj_cb(self, combo):
         """Set projection"""
-        if self.proj_index != self.proj_om.get_history():
-            self.proj_index = self.proj_om.get_history()
+        index = combo.get_active()
+        if self.proj_index != index:
+            self.proj_index = index
             self.sr = osr.SpatialReference()
             self.sr.SetWellKnownGeogCS(self.datum_names[self.datum_name])
             self.sr.SetProjection(self.projs[self.proj_index])
@@ -980,18 +1002,26 @@ class GvRasterPropDialog(gtk.Window):
                     self.sr.SetNormProjParm(i[0], self.parm_dict[i[0]])
                 except KeyError:
                     self.sr.SetNormProjParm(i[0], i[3])
-            self.layer.set_projection(self.sr.ExportToWkt())
             self.create_projparms()
 
-	    self.update_proj_text()
+        self.update_proj_text()
 
-    def set_datum_cb(self, *args):
+    def set_datum_cb(self, combo):
         """Set datum"""
-        if self.datum_index != self.datum_om.get_history():
-            self.datum_index = self.datum_om.get_history()
+        index = combo.get_active()
+        if self.datum_index != index:
+            self.datum_index = index
             self.datum_name = self.datum_names.keys()[self.datum_index]
             self.sr.SetWellKnownGeogCS(self.datum_names[self.datum_name])
             self.update_proj_text()
+
+    def apply_projection(self, *args):
+        try:
+            self.layer.reproject(self.sr.ExportToWkt())
+            self.layer.display_changed()
+        except:
+            # MB: should we inform the user when this happens?
+            pass
 
     # Dialog closed, remove references to python object
     def close(self, *args):
