@@ -43,12 +43,12 @@ static unsigned char *
 gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
                       GvRasterSource *source);
 static unsigned char *
-gv_scale_tile_linear(void *src_data, int tile_x, int tile_y, 
+gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
                      float min, float max, GDALDataType gdal_type);
 
 
 static unsigned char *
-gv_scale_tile_linear(void *src_data, int tile_x, int tile_y, 
+gv_scale_tile_linear(void *src_data, int tile_x, int tile_y,
                      float min, float max,GDALDataType gdal_type)
 {
     float scale;
@@ -239,8 +239,8 @@ gv_scale_tile_to_byte(void *src_data, int tile_x, int tile_y,
 }
 
 static unsigned char *
-gv_scale_pure_phase_tile_to_byte( void *src_data, 
-                       int tile_x, int tile_y, 
+gv_scale_pure_phase_tile_to_byte( void *src_data,
+                       int tile_x, int tile_y,
                        GDALDataType gdal_type )
 
 {
@@ -288,9 +288,9 @@ gv_scale_pure_phase_tile_to_byte( void *src_data,
     return ret_data;
 }
 
-static void 
-gv_raster_layer_srctile_check_nodata( GvRasterSource *source, int pixels, 
-                                      unsigned char *data, 
+static void
+gv_raster_layer_srctile_check_nodata( GvRasterSource *source, int pixels,
+                                      unsigned char *data,
                                       unsigned char *nodata_mask )
 
 {
@@ -353,7 +353,7 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
 
     g_return_val_if_fail( GV_IS_RASTER_LAYER( layer ), NULL );
     g_return_val_if_fail( layer != NULL, NULL );
-    g_return_val_if_fail( isource >= 0 
+    g_return_val_if_fail( isource >= 0
                           && isource < layer->source_count, NULL );
 
     source = layer->source_list + isource;
@@ -368,11 +368,11 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
             return NULL;
 
         if( nodata_mask != NULL && source->nodata_active )
-            gv_raster_layer_srctile_check_nodata( source, pixel_count, 
+            gv_raster_layer_srctile_check_nodata( source, pixel_count,
                                                   ret_data, nodata_mask );
 
-        if( source->data->gdal_type != GDT_Byte 
-            || source->min != 0.0 
+        if( source->data->gdal_type != GDT_Byte
+            || source->min != 0.0
             || source->max != 255.0 )
         {
             *needs_free = TRUE;
@@ -381,9 +381,9 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
                 (gv_data_get_property( GV_DATA(layer),"last_complex_lut" ) != NULL) &&
                 (strcmp(gv_data_get_property( GV_DATA(layer),"last_complex_lut" ),"phase") == 0))
             {
-                ret_data = gv_scale_pure_phase_tile_to_byte( ret_data, 
-                                              layer->tile_x >> lod, 
-                                              layer->tile_y >> lod, 
+                ret_data = gv_scale_pure_phase_tile_to_byte( ret_data,
+                                              layer->tile_x >> lod,
+                                              layer->tile_y >> lod,
                                               source->data->gdal_type );
             }
             else if (( layer->mode == GV_RLM_RGBA ) &&
@@ -391,9 +391,9 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
                      (strcmp(gv_data_get_property( GV_DATA(layer),"last_complex_lut" ),"phase") == 0) &&
                      (source->data->gdal_type == GDT_CFloat32) )
             {
-                ret_data = gv_scale_pure_phase_tile_to_byte( ret_data, 
-                                              layer->tile_x >> lod, 
-                                              layer->tile_y >> lod, 
+                ret_data = gv_scale_pure_phase_tile_to_byte( ret_data,
+                                              layer->tile_x >> lod,
+                                              layer->tile_y >> lod,
                                               source->data->gdal_type );
             }
             else
@@ -430,7 +430,7 @@ gv_raster_layer_srctile_xy_get( GvRasterLayer * layer, int isource,
        and applied in scale_tile_to_byte.
 
     if( source->lut != NULL && layer->mode != GV_RLM_COMPLEX &&
-        ((source->data == NULL) || 
+        ((source->data == NULL) ||
          (source->data != NULL && source->data->gdal_type != GDT_CFloat32)))
     {
         int  i;
@@ -466,7 +466,7 @@ gv_raster_layer_source_get_lut( GvRasterLayer * layer, int isource )
     return layer->source_list[isource].lut;
 }
 
-unsigned char 
+unsigned char
 gv_raster_layer_get_const_value( GvRasterLayer * layer, int isource )
 {
     g_return_val_if_fail( GV_IS_RASTER_LAYER( layer ), 0 );
@@ -556,11 +556,11 @@ float gv_raster_layer_max_get( GvRasterLayer *layer, int isource )
  * Sets NODATA value for the specified layer.
  *
  * @param layer Pointer to GvRasterLayer object.
- * 
+ *
  * @param isource Source index.
  *
  * @param nodata_real Real part of the variable containing NODATA value.
- * 
+ *
  * @param nodata_imaginary Imaginary part of the variable containing
  * NODATA value.
  *
@@ -585,7 +585,7 @@ gv_raster_layer_nodata_set( GvRasterLayer *layer, int isource,
         source->nodata_real = nodata_real;
         source->nodata_imaginary = nodata_imaginary;
         source->nodata_active = TRUE;
-        gv_raster_layer_blend_mode_set( layer, 
+        gv_raster_layer_blend_mode_set( layer,
                                         GV_RASTER_LAYER_BLEND_MODE_FILTER,
                                         0, 0 );
         gv_raster_layer_purge_all_textures( layer );
@@ -603,12 +603,12 @@ gv_raster_layer_nodata_set( GvRasterLayer *layer, int isource,
  * Queries NODATA value for the specified layer.
  *
  * @param layer Pointer to GvRasterLayer object.
- * 
+ *
  * @param isource Source index.
  *
  * @param nodata_real Pointer to the varible which will be filled with real
  * part of the NODATA value, may be NULL
- * 
+ *
  * @param nodata_imaginary Pointer to the varible which will be filled with
  * imaginary part of the NODATA value, may be NULL.
  *
@@ -644,9 +644,9 @@ gv_raster_layer_nodata_get( GvRasterLayer *layer, int isource,
  * Queries type of the values for specified layer and source.
  *
  * @param layer Pointer to GvRasterLayer object.
- * 
+ *
  * @param isource Source index.
- * 
+ *
  * @return GDAL dtat type of the specified raster.
  */
 
@@ -661,12 +661,12 @@ gv_raster_layer_type_get( GvRasterLayer *layer, int isource )
     return layer->source_list[isource].data->gdal_type;
 }
 
-int gv_raster_layer_set_source( GvRasterLayer *layer, int isource, 
+int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
                                 GvRaster *data, float min, float max,
                                 unsigned char const_value,
                                 unsigned char *lut,
-                                int nodata_active, 
-                                double nodata_real, 
+                                int nodata_active,
+                                double nodata_real,
                                 double nodata_imaginary )
 
 {
@@ -697,7 +697,7 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
 
     source = layer->source_list + isource;
 
-    if( source->data == data 
+    if( source->data == data
         && source->min == min
         && source->max == max
         && source->const_value == const_value
@@ -705,6 +705,7 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
         && source->nodata_real == nodata_real
         && source->nodata_imaginary == nodata_imaginary
         && source->lut == NULL
+        && source->gv_lut == NULL
         && lut == NULL )
         return 0;
 
@@ -738,6 +739,11 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
         source->lut = (unsigned char *) g_malloc(256);
         memcpy( source->lut, lut, 256 );
     }
+    else if (source->gv_lut != NULL)
+    {
+        gv_raster_lut_free(source->gv_lut);
+        source->gv_lut = NULL;
+    }
 
     if( source->lut_rgba_composed != NULL )
     {
@@ -753,10 +759,10 @@ int gv_raster_layer_set_source( GvRasterLayer *layer, int isource,
     */
     gv_raster_layer_lut_compose( layer );
 
-    /* If we have a nodata value, we have to ensure that we have 
+    /* If we have a nodata value, we have to ensure that we have
        alpha blending turned on */
     if( source->nodata_active )
-        gv_raster_layer_blend_mode_set( layer, 
+        gv_raster_layer_blend_mode_set( layer,
                                         GV_RASTER_LAYER_BLEND_MODE_FILTER,
                                         0, 0 );
 
