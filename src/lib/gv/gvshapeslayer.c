@@ -33,6 +33,9 @@
 #include "gvsymbolmanager.h"
 #include "gvmanager.h"
 #include "cpl_error.h"
+#include "ogr_core.h"
+#include "ogr_api.h"
+#include "ogr_srs_api.h"
 #include <GL/gl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -66,6 +69,10 @@ static void gv_shapes_layer_move_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_insert_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_delete_node(GvShapeLayer *layer, GvNodeInfo *info);
 static void gv_shapes_layer_node_motion(GvShapeLayer *layer, gint area_id);
+
+static gint gv_shapes_layer_reproject( GvLayer *layer, const char * new_projection );
+static GvShapes* gv_shapes_transform( GvShapes* pShapes, OGRCoordinateTransformationH hTransform,  OGRSpatialReferenceH hSRS );
+
 static void gv_shapes_layer_finalize(GObject *gobject );
 
 static GvShapeLayerClass *parent_class = NULL;
@@ -116,6 +123,7 @@ gv_shapes_layer_class_init(GvShapesLayerClass *klass)
 
     layer_class->draw = gv_shapes_layer_draw;
     layer_class->extents_request = gv_shapes_layer_extents;
+    layer_class->reproject = gv_shapes_layer_reproject;
 
     shape_layer_class->draw_selected = gv_shapes_layer_draw_selected;
     shape_layer_class->delete_selected = gv_shapes_layer_delete_selected;
@@ -197,14 +205,16 @@ void gv_shapes_layer_set_data( GvShapesLayer *layer,
                                GvShapes *data )
 
 {
-//~     if (layer->data)
-//~         g_object_unref(layer->data);
 
     layer->data = data;
-    /*GV_DATA(layer)->parent = GV_DATA(layer->data);*/
+
+    //gv_data_set_parent will take care of creating the g_object reference and unref-ing any pre-existing parent
     gv_data_set_parent(GV_DATA(layer), GV_DATA(data));
     gv_shape_layer_set_num_shapes(GV_SHAPE_LAYER(layer),
                   gv_shapes_num_shapes(data));
+
+    //use the projection of the data
+    gv_data_set_projection( GV_DATA(layer), gv_data_get_projection(GV_DATA(data)));
 
 #ifdef GV_USE_RENDER_PLUGIN
     {
@@ -225,7 +235,7 @@ void gv_shapes_layer_set_data( GvShapesLayer *layer,
                     gchar *drv_name = get_drv_name();
 
                     if (0 == strcmp(prop_value, drv_name)) {
-                        if (g_module_symbol(module, "_layer_init", 
+                        if (g_module_symbol(module, "_layer_init",
                                             (gpointer) & layer_init))
                             layer_init(layer);
                         else
@@ -241,11 +251,207 @@ void gv_shapes_layer_set_data( GvShapesLayer *layer,
 
 }
 
+/*transforms the shapes using the given transformation.  Used in reprojection.
+ *
+ */
+static GvShapes* gv_shapes_transform( GvShapes* pShapes, OGRCoordinateTransformationH hTransform,  OGRSpatialReferenceH hSRS)
+{
+#ifndef HAVE_OGR
+    g_error("gv_shapes_transform() requires the gv library to be compiled with OGR.\n");
+    return NULL;
+#else
+    OGRSFDriverH hDriver;             //handle to ogr driver
+    OGRDataSourceH hProjectedDS;      //handle to the new ogr data source
+    OGRLayerH hOrigLayer;             //handle to the original ogr layer
+    OGRLayerH hProjectedLayer = NULL; //handle to the newly projected ogr layer
+    OGRFeatureH hOrigFeature;         //handle to the original ogr feature
+    OGRFeatureH hProjectedFeature;    //handle to the newly projected ogr feature
+    OGRGeometryH hGeometry;           //handle to the ogr feature geometry
+    OGRFeatureDefnH hFeatureDefn;     //handle to the ogr feature definition
+    GvData* newshapes = NULL;         //pointer to the new GvShapes that will be created
+    OGRErr ret = OGRERR_NONE;         //OGR return values
+
+    //can't do anything if there is no OGR data source - the shapes must have been loaded from OGR
+    if( pShapes->hOGRds == NULL)
+        return NULL;
+
+    //get the original layer
+    hOrigLayer =  OGR_DS_GetLayer( pShapes->hOGRds, 0 );    //FIXME - for now we assume layer 0
+    if (hOrigLayer == NULL)
+        return NULL;
+
+    //get the feature definition - needed for creating new features
+    hFeatureDefn = OGR_L_GetLayerDefn(hOrigLayer);
+    if (hFeatureDefn == NULL)
+        return NULL;
+
+    //need to create a whole new shapefile for the projected vector
+    //use the same driver
+    //hDriver = OGR_DS_GetDriver(pShapes->hOGRds);
+    //actually, specifying a driver creates a file using the createdatasource name unless the driver is "Memory"
+    //maybe using a file is not a bad idea especially for large vectors.
+    //But it should be put in a temp directory (mkstemp()?)
+    hDriver = OGRGetDriverByName("Memory");
+    if (hDriver == NULL)
+        return NULL;
+
+    //create the new data source
+    hProjectedDS = OGR_Dr_CreateDataSource(hDriver, "Projected DS", NULL);  //the given name will be the file (or folder) name if not using the Mem driver
+    if (hProjectedLayer == NULL)
+        return NULL;
+
+    //create the new layer
+    hProjectedLayer = OGR_DS_CreateLayer(hProjectedDS, "Projected Layer", hSRS, wkbUnknown, NULL);
+    if (hProjectedLayer == NULL)
+    {
+        OGR_DS_Destroy( hProjectedDS );
+        return NULL;
+    }
+
+    //loop through all the features and transform the geometry, writing into the new layer
+    OGR_L_ResetReading(hOrigLayer); //make sure to start at the first feature
+    while( hOrigFeature=OGR_L_GetNextFeature(hOrigLayer) )
+    {
+        //get geometry
+        hGeometry = OGR_F_GetGeometryRef(hOrigFeature);
+        g_assert(hGeometry != NULL);
+
+        //transform
+        ret = OGR_G_Transform(hGeometry, hTransform);
+        if (ret != OGRERR_NONE)
+            break;
+
+        //create new feature
+        hProjectedFeature = OGR_F_Create(hFeatureDefn);
+        g_assert(hProjectedFeature !=NULL);
+
+        //set the new transformed geometry for the feature
+        ret = OGR_F_SetGeometry(hProjectedFeature, hGeometry);
+        if (ret != OGRERR_NONE)
+            break;
+
+        //add the projected feature to the layer
+        ret = OGR_L_CreateFeature(hProjectedLayer, hProjectedFeature);
+        if (ret != OGRERR_NONE)
+            break;
+
+        //clean up - the documentation did not mention destroying the geometry - maybe not needed?
+        OGR_F_Destroy(hOrigFeature);
+        OGR_F_Destroy(hProjectedFeature);
+    }
+    if (ret != OGRERR_NONE)
+    {
+        OGR_F_Destroy(hOrigFeature);
+        OGR_F_Destroy(hProjectedFeature);
+        OGR_DS_Destroy( hProjectedDS );
+        return NULL;
+    }
+    else
+        //now that the OGR part has been transformed, create the new gvshapes
+        newshapes = gv_shapes_from_ogr_layer(hProjectedLayer);
+
+    //clean up - maybe don't destroy just yet in case the user wants to save the reprojection??
+    OGR_DS_Destroy( hProjectedDS );
+
+    return GV_SHAPES(newshapes);
+#endif
+}
+
+/* gv_shapes_layer_reproject() attempts to reproject the shapes layer to the given projection.  This is based on the code from gv_raster_layer_reproject
+ * new_projection should be a string in the WKT format.
+ * returns TRUE on success.
+ */
+static gint gv_shapes_layer_reproject( GvLayer *layer, const char * new_projection )
+{
+#ifndef HAVE_OGR
+    g_error("gv_shapes_layer_reproject() requires the gv library to be compiled with OGR.\n");
+    return FALSE;
+#else
+    int success = TRUE;
+    GvShapes* newShapes = NULL;
+    GvShapesLayer* rlayer = GV_SHAPES_LAYER(layer);
+    OGRSpatialReferenceH   hSRSNew = NULL, hSRSOld = NULL;
+    OGRCoordinateTransformationH hTransform = NULL;
+
+    /*
+     * Try and establish if we can, or need to do reprojection.
+     */
+    if( gv_data_get_projection(GV_DATA(layer)) == NULL )
+        return FALSE;
+
+    if( EQUAL(gv_data_get_projection(GV_DATA(layer)),"PIXEL") )
+        return FALSE;
+
+    //create the coordinate systems for the new and old projections
+    hSRSNew = OSRNewSpatialReference( new_projection );
+    if( hSRSNew == NULL )
+        return FALSE;
+
+    hSRSOld = OSRNewSpatialReference(gv_data_get_projection(GV_DATA(layer)));
+    if( hSRSOld == NULL )
+    {
+        OSRDestroySpatialReference( hSRSNew );
+        return FALSE;
+    }
+
+    //if the new and old are the same, there is nothing to do
+    if( OSRIsSame( hSRSOld, hSRSNew ) )
+    {
+        OSRDestroySpatialReference( hSRSOld );
+        OSRDestroySpatialReference( hSRSNew );
+
+        return TRUE;
+    }
+
+    /*
+     * Establish transformation.
+     */
+
+    hTransform = OCTNewCoordinateTransformation( hSRSOld, hSRSNew );
+    if( hTransform == NULL )
+    {
+        OSRDestroySpatialReference( hSRSOld );
+        OSRDestroySpatialReference( hSRSNew );
+
+        return FALSE;
+    }
+
+    /*
+     * Transform all the mesh points.
+     */
+
+    newShapes = gv_shapes_transform(rlayer->data, hTransform, hSRSNew);
+    if (newShapes == NULL)
+        success = FALSE;
+
+
+    if( success )
+    {
+        //set the new data for the shapes layer
+        gv_shapes_layer_set_data(rlayer, newShapes);
+
+        //set the projection string
+        gv_data_set_projection( GV_DATA(layer), new_projection );
+
+        //signal a re-draw
+        gv_data_changed(GV_DATA(layer), NULL);
+        gv_view_area_queue_draw( GV_LAYER(layer)->view );
+    }
+
+    //clean up
+    OCTDestroyCoordinateTransformation( hTransform );
+    OSRDestroySpatialReference( hSRSOld );
+    OSRDestroySpatialReference( hSRSNew );
+
+    return success;
+#endif
+}
+
 /************************************************************************/
 /*                 gv_shapes_layer_get_symbol_manager()                 */
 /************************************************************************/
 
-GObject *gv_shapes_layer_get_symbol_manager( GvShapesLayer *layer, 
+GObject *gv_shapes_layer_get_symbol_manager( GvShapesLayer *layer,
                                                int ok_to_create )
 
 {
@@ -485,35 +691,35 @@ gv_shapes_layer_draw_label( GvViewArea *view, GvShapesLayer *layer,
             glColor4fv(label_info->background_color);
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x - x_offset, y - y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x - x_offset, y ,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x - x_offset, y + y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x, y + y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x + x_offset, y + y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x + x_offset, y,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x + x_offset, y - y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x, y - y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
         }
 
@@ -522,7 +728,7 @@ gv_shapes_layer_draw_label( GvViewArea *view, GvShapesLayer *layer,
             glColor4fv(label_info->background_color);
             gv_view_area_bmfont_draw( view, label_info->font,
                                       x + x_offset, y + y_offset,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
         }
     }
@@ -554,7 +760,7 @@ gv_shapes_layer_draw_label( GvViewArea *view, GvShapesLayer *layer,
                 view, label_info->font,
                 x + GV_SHAPE_LAYER(layer)->selected_motion.x,
                 y + GV_SHAPE_LAYER(layer)->selected_motion.y,
-                label_info->text, 
+                label_info->text,
                 !drawinfo->geo2screen_works );
             glTranslate(GV_SHAPE_LAYER(layer)->selected_motion.x,
                          GV_SHAPE_LAYER(layer)->selected_motion.y,
@@ -563,7 +769,7 @@ gv_shapes_layer_draw_label( GvViewArea *view, GvShapesLayer *layer,
         else
         {
             gv_view_area_bmfont_draw( view, label_info->font, x, y,
-                                      label_info->text, 
+                                      label_info->text,
                                       !drawinfo->geo2screen_works );
         }
     }
@@ -636,11 +842,11 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
     }
     else
     {
-        if( layer->symbol_manager != NULL 
-            && gv_symbol_manager_has_symbol( 
-                GV_SYMBOL_MANAGER(layer->symbol_manager), 
+        if( layer->symbol_manager != NULL
+            && gv_symbol_manager_has_symbol(
+                GV_SYMBOL_MANAGER(layer->symbol_manager),
                 symbol_info->symbol_id ) )
-            poSymbol = gv_symbol_manager_get_symbol( 
+            poSymbol = gv_symbol_manager_get_symbol(
                 GV_SYMBOL_MANAGER(layer->symbol_manager),
                 symbol_info->symbol_id );
         else
@@ -690,7 +896,7 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
             if( draw_mode == NORMAL_GET_BOX )
             {
                 gv_draw_info_aggregate_select_region( drawinfo, box_x, box_y);
-                gv_draw_info_aggregate_select_region( drawinfo, 
+                gv_draw_info_aggregate_select_region( drawinfo,
                                                       box_x + geo_width,
                                                       box_y + geo_height );
             }
@@ -797,7 +1003,7 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
 
               glScale( base_scale, base_scale, base_scale );
 
-              GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+              GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer,
                                 symbol_info->part_index,
                                 shape_obj,
                                 draw_mode == SELECTED ? NORMAL_GET_BOX : draw_mode,
@@ -810,17 +1016,17 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
                   gv_draw_info_grow_box( &sub_drawinfo, 1.2 );
 
                   glBegin(GL_LINE_LOOP);
-                  glVertex2( 
-                      sub_drawinfo.selection_box.x, 
+                  glVertex2(
+                      sub_drawinfo.selection_box.x,
                       sub_drawinfo.selection_box.y );
-                  glVertex2( 
-                      sub_drawinfo.selection_box.x + sub_drawinfo.selection_box.width, 
+                  glVertex2(
+                      sub_drawinfo.selection_box.x + sub_drawinfo.selection_box.width,
                       sub_drawinfo.selection_box.y );
-                  glVertex2( 
-                      sub_drawinfo.selection_box.x + sub_drawinfo.selection_box.width, 
+                  glVertex2(
+                      sub_drawinfo.selection_box.x + sub_drawinfo.selection_box.width,
                       sub_drawinfo.selection_box.y + sub_drawinfo.selection_box.height);
-                  glVertex2( 
-                      sub_drawinfo.selection_box.x, 
+                  glVertex2(
+                      sub_drawinfo.selection_box.x,
                       sub_drawinfo.selection_box.y + sub_drawinfo.selection_box.height);
                   glEnd();
               }
@@ -1050,10 +1256,10 @@ gv_shapes_layer_draw_symbol( GvViewArea *view, GvShapesLayer *layer,
 
             /* We do not currently take symbol rotation angle into account. */
 
-            gv_draw_info_aggregate_select_region( drawinfo, 
+            gv_draw_info_aggregate_select_region( drawinfo,
                                                   cx - bx*symbol_info->scale,
                                                   cy - bx*symbol_info->scale );
-            gv_draw_info_aggregate_select_region( drawinfo, 
+            gv_draw_info_aggregate_select_region( drawinfo,
                                                   cx + bx*symbol_info->scale,
                                                   cy + bx*symbol_info->scale );
         }
@@ -1213,7 +1419,7 @@ gv_shapes_layer_draw_pen( GvViewArea *view, GvShape *shape,
             int j;
             for (j=0; j < line->num_nodes; ++j)
             {
-                gv_draw_info_aggregate_select_region( drawinfo, 
+                gv_draw_info_aggregate_select_region( drawinfo,
                                                       line->xyz_nodes[j*3],
                                                       line->xyz_nodes[j*3+1] );
             }
@@ -1411,7 +1617,7 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
                                  gv_draw_mode draw_mode,
                                  GvShapeDrawInfo *drawinfo )
 {
-    gvgeocoord x, y, z;
+    gvgeocoord x=0.0, y=0.0, z=0.0;
     GvShapeDrawInfo sAltDrawInfo;
 
 /* -------------------------------------------------------------------- */
@@ -1438,10 +1644,10 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
                                                  part_index );
             next_part_index = part_info->next_part;
 
-            /* if there are multiple parts, we need to aggregate 
+            /* if there are multiple parts, we need to aggregate
                selection boxes. */
 
-            if( part_draw_mode == SELECTED 
+            if( part_draw_mode == SELECTED
                 && gv_shape_type(shape_obj) == GVSHAPE_POINT
                 && next_part_index != GVP_LAST_PART )
                 part_draw_mode = NORMAL_GET_BOX;
@@ -1500,17 +1706,17 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
 
             /* draw box around cross hair */
             glBegin(GL_LINE_LOOP);
-            glVertex2( 
-                drawinfo->selection_box.x, 
+            glVertex2(
+                drawinfo->selection_box.x,
                 drawinfo->selection_box.y );
-            glVertex2( 
-                drawinfo->selection_box.x + drawinfo->selection_box.width, 
+            glVertex2(
+                drawinfo->selection_box.x + drawinfo->selection_box.width,
                 drawinfo->selection_box.y );
-            glVertex2( 
-                drawinfo->selection_box.x + drawinfo->selection_box.width, 
+            glVertex2(
+                drawinfo->selection_box.x + drawinfo->selection_box.width,
                 drawinfo->selection_box.y + drawinfo->selection_box.height);
-            glVertex2( 
-                drawinfo->selection_box.x, 
+            glVertex2(
+                drawinfo->selection_box.x,
                 drawinfo->selection_box.y + drawinfo->selection_box.height);
             glEnd();
         }
@@ -1570,9 +1776,9 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
             x = ((GvPointShape *) shape_obj)->x;
             y = ((GvPointShape *) shape_obj)->y;
 
-            gv_draw_info_aggregate_select_region( drawinfo, 
+            gv_draw_info_aggregate_select_region( drawinfo,
                                                   x - delta, y - delta );
-            gv_draw_info_aggregate_select_region( drawinfo, 
+            gv_draw_info_aggregate_select_region( drawinfo,
                                                   x + delta, y + delta );
         }
     }
@@ -1628,7 +1834,7 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
                 glVertex2(x, y+delta);
                 glVertex2(x+delta, y);
 
-#else                        
+#else
                 glVertex2(x-delta, y-delta);
                 glVertex2(x+delta, y-delta);
                 glVertex2(x+delta, y+delta);
@@ -1748,7 +1954,7 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
                         y = area->xyz_ring_nodes[ring][j*3+1];
 
                         if( draw_mode == NORMAL_GET_BOX )
-                            gv_draw_info_aggregate_select_region( drawinfo, 
+                            gv_draw_info_aggregate_select_region( drawinfo,
                                                                   x, y );
                         else
                         {
@@ -1763,7 +1969,7 @@ void gv_shapes_layer_draw_shape( GvViewArea *view, GvShapesLayer *layer,
                             glVertex2(x, y+delta);
                             glVertex2(x+delta, y);
 
-#else                            
+#else
                             glVertex2(x-delta, y-delta);
                             glVertex2(x+delta, y-delta);
                             glVertex2(x+delta, y+delta);
@@ -1805,7 +2011,7 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
     gint bAntialiased, in_list_count = 0, out_list_count = 0;
     const char * pszAntialiased;
 #ifdef ATLANTIS_BUILD
-    int          bDisplayListsEnabled = 0; /* display lists unreliable */ 
+    int          bDisplayListsEnabled = 0; /* display lists unreliable */
 #else
     int          bDisplayListsEnabled = 0;
         /*gv_manager_get_preference(gv_get_manager(),"display_lists") == NULL
@@ -1899,7 +2105,7 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
             {
                 in_list_count++;
                 drawinfo.box_set = FALSE;
-                GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+                GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer,
                                         part_index, shape_obj,
                                         NORMAL, &drawinfo );
             }
@@ -1939,7 +2145,7 @@ gv_shapes_layer_draw(GvLayer *r_layer, GvViewArea *view)
         {
             out_list_count++;
             drawinfo.box_set = FALSE;
-            GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+            GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer,
                                         part_index, shape_obj,
                                         NORMAL, &drawinfo );
         }
@@ -2025,7 +2231,7 @@ gv_shapes_layer_draw_selected(GvShapeLayer *r_layer, GvViewArea *view)
 
         /* draw the shape in selected mode. */
         drawinfo.box_set = FALSE;
-        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer, 
+        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape( view, layer,
                                     part_index, shape_obj,
                                     SELECTED, &drawinfo );
     }
@@ -2075,7 +2281,7 @@ gv_shapes_layer_pick_shape(GvShapeLayer *r_layer)
 
         /* Draw it in PICKING mode */
         drawinfo.box_set = FALSE;
-        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape(view, layer, 
+        GV_SHAPES_LAYER_GET_CLASS(layer)->draw_shape(view, layer,
                                     part_index, shape_obj,
                                     PICKING, &drawinfo);
     }
