@@ -47,8 +47,6 @@ import gview
 
 EYE_W = 24
 
-tooltips = gtk.Tooltips()
-
 class Layers(gtk.Frame, Signaler):
     def __init__(self, viewwin):
         """Initialize the Layers list.
@@ -97,7 +95,7 @@ class Layers(gtk.Frame, Signaler):
         for stock,tip,cb in opts:
             but = create_stock_button(stock, cb)
             self.butbox.pack_start(but)
-            tooltips.set_tip(but, tip)
+            but.set_tooltip_text(tip)
 
         self.connect('realize', self.realize)
         self.publish('deleted-layer')
@@ -118,6 +116,7 @@ class Layers(gtk.Frame, Signaler):
             ('Legend', 'legend', _("Legend"), None, None, self.show_legend),
             ('ClassifyLayer', 'classify', _("Classify Layer"), None, None, self.classify_layer),
             ('Properties', gtk.STOCK_PREFERENCES, _("Properties"), None, None, self.launch_properties),
+            ('Attributes', None, _("Attributes"), None, None, self.launch_attedit),
             ])
 
         self.UImgr.insert_action_group(self.actiongroup, 0)
@@ -135,6 +134,7 @@ class Layers(gtk.Frame, Signaler):
             <menuitem action='Legend'/>
             <menuitem action='ClassifyLayer'/>
             <menuitem action='Properties'/>
+            <menuitem action='Attributes'/>
         </popup>
         """)
 
@@ -239,6 +239,11 @@ class Layers(gtk.Frame, Signaler):
         if ret == 'Yes':
             layer.launch_properties()
 
+    def launch_attedit(self, action):
+        from gvshapesgrid import AttributeEditor
+        dlg = AttributeEditor(app=self.viewwin.app)
+        dlg.show_cb(self.viewwin)
+        
     def row_selected(self, selection):
         if self.updating:
             return
