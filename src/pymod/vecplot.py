@@ -66,7 +66,7 @@
 #
 
 import gview
-import numpy as Numeric
+import numpy
 import gtk
 import pgumenu
 import os
@@ -159,9 +159,11 @@ DEFAULT_EDGE_PADDING=0.15
 
 
 if os.name == 'nt':
-    DEFAULT_FONT="-adobe-helvetica-medium-r-*-*-15-*-*-*-*-*-*-*"
+    #DEFAULT_FONT="-adobe-helvetica-medium-r-*-*-15-*-*-*-*-*-*-*"
+    DEFAULT_FONT="Sans 12"
 else:
-    DEFAULT_FONT="-adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*"
+    #DEFAULT_FONT="-adobe-helvetica-medium-r-*-*-12-*-*-*-*-*-*-*"
+    DEFAULT_FONT="Sans 12"
 
 
 
@@ -473,8 +475,8 @@ class gvplot_2Ddata_cartesian:
                 cnode=shp.get_node(cnodeidx)
                 xlists[idx].append(cnode[0])
                 ylists[idx].append(cnode[1])
-            xdata,ydata,ok=self.get_xyposition(Numeric.array(xlists[idx]),
-                                               Numeric.array(ylists[idx]))
+            xdata,ydata,ok=self.get_xyposition(numpy.array(xlists[idx]),
+                                               numpy.array(ylists[idx]))
             arrxlists.append(xdata)
             arrylists.append(ydata)
             idx=idx+1
@@ -796,16 +798,16 @@ class gvplot_2Ddata_cartesian:
         dymin=self.pymin+(self.pymax-self.pymin)*self.bborder
         dymax=self.pymax-(self.pymax-self.pymin)*self.tborder
 
-        if type(x) == type(Numeric.array([])):
-            x=Numeric.ravel(x)
+        if type(x) == type(numpy.array([])):
+            x=numpy.ravel(x)
 
-        if type(y) == type(Numeric.array([])):
-            y=Numeric.ravel(y)
+        if type(y) == type(numpy.array([])):
+            y=numpy.ravel(y)
 
         x,xok=PlotToData1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=PlotToData1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
 
-        okarr=Numeric.where(xok==0,0,yok)
+        okarr=numpy.where(xok==0,0,yok)
 
         return (x,y,okarr)
 
@@ -820,16 +822,16 @@ class gvplot_2Ddata_cartesian:
         dymin=self.pymin+(self.pymax-self.pymin)*self.bborder
         dymax=self.pymax-(self.pymax-self.pymin)*self.tborder
 
-        if type(x) == type(Numeric.array([])):
-            x=Numeric.ravel(x)
+        if type(x) == type(numpy.array([])):
+            x=numpy.ravel(x)
 
-        if type(y) == type(Numeric.array([])):
-            y=Numeric.ravel(y)
+        if type(y) == type(numpy.array([])):
+            y=numpy.ravel(y)
 
         x,xok=DataToPlot1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=DataToPlot1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
 
-        okarr=Numeric.where(xok==0,0,yok)
+        okarr=numpy.where(xok==0,0,yok)
 
         return (x,y,okarr)        
 
@@ -1709,28 +1711,28 @@ class gvplot_3Ddata_cartesiangrid:
         dzmax=self.pzmax-(self.pzmax-self.pzmin)*self.tborder
 
         arrshp=None
-        if type(x) == type(Numeric.array([])):
+        if type(x) == type(numpy.array([])):
             arrshp=x.shape
-            x=Numeric.ravel(x)
+            x=numpy.ravel(x)
 
-        if type(y) == type(Numeric.array([])):
-            y=Numeric.ravel(y)
+        if type(y) == type(numpy.array([])):
+            y=numpy.ravel(y)
 
-        if type(y) == type(Numeric.array([])):
-            z=Numeric.ravel(z)
+        if type(y) == type(numpy.array([])):
+            z=numpy.ravel(z)
 
         x,xok=PlotToData1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=PlotToData1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
         z,zok=PlotToData1D(dzmin,dzmax,self.zmins,self.zmaxs,z,self.zaxistype)
 
-        okarr=Numeric.where(xok==0,0,yok)
-        okarr=Numeric.where(zok==0,0,okarr)
+        okarr=numpy.where(xok==0,0,yok)
+        okarr=numpy.where(zok==0,0,okarr)
 
         if arrshp is not None:
-            x=Numeric.reshape(x,arrshp)
-            y=Numeric.reshape(y,arrshp)
-            z=Numeric.reshape(z,arrshp)
-            okarr=Numeric.reshape(okarr,arrshp)
+            x=numpy.reshape(x,arrshp)
+            y=numpy.reshape(y,arrshp)
+            z=numpy.reshape(z,arrshp)
+            okarr=numpy.reshape(okarr,arrshp)
 
         return (x,y,z,okarr)
 
@@ -1749,28 +1751,28 @@ class gvplot_3Ddata_cartesiangrid:
         dzmax=self.pzmax-(self.pzmax-self.pzmin)*self.tborder
 
         arrshp=None
-        if type(x) == type(Numeric.array([])):
+        if type(x) == type(numpy.array([])):
             arrshp=x.shape
-            x=Numeric.ravel(x)
+            x=numpy.ravel(x)
 
-        if type(y) == type(Numeric.array([])):
-            y=Numeric.ravel(y)
+        if type(y) == type(numpy.array([])):
+            y=numpy.ravel(y)
 
-        if type(y) == type(Numeric.array([])):
-            z=Numeric.ravel(z)
+        if type(y) == type(numpy.array([])):
+            z=numpy.ravel(z)
 
         x,xok=DataToPlot1D(dxmin,dxmax,self.xmins,self.xmaxs,x,self.xaxistype)
         y,yok=DataToPlot1D(dymin,dymax,self.ymins,self.ymaxs,y,self.yaxistype)
         z,zok=DataToPlot1D(dzmin,dzmax,self.zmins,self.zmaxs,z,self.zaxistype)
 
-        okarr=Numeric.where(xok==0,0,yok)
-        okarr=Numeric.where(zok==0,0,okarr)
+        okarr=numpy.where(xok==0,0,yok)
+        okarr=numpy.where(zok==0,0,okarr)
 
         if arrshp is not None:
-            x=Numeric.reshape(x,arrshp)
-            y=Numeric.reshape(y,arrshp)
-            z=Numeric.reshape(z,arrshp)
-            okarr=Numeric.reshape(okarr,arrshp)
+            x=numpy.reshape(x,arrshp)
+            y=numpy.reshape(y,arrshp)
+            z=numpy.reshape(z,arrshp)
+            okarr=numpy.reshape(okarr,arrshp)
 
 
         return (x,y,z,okarr)        
@@ -1985,32 +1987,32 @@ class gvplot_array_cartesian:
     def __init__(self,xarr,yarr,zarr=None):
 
 
-        if type(xarr) == type(Numeric.array([1,2])):
+        if type(xarr) == type(numpy.array([1,2])):
             # Below:
             # Data points must have x, y, and z (if present)
             # not equal to nan or inf to be included.
             # This isn't implemented properly yet though
             # because of problems on some platforms with nan/inf
-            okarr=Numeric.ones(xarr.shape)
+            okarr=numpy.ones(xarr.shape)
 
             # nt and irix both don't seem to have a notion
             # of nan and inf, so leave out the checks for
             # them...
             #if os.name != 'nt':
-            #    okarr=Numeric.where(xarr == float('inf'),0,okarr)
-            #    okarr=Numeric.where(xarr == float('nan'),0,okarr)
-            #    okarr=Numeric.where(yarr == float('inf'),0,okarr)
-            #    okarr=Numeric.where(yarr == float('nan'),0,okarr)
+            #    okarr=numpy.where(xarr == float('inf'),0,okarr)
+            #    okarr=numpy.where(xarr == float('nan'),0,okarr)
+            #    okarr=numpy.where(yarr == float('inf'),0,okarr)
+            #    okarr=numpy.where(yarr == float('nan'),0,okarr)
 
             #    if zarr is not None:
-            #        okarr=Numeric.where(zarr == float('inf'),0,okarr)
-            #        okarr=Numeric.where(zarr == float('nan'),0,okarr)
+            #        okarr=numpy.where(zarr == float('inf'),0,okarr)
+            #        okarr=numpy.where(zarr == float('nan'),0,okarr)
 
-            self.xarr=Numeric.compress(okarr==1,xarr)
-            self.yarr=Numeric.compress(okarr==1,yarr)
+            self.xarr=numpy.compress(okarr==1,xarr)
+            self.yarr=numpy.compress(okarr==1,yarr)
 
             if zarr is not None:
-                self.zarr=Numeric.compress(okarr==1,zarr)
+                self.zarr=numpy.compress(okarr==1,zarr)
 
             self.xmin=min(self.xarr)
             self.xmax=max(self.xarr)
@@ -2061,19 +2063,19 @@ class gvplot_grid_cartesian:
     """
     def __init__(self,xarr,yarr,zarr=None):
 
-        if type(xarr) == type(Numeric.array([1,2])):
+        if type(xarr) == type(numpy.array([1,2])):
             self.xarr=xarr
             self.yarr=yarr
             self.zarr=zarr
 
-            self.xmin=min(Numeric.ravel(self.xarr))
-            self.xmax=max(Numeric.ravel(self.xarr))
-            self.ymin=min(Numeric.ravel(self.yarr))
-            self.ymax=max(Numeric.ravel(self.yarr))
+            self.xmin=min(numpy.ravel(self.xarr))
+            self.xmax=max(numpy.ravel(self.xarr))
+            self.ymin=min(numpy.ravel(self.yarr))
+            self.ymax=max(numpy.ravel(self.yarr))
 
             if zarr is not None:
-                self.zmin=min(Numeric.ravel(self.zarr))
-                self.zmax=max(Numeric.ravel(self.zarr))
+                self.zmin=min(numpy.ravel(self.zarr))
+                self.zmax=max(numpy.ravel(self.zarr))
             else:
                 self.zarr=None
                 self.zmin=None
@@ -2084,22 +2086,22 @@ class gvplot_grid_cartesian:
             self.yarr=yarr
             self.zarr=zarr
 
-            self.xmin=min(Numeric.ravel(self.xarr[0]))
-            self.xmax=max(Numeric.ravel(self.xarr[0]))
-            self.ymin=min(Numeric.ravel(self.yarr[0]))
-            self.ymin=max(Numeric.ravel(self.yarr[0]))
+            self.xmin=min(numpy.ravel(self.xarr[0]))
+            self.xmax=max(numpy.ravel(self.xarr[0]))
+            self.ymin=min(numpy.ravel(self.yarr[0]))
+            self.ymin=max(numpy.ravel(self.yarr[0]))
             if zarr is not None:
-                self.zmin=min(Numeric.ravel(self.zarr[0]))
-                self.zmax=max(Numeric.ravel(self.zarr[0]))
+                self.zmin=min(numpy.ravel(self.zarr[0]))
+                self.zmax=max(numpy.ravel(self.zarr[0]))
 
             for idx in range(1,len(xarr)):
-                self.xmin=min(min(Numeric.ravel(self.xarr[idx])),self.xmin)
-                self.xmax=max(max(Numeric.ravel(self.xarr[idx])),self.xmax)
-                self.ymin=min(min(Numeric.ravel(self.yarr[idx])),self.ymin)
-                self.ymax=max(max(Numeric.ravel(self.yarr[idx])),self.ymax)
+                self.xmin=min(min(numpy.ravel(self.xarr[idx])),self.xmin)
+                self.xmax=max(max(numpy.ravel(self.xarr[idx])),self.xmax)
+                self.ymin=min(min(numpy.ravel(self.yarr[idx])),self.ymin)
+                self.ymax=max(max(numpy.ravel(self.yarr[idx])),self.ymax)
                 if zarr is not None:
-                    self.zmin=min(Numeric.ravel(min(self.zarr[idx])),self.zmin)
-                    self.zmax=max(Numeric.ravel(max(self.zarr[idx])),self.zmax)
+                    self.zmin=min(numpy.ravel(min(self.zarr[idx])),self.zmin)
+                    self.zmax=max(numpy.ravel(max(self.zarr[idx])),self.zmax)
 
 
 
@@ -2397,13 +2399,13 @@ def CreateGridArrayDataLayer(plot_data,index,name=None):
                               yinlist[idx],
                               plot_data.yaxistype)
 
-        okarr=Numeric.where(yok == 0,0,xok)
+        okarr=numpy.where(yok == 0,0,xok)
 
         zarr,zok=DataToPlot1D(ext[2],ext[5],
                               plot_data.zmins,plot_data.zmaxs,
                               zinlist[idx],
                               plot_data.zaxistype)
-        okarr=Numeric.where(zok == 0,0,okarr)
+        okarr=numpy.where(zok == 0,0,okarr)
 
         for idx in range(xarr.shape[0]-1):
             for idx2 in range(xarr.shape[1]-1):
@@ -2495,16 +2497,16 @@ def CreateArrayDataLayer(plot_data,index,name=None):
                               yinlist[idx],
                               plot_data.yaxistype)
 
-        okarr=Numeric.where(yok == 0,0,xok)
+        okarr=numpy.where(yok == 0,0,xok)
 
         if plot_data.array_data[index].zarr is not None:
             zarr,zok=DataToPlot1D(ext[2],ext[5],
                                 plot_data.zmins,plot_data.zmaxs,
                                 zinlist[idx],
                                 plot_data.zaxistype)
-            okarr=Numeric.where(zok == 0,0,okarr)
+            okarr=numpy.where(zok == 0,0,okarr)
         else:
-            zarr=Numeric.zeros(Numeric.shape(xarr),Numeric.Float64)
+            zarr=numpy.zeros(numpy.shape(xarr),numpy.float64)
 
         # NOTE: taking the for-loop down to the c-level didn't
         # speed up the plot time.  The render time seems
@@ -2552,7 +2554,7 @@ class GvSimplePlot(gview.GvViewArea):
         call doesn't seem to do anything).
     """
     def __init__(self, _obj=None, bgcolor=(1.0,1.0,1.0,1.0)):
-        gview.GvViewArea.__init__(self,_obj)
+        gview.GvViewArea.__init__(self)
         self.set_background_color(bgcolor)
         self.set_border_padding()
         self.bgcolor=bgcolor
@@ -2613,7 +2615,7 @@ class GvSimplePlot(gview.GvViewArea):
             raise RuntimeError,'No plot to plot over.'
 
         try:
-            dshape = Numeric.shape( yarr )
+            dshape = numpy.shape( yarr )
         except:
             raise ValueError,"data argument to plot() does not appear to be "+\
                           "a NumPy array"
@@ -2621,15 +2623,15 @@ class GvSimplePlot(gview.GvViewArea):
         dim = len(dshape)
 
         if dim == 2 and (dshape[0] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[1],))
+            yarr=numpy.reshape(yarr,(dshape[1],))
         elif dim == 2 and (dshape[1] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[0],))
+            yarr=numpy.reshape(yarr,(dshape[0],))
         elif dim != 1:
             raise ValueError,\
                   "data argument dimension or shape is not supported."
 
         if xarr is None:
-            xarr=Numeric.array(range(len(yarr)))
+            xarr=numpy.array(range(len(yarr)))
 
         cstr=str(color[0])+' '+str(color[1])+' '+str(color[2])+\
               ' '+str(color[3])
@@ -2693,7 +2695,7 @@ class GvSimplePlot(gview.GvViewArea):
             return
 
         try:
-            dshape = Numeric.shape( yarr )
+            dshape = numpy.shape( yarr )
         except:
             raise ValueError,"data argument to plot() does not appear to be "+\
                           "a NumPy array"
@@ -2701,15 +2703,15 @@ class GvSimplePlot(gview.GvViewArea):
         dim = len(dshape)
 
         if dim == 2 and (dshape[0] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[1],))
+            yarr=numpy.reshape(yarr,(dshape[1],))
         elif dim == 2 and (dshape[1] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[0],))
+            yarr=numpy.reshape(yarr,(dshape[0],))
         elif dim != 1:
             raise ValueError,\
                   "data argument dimension or shape is not supported."
 
         if xarr is None:
-            xarr=Numeric.array(range(len(yarr)))
+            xarr=numpy.array(range(len(yarr)))
 
         self.clear()
         xsize=float(self.get_width())
@@ -2830,8 +2832,8 @@ class GvSimplePlot(gview.GvViewArea):
               color=(0.0,0.0,1.0,1.0),drawstyle='_', interactive=0):
 
         try:
-            dshape = Numeric.shape( xarr )
-            dshape = Numeric.shape( yarr )
+            dshape = numpy.shape( xarr )
+            dshape = numpy.shape( yarr )
         except:
             raise ValueError,"data argument to plot() does not appear to be "+\
                           "a NumPy array"
@@ -2839,15 +2841,15 @@ class GvSimplePlot(gview.GvViewArea):
         dim = len(dshape)
 
         if dim == 2 and (dshape[0] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[1],))
+            yarr=numpy.reshape(yarr,(dshape[1],))
         elif dim == 2 and (dshape[1] == 1):
-            yarr=Numeric.reshape(yarr,(dshape[0],))
+            yarr=numpy.reshape(yarr,(dshape[0],))
         elif dim != 1:
             raise ValueError,\
                   "data argument dimension or shape is not supported."
 
         if xarr is None:
-            xarr=Numeric.array(range(len(yarr)))
+            xarr=numpy.array(range(len(yarr)))
 
         cstr=str(color[0])+' '+str(color[1])+' '+str(color[2])+\
               ' '+str(color[3])
@@ -2870,12 +2872,12 @@ class GvSimplePlot(gview.GvViewArea):
             xmin=self.plots[0].xmins[0]
             xmax=self.plots[0].xmaxs[len(self.plots[0].xmaxs)-1]
             xspc=(xmax-xmin)/(xtics-1)
-            rord=Numeric.log10(abs(xspc))
+            rord=numpy.log10(abs(xspc))
             nrord=rord % 1
-            spc=pow(10,Numeric.floor(rord))
+            spc=pow(10,numpy.floor(rord))
             min_diff=abs(xspc-spc)
             for i in [1,2,5]:
-                nspc=i*pow(10,Numeric.floor(rord))
+                nspc=i*pow(10,numpy.floor(rord))
                 if abs(nspc-spc) < min_diff:
                     min_diff=abs(xspc-nspc)
                     spc=nspc
@@ -2887,12 +2889,12 @@ class GvSimplePlot(gview.GvViewArea):
             ymin=self.plots[0].ymins[0]
             ymax=self.plots[0].ymaxs[len(self.plots[0].ymaxs)-1]
             yspc=(ymax-ymin)/(ytics-1)
-            rord=Numeric.log10(abs(yspc))
+            rord=numpy.log10(abs(yspc))
             nrord=rord % 1
-            spc=pow(10,Numeric.floor(rord))
+            spc=pow(10,numpy.floor(rord))
             min_diff=abs(yspc-spc)
             for i in [1,2,5]:
-                nspc=i*pow(10,Numeric.floor(rord))
+                nspc=i*pow(10,numpy.floor(rord))
                 if abs(nspc-spc) < min_diff:
                     min_diff=abs(yspc-nspc)
                     spc=nspc
@@ -2980,14 +2982,31 @@ class GvSimplePlotWindow(gtk.Window):
         shell = gtk.VBox(spacing=0)
         self.add(shell)
         self.set_size_request(650,545)
+        
+        # Print menu - using gtk instead of the pguMenuFactory - it was giving assertion errors
+        uimanager = gtk.UIManager()
+        self.add_accel_group(uimanager.get_accel_group())
+        uimanager.add_ui_from_string(
+                """<ui><menubar name='MenuBar'>
+                          <menu action='File'>
+                            <menuitem action='Print'/>
+                    </menu></menubar></ui>          
+                """)
+        
+        action_group = gtk.ActionGroup("main")
+        action_group.add_actions([
+            ('File', None, "File"),
+            ('Print', gtk.STOCK_PRINT, '_Print', '<control>p', "Print", self.print_cb)
+            ])
+        uimanager.insert_action_group(action_group, 0)
+        menu = uimanager.get_widget('/MenuBar')
+        
+#        menuf = pgumenu.pguMenuFactory()
+#        self.menuf = menuf
+#        menuf.add_entries([
+#                 ('File/Print', None, self.print_cb)])
 
-        # Print menu
-        menuf = pgumenu.pguMenuFactory()
-        self.menuf = menuf
-        menuf.add_entries([
-                 ('File/Print', None, self.print_cb)])
-
-        shell.pack_start(self.menuf, expand=False)
+        shell.pack_start(menu, expand=False)
 
         shell.pack_start( self.plotarea )
 
@@ -3037,8 +3056,8 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
         raise RuntimeError,'DataToPlot1D: unknown axis type!'
 
     ptype=type(dpos)
-    if ptype != type(Numeric.array([])):
-        dpos=Numeric.array(dpos,Numeric.Float64)
+    if ptype != type(numpy.array([])):
+        dpos=numpy.array(dpos,numpy.float64)
 
     # First check for length 1 case and do quick
     # transform and return if it is; otherwise, continue.
@@ -3050,78 +3069,78 @@ def DataToPlot1D(pmin,pmax,dmins,dmaxs,dpos,axistype=GVPLOT_AXISTYPE_LINEAR):
                   (float(dmaxs[0])-float(dmins[0])))*\
                   (dpos-float(dmins[0]))+float(pmin)
 
-            okarr=Numeric.where(ppos >= pmin,1,0)
-            okarr=Numeric.where(ppos <= pmax,okarr,0)            
+            okarr=numpy.where(ppos >= pmin,1,0)
+            okarr=numpy.where(ppos <= pmax,okarr,0)            
 
         elif axistype == GVPLOT_AXISTYPE_LOG:
             # Make sure logs don't choke
-            okarr=Numeric.where(dpos > 0,1,0)
-            dpos=Numeric.where(okarr == 0,1,dpos)
+            okarr=numpy.where(dpos > 0,1,0)
+            dpos=numpy.where(okarr == 0,1,dpos)
 
-            ppos=(((float(pmax)-float(pmin))/float(Numeric.log10(dmaxs[0])-
-                                          Numeric.log10(dmins[0])))*\
-                  (Numeric.log10(dpos)-Numeric.log10(dmins[0])))+pmin
-            okarr=Numeric.where(ppos >= pmin,okarr,0)
-            okarr=Numeric.where(ppos <= pmax,okarr,0)
+            ppos=(((float(pmax)-float(pmin))/float(numpy.log10(dmaxs[0])-
+                                          numpy.log10(dmins[0])))*\
+                  (numpy.log10(dpos)-numpy.log10(dmins[0])))+pmin
+            okarr=numpy.where(ppos >= pmin,okarr,0)
+            okarr=numpy.where(ppos <= pmax,okarr,0)
 
-        if ptype not in [type(Numeric.array([])),type((1,)),type([])]:
+        if ptype not in [type(numpy.array([])),type((1,)),type([])]:
             okarr=okarr[0]
 
         return (ppos,okarr)
 
-    dmaxs=Numeric.array(dmaxs,Numeric.Float64)
-    dmins=Numeric.array(dmins,Numeric.Float64)
+    dmaxs=numpy.array(dmaxs,numpy.float64)
+    dmins=numpy.array(dmins,numpy.float64)
 
     if axistype == GVPLOT_AXISTYPE_LINEAR:    
-        dwidtharr=Numeric.ravel(dmaxs-dmins)
-        dwidth=Numeric.sum(dwidtharr)
-        dcsum=Numeric.cumsum(dwidtharr)
-        drng=Numeric.array(list(dcsum/dwidth).insert(0,0.0))
+        dwidtharr=numpy.ravel(dmaxs-dmins)
+        dwidth=numpy.sum(dwidtharr)
+        dcsum=numpy.cumsum(dwidtharr)
+        drng=numpy.array(list(dcsum/dwidth).insert(0,0.0))
         prng=pmin+(drng*(pmax-pmin)) # plot range endpoints
 
-        ppos=Numeric.zeros((len(dpos),),Numeric.Float64)
-        okarr=Numeric.zeros((len(dpos),),Numeric.Float64)
+        ppos=numpy.zeros((len(dpos),),numpy.float64)
+        okarr=numpy.zeros((len(dpos),),numpy.float64)
 
         for idx in range(len(dmins)):
-            sc=Numeric.where(dpos >= dmins[idx],1,0)
-            sc=Numeric.where(dpos <= dmaxs[idx],1,sc)
-            okarr=Numeric.where(sc == 1,1,okarr)
-            sc=sc.astype(Numeric.Float64)
+            sc=numpy.where(dpos >= dmins[idx],1,0)
+            sc=numpy.where(dpos <= dmaxs[idx],1,sc)
+            okarr=numpy.where(sc == 1,1,okarr)
+            sc=sc.astype(numpy.float64)
 
             ppos=ppos+(sc*(prng[idx]+((prng[idx+1]-prng[idx])*
                      (dpos-dmins[idx])/(dmaxs[idx+1]-dmins[idx]))))
 
     elif axistype == GVPLOT_AXISTYPE_LOG:
-        dmaxs=Numeric.log10(dmaxs)
-        dmins=Numeric.log10(dmins)
+        dmaxs=numpy.log10(dmaxs)
+        dmins=numpy.log10(dmins)
 
         # Make sure logs don't choke
-        okarrmask=Numeric.where(dpos > 0,1,0)
-        dpos=Numeric.where(okarrmask == 0,1,dpos)
+        okarrmask=numpy.where(dpos > 0,1,0)
+        dpos=numpy.where(okarrmask == 0,1,dpos)
 
-        dpos=Numeric.log10(dpos)
+        dpos=numpy.log10(dpos)
 
-        dwidtharr=Numeric.ravel(dmaxs-dmins)
-        dwidth=Numeric.sum(dwidtharr)
-        dcsum=Numeric.cumsum(dwidtharr)
-        drng=Numeric.array(list(dcsum/dwidth).insert(0,0.0))
+        dwidtharr=numpy.ravel(dmaxs-dmins)
+        dwidth=numpy.sum(dwidtharr)
+        dcsum=numpy.cumsum(dwidtharr)
+        drng=numpy.array(list(dcsum/dwidth).insert(0,0.0))
         prng=pmin+(drng*(pmax-pmin)) # plot range endpoints
 
-        ppos=Numeric.zeros((len(dpos),),Numeric.Float64)
-        okarr=Numeric.zeros((len(dpos),),Numeric.Float64)
+        ppos=numpy.zeros((len(dpos),),numpy.float64)
+        okarr=numpy.zeros((len(dpos),),numpy.float64)
 
         for idx in range(len(dmins)):
-            sc=Numeric.where(dpos >= dmins[idx],1,0)
-            sc=Numeric.where(dpos <= dmaxs[idx],1,sc)
-            okarr=Numeric.where(sc == 1,1,okarr)
-            sc=sc.astype(Numeric.Float64)
+            sc=numpy.where(dpos >= dmins[idx],1,0)
+            sc=numpy.where(dpos <= dmaxs[idx],1,sc)
+            okarr=numpy.where(sc == 1,1,okarr)
+            sc=sc.astype(numpy.float64)
 
             ppos=ppos+(sc*(prng[idx]+((prng[idx+1]-prng[idx])*
                      (dpos-dmins[idx])/(dmaxs[idx+1]-dmins[idx]))))
 
         okarr=okarr*okarrmask
 
-    if ptype not in [type(Numeric.array([])),type((1,)),type([])]:
+    if ptype not in [type(numpy.array([])),type((1,)),type([])]:
         okarr=okarr[0]
 
     return (ppos,okarr)
@@ -3148,11 +3167,11 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
         raise RuntimeError,'PlotToData1D: unknown axis type!'
 
     dtype=type(ppos)
-    if dtype != type(Numeric.array([])):
-        ppos=Numeric.array(ppos,Numeric.Float64)
+    if dtype != type(numpy.array([])):
+        ppos=numpy.array(ppos,numpy.float64)
 
-    okarr=Numeric.where(ppos >= pmin,1,0)
-    okarr=Numeric.where(ppos <= pmax,okarr,0)
+    okarr=numpy.where(ppos >= pmin,1,0)
+    okarr=numpy.where(ppos <= pmax,okarr,0)
 
     # First check for length 1 case and do quick
     # transform and return if it is; otherwise, continue.    
@@ -3163,66 +3182,66 @@ def PlotToData1D(pmin,pmax,dmins,dmaxs,ppos,axistype=GVPLOT_AXISTYPE_LINEAR):
                   (ppos-pmin))+dmins[0]
 
         elif axistype == GVPLOT_AXISTYPE_LOG:
-            dpos=Numeric.power(10,((((Numeric.log10(float(dmaxs[0]))-
-                   Numeric.log10(float(dmins[0])))/
+            dpos=numpy.power(10,((((numpy.log10(float(dmaxs[0]))-
+                   numpy.log10(float(dmins[0])))/
                   float(pmax-pmin))*(ppos-pmin))+
-                  Numeric.log10(float(dmins[0]))))
+                  numpy.log10(float(dmins[0]))))
 
-        if dtype not in [type(Numeric.array([])),type((1,)),type([])]:
+        if dtype not in [type(numpy.array([])),type((1,)),type([])]:
             okarr=okarr[0]
 
         return (dpos,okarr)
 
 
-    dmaxs=Numeric.array(dmaxs,Numeric.Float64)
-    dmins=Numeric.array(dmins,Numeric.Float64)
+    dmaxs=numpy.array(dmaxs,numpy.float64)
+    dmins=numpy.array(dmins,numpy.float64)
 
     if axistype == GVPLOT_AXISTYPE_LINEAR:    
-        dwidtharr=Numeric.ravel(dmaxs-dmins)
-        dwidth=Numeric.sum(dwidtharr)
-        dcsum=Numeric.cumsum(dwidtharr)
-        drng=Numeric.array(list(dcsum/dwidth).insert(0,0.0))
+        dwidtharr=numpy.ravel(dmaxs-dmins)
+        dwidth=numpy.sum(dwidtharr)
+        dcsum=numpy.cumsum(dwidtharr)
+        drng=numpy.array(list(dcsum/dwidth).insert(0,0.0))
         prng=pmin+(drng*(pmax-pmin)) # plot range endpoints
         pfrac=(float(ppos)-float(pmin))/(float(pmax)-float(pmin))
-        dpos=Numeric.zeros((len(ppos),),Numeric.Float64)
+        dpos=numpy.zeros((len(ppos),),numpy.float64)
         for idx in range(len(dmins)):
             # If ppos is between dmins[idx] and dmaxs[idx],
             # sc will be 1; otherwise it will be 0
-            sc=(Numeric.sign(pfrac-drng[idx])+
-                Numeric.sign(drng[idx+1]-pfrac))
+            sc=(numpy.sign(pfrac-drng[idx])+
+                numpy.sign(drng[idx+1]-pfrac))
             # exact boundary of 2 ranges- use lower.
-            sc=Numeric.where(sc == -1,1,sc)
-            sc=Numeric.where(sc == 1,0,sc)
-            sc=sc.astype(Numeric.Float64)/2.0
+            sc=numpy.where(sc == -1,1,sc)
+            sc=numpy.where(sc == 1,0,sc)
+            sc=sc.astype(numpy.float64)/2.0
             dpos=dpos+(sc*(dmins[idx]+((dmaxs[idx+1]-dmins[idx])*
                         (ppos-prng[idx])/(prng[idx+1]-prng[idx]))))
 
     elif axistype == GVPLOT_AXISTYPE_LOG:
-        dmaxs=Numeric.log10(dmaxs)
-        dmins=Numeric.log10(dmins)
-        dwidtharr=Numeric.ravel(dmaxs-dmins)
-        dwidth=Numeric.sum(dwidtharr)
-        dcsum=Numeric.cumsum(dwidtharr)
-        drng=Numeric.array(list(dcsum/dwidth).insert(0,0.0))
+        dmaxs=numpy.log10(dmaxs)
+        dmins=numpy.log10(dmins)
+        dwidtharr=numpy.ravel(dmaxs-dmins)
+        dwidth=numpy.sum(dwidtharr)
+        dcsum=numpy.cumsum(dwidtharr)
+        drng=numpy.array(list(dcsum/dwidth).insert(0,0.0))
         prng=pmin+(drng*(pmax-pmin)) # plot range endpoints
         pfrac=(float(ppos)-float(pmin))/(float(pmax)-float(pmin))
-        dpos=Numeric.zeros((len(ppos),),Numeric.Float64)
+        dpos=numpy.zeros((len(ppos),),numpy.float64)
         for idx in range(len(dmins)):
             # If ppos is between dmins[idx] and dmaxs[idx],
             # sc will be 1; otherwise it will be 0
-            sc=(Numeric.sign(pfrac-drng[idx])+
-                Numeric.sign(drng[idx+1]-pfrac))
+            sc=(numpy.sign(pfrac-drng[idx])+
+                numpy.sign(drng[idx+1]-pfrac))
             # exact boundary of 2 ranges- use lower.
-            sc=Numeric.where(sc == -1,1,sc)
-            sc=Numeric.where(sc == 1,0,sc)
-            sc=sc.astype(Numeric.Float64)/2.0
+            sc=numpy.where(sc == -1,1,sc)
+            sc=numpy.where(sc == 1,0,sc)
+            sc=sc.astype(numpy.float64)/2.0
             dpos=dpos+(sc*(dmins[idx]+((dmaxs[idx+1]-dmins[idx])*
                         (ppos-prng[idx])/(prng[idx+1]-prng[idx]))))
 
-        dpos=Numeric.power(10,dpos)
+        dpos=numpy.power(10,dpos)
 
 
-    if dtype not in [type(Numeric.array([])),type((1,)),type([])]:
+    if dtype not in [type(numpy.array([])),type((1,)),type([])]:
         okarr=okarr[0]
 
     return (dpos,okarr)
@@ -3234,11 +3253,11 @@ def MakeContiguousXY(xarr,yarr):
     for idx in range(len(xarr)):
         longxlist.extend(xarr[idx])
         longylist.extend(yarr[idx])
-    lxarr=Numeric.array(longxlist) 
-    lyarr=Numeric.array(longylist)   
-    ind=Numeric.argsort(lxarr)
-    nxarr=Numeric.take(lxarr,ind)
-    nyarr=Numeric.take(lyarr,ind)
+    lxarr=numpy.array(longxlist) 
+    lyarr=numpy.array(longylist)   
+    ind=numpy.argsort(lxarr)
+    nxarr=numpy.take(lxarr,ind)
+    nyarr=numpy.take(lyarr,ind)
 
     return(nxarr,nyarr)
 
@@ -3255,7 +3274,7 @@ def GetOutlierData(xarr,xmins,xmaxs,yarr,ymins,ymaxs,
               not plot coordinates (xmins/xmaxs etc. are the plot
               boundaries converted to data coordinates).
     """
-    if type(xarr) == type(Numeric.array([1,2])):
+    if type(xarr) == type(numpy.array([1,2])):
         xarr=[xarr]
         yarr=[yarr]
         if zarr is not None:
@@ -3287,25 +3306,25 @@ def GetOutlierData(xarr,xmins,xmaxs,yarr,ymins,ymaxs,
         ty=yarr[idx]
         if zarr is not None:
             tz=zarr[idx]
-        xok=Numeric.zeros(Numeric.shape(tx))
+        xok=numpy.zeros(numpy.shape(tx))
         for xidx in range(len(xmins)):
-           xok=Numeric.where((tx >= xmins[xidx]) & (tx <= xmaxs[xidx]),1,xok)
-        yok=Numeric.zeros(Numeric.shape(ty))
+           xok=numpy.where((tx >= xmins[xidx]) & (tx <= xmaxs[xidx]),1,xok)
+        yok=numpy.zeros(numpy.shape(ty))
         for yidx in range(len(ymins)):
-           yok=Numeric.where((ty >= ymins[yidx]) & (ty <= ymaxs[yidx]),1,yok)
+           yok=numpy.where((ty >= ymins[yidx]) & (ty <= ymaxs[yidx]),1,yok)
         if zarr is not None:
             for zidx in range(len(zmins)):
-               zok=Numeric.where((tz >= zmins[zidx]) & (tz <= zmaxs[zidx]),
+               zok=numpy.where((tz >= zmins[zidx]) & (tz <= zmaxs[zidx]),
                                  1,zok)
-        outlier=Numeric.where(xok == 0,1,0)
-        outlier=Numeric.where(yok == 0,1,outlier)
+        outlier=numpy.where(xok == 0,1,0)
+        outlier=numpy.where(yok == 0,1,outlier)
         if zarr is not None:
-            outlier=Numeric.where(zok == 0,1,outlier)
+            outlier=numpy.where(zok == 0,1,outlier)
 
-        nxarr.append(Numeric.compress(outlier == 1,tx))
-        nyarr.append(Numeric.compress(outlier == 1,ty))
+        nxarr.append(numpy.compress(outlier == 1,tx))
+        nyarr.append(numpy.compress(outlier == 1,ty))
         if zarr is not None:              
-            nzarr.append(Numeric.compress(outlier == 1,tz))
+            nzarr.append(numpy.compress(outlier == 1,tz))
 
     return (nxarr,nyarr,nzarr)
 
@@ -3319,25 +3338,25 @@ def GetAxisBreaks(mins,maxs,axis_type=GVPLOT_AXISTYPE_LINEAR,bwidth=0.1):
     if len(mins) == 1:
         return None
 
-    maxs=Numeric.array(maxs)
-    mins=Numeric.array(mins)
+    maxs=numpy.array(maxs)
+    mins=numpy.array(mins)
 
     if axis_type == GVPLOT_AXISTYPE_LOG:
-        maxs=Numeric.log10(maxs)
-        mins=Numeric.log10(mins)
+        maxs=numpy.log10(maxs)
+        mins=numpy.log10(mins)
 
-    dwidtharr=Numeric.ravel(maxs-mins)
-    dwidth=Numeric.sum(dwidtharr)
-    dcsum=Numeric.cumsum(dwidtharr)
-    drng=Numeric.array(list(dcsum/dwidth))
+    dwidtharr=numpy.ravel(maxs-mins)
+    dwidth=numpy.sum(dwidtharr)
+    dcsum=numpy.cumsum(dwidtharr)
+    drng=numpy.array(list(dcsum/dwidth))
     drng=drng[:len(drng)-1]
     bstarts=drng-(bwidth/2.0)
     bends=drng+(bwidth/2.0)
-    bstarts=Numeric.where(bstarts < 0.0,0.0,bstarts)
-    bends=Numeric.where(bends > 1.0,1.0,bends)
+    bstarts=numpy.where(bstarts < 0.0,0.0,bstarts)
+    bends=numpy.where(bends > 1.0,1.0,bends)
     diff=bstarts[1:]-bends[:-1]
-    bstarts[1:]=Numeric.where(diff < 0,bstarts[1:]+diff/2.0,bstarts[1:])
-    bends[:-1]=Numeric.where(diff < 0,bends[:-1]-diff/2.0,bends[:-1])
+    bstarts[1:]=numpy.where(diff < 0,bstarts[1:]+diff/2.0,bstarts[1:])
+    bends[:-1]=numpy.where(diff < 0,bends[:-1]-diff/2.0,bends[:-1])
 
     breaks=[]
     for idx in range(len(bstarts)):
@@ -3378,14 +3397,14 @@ def GetNiceLinearMinMax(minval,maxval,pref_spacing=None):
         labels.
     """
     if abs(maxval-minval) > 0:
-        rord=Numeric.log10(abs(maxval-minval))
+        rord=numpy.log10(abs(maxval-minval))
     else:
         maxval=maxval*1.1
         minval=minval*0.9
         if maxval == 0:
             maxval=1.0
             minval=-1.0
-        rord=Numeric.log10(abs(maxval-minval))
+        rord=numpy.log10(abs(maxval-minval))
 
     nrord=rord % 1
 
@@ -3393,29 +3412,30 @@ def GetNiceLinearMinMax(minval,maxval,pref_spacing=None):
     if rord > 1:
         fmt="%d"
     else:
-        prec=int(abs(rord))+2
-        fmt="%."+str(prec)+"f"
+        fmt="%g"
+        #prec=int(abs(rord))+1
+        #fmt="%."+str(prec)+"f"
 
     if pref_spacing is None:
-        if nrord < Numeric.log10(2):
-            spc=0.2*pow(10,Numeric.floor(rord))
-        elif nrord < Numeric.log10(5):
-            spc=0.5*pow(10,Numeric.floor(rord))
+        if nrord < numpy.log10(2):
+            spc=0.2*pow(10,numpy.floor(rord))
+        elif nrord < numpy.log10(5):
+            spc=0.5*pow(10,numpy.floor(rord))
         else:
-            spc=pow(10,Numeric.floor(rord))
+            spc=pow(10,numpy.floor(rord))
     else:
         spc=pref_spacing
 
     tmp1=(abs(minval) % spc)/spc
     new_min=minval - (minval % spc)
 
-    new_max=Numeric.floor((maxval-new_min)/spc)*spc+new_min
+    new_max=numpy.floor((maxval-new_min)/spc)*spc+new_min
 
     if maxval-new_max > (float(spc)/10000.0):
         new_max=new_max+spc
 
     label_offsets=[]
-    for label_val in Numeric.arange(new_min,new_max+spc/100.0,spc):
+    for label_val in numpy.arange(new_min,new_max+spc/100.0,spc):
         label_offsets.append(label_val)
 
     return (new_min,new_max,label_offsets,fmt)
@@ -3638,12 +3658,12 @@ class GvSimpleRescaleTable(gtk.Table):
         return
 
 if __name__ == '__main__':
-    yarr=Numeric.arange(20000,typecode='f')/1000.0
-    yarr2=Numeric.arange(20000,typecode='f')/2000.0
-    yarr3=Numeric.arange(20000,typecode='f')/1500.0
-    yarr=Numeric.sin(yarr)
-    yarr2=2*Numeric.sin(yarr2)
-    yarr3=1.5*Numeric.sin(yarr3)
+    yarr=numpy.arange(20000,typecode='f')/1000.0
+    yarr2=numpy.arange(20000,typecode='f')/2000.0
+    yarr3=numpy.arange(20000,typecode='f')/1500.0
+    yarr=numpy.sin(yarr)
+    yarr2=2*numpy.sin(yarr2)
+    yarr3=1.5*numpy.sin(yarr3)
 
     win=GvSimplePlotWindow()
     win.connect('delete-event',gtk.main_quit)
@@ -3670,14 +3690,14 @@ if __name__ == '__main__':
     win4.oplot(yarr3,color=(0.0,1.0,0.0,1.0),xmin=17010,xmax=19031,
                with_legend=1)
 
-    xg=Numeric.zeros((20,20),Numeric.Float16)
-    yg=Numeric.zeros((20,20),Numeric.Float16)
-    zg=Numeric.zeros((20,20),Numeric.Float16)
+    xg=numpy.zeros((20,20),numpy.Float16)
+    yg=numpy.zeros((20,20),numpy.Float16)
+    zg=numpy.zeros((20,20),numpy.Float16)
     for idx1 in range(20):
         for idx2 in range(20):
             xg[idx1,idx2]=idx1
             yg[idx1,idx2]=idx2
-    zg=Numeric.sin(xg*Numeric.pi/10)*Numeric.sin(yg*Numeric.pi/10)
+    zg=numpy.sin(xg*numpy.pi/10)*numpy.sin(yg*numpy.pi/10)
     win5=GvSimplePlotWindow()
     win5.show()
     win5.plotarea.plot3D(xg,yg,zg)

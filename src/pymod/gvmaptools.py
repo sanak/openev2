@@ -30,7 +30,7 @@
 ###############################################################################
 
 import gview
-import numpy as Numeric
+import numpy
 import os
 import gvogrfs
 
@@ -74,7 +74,7 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
     hspc=(max_x-min_x)/x_divisions
     vspc=(max_y-min_y)/y_divisions
 
-    for hval in Numeric.arange(min_x,max_x+hspc/100.0,hspc):
+    for hval in numpy.arange(min_x,max_x+hspc/100.0,hspc):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
         nshp.set_node(hval,max_y,0,0)
         nshp.set_node(hval,min_y,0,1)
@@ -84,7 +84,7 @@ def SimpleReferenceGrid(min_x,min_y,max_x,max_y,x_divisions,y_divisions,
         pshp.set_property('position',"%.1f" % hval)
         shps.append(pshp)
 
-    for vval in Numeric.arange(min_y,max_y+vspc/100.0,vspc):
+    for vval in numpy.arange(min_y,max_y+vspc/100.0,vspc):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
         nshp.set_node(min_x,vval,0,0)
         nshp.set_node(max_x,vval,0,1)
@@ -143,13 +143,13 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
 
 
     # Round to nearest integer space
-    max_x=min_x+Numeric.floor((max_x-min_x)/x_spacing)*x_spacing
-    max_y=min_y+Numeric.floor((max_y-min_y)/y_spacing)*y_spacing
+    max_x=min_x+numpy.floor((max_x-min_x)/x_spacing)*x_spacing
+    max_y=min_y+numpy.floor((max_y-min_y)/y_spacing)*y_spacing
 
     lxoff=(max_x-min_x)*xoff  # horizontal label placement
     lyoff=(max_y-min_y)*yoff # vertical label placement
 
-    for hval in Numeric.arange(min_x,
+    for hval in numpy.arange(min_x,
                                max_x+x_spacing/100.0,
                                x_spacing):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
@@ -161,7 +161,7 @@ def SimpleMeasuredGrid(min_x,min_y,max_x,max_y,x_spacing,y_spacing,
         pshp.set_property('position',"%d" % int(hval+0.5))
         shps.append(pshp)
 
-    for vval in Numeric.arange(min_y,
+    for vval in numpy.arange(min_y,
                                max_y+y_spacing/100.0,
                                y_spacing):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
@@ -233,13 +233,13 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
 
 
     # Round to nearest integer space
-    max_x=min_x+Numeric.floor((max_x-min_x)/x_spacing)*x_spacing
-    max_y=min_y+Numeric.floor((max_y-min_y)/y_spacing)*y_spacing
+    max_x=min_x+numpy.floor((max_x-min_x)/x_spacing)*x_spacing
+    max_y=min_y+numpy.floor((max_y-min_y)/y_spacing)*y_spacing
 
     lxoff=(max_x-min_x)*xoff  # horizontal label placement
     lyoff=(max_y-min_y)*yoff # vertical label placement
 
-    for hval in Numeric.arange(min_x,
+    for hval in numpy.arange(min_x,
                                max_x+x_spacing/100.0,
                                x_spacing):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
@@ -252,7 +252,7 @@ def SimpleLatLongGrid(min_x,min_y,max_x,max_y,hdeg,hmin,hsec,vdeg,vmin,vsec,
         pshp.set_property('position',hstr)
         shps.append(pshp)
 
-    for vval in Numeric.arange(min_y,
+    for vval in numpy.arange(min_y,
                                max_y+y_spacing/100.0,
                                y_spacing):
         nshp=gview.GvShape(type=gview.GVSHAPE_LINE)
@@ -477,16 +477,16 @@ def SimpleScalebarLayer(xoffset,yoffset,dwidth,swidth,
                                   # so that rectangle is centered about 0.
         # rectangle extends from -smax/20 (bbr) to +smax/20 (tbr) vertically,
         # labels are placed at + or - smax/5
-        tbr=smax/20.0*Numeric.ones(Numeric.shape(hbr))
-        bbr=-1*smax/20.0*Numeric.ones(Numeric.shape(hbr))
-        lbr=offset*smax*Numeric.ones(Numeric.shape(hbr))
+        tbr=smax/20.0*numpy.ones(numpy.shape(hbr))
+        bbr=-1*smax/20.0*numpy.ones(numpy.shape(hbr))
+        lbr=offset*smax*numpy.ones(numpy.shape(hbr))
 
         # units label location before rotation
         uxbr=(hbr[len(hbr)-1]-hbr[0])*0.05+hbr[len(hbr)-1]
 
         # rotate
-        ctheta=Numeric.cos(angle)
-        stheta=Numeric.sin(angle)
+        ctheta=numpy.cos(angle)
+        stheta=numpy.sin(angle)
         tx=hbr*ctheta-tbr*stheta + xoffset
         ty=hbr*stheta+tbr*ctheta + yoffset
         bx=hbr*ctheta-bbr*stheta + xoffset
@@ -556,21 +556,21 @@ def GetScaleBlocks(width):
             labels- labels for divisions
     """
 
-    rord=Numeric.log10(abs(width)/2.0)
+    rord=numpy.log10(abs(width)/2.0)
     nrord=rord % 1
 
-    if nrord < Numeric.log10(2):
-        spc=0.2*pow(10,Numeric.floor(rord))
+    if nrord < numpy.log10(2):
+        spc=0.2*pow(10,numpy.floor(rord))
         smallspc=spc
         bigspc=5*spc
         newspc=[0,smallspc,smallspc*2,smallspc*3,smallspc*4,smallspc*5]
-    elif nrord < Numeric.log10(5):
-        spc=0.5*pow(10,Numeric.floor(rord))
+    elif nrord < numpy.log10(5):
+        spc=0.5*pow(10,numpy.floor(rord))
         smallspc=spc
         bigspc=5*spc
         newspc=[0,smallspc,smallspc*2,smallspc*3,smallspc*4]
     else:
-        spc=pow(10,Numeric.floor(rord))
+        spc=pow(10,numpy.floor(rord))
         smallspc=spc
         bigspc=spc*5
         newspc=[0,smallspc,smallspc*2,smallspc*3,smallspc*4,smallspc*5]
@@ -583,7 +583,7 @@ def GetScaleBlocks(width):
 
     temp_max=newspc[len(newspc)-1]
     start=temp_max
-    for temp in Numeric.arange(start,width-bigspc/2,bigspc):
+    for temp in numpy.arange(start,width-bigspc/2,bigspc):
         temp_max=temp_max+bigspc
         newspc.append(temp_max)
         labels.append("%g" % temp_max)
@@ -594,7 +594,7 @@ def GetScaleBlocks(width):
     #    temp_max=temp_max+smallspc 
     #    newspc.append(temp_max)       
 
-    return (Numeric.array(newspc,Numeric.Float32),labels)
+    return (numpy.array(newspc,numpy.float32),labels)
 
 
 #############################################################
@@ -673,12 +673,12 @@ def GetLatLongString(ddvalue,lltype='latitude'):
     min=int((abs(ddvalue)-deg)*60)
     sec=int((abs(ddvalue)-deg-(float(min)/60.0))*3600.0)
     if lltype == 'latitude':
-        if Numeric.sign(ddvalue) == -1:
+        if numpy.sign(ddvalue) == -1:
             ch='S'
         else:
             ch='N'
     else:
-        if Numeric.sign(ddvalue) == -1:
+        if numpy.sign(ddvalue) == -1:
             ch='W'
         else:
             ch='E'
@@ -724,8 +724,8 @@ def GetAlphabeticGridString(index):
               'L','M','N','O','P','Q','R','S','T','U','V',
               'W','X','Y','Z']
     alen=len(alphabet)
-    sc=Numeric.log(alen)
-    nletters=int(Numeric.log(index)/sc)
+    sc=numpy.log(alen)
+    nletters=int(numpy.log(index)/sc)
     str=''
     rem=index
     for idx in range(nletters,-1,-1):
