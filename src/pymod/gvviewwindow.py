@@ -261,6 +261,7 @@ class GvViewWindow(gtk.Window):
             ('ZoomIn', gtk.STOCK_ZOOM_IN, None, None, "Zoom in x2", self.zoomin_cb),
             ('ZoomOut', gtk.STOCK_ZOOM_OUT, None, None, "Zoom out x2", self.zoomout_cb),
             ('Refresh', gtk.STOCK_REFRESH, None, None, "Refresh Rasters From Disk", self.refresh_cb),
+            ('RawGeo', 'worldg', None, None, "Georeferencing", self.rawgeo_cb),
             ])
 
     def add_tool_actions(self):
@@ -597,6 +598,7 @@ class GvViewWindow(gtk.Window):
 
         layer = gview.GvShapesLayer( shape_data )
         layer.set_name(filename)
+        self.check_projection(layer)
         self.viewarea.add_layer(layer)
         self.viewarea.set_active_layer(layer)
 
@@ -725,8 +727,19 @@ class GvViewWindow(gtk.Window):
            self.file_open_by_name(file)
 
     def open_subdataset_check(self, dataset):
+        """shows a dialog box so the user can select the subdatasets to display.
+        The subdatasets are then opened."""
         from gvsdsdlg import GvSDSDlg
-        GvSDSDlg(dataset, self)
+
+        #create and run the dialog
+        sdsdlg = GvSDSDlg(self, dataset)
+        subdatasets = sdsdlg.run()
+        sdsdlg.destroy()
+
+        #open the datasets - if run returns a list, it is a list of the subdatasets
+        if isinstance(subdatasets, list):
+            for subdataset in subdatasets:
+                self.file_open_by_name(subdataset)
 
     def file_open_ap_envisat(self, dataset):
         # MB: untested
@@ -813,12 +826,13 @@ class GvViewWindow(gtk.Window):
 
         raster_layer = gview.GvRasterLayer(raster, options, rl_mode=mode)
         raster_layer.set_name(dataset.GetDescription())
-
         #
         # Note: We now set source for initial raster (0) as well, as set_source
         # will apply a default lut, if specified in band metadata.
+        # MB: also, we will assume that nodata value is the same for all bands.
         #
-        raster_layer.set_source(0, raster)
+        nodata = dataset.GetRasterBand(1).GetNoDataValue()
+        raster_layer.set_source(0, raster, nodata=nodata)
 
         # Logic to handle PSCI layers
         if mode == gview.RLM_PSCI:
@@ -832,8 +846,8 @@ class GvViewWindow(gtk.Window):
         # Lots of logic to handle RGB and RGBA Layers
         if mode == gview.RLM_RGBA and dataset.RasterCount == 2:
             alpha_band = gview.manager.get_dataset_raster(dataset, 2)
-            raster_layer.set_source(1, raster)
-            raster_layer.set_source(2, raster)
+            raster_layer.set_source(1, raster, nodata=nodata)
+            raster_layer.set_source(2, raster, nodata=nodata)
             raster_layer.set_source(3, alpha_band)
 
             raster_layer.blend_mode_set(gview.RL_BLEND_FILTER)
@@ -842,8 +856,8 @@ class GvViewWindow(gtk.Window):
             green_raster = gview.manager.get_dataset_raster(dataset, 2)
             blue_raster = gview.manager.get_dataset_raster(dataset, 3)
 
-            raster_layer.set_source(1, green_raster)
-            raster_layer.set_source(2, blue_raster)
+            raster_layer.set_source(1, green_raster, nodata=nodata)
+            raster_layer.set_source(2, blue_raster, nodata=nodata)
 
             if dataset.RasterCount > 3:
                 band = dataset.GetRasterBand(4)
@@ -852,6 +866,7 @@ class GvViewWindow(gtk.Window):
                     alpha_raster = gview.manager.get_dataset_raster(dataset, 4)
                     raster_layer.set_source(3, alpha_raster)
 
+        self.check_projection(raster_layer)
         self.viewarea.add_layer(raster_layer)
         self.updating = False
         self.viewarea.set_active_layer(raster_layer)
@@ -940,10 +955,6 @@ class GvViewWindow(gtk.Window):
         self.insert_widget_to_bar(combo, 'ZoomFactor')
         self.zoom_factor = combo
 
-        # raw / georeferenced pixmap
-        self.rawgeo_pixmap = gtk.Image()
-        self.insert_widget_to_bar(self.rawgeo_pixmap, 'RawGeo')
-
         # idle / busy pixmap
         self.idlebusy_pixmap = gtk.Image()
         self.insert_widget_to_bar(self.idlebusy_pixmap, 'IdleBusy')
@@ -994,7 +1005,7 @@ class GvViewWindow(gtk.Window):
               <toolitem action='ZoomOut'/>
               <toolitem action='Refresh'/>
               <separator/>
-              <placeholder name='RawGeo'/>
+              <toolitem action='RawGeo'/>
               <separator/>
               <toolitem action='HelpOpenEV'/>
               <placeholder name='IdleBusy'/>
@@ -1400,19 +1411,32 @@ class GvViewWindow(gtk.Window):
 
         return dataset
 
-    def rawgeo_cb( self, *args ):
+    def rawgeo_cb(self, *args):
         ref_layer = self.viewarea.active_layer()
         self.viewarea.set_raw(ref_layer, not self.viewarea.get_raw(ref_layer))
+        self.viewarea.fit_all_layers()
         self.rawgeo_update()
 
     def rawgeo_update(self, *args):
         if self.iconbar is None:
             return
 
-        if self.viewarea.get_raw(self.viewarea.active_layer()):
-            self.rawgeo_pixmap.set_from_stock('worldg', gtk.ICON_SIZE_LARGE_TOOLBAR)
-        else:
-            self.rawgeo_pixmap.set_from_stock('worldrgb', gtk.ICON_SIZE_LARGE_TOOLBAR)
+        raw = self.viewarea.get_raw(self.viewarea.active_layer())
+        stock = ('worldrgb', 'worldg')[raw]
+        self.UImgr.get_widget('/OEToolbar/RawGeo').set_stock_id(stock)
+
+    def check_projection(self, layer):
+        if not self.viewarea.list_layers(): # if no layers, no need
+            return
+
+        if get_pref('auto_reproject', 'no') == 'no':
+            return
+
+        if layer.get_projection() != self.viewarea.projection:
+            try:
+                layer.reproject(self.viewarea.projection)
+            except:
+                pass
 
 class Dialog3D(gtk.Window):
     def __init__(self, win):
