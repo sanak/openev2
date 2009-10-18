@@ -43,7 +43,7 @@ struct _GvShapesMemento
 
 static void gv_shapes_class_init(GvShapesClass *klass);
 static void gv_shapes_init(GvShapes *points);
-static void gv_shapes_get_memento(GvData *points, gpointer info, 
+static void gv_shapes_get_memento(GvData *points, gpointer info,
                                   GvDataMemento **memento);
 static void gv_shapes_set_memento(GvData *points, GvDataMemento *memento);
 static void gv_shapes_del_memento(GvData *points, GvDataMemento *memento);
@@ -84,6 +84,9 @@ gv_shapes_init(GvShapes *shapes)
     shapes->shapes = g_ptr_array_new();
     shapes->extents_valid = FALSE;
     shapes->actual_num_shapes = 0;
+#ifdef HAVE_OGR
+    shapes->hOGRds = NULL;
+#endif
 }
 
 static void
@@ -208,11 +211,11 @@ gv_shapes_delete_shapes(GvShapes *shapes, gint num_shapes, gint *id_list)
     }
 
     /* Boil NULLs off the end of the list */
-    while( shapes->shapes->len > 0 
-           && g_ptr_array_index(shapes->shapes, 
+    while( shapes->shapes->len > 0
+           && g_ptr_array_index(shapes->shapes,
                                 shapes->shapes->len-1) == NULL )
     {
-        g_ptr_array_remove_index_fast( shapes->shapes, 
+        g_ptr_array_remove_index_fast( shapes->shapes,
                                        shapes->shapes->len-1 );
     }
 
@@ -244,10 +247,10 @@ gv_shapes_translate_shapes(GvShapes *shapes, gint num_shapes, gint *id_list,
         {
             int    node;
 
-            for( node = gv_shape_get_nodes(shape,ring)-1; 
+            for( node = gv_shape_get_nodes(shape,ring)-1;
                  node >= 0; node-- )
             {
-                gv_shape_set_xyz( shape, ring, node, 
+                gv_shape_set_xyz( shape, ring, node,
                                   gv_shape_get_x(shape, ring, node) + dx,
                                   gv_shape_get_y(shape, ring, node) + dy,
                                   gv_shape_get_z(shape, ring, node) );
@@ -279,7 +282,7 @@ gv_shapes_get_extents(GvShapes *shapes, GvRect *rect)
 
             gv_shape_get_extents( shape, &rect );
 
-            if( rect.x != 0 || rect.y != 0 
+            if( rect.x != 0 || rect.y != 0
                 || rect.width != 0 || rect.height != 0 )
             {
                 valid_shapes++;
@@ -509,6 +512,11 @@ gv_shapes_finalize(GObject *gobject)
       shapes->shapes = NULL;
     }
 
+#ifdef HAVE_OGR
+    if (shapes->hOGRds != NULL)
+    	OGR_DS_Destroy( shapes->hOGRds );
+#endif
+
     /* Call parent class finalize */
     G_OBJECT_CLASS(parent_class)->finalize(gobject);
 }
@@ -516,7 +524,7 @@ gv_shapes_finalize(GObject *gobject)
 #ifndef HAVE_OGR
 GvData *gv_shapes_from_ogr(const char *filename, int iLayer)
 {
-    CPLDebug( "OpenEV", 
+    CPLDebug( "OpenEV",
               "gv_shapes_from_ogr(%s) called, but OGR not configured",
               filename );
     return NULL;
@@ -565,7 +573,7 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
         nodata_value = -1e8;
 
     /*
-     * Loop over all shapes, applying height. 
+     * Loop over all shapes, applying height.
      */
     for (i=0; i < num_shapes; i++)
     {
@@ -605,49 +613,49 @@ gv_shapes_add_height(GvShapes *shapes, GvData *raster_data, double offset,
                 if( y >= raster->height && y < raster->height+1 )
                     y = raster->height - 0.01;
 
-                /* Check if mesh xy values outside of height raster 
+                /* Check if mesh xy values outside of height raster
                    - leave as 0 */
                 if( x >= 0.0 && x < raster->width
                     && y >= 0.0 && y < raster->height )
                 {
                     if (!gv_raster_get_sample(raster, x, y, &z, &imaginary))
                     {
-                        fprintf(stderr, 
-                                "ERROR raster_get_sample failed for (x y z) %f %f\n", 
+                        fprintf(stderr,
+                                "ERROR raster_get_sample failed for (x y z) %f %f\n",
                                 x, y);
                     }
                     else
                     {
                         if( z == nodata_value && x > 0 )
-                            gv_raster_get_sample(raster, x-1, y, &z, 
+                            gv_raster_get_sample(raster, x-1, y, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && x < raster->width-1 )
-                            gv_raster_get_sample(raster, x+1, y, &z, 
+                            gv_raster_get_sample(raster, x+1, y, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && y > 0 )
-                            gv_raster_get_sample(raster, x, y-1, &z, 
+                            gv_raster_get_sample(raster, x, y-1, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && y < raster->height-1 )
-                            gv_raster_get_sample(raster, x, y+1, &z, 
+                            gv_raster_get_sample(raster, x, y+1, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && x > 1 )
-                            gv_raster_get_sample(raster, x-2, y, &z, 
+                            gv_raster_get_sample(raster, x-2, y, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && x < raster->width-2 )
-                            gv_raster_get_sample(raster, x+2, y, &z, 
+                            gv_raster_get_sample(raster, x+2, y, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && y > 1 )
-                            gv_raster_get_sample(raster, x, y-2, &z, 
+                            gv_raster_get_sample(raster, x, y-2, &z,
                                                  &imaginary);
 
                         if( z == nodata_value && y < raster->height-2 )
-                            gv_raster_get_sample(raster, x, y+2, &z, 
+                            gv_raster_get_sample(raster, x, y+2, &z,
                                                  &imaginary);
 
                         if( z == nodata_value )
