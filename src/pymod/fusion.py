@@ -674,9 +674,9 @@ if __name__ != '__main__':
         def initFusionObject(self):
             fus = FusionObject()
             layer = self.rgbDict[self.rgbDict.keys()[0]]
-            rgb = layer.parent.get_dataset()
+            rgb = layer.get_dataset()
             layer = self.panDict[self.panDict.keys()[0]]
-            pan = layer.parent.get_dataset()
+            pan = layer.get_dataset()
 
             try:
                 fus.setSources(rgb, pan)
@@ -686,7 +686,6 @@ if __name__ != '__main__':
             return fus
 
         def createGUI(self):
-            tips = gtk.Tooltips()
             mainbox = gtk.VBox(spacing=5)
             mainbox.set_border_width(5)
             self.add(mainbox)
@@ -733,7 +732,7 @@ if __name__ != '__main__':
             drivers.sort()
             self.formatCB = pgu.ComboText(strings=drivers)
             self.formatCB.set_active_text('GTiff')
-            tips.set_tip(self.formatCB, "Output formats. Some may not work.")
+            self.formatCB.set_tooltip_text("Output formats. Some may not work.")
             table.attach(self.formatCB, 1, 2, row, row+1)
     
             row += 1
@@ -765,7 +764,7 @@ if __name__ != '__main__':
             table.attach(label, 0, 1, row, row+1)
             self.algCB = pgu.ComboText(strings=("Nearest Neighbor","Bilinear","Cubic","Cubic Spline"))
             table.attach(self.algCB, 1, 2, row, row+1)
-            tips.set_tip(self.algCB, "Resampling algorithm. Cubic Spline is recommended for best results")
+            self.algCB.set_tooltip_text("Resampling algorithm. Cubic Spline is recommended for best results")
     
             row += 1
             label = pgu.Label("Resize:")
@@ -787,7 +786,7 @@ if __name__ != '__main__':
             row += 1
             self.swapTO = gtk.CheckButton(label="Swap R-B")
             table.attach(self.swapTO, 0, 2, row, row+1)
-            tips.set_tip(self.swapTO, "Swap Red and Blue bands. Used for Quickbird.")
+            self.swapTO.set_tooltip_text("Swap Red and Blue bands. Used for Quickbird.")
     
             self.sat0RB = gtk.RadioButton(label="Byte")
             box.pack_start(self.sat0RB, expand=False)
@@ -822,12 +821,12 @@ if __name__ != '__main__':
             self.panXoffTE = pgu.LabelEntry("X offset:", width=50)
             self.panXoffTE.set_text("0")
             table.attach(self.panXoffTE, 0, 1, row, row+1)
-            tips.set_tip(self.panXoffTE, "Pan X offset")
+            self.panXoffTE.set_tooltip_text("Pan X offset")
 
             self.panYoffTE = pgu.LabelEntry("Y offset:", width=50)
             self.panYoffTE.set_text("0")
             table.attach(self.panYoffTE, 1, 2, row, row+1)
-            tips.set_tip(self.panYoffTE, "Pan Y offset")
+            self.panYoffTE.set_tooltip_text("Pan Y offset")
     
             # Params
             frame = gtk.Frame("Fusion Method")
@@ -841,7 +840,7 @@ if __name__ != '__main__':
             self.met0RB = gtk.RadioButton(label="IHS")
             tipTxt = "Standard Intensity-Hue-Saturation merging. "
             tipTxt += "Sharpness setting has no effect. "
-            tips.set_tip(self.met0RB, tipTxt)
+            self.met0RB.set_tooltip_text(tipTxt)
             box.add(self.met0RB)
     
             self.met1RB = gtk.RadioButton(label="Kernel",group=self.met0RB)
@@ -849,7 +848,7 @@ if __name__ != '__main__':
             tipTxt += "Recommended sharpness: 0.15-0.25 for Ikonos and Quickbird, "
             tipTxt += "0.3-0.5 for Landsat and SPOT. "
             tipTxt += "Can be set higher if imagery is enhanced."
-            tips.set_tip(self.met1RB, tipTxt)
+            self.met1RB.set_tooltip_text(tipTxt)
             box.add(self.met1RB)
     
             # params
@@ -871,11 +870,11 @@ if __name__ != '__main__':
     
             mergeBT = gtk.Button("Merge")
             mergeBT.connect('clicked', self.compute, 'merge')
-            tips.set_tip(mergeBT, "Proceed with merging")
+            mergeBT.set_tooltip_text("Proceed with merging")
             box.add(mergeBT)
     
             pviewBT = gvutils.create_stock_button('eye', self.compute, 'pview')
-            tips.set_tip(pviewBT, "Preview merging")
+            pviewBT.set_tooltip_text("Preview merging")
             box.add(pviewBT)
     
             closeBT = gtk.Button(stock=gtk.STOCK_CLOSE)
@@ -916,7 +915,7 @@ if __name__ != '__main__':
         def rgbChanged(self, combo):
             nkey = combo.get_active_text()
             rgbLayer = self.rgbDict[nkey]
-            self.fus.setRGB(rgbLayer.parent.get_dataset())
+            self.fus.setRGB(rgbLayer.get_dataset())
             self.fus.setSize()
             self.updateExtentEntries()
             self.setFilename()
@@ -924,7 +923,7 @@ if __name__ != '__main__':
         def panChanged(self, combo):
             nkey = combo.get_active_text()
             panLayer = self.panDict[nkey]
-            self.fus.setPan(panLayer.parent.get_dataset())
+            self.fus.setPan(panLayer.get_dataset())
             self.fus.setSize()
             self.updateExtentEntries()
 

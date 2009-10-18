@@ -563,7 +563,6 @@ class ServiceCaps(ElementTree):
         return f
 
 servCaps = ServiceCaps()
-tips = gtk.Tooltips()
 
 class WMSDialog(gtk.Window):
     def __init__(self, app):
@@ -617,16 +616,16 @@ class WMSDialog(gtk.Window):
 
         but = gvutils.create_stock_button(gtk.STOCK_PREFERENCES, self.setup)
         but.set_size_request(32,32)
-        tips.set_tip(but,"Setup maps and services")
+        but.set_tooltip_text("Setup maps and services")
         hbox.pack_start(but, expand=False)
 
         but = gvutils.create_stock_button(gtk.STOCK_NETWORK, self.addLayer)
         but.set_size_request(32,32)
-        tips.set_tip(but,"Get map from server")
+        but.set_tooltip_text("Get map from server")
         hbox.pack_start(but, expand=False)
 
         self.colorBT = pgucolor.ColorButton()
-        tips.set_tip(self.colorBT,"Map background color")
+        self.colorBT.set_tooltip_text("Map background color")
         hbox.pack_start(self.colorBT, expand=False)
 
         # Map params
@@ -681,17 +680,17 @@ class WMSDialog(gtk.Window):
 
         but = gtk.Button("Refresh Services")
         but.connect('clicked', self.refreshServices)
-        tips.set_tip(but,"Refresh all services in services.txt")
+        but.set_tooltip_text("Refresh all services in services.txt")
         bbox.add(but)
         
         but = gtk.Button("Validate Map")
         but.connect('clicked', self.validateMap)
-        tips.set_tip(but,"Validate map parameters. Only SRS is currently checked.")
+        but.set_tooltip_text("Validate map parameters. Only SRS is currently checked.")
         bbox.add(but)
 
         but = gtk.Button("World Map")
         but.connect('clicked', self.loadWorld)
-        tips.set_tip(but,"Load a MODIS World Map")
+        but.set_tooltip_text("Load a MODIS World Map")
         bbox.add(but)
         
         # Buttons
@@ -1031,7 +1030,7 @@ class WMSDialog(gtk.Window):
         layer = self.viewwin.viewarea.active_layer()
         if layer is None:
             return
-        ds = layer.parent.get_dataset()
+        ds = layer.get_dataset()
         w = ds.RasterXSize
         h = ds.RasterYSize
         geoTr = ds.GetGeoTransform()
@@ -1341,15 +1340,15 @@ class SetupDialog(gtk.Window):
         hbox.pack_end(bbox, expand=False)
 
         but = gvutils.create_stock_button(gtk.STOCK_NEW, self.enterMap)
-        tips.set_tip(but,"Create a new map")
+        but.set_tooltip_text("Create a new map")
         bbox.add(but)
 
         but = gvutils.create_stock_button(gtk.STOCK_DELETE, self.delMap)
-        tips.set_tip(but,"Delete the selected map")
+        but.set_tooltip_text("Delete the selected map")
         bbox.add(but)
 
         but = gvutils.create_stock_button(gtk.STOCK_SAVE, self.saveMap)
-        tips.set_tip(but,"Save the selected map")
+        but.set_tooltip_text("Save the selected map")
         bbox.add(but)
 ##        but.set_sensitive(False)
         self.saveMapBut = but
@@ -1394,15 +1393,15 @@ class SetupDialog(gtk.Window):
         hbox.pack_end(bbox, expand=False)
 
         but = gvutils.create_stock_button(gtk.STOCK_NEW, self.enterService)
-        tips.set_tip(but,"Add a new service")
+        but.set_tooltip_text("Add a new service")
         bbox.add(but)
 
         but = gvutils.create_stock_button(gtk.STOCK_DELETE, self.delService)
-        tips.set_tip(but,"Delete the selected service")
+        but.set_tooltip_text("Delete the selected service")
         bbox.add(but)
 
         but = gvutils.create_stock_button(gtk.STOCK_SAVE, self.saveService)
-        tips.set_tip(but,"Save service entry")
+        but.set_tooltip_text("Save service entry")
         bbox.add(but)
         but.set_sensitive(False)
         self.saveServBut = but
@@ -1452,22 +1451,22 @@ class SetupDialog(gtk.Window):
         mainbox.pack_start(bbox, expand=False)
 
         but = gtk.Button(label="Get map")
-        tips.set_tip(but,"Get map")
+        but.set_tooltip_text("Get map")
         but.connect('clicked', self.getMap)
         bbox.add(but)
 
         but = gtk.Button("Validate")
-        tips.set_tip(but,"Validate map")
+        but.set_tooltip_text("Validate map")
         but.connect('clicked', self.validateMap)
         bbox.add(but)
 
         but = gtk.Button(stock=gtk.STOCK_OK)
-        tips.set_tip(but,"Save maps and exit")
+        but.set_tooltip_text("Save maps and exit")
         but.connect('clicked', self.doneClicked)
         bbox.add(but)
 
         but = gtk.Button(stock=gtk.STOCK_CANCEL)
-        tips.set_tip(but,"Exit without saving")
+        but.set_tooltip_text("Exit without saving")
         but.connect('clicked', self.close)
         bbox.add(but)
 
@@ -1701,7 +1700,7 @@ class SetupDialog(gtk.Window):
         self.servCB.set_active(-1)
         self.mapCB.set_active(-1)
         self.mapCB.set_sensitive(False)
-        tips.set_tip(self.servCB.entry,"Enter service filename/url and hit <Return>")
+        self.servCB.entry.set_tooltip_text("Enter service filename/url and hit <Return>")
         self.updateServiceGUI('New service')
         self.updating = False
 
@@ -1776,7 +1775,7 @@ class SetupDialog(gtk.Window):
             self.formatCB.set_active(-1)
             self.exceptCB.set_active(-1)
             if key == 'Select service':
-                tips.set_tip(self.servCB.entry, "Select the service for this map. \n Only one service per map.")
+                self.servCB.entry.set_tooltip_text("Select the service for this map. \n Only one service per map.")
             self.layersTR.clear()
             if key in ('New service',''):
                 self.selectedTV.clear()
@@ -1789,7 +1788,7 @@ class SetupDialog(gtk.Window):
             txt = servCaps.abstract
         else:
             txt = servCaps.title
-        tips.set_tip(self.servCB.entry, txt)
+        self.servCB.entry.set_tooltip_text(txt)
 
     def updateLayersList(self):
         self.layersTR.clear()
@@ -1916,7 +1915,7 @@ class LayerDialog(gtk.Window, Signaler):
 ##                box.pack_start(gtk.Label('SRS:'), expand=False)
                 srsCB = pgu.LabelComboText("SRS:", strings=srsLst)
                 srsCB.set_size_request(110,-1)
-                tips.set_tip(srsCB.combo, "For information only. Not selectable")
+                srsCB.combo.set_tooltip_text("For information only. Not selectable")
                 vbox.pack_start(srsCB, expand=False)
                 srsflag = False
             elif tag in ('LatLonBoundingBox','BoundingBox'):

@@ -274,7 +274,7 @@ class HistogramWindow(gtk.Window):
     def __init__(self, layer):
         gtk.Window.__init__(self)
         self.layer = layer
-        ds = layer.parent.get_dataset()
+        ds = layer.get_dataset()
         self.gdt = ds.GetRasterBand(1).DataType
         self.teardown_id = self.layer.connect('teardown', self.close)
 
@@ -293,7 +293,6 @@ class HistogramWindow(gtk.Window):
         self.autoScale()
 
     def createGUI(self):
-        tips = gtk.Tooltips()
         vbox = gtk.VBox(spacing=5)
         vbox.set_border_width(5)
         self.add(vbox)
@@ -343,19 +342,19 @@ class HistogramWindow(gtk.Window):
 
         button = create_stock_button('refresh', self.refresh)
         ctrlbox.pack_start(button, expand=False)
-        tips.set_tip(button, "rebuilds the histogram from layer")
+        button.set_tooltip_text("rebuilds the histogram from layer")
         button = create_stock_button(gtk.STOCK_ZOOM_IN, self.zoom, 'in')
         ctrlbox.pack_start(button, expand=False)
-        tips.set_tip(button, "zoom in")
+        button.set_tooltip_text("zoom in")
         button = create_stock_button(gtk.STOCK_ZOOM_OUT, self.zoom, 'out')
         ctrlbox.pack_start(button, expand=False)
-        tips.set_tip(button, "zoom out")
+        button.set_tooltip_text("zoom out")
         button = create_stock_button(gtk.STOCK_OPEN, self.load)
         ctrlbox.pack_start(button, expand=False)
-        tips.set_tip(button, "load histogram")
+        button.set_tooltip_text("load histogram")
         button = create_stock_button(gtk.STOCK_SAVE, self.save)
         ctrlbox.pack_start(button, expand=False)
-        tips.set_tip(button, "save histogram")
+        button.set_tooltip_text("save histogram")
 
         frame = gtk.Frame("Autoscale")
         vbox.pack_start(frame, expand=False)
