@@ -1,5 +1,5 @@
 /******************************************************************************
- * $Id: gvogr.c,v 1.1.1.1 2005/04/18 16:38:33 uid1026 Exp $
+ * $Id$
  *
  * Project:  OpenEV
  * Purpose:  Read/write link to OGR.
@@ -77,6 +77,7 @@
  */
 
 #include "ogr_api.h"
+#include "ogr_srs_api.h"
 #include "gvshapes.h"
 #include "cpl_error.h"
 
@@ -179,7 +180,7 @@ static GvShape *ogr_geometry_to_gv_shape( OGRGeometryH hGeom )
 
             hPoly      = OGR_G_GetGeometryRef( hGeom, iPoly );
             nRingCount = OGR_G_GetGeometryCount( hPoly );
-            
+
             for( iRing = 0; iRing < nRingCount; iRing++ )
             {
                 OGRGeometryH hRing;
@@ -254,7 +255,7 @@ GvData *gv_shapes_from_ogr_layer(OGRLayerH hLayer)
         char      prop_value[64], prop_name[64];
 
         sprintf( prop_name, "_field_name_%d", field_index+1 );
-        gv_properties_set( properties, prop_name, 
+        gv_properties_set( properties, prop_name,
                            OGR_Fld_GetNameRef( hField ) );
 
         sprintf( prop_name, "_field_width_%d", field_index+1 );
@@ -297,7 +298,7 @@ GvData *gv_shapes_from_ogr_layer(OGRLayerH hLayer)
                 if( OGR_F_IsFieldSet( hFeature, field_index ) )
                 {
                     gv_properties_set( properties,
-                           OGR_Fld_GetNameRef( 
+                           OGR_Fld_GetNameRef(
                                OGR_F_GetFieldDefnRef(hFeature,field_index) ),
                            OGR_F_GetFieldAsString( hFeature, field_index ) );
                 }
@@ -328,6 +329,8 @@ GvData *gv_shapes_from_ogr(const char *filename, int iLayer)
     OGRDataSourceH hDS;
     GvData *psData;
     OGRSFDriverH     hDriver;
+    OGRSpatialReferenceH hSR;   //spatial reference for this layer
+    char* projection_wkt;
 
 /* -------------------------------------------------------------------- */
 /*      Open the OGR dataset.                                           */
@@ -337,8 +340,6 @@ GvData *gv_shapes_from_ogr(const char *filename, int iLayer)
     hDS = OGROpen( filename, FALSE, &hDriver );
     if( hDS == NULL )
         return NULL;
-
-
 
     if( iLayer < 0 || iLayer >= OGR_DS_GetLayerCount(hDS) )
     {
@@ -356,14 +357,20 @@ GvData *gv_shapes_from_ogr(const char *filename, int iLayer)
     if( psData != NULL )
     {
         gv_data_set_property( psData, "_filename", filename );
-        gv_data_set_property( psData, "_ogr_driver_name", 
+        gv_data_set_property( psData, "_ogr_driver_name",
                               OGR_Dr_GetName(hDriver) );
-    }
 
-/* -------------------------------------------------------------------- */
-/*      Cleanup                                                         */
-/* -------------------------------------------------------------------- */
-    OGR_DS_Destroy( hDS );
+        //save the ogr data source.  Cleanup is now done in finalize.
+        GV_SHAPES(psData)->hOGRds = hDS;
+
+        //extract the wkt for setting the data projection
+        hSR = OGR_L_GetSpatialRef(hLayer);
+        if (hSR != NULL)
+        {
+            OSRExportToWkt(hSR, &projection_wkt);
+            gv_data_set_projection(psData, projection_wkt);
+        }
+    }
 
     return psData;
 }
