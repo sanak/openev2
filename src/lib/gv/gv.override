@@ -620,6 +620,33 @@ _wrap_gv_shapes_num_shapes(PyGObject *self)
     return PyInt_FromLong(gv_shapes_num_shapes(GV_SHAPES(self->obj)));
 }
 %%
+override gv_symbol_manager_new kwargs
+static int
+_wrap_gv_symbol_manager_new(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char* kwlist[] = { NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     ":_gv.SymbolManager.__init__",
+                                     kwlist))
+        return -1;
+
+    pygobject_constructv(self, 0, NULL);
+    if (!self->obj) {
+        PyErr_SetString(
+            PyExc_RuntimeError,
+            "could not create _gv.SymbolManager object");
+        return -1;
+    }
+    g_object_unref(self->obj);
+    self->obj = G_OBJECT(gv_get_symbol_manager());
+    g_object_ref(self->obj);
+
+    return 0;
+}
+%%
+new-constructor GV_TYPE_SYMBOL_MANAGER
+%%
 override gv_symbol_manager_get_names noargs
 static PyObject *
 _wrap_gv_symbol_manager_get_names(PyGObject *self)
@@ -2974,6 +3001,35 @@ _wrap_gv_raster_layer_build_skirt(PyGObject *self, PyObject *args, PyObject *kwa
     return pygobject_new((GObject *)gv_build_skirt(rlayer, base_z));
 }
 %%
+override gv_manager_new kwargs
+static int
+_wrap_gv_manager_new(PyGObject *self, PyObject *args, PyObject *kwargs)
+{
+    static char* kwlist[] = { NULL };
+
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs,
+                                     ":_gv.Manager.__init__",
+                                     kwlist))
+        return -1;
+
+    pygobject_constructv(self, 0, NULL);
+    if (!self->obj) {
+        PyErr_SetString(
+            PyExc_RuntimeError,
+            "could not create _gv.Manager object");
+        return -1;
+    }
+
+    // replace the new manager object with the static one
+    g_object_unref(self->obj);  //unref newly created manager - not needed
+    self->obj = G_OBJECT(gv_get_manager()); //get the static manager
+    g_object_ref(self->obj);    //hold a reference
+
+    return 0;
+}
+%%
+new-constructor GV_TYPE_MANAGER
+%%
 override gv_manager_get_preferences noargs
 static PyObject *
 _wrap_gv_manager_get_preferences(PyGObject *self)
@@ -3327,7 +3383,7 @@ _wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
     {
         PyErr_SetString(PyExc_ValueError,
               "require at least one node in list for gv_shapes_lines_for_vecplot");
-        return NULL;
+        Py_RETURN_NONE;
     }
     if ((node_count != PyList_Size(pyylist)) ||
         (node_count != PyList_Size(pyzlist)) ||
@@ -3335,7 +3391,7 @@ _wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
     {
         PyErr_SetString(PyExc_ValueError,
               "x, y, z, ok lists must have identical lengths for gv_shapes_lines_for_vecplot");
-        return NULL;
+        Py_RETURN_NONE;
     }
     shapes = (GvShapes *) gv_shapes_new();
     shape = gv_shape_new(GVSHAPE_LINE);
@@ -3363,7 +3419,7 @@ _wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
             }
             gv_shapes_delete_shapes(shapes, shape_count, shape_ids);
             g_free(shape_ids);
-            return NULL;
+            Py_RETURN_NONE;
         }
         if (oknode == 1)
         {
@@ -3388,7 +3444,7 @@ _wrap_gv_shapes_lines_for_vecplot(PyObject *self, PyObject *args)
         g_free(shape_ids);
     }
 
-    return pygobject_new((GObject *) shapes);
+    return pygobject_new( G_OBJECT(shapes) );
 }
 %%
 override gv_track_tool_new kwargs
@@ -3418,10 +3474,10 @@ override gv_autopan_tool_new_rect
 static PyObject *
 _wrap_gv_autopan_tool_new_rect(PyGObject *self, PyObject *args)
 {
-	GvRect rect;
+    GvRect rect;
 
-	if (!PyArg_ParseTuple(args, "(dddd):_gv.AutopanTool.set_extents", &rect.x, &rect.y, &rect.width, &rect.height))
-	        return NULL;
+    if (!PyArg_ParseTuple(args, "(dddd):_gv.AutopanTool.set_extents", &rect.x, &rect.y, &rect.width, &rect.height))
+            return NULL;
 
     if (!gv_autopan_tool_new_rect( GV_AUTOPAN_TOOL(self->obj), &rect))
     {
@@ -3435,7 +3491,7 @@ override gv_autopan_tool_get_rect noargs
 static PyObject *
 _wrap_gv_autopan_tool_get_rect(PyGObject *self)
 {
-	GvRect rect;
+    GvRect rect;
 
     if (!gv_autopan_tool_get_rect( GV_AUTOPAN_TOOL(self->obj), &rect))
     {
@@ -3453,7 +3509,7 @@ _wrap_gv_autopan_tool_get_location(PyGObject *self)
 
     if (!gv_autopan_tool_get_location( GV_AUTOPAN_TOOL(self->obj), &x, &y, &z))
     {
-    	Py_RETURN_NONE;
+        Py_RETURN_NONE;
     }
 
     return Py_BuildValue("(" CCC ")", x, y, z);
@@ -3463,7 +3519,7 @@ override gv_autopan_tool_get_state noargs
 static PyObject *
 _wrap_gv_autopan_tool_get_state(PyGObject *self)
 {
-	gint play_flag, path_type, block_size_mode, num_views;
+    gint play_flag, path_type, block_size_mode, num_views;
     gvgeocoord  block_x_size, x_resolution;
 
     gv_autopan_tool_get_state( GV_AUTOPAN_TOOL(self->obj), &play_flag, &path_type, &block_size_mode, &block_x_size, &x_resolution, &num_views);
@@ -3495,8 +3551,8 @@ override gv_autopan_tool_get_trail_parameters noargs
 static PyObject *
 _wrap_gv_autopan_tool_get_trail_parameters(PyGObject *self)
 {
-	GvRect overview_extents;
-	int overview_width_pixels, num_trail_tiles;
+    GvRect overview_extents;
+    int overview_width_pixels, num_trail_tiles;
 
     gv_autopan_tool_get_trail_parameters( GV_AUTOPAN_TOOL(self->obj), &overview_extents, &overview_width_pixels, &num_trail_tiles);
 
@@ -3523,5 +3579,5 @@ _wrap_gv_view_area_set_rotation(PyGObject *self, PyObject *args)
 
     gv_view_area_set_rotation(GV_VIEW_AREA(self->obj), angle);
 
-	Py_RETURN_TRUE;
+    Py_RETURN_TRUE;
 }
