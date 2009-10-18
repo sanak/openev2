@@ -62,7 +62,7 @@ _locale = None
 import gview
 import os
 import string
-import gdal
+from osgeo import gdal
 
 gdal.Debug( "nls", 'initializing localization module' )
 
