@@ -37,6 +37,7 @@
 #include <GL/gl.h>
 #include "gvlayer.h"
 #include "gvraster.h"
+#include "ogr_srs_api.h"
 
 
 #define GV_TYPE_RASTER_LAYER            (gv_raster_layer_get_type ())
@@ -141,6 +142,15 @@ struct _GvRasterLayer
     gint      mesh_is_raw;
     gint      mesh_is_dirty;
     GvMesh   *mesh;
+
+    //this saves the coordinate transformation for use in the mapping functions (gv_raster_layer_view_to_pixel and gv_raster_layer_pixel_to_view)
+    OGRCoordinateTransformationH hTransform;
+    OGRCoordinateTransformationH hInverseTransform;
+
+    //this saves the original wkt projection string.
+    //The layer is reset to the original projection before a second reprojection is done.
+    //this will prevent compounding errors in multiple reprojections
+    char* origProjectionWKT;
 
     int       tile_x, tile_y;
 
