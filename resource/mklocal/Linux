@@ -62,9 +62,12 @@
 # GDAL
 #
 
-  GDAL_INCS = -I$(INSTALL_PREFIX)/include
-  GDAL_LIBSL = -L$(INSTALL_PREFIX)/lib
-  GDAL_LIBS = -lgdal
+#  GDAL_INCS = -I$(INSTALL_PREFIX)/include
+#  GDAL_LIBSL = -L$(INSTALL_PREFIX)/lib
+#  GDAL_LIBS = -lgdal
+  GDAL_INCS = `gdal-config --cflags`
+  GDAL_LIBSL = `gdal-config --libs | cut -f 1 -d' '`
+  GDAL_LIBS = `gdal-config --libs | cut -f 2 -d' '`
 
 #
 # Python
@@ -77,6 +80,8 @@
   PYTHON_ROOT = ${INSTALL_PREFIX}
   PYGTK = $(PYTHON_ROOT)/share/pygtk
   PYGTK_VER = 2.0
+  PYGOBJECT = $(PYTHON_ROOT)/share/pygobject
+  PYGOBJECT_VER = 2.0
   PYTHON = $(PYTHON_ROOT)/bin/python$(PYTHON_VER)
 
   PYTHON_INC = $(PYTHON_ROOT)/include
@@ -94,7 +99,8 @@
 
   PYGTK_DEFS = $(PYGTK)/$(PYGTK_VER)/defs
   PYH2DEF = $(PYGTK)/$(PYGTK_VER)/codegen/h2def.py
-  PYCODEGEN = $(PYGTK)/$(PYGTK_VER)/codegen/codegen.py
+#  PYCODEGEN = $(PYGTK)/$(PYGTK_VER)/codegen/codegen.py
+  PYCODEGEN = $(PYGOBJECT)/$(PYGOBJECT_VER)/codegen/codegen.py
   PYREGISTER = --register $(PYGTK_DEFS)/gdk-types.defs \
 	       --register $(PYGTK_DEFS)/gtk-types.defs
 
