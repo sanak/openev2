@@ -25,6 +25,8 @@
 ###############################################################################
 
 import traceback
+import pygtk
+pygtk.require('2.0')
 import gtk
 import gvutils
 import pgu

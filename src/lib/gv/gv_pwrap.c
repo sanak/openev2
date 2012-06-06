@@ -20,6 +20,9 @@ typedef getwritebufferproc writebufferproc;
 typedef getsegcountproc segcountproc;
 typedef getcharbufferproc charbufferproc;
 #endif
+#if defined(__APPLE__) && defined(__MACH__)
+#  define NO_IMPORT_PYGOBJECT
+#endif
 #include "pygobject.h"
 #include "gextra.h"
 #include "gvareatool.h"

@@ -635,6 +635,8 @@ def GetDriverList():
     return list
 
 if __name__ != '__main__':
+    import pygtk
+    pygtk.require('2.0')
     import gtk
     import gview
     import gvutils

@@ -37,6 +37,8 @@ else:
     pref = gview.get_preference
     from gvhtml import set_help_topic
 
+import pygtk
+pygtk.require('2.0')
 import gtk
 import pango
 from gvclassification import GvClassification

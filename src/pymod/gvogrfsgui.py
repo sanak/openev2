@@ -27,6 +27,8 @@
 # Boston, MA 02111-1307, USA.
 ###############################################################################
 
+import pygtk
+pygtk.require('2.0')
 import gtk
 import gtk.keysyms
 from gvsignaler import Signaler

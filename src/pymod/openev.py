@@ -30,6 +30,8 @@ home_dir = os.environ['OPENEV_HOME']
 import sys
 import gviewapp
 import gview
+import pygtk
+pygtk.require('2.0')
 import gtk
 import getopt
 

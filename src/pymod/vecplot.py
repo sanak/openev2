@@ -67,6 +67,8 @@
 
 import gview
 import numpy
+import pygtk
+pygtk.require('2.0')
 import gtk
 import pgumenu
 import os

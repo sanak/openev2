@@ -35,6 +35,8 @@ else:
     import gview
 
 from gvutils import error, yesno, create_stock_button
+import pygtk
+pygtk.require('2.0')
 import gtk
 import pgu
 from pgucolor import ColorButton, ColorRamp

@@ -36,6 +36,8 @@ else:
     from gvhtml import set_help_topic
 
 from gvutils import error
+import pygtk
+pygtk.require('2.0')
 import gtk
 import pgu
 from osgeo import gdal

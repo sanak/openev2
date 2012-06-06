@@ -195,6 +195,7 @@ if build_it:
         includes.append('C:\\Python25\\include\\pygtk-2.0')
     else:
         includes.append('/usr/include/pygtk-2.0')
+        includes.append('/usr/local/include/pygtk-2.0')
 
     lib_dirs = get_library_dirs(gtk)
     # GDAL libs dirs

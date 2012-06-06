@@ -28,6 +28,8 @@ import gview
 import os
 import os.path
 import _gv
+import pygtk
+pygtk.require('2.0')
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *

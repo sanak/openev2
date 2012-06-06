@@ -26,6 +26,8 @@
 ###############################################################################
 
 from gvsignaler import Signaler
+import pygtk
+pygtk.require('2.0')
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *

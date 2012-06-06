@@ -29,6 +29,10 @@
  */
 
 /* include this first, before NO_IMPORT_PYGOBJECT is defined */
+#if defined(__APPLE__) && defined(__MACH__)
+#  define NO_IMPORT_PYGOBJECT
+#  define NO_IMPORT_PYGTK
+#endif
 #include <pygobject.h>
 #ifdef CIET_BUILD
 #include "gvrecords.h"
@@ -42,7 +46,7 @@ PyTypeObject G_GNUC_INTERNAL PyGvData_Type;
 #  include <pygtk/pygtk.h>
 #endif
 
-PyTypeObject G_GNUC_INTERNAL PyGvShape_Type;
+extern PyTypeObject G_GNUC_INTERNAL PyGvShape_Type;
 
 void _gv_register_classes (PyObject *d);
 

@@ -27,6 +27,8 @@
 MAX_COMMAND_PATHS = 15
 MAX_MODULE_PATHS = 15
 
+import pygtk
+pygtk.require('2.0')
 import gtk
 from gtk.gdk import *
 from gtk.keysyms import *

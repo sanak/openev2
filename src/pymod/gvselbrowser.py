@@ -33,6 +33,8 @@ if 'CIETMAP_HOME' in os.environ:
 else:
     import gview
 
+import pygtk
+pygtk.require('2.0')
 import gtk
 from gvutils import create_stock_button
 from gvsignaler import Signaler

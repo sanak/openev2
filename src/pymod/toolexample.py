@@ -5,6 +5,8 @@
 # roi and poi tools, a layer manager, and view manager.
 
 import gviewapp
+import pygtk
+pygtk.require('2.0')
 import gtk
 import os
 from osgeo import gdal

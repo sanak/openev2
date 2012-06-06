@@ -1,0 +1,121 @@
+###############################################################################
+# Architecture specific variables                                             #
+###############################################################################
+
+  ARCHCFLAGS = -c -g -DHAVE_OGR
+  ARCHCCFLAGS = -c -g -DHAVE_OGR
+  ARCHFFLAGS = -e
+  ARCHLDFLAGS = -g -DHAVE_OGR
+  ARCHARFLAGS = -ruv
+  ARCHLINTFLAGS = 
+  ARCHINSTFLAGS = 
+  ARCHINCLUDES =
+  ARCHLIBS  = 
+
+#
+#  Platform specific compilers
+#
+
+  CCC = g++
+  GNU_CC = gcc
+  CC = ${GNU_CC}
+  CCLD = ${GNU_CC}
+  CXX = ${CCC}
+  CCCLD = ${CCC}
+
+###############################################################################
+# Module specific definitions                                                 #
+###############################################################################
+
+#
+# Create definitions used by this project, such as gtk2,
+# gtkglext, gdal, opengl, and python.  These defs should be
+# saved in resource/mklocal for the project.
+#
+
+#
+# Set development root directory if not set, to one above project root
+#
+# If environ.sh sets up WC_ROOT and INSTALL_PREFIX to something screwy,
+# try 'unset' on these vars to use the below defaults.
+#
+
+  WC_ROOT ?= $(SYSTEM)/..
+  INSTALL_PREFIX ?= /opt/vexcel/openev2
+  ifeq ($(origin PKG_CONFIG_PATH), undefined)
+    PKG_CONFIG_PATH = $(INSTALL_PREFIX)/lib/pkgconfig
+  else
+    PKG_CONFIG_PATH := $(PKG_CONFIG_PATH):$(INSTALL_PREFIX)/lib/pkgconfig
+  endif
+
+#
+# GTK
+#
+
+  GTK_INCS = `export PKG_CONFIG_PATH=$(PKG_CONFIG_PATH);pkg-config --cflags gtk+-2.0 atk pango gdk-2.0 glib-2.0 gtkglext-1.0`
+  GTK_LIBSL = `export PKG_CONFIG_PATH=$(PKG_CONFIG_PATH);pkg-config --libs-only-L gtk+-2.0 atk pango gdk-2.0 glib-2.0`
+  GTK_LIBS = `export PKG_CONFIG_PATH=$(PKG_CONFIG_PATH);pkg-config --libs-only-l gtk+-2.0 atk pango gdk-2.0 glib-2.0 gtkglext-1.0`
+#  GTK_LIBS += -lgdkglext-x11-1.0 -lgtkglext-x11-1.0
+  GTK_LIBS += -ldl -lXext -lX11 -lm -ldl
+
+#
+# GDAL
+#
+
+  GDAL_INCS = -I$(INSTALL_PREFIX)/include
+  GDAL_LIBSL = -L$(INSTALL_PREFIX)/lib
+  GDAL_LIBS = -lgdal
+
+#
+# Python
+#
+#
+#PYTHON_INC = `python -c "import distutils.sysconfig;\
+#             print distutils.sysconfig.get_python_inc()"`
+
+#  PYTHON_VER = `python -V 2>&1 | sed -r 's|.* (.\..)\..|\1|'`
+  PYTHON_VER = `python -V 2>&1 | sed -E 's|.* (.\..)\..|\1|'`
+  PYTHON_ROOT = ${INSTALL_PREFIX}
+  PYGTK = $(PYTHON_ROOT)/share/pygtk
+  PYGTK_VER = 2.0
+  PYGOBJECT = $(PYTHON_ROOT)/share/pygobject
+  PYGOBJECT_VER = 2.0
+#  PYTHON = $(PYTHON_ROOT)/bin/python$(PYTHON_VER)
+  PYTHON = `which python`
+
+  PYTHON_INC = $(PYTHON_ROOT)/include
+  PYTHON_INCS = -I$(PYTHON_INC)/python$(PYTHON_VER)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)/pygtk
+
+  PYTHON_LIBSL = -L$(PYTHON_ROOT)/lib/python$(PYTHON_VER)/config
+
+  PYTHON_LIBS = -lpython$(PYTHON_VER)
+
+#
+# Python module library vars
+#
+
+  PYGTK_DEFS = $(PYGTK)/$(PYGTK_VER)/defs
+  PYH2DEF = $(PYGTK)/$(PYGTK_VER)/codegen/h2def.py
+#  PYCODEGEN = $(PYGTK)/$(PYGTK_VER)/codegen/codegen.py
+  PYCODEGEN = $(PYGOBJECT)/$(PYGOBJECT_VER)/codegen/codegen.py
+  PYREGISTER = --register $(PYGTK_DEFS)/gdk-types.defs \
+	       --register $(PYGTK_DEFS)/gtk-types.defs
+
+#
+# OpenGL
+#
+
+  GL_INCS =
+  GL_LIBSL =
+  GL_LIBS = -lGLU -lGL
+
+#
+# Tie it all together 
+#
+
+  EV_INCS = $(GTK_INCS) $(GDAL_INCS) $(PYTHON_INCS) $(GL_INCS)
+  EV_LIBSL = $(GTK_LIBSL) $(GDAL_LIBSL) $(PYTHON_LIBSL) $(GL_LIBSL)
+  EV_LIBSL += -L/usr/X11R6/lib
+  EV_LIBS = -lutil $(GTK_LIBS) $(GDAL_LIBS) $(PYTHON_LIBS) $(GL_LIBS)

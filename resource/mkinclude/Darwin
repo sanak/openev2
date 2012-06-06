@@ -1,0 +1,67 @@
+
+###############################################################################
+# Architecture specific variables                                             #
+###############################################################################
+
+  ARCHCFLAGS = -c -g
+  ARCHCCFLAGS = -c -g
+  ARCHFFLAGS = -e
+  ARCHLDFLAGS = -g
+  ARCHARFLAGS = -ruv
+  ARCHLINTFLAGS = 
+  ARCHINSTFLAGS = 
+  ARCHINCLUDES =
+  ARCHLIBS  = 
+
+#
+#  Platform specific compilers
+#
+
+  CCC = g++
+  GNU_CC = gcc
+  CC = ${GNU_CC}
+  CCLD = ${GNU_CC}
+  CXX = ${CCC}
+  CCCLD = ${CCC}
+
+###############################################################################
+# Module specific definitions                                                 #
+###############################################################################
+
+#
+# Create definitions used by this project, such as gtk2,
+# gtkglext, gdal, opengl, and python.  These defs should be
+# saved in resource/mklocal for the project.
+#
+
+#
+# Python
+#
+#PYTHON_INC = `python -c "import distutils.sysconfig;\
+#             print distutils.sysconfig.get_python_inc()"`
+#PYTHON_VER = `python -c "import sys;print sys.version[0]+sys.version[2]"`
+
+  PYTHON_VER = 2.4
+  PYTHON_ROOT = ${INSTALL_PREFIX}
+  PYGTK = $(PYTHON_ROOT)/share/pygtk
+  PYGTK_VER = 2.0
+  PYTHON = $(PYTHON_ROOT)/bin/python$(PYTHON_VER)
+
+  PYTHON_INC = $(PYTHON_ROOT)/include
+  PYTHON_INCS = -I$(PYTHON_INC)/python$(PYTHON_VER)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)
+  PYTHON_INCS += -I$(PYTHON_INC)/pygtk-$(PYGTK_VER)/pygtk
+
+  PYTHON_LIBSL = -L$(PYTHON_ROOT)/lib/python$(PYTHON_VER)/config
+
+  PYTHON_LIBS = -lpython$(PYTHON_VER)
+
+#
+# Python module library vars
+#
+
+  PYGTK_DEFS = $(PYGTK)/$(PYGTK_VER)/defs
+  PYH2DEF = $(PYGTK)/$(PYGTK_VER)/codegen/h2def.py
+  PYCODEGEN = $(PYGTK)/$(PYGTK_VER)/codegen/codegen.py
+  PYREGISTER = --register $(PYGTK_DEFS)/gdk-types.defs \
+	       --register $(PYGTK_DEFS)/gtk-types.defs
